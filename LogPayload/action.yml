@@ -1,0 +1,4 @@
+name: 'Log event payload'
+runs:
+  using: 'node16'
+  main: 'index.js'
