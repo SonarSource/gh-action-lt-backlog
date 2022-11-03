@@ -1,0 +1,9 @@
+name: 'Create new Rspec issue'
+description: 'Create new "Update RSPEC" issue from newly created milestone'
+inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
+runs:
+  using: 'node16'
+  main: 'index.js'
