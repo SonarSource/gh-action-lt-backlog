@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "BacklogAutomation", "BacklogAutomation.njsproj", "{DE870850-F36A-4264-B9A2-A7E35D15D292}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DE870850-F36A-4264-B9A2-A7E35D15D292}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE870850-F36A-4264-B9A2-A7E35D15D292}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE870850-F36A-4264-B9A2-A7E35D15D292}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE870850-F36A-4264-B9A2-A7E35D15D292}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3BC23AE7-F9C0-44E7-A9F6-7EAEB1723C25}
+	EndGlobalSection
+EndGlobal
