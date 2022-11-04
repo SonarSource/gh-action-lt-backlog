@@ -4,7 +4,7 @@ class CreateRspecIssue extends OctokitAction {
     protected async execute() {
         this.log("Creating issue");
         const issue = await this.octokit.rest.issues.create(this.addRepo({ title: `Update RSPEC before ${this.payload.milestone.title} release`, milestone: this.payload.milestone.number, labels: ["Type: Tooling"] }));
-        this.log(this.serializeToString(issue.data));
+        this.log(`Created issue #${issue.data.number}: ${issue.data.html_url}`);
     }
 }
 
