@@ -13,7 +13,7 @@ export abstract class Action {
     protected readonly repo: Repo;
     protected readonly payload: WebhookPayload;
 
-    protected abstract execute(): void;
+    protected abstract execute(): Promise<void>;
 
     constructor() {
         this.context = github.context;
@@ -21,9 +21,9 @@ export abstract class Action {
         this.payload = github.context.payload
     }
 
-    run() {
+    async run(): Promise<void> {
         try {
-            this.execute();
+            await this.execute();
             this.log("Done");
         }
         catch (ex) {

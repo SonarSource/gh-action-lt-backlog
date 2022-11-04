@@ -1,7 +1,7 @@
 import { Action } from "../lib/Action";
 
 class LogPayload extends Action {
-    execute() {
+    protected async execute(): Promise<void> {
         this.log("--- Event payload ---");
         this.log(this.serializeToString(this.payload));
         this.log("----------");
