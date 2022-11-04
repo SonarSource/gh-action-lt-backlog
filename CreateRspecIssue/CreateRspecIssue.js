@@ -9,16 +9,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Action_1 = require("../lib/Action");
-class LogPayload extends Action_1.Action {
+const OctokitAction_1 = require("../lib/OctokitAction");
+class CreateRspecIssue extends OctokitAction_1.OctokitAction {
     execute() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.log("--- Event payload ---");
-            this.log(this.serializeToString(this.payload));
-            this.log("----------");
+            this.log("Creating issue");
+            const issue = yield this.rest.issues.create(this.addRepo({ title: `Update RSPEC before ${this.payload.milestone.title} release`, milestone: this.payload.milestone.number, labels: ["Type: Tooling"] }));
+            this.log(`Created issue #${issue.data.number}: ${issue.data.html_url}`);
         });
     }
 }
-const action = new LogPayload();
+const action = new CreateRspecIssue();
 action.run();
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=CreateRspecIssue.js.map
