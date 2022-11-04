@@ -1,0 +1,9 @@
+name: 'Assign card to sender'
+description: 'Assign Kanban card to the sender of the event'
+inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
+runs:
+  using: 'node16'
+  main: 'AssignCardToSender.js'

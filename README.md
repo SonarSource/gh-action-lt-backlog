@@ -16,6 +16,8 @@ All actions should be consumed from these branches.
 
 ## Actions
 
+[AssignCardToSender](AssignCardToSender) - Assign Kanban card to sender of the event, mainly when moving card from `To do` column.
+
 [CreateRspecIssue](CreateRspecIssue) - Create issue to update RSPEC after milestone is created.
 
 [LogPayload](LogPayload) - Log payload to console
