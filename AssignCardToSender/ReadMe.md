@@ -15,7 +15,7 @@ None
 ## Example usage
 
 ```yaml
-name: Start Progress
+name: Assign card to sender
 
 on:
   project_card:
