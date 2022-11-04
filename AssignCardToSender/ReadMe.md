@@ -22,7 +22,7 @@ on:
     types: ["moved"]
 
 jobs:
-  AssginCardToSender_job:
+  AssignCardToSender_job:
     runs-on: ubuntu-latest
     if: |
         github.event.changes.column_id.from == 1234567      # FIXME: Replace with "To do" column ID
