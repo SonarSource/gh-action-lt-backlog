@@ -20,7 +20,7 @@ class CreateCardForStandalonePR extends OctokitAction_1.OctokitAction {
             }
             else {
                 this.addAssignee(pr, this.payload.sender.login);
-                this.createCardPullRequest(pr, this.getInputNumber("column-id"));
+                yield this.createCardPullRequest(pr, this.getInputNumber("column-id"));
             }
         });
     }

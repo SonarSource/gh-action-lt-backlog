@@ -9,7 +9,7 @@ class CreateCardForStandalonePR extends OctokitAction {
             this.log("Skip, contains '" + matches[0] + "'");
         } else {
             this.addAssignee(pr, this.payload.sender.login);
-            this.createCardPullRequest(pr, this.getInputNumber("column-id"));
+            await this.createCardPullRequest(pr, this.getInputNumber("column-id"));
         }
     }
 }

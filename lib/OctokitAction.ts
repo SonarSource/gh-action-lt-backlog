@@ -3,6 +3,7 @@ import * as github from "@actions/github";
 import { GitHub } from "@actions/github/lib/utils";
 import { Action } from "./Action";
 import { RestEndpointMethods } from "@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types";
+import { components } from "@octokit/openapi-types/types.d";
 
 export abstract class OctokitAction extends Action {
     protected readonly octokit: InstanceType<typeof GitHub>;
@@ -41,20 +42,20 @@ export abstract class OctokitAction extends Action {
         }));
     }
 
-    protected async createCardIssue(issue: { id: number }, column_id: number): Promise<void> {
+    protected async createCardIssue(issue: { id: number }, column_id: number): Promise<components["schemas"]["project-card"]> {
         return this.createCard(column_id, issue.id, "Issue");
     }
 
-    protected async createCardPullRequest(pr: { id: number }, column_id: number): Promise<void> {
+    protected async createCardPullRequest(pr: { id: number }, column_id: number): Promise<components["schemas"]["project-card"]> {
         return this.createCard(column_id, pr.id, "PullRequest");
     }
 
-    private async createCard(column_id: number, content_id: number, content_type: string): Promise<void> {
+    private async createCard(column_id: number, content_id: number, content_type: string): Promise<components["schemas"]["project-card"]> {
         if (column_id == 0) {
             this.log(`Skip creating ${content_type} card.`);
         } else {
             this.log(`Creating ${content_type} card`);
-            await this.rest.projects.createCard({ column_id, content_id, content_type });
+            return (await this.rest.projects.createCard({ column_id, content_id, content_type })).data;            
         }
     }
 }
