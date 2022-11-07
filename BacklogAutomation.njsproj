@@ -30,6 +30,8 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="CreateCardForStandalonePR\action.yml" />
+    <Content Include="CreateCardForStandalonePR\ReadMe.md" />
     <Content Include="AssignCardToSender\action.yml" />
     <Content Include="AssignCardToSender\ReadMe.md" />
     <Content Include="CreateRspecIssue\action.yml" />
@@ -41,12 +43,14 @@
     <Content Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="CreateCardForStandalonePR\" />
     <Folder Include="AssignCardToSender\" />
     <Folder Include="CreateRspecIssue\" />
     <Folder Include="LogPayload\" />
     <Folder Include="lib\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="CreateCardForStandalonePR\CreateCardForStandalonePR.ts" />
     <TypeScriptCompile Include="AssignCardToSender\AssignCardToSender.ts" />
     <TypeScriptCompile Include="CreateRspecIssue\CreateRspecIssue.ts" />
     <TypeScriptCompile Include="lib\Action.ts" />

@@ -25,7 +25,7 @@ jobs:
   AssignCardToSender_job:
     runs-on: ubuntu-latest
     if: |
-        github.event.changes.column_id.from == 1234567      # FIXME: Replace with "To do" column ID
+        github.event.changes.column_id.from == 123456       # FIXME: Replace with "To do" column ID
         && github.event.project_card.content_url != null
     steps:
       - uses: sonarsource/gh-action-lt-backlog/AssignCardToSender@v1
