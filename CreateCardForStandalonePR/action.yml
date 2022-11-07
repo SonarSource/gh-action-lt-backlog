@@ -1,0 +1,12 @@
+name: 'Create card for Standalone PR'
+description: 'Create new card for a PR without fixed issue and assign it to the author'
+inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
+  column-id:
+    description: 'ID of the Kanban column where the card should be created'
+    required: true
+runs:
+  using: 'node16'
+  main: 'CreateCardForStandalonePR.js'
