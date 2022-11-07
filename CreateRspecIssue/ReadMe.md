@@ -29,4 +29,5 @@ jobs:
       - uses: sonarsource/gh-action-lt-backlog/CreateRspecIssue@v1
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
+          column-id: 123456         # FIXME: Replace with "To Do" column ID or remove this optional parameter
 ```

@@ -4,6 +4,9 @@ inputs:
   github-token:
     description: 'GitHub auth Token'
     required: true
+  column-id:
+    description: 'ID of the Kanban column, if a card should be also created'
+    default: '0'
 runs:
   using: 'node16'
   main: 'CreateRspecIssue.js'
