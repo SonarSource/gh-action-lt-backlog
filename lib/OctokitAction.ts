@@ -51,7 +51,7 @@ export abstract class OctokitAction extends Action {
     }
 
     private async createCard(column_id: number, content_id: number, content_type: string): Promise<components["schemas"]["project-card"]> {
-        if (column_id == 0) {
+        if (column_id === 0) {
             this.log(`Skip creating ${content_type} card.`);
         } else {
             this.log(`Creating ${content_type} card`);
