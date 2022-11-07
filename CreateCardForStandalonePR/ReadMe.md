@@ -33,8 +33,8 @@ jobs:
     # PRs from forks don't have required token authorization
     # Dependabot works directly under our repository, but doesn't have enough priviledges to create project card
     if: |
-        github.event.pull_request.head.repo.full_name === github.repository
-        && github.event.sender.type !== 'Bot'
+        github.event.pull_request.head.repo.full_name == github.repository
+        && github.event.sender.type != 'Bot'
     steps:
       - uses: sonarsource/gh-action-lt-backlog/CreateCardForStandalonePR@v1
         with:
