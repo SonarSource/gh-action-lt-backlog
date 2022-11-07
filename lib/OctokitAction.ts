@@ -13,4 +13,17 @@ export abstract class OctokitAction extends Action {
         this.octokit = github.getOctokit(core.getInput("github-token"));
         this.rest = this.octokit.rest;
     }
+
+    async downloadData(url: string): Promise<any> {
+        console.log("Downloading " + url);
+        return (await this.octokit.request(url)).data;
+    }
+
+    async addAssignee(issue: { number: string }, login: string): Promise<void> {
+        console.log("Assigning to: " + login);
+        await this.rest.issues.addAssignees(this.addRepo({
+            issue_number: issue.number,
+            assignees: [login]
+        }));
+    }
 }

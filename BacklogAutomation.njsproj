@@ -30,6 +30,8 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="AssignCardToSender\action.yml" />
+    <Content Include="AssignCardToSender\ReadMe.md" />
     <Content Include="CreateRspecIssue\action.yml" />
     <Content Include="CreateRspecIssue\ReadMe.md" />
     <Content Include="LogPayload\action.yml" />
@@ -39,17 +41,19 @@
     <Content Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="AssignCardToSender\" />
     <Folder Include="CreateRspecIssue\" />
     <Folder Include="LogPayload\" />
     <Folder Include="lib\" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="CreateRspecIssue\index.ts" />
+    <TypeScriptCompile Include="AssignCardToSender\AssignCardToSender.ts" />
+    <TypeScriptCompile Include="CreateRspecIssue\CreateRspecIssue.ts" />
     <TypeScriptCompile Include="lib\Action.ts" />
     <TypeScriptCompile Include="lib\OctokitAction.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="LogPayload\index.ts" />
+    <TypeScriptCompile Include="LogPayload\LogPayload.ts" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />
   <ProjectExtensions>

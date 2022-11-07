@@ -9,16 +9,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Action_1 = require("../lib/Action");
-class LogPayload extends Action_1.Action {
+const OctokitAction_1 = require("../lib/OctokitAction");
+class AssignCardToSender extends OctokitAction_1.OctokitAction {
     execute() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.log("--- Event payload ---");
-            this.log(this.serializeToString(this.payload));
-            this.log("----------");
+            const issue = yield this.downloadData(this.payload.project_card.content_url);
+            if (!issue.assignee) {
+                this.addAssignee(issue, this.payload.sender.login);
+            }
         });
     }
 }
-const action = new LogPayload();
+const action = new AssignCardToSender();
 action.run();
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=AssignCardToSender.js.map
