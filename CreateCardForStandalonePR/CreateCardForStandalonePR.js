@@ -12,11 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const OctokitAction_1 = require("../lib/OctokitAction");
 class CreateCardForStandalonePR extends OctokitAction_1.OctokitAction {
     execute() {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const pr = this.payload.pull_request;
-            const matches = pr.body == null ? null : pr.body.match(/(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*#\d+/gi);
+            const matches = (_a = pr.body) === null || _a === void 0 ? void 0 : _a.match(/(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*#\d+/gi);
             if (matches) {
-                this.log("Skip, contains '" + matches[0] + "'");
+                this.log(`Skip, contains '$(matches[0])'`);
             }
             else {
                 this.addAssignee(pr, this.payload.sender.login);
