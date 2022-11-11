@@ -4,7 +4,7 @@ import { OctokitAction } from "../lib/OctokitAction";
 class CreateCardForStandalonePR extends OctokitAction {
     protected async execute(): Promise<void> {
         const pr = this.payload.pull_request as WebhookPayload["pull_request"] & { id: number };
-        const matches = pr.body?.match(/(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*#\d+/gi);
+        const matches = this.fixingMatches(pr);
         if (matches) {
             this.log(`Skip, contains '$(matches[0])'`);
         } else {

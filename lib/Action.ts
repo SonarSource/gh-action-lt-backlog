@@ -15,13 +15,13 @@ export abstract class Action {
 
     protected abstract execute(): Promise<void>;
 
-    constructor() {
+    public constructor() {
         this.context = github.context;
         this.repo = github.context.repo;
         this.payload = github.context.payload
     }
 
-    async run(): Promise<void> {
+    public async run(): Promise<void> {
         try {
             await this.execute();
             this.log("Done");
@@ -31,15 +31,19 @@ export abstract class Action {
         }
     }
 
-    protected log(line: string) {
+    public log(line: string) {
         console.log(line);
     }
 
-    protected addRepo(other: any): any {
+    public logSerialized(value: any) {
+        console.log(this.serializeToString(value));
+    }
+
+    public addRepo(other: any): any {
         return { ...this.repo, ...other };
     }
 
-    protected serializeToString(value: any): string {
+    private serializeToString(value: any): string {
         return JSON.stringify(value, undefined, 2);
     }
 }

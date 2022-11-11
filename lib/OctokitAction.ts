@@ -7,7 +7,7 @@ import { components } from "@octokit/openapi-types/types.d";
 
 export abstract class OctokitAction extends Action {
     protected readonly octokit: InstanceType<typeof GitHub>;
-    protected readonly rest: RestEndpointMethods;
+    public readonly rest: RestEndpointMethods;
 
     constructor() {
         super();
@@ -34,12 +34,27 @@ export abstract class OctokitAction extends Action {
         return (await this.octokit.request(url)).data;
     }
 
+    protected async getIssue(issue_number: number): Promise<components["schemas"]["issue"]> {
+        try {
+            this.log(`Getting issue #${issue_number}`);
+            return (await this.rest.issues.get(this.addRepo({ issue_number }))).data;
+        }
+        catch (error) {
+            this.log(`Issue #${issue_number} not found: ${error}`);
+            return null;
+        }
+    }
+
     protected async addAssignee(issue: { number: number }, login: string): Promise<void> {
         console.log("Assigning to: " + login);
         await this.rest.issues.addAssignees(this.addRepo({
             issue_number: issue.number,
             assignees: [login]
         }));
+    }
+
+    protected fixingMatches(pr: { body?: string }): RegExpMatchArray {
+        return pr.body?.match(/(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*#\d+/gi);
     }
 
     protected async createCardIssue(issue: { id: number }, column_id: number): Promise<components["schemas"]["project-card"]> {

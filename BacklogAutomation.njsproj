@@ -30,6 +30,10 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="SubmitReview\action.yml" />
+    <Content Include="SubmitReview\ReadMe.md" />
+    <Content Include="RequestReview\action.yml" />
+    <Content Include="RequestReview\ReadMe.md" />
     <Content Include="CreateCardForStandalonePR\action.yml" />
     <Content Include="CreateCardForStandalonePR\ReadMe.md" />
     <Content Include="AssignCardToSender\action.yml" />
@@ -43,6 +47,8 @@
     <Content Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="SubmitReview\" />
+    <Folder Include="RequestReview\" />
     <Folder Include="CreateCardForStandalonePR\" />
     <Folder Include="AssignCardToSender\" />
     <Folder Include="CreateRspecIssue\" />
@@ -50,6 +56,9 @@
     <Folder Include="lib\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="lib\ProjectContent.ts" />
+    <TypeScriptCompile Include="SubmitReview\SubmitReview.ts" />
+    <TypeScriptCompile Include="RequestReview\RequestReview.ts" />
     <TypeScriptCompile Include="CreateCardForStandalonePR\CreateCardForStandalonePR.ts" />
     <TypeScriptCompile Include="AssignCardToSender\AssignCardToSender.ts" />
     <TypeScriptCompile Include="CreateRspecIssue\CreateRspecIssue.ts" />
