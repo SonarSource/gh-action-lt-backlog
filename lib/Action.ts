@@ -9,6 +9,7 @@ export type Repo = {
 }
 
 export abstract class Action {
+
     protected readonly context: Context;
     protected readonly repo: Repo;
     protected readonly payload: WebhookPayload;

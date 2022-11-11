@@ -14,13 +14,13 @@ class CreateCardForStandalonePR extends OctokitAction_1.OctokitAction {
     execute() {
         return __awaiter(this, void 0, void 0, function* () {
             const pr = this.payload.pull_request;
-            const matches = this.fixingMatches(pr);
-            if (matches) {
-                this.log(`Skip, contains '$(matches[0])'`);
+            const fixedIssues = this.fixedIssues(pr);
+            if (fixedIssues) {
+                this.log(`Skip, fixes issues`);
             }
             else {
                 this.addAssignee(pr, this.payload.sender.login);
-                yield this.createCardPullRequest(pr, this.getInputNumber("column-id"));
+                yield this.createCard(pr, this.getInputNumber("column-id"));
             }
         });
     }

@@ -1,23 +1,42 @@
 import { OctokitAction } from "./OctokitAction";
+import { components } from "@octokit/openapi-types/types.d";
 
 export class ProjectContent {
 
-    private constructor() {
-        
+    private readonly action: OctokitAction;
+    private readonly columns: number[] = [];
+
+    private constructor(action: OctokitAction, columns: number[]) {
+        this.action = action;
+        this.columns = columns;
     }
 
     public static async FromColumn(action: OctokitAction, column_id: number): Promise<ProjectContent> {
+        const { data: column } = await action.rest.projects.getColumn({ column_id });
+        const project_id = parseInt(column.project_url.split("/").pop());
+        const { data: columns } = await action.rest.projects.listColumns({ project_id }); 
+        return new ProjectContent(action, columns.map(x => x.id));
+    }
 
-        const mediaType = { previews: ['inertia'] }; // Column related APIs are in Alpha Preview. We need to set this HTTP Header to gain access.
-        const dataA = (await action.rest.projects.getColumn({ column_id })).data;
-        const dataB = (await action.rest.projects.getColumn({ column_id, mediaType })).data;
+    public async findCard(content_url: string): Promise<any> {
+        // We should start caching these results in case we need to call it multiple times from a single action
+        for (const column_id of this.columns) {
+            const cards = await this.action.rest.projects.listCards({ column_id });
+            const card = cards.data.find(x => x.content_url == content_url);
+            if (card) {
+                return card;
+            }
+        }
+        this.action.log(`Card not found for: ${content_url}`);
+        return null;
+    }
 
-        action.logSerialized(dataA);
-        action.log("----");
-        action.logSerialized(dataB);
-        
-        
-
-        return new ProjectContent();
+    public async moveCard(card: components["schemas"]["project-card"], column_id: number): Promise<void> {
+        console.log(`Moving card to column ${column_id}`);
+        await this.action.rest.projects.moveCard({
+            card_id: card.id,
+            position: "bottom",
+            column_id
+        });
     }
 }

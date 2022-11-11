@@ -14,13 +14,13 @@ class CreateRspecIssue extends OctokitAction_1.OctokitAction {
     execute() {
         return __awaiter(this, void 0, void 0, function* () {
             this.log("Creating issue");
-            const issue = (yield this.rest.issues.create(this.addRepo({
+            const { data: issue } = yield this.rest.issues.create(this.addRepo({
                 title: `Update RSPEC before ${this.payload.milestone.title} release`,
                 milestone: this.payload.milestone.number,
                 labels: ["Type: Tooling"]
-            }))).data;
+            }));
             this.log(`Created issue #${issue.number}: ${issue.html_url}`);
-            this.createCardIssue(issue, this.getInputNumber("column-id"));
+            this.createCard(issue, this.getInputNumber("column-id"));
         });
     }
 }

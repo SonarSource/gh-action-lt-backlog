@@ -6,6 +6,7 @@ import { RestEndpointMethods } from "@octokit/plugin-rest-endpoint-methods/dist-
 import { components } from "@octokit/openapi-types/types.d";
 
 export abstract class OctokitAction extends Action {
+
     protected readonly octokit: InstanceType<typeof GitHub>;
     public readonly rest: RestEndpointMethods;
 
@@ -29,7 +30,7 @@ export abstract class OctokitAction extends Action {
         }
     }
 
-    protected async downloadData(url: string): Promise<any> {
+    public async downloadData(url: string): Promise<any> {
         console.log("Downloading " + url);
         return (await this.octokit.request(url)).data;
     }
@@ -53,24 +54,35 @@ export abstract class OctokitAction extends Action {
         }));
     }
 
-    protected fixingMatches(pr: { body?: string }): RegExpMatchArray {
-        return pr.body?.match(/(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*#\d+/gi);
+    protected async removeAssignees(issue): Promise<void> {
+        const oldAssignees = issue.assignees.map(x => x.login);
+        if (oldAssignees.length !== 0) {
+            console.log("Removing assignees: " + oldAssignees.join(", "));
+            await this.rest.issues.removeAssignees(this.addRepo({
+                issue_number: issue.number,
+                assignees: oldAssignees
+            }));
+        }
     }
 
-    protected async createCardIssue(issue: { id: number }, column_id: number): Promise<components["schemas"]["project-card"]> {
-        return this.createCard(column_id, issue.id, "Issue");
+    protected async reassignIssue(issue: { number: number }, login: string): Promise<void> {
+        await this.removeAssignees(issue);
+        await this.addAssignee(issue, login);
     }
 
-    protected async createCardPullRequest(pr: { id: number }, column_id: number): Promise<components["schemas"]["project-card"]> {
-        return this.createCard(column_id, pr.id, "PullRequest");
+    protected fixedIssues(pr: { body?: string }): number[] {
+        const matches = pr.body?.match(/(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*#\d+/gi);
+        return matches && matches.length !== 0 ? matches.map(x => parseInt(x.split("#")[1])) : null;
     }
 
-    private async createCard(column_id: number, content_id: number, content_type: string): Promise<components["schemas"]["project-card"]> {
+    protected async createCard(prOrIssue: components["schemas"]["issue"], column_id: number): Promise<components["schemas"]["project-card"]> {
+        const content_type = prOrIssue.pull_request ? "PullRequest" : "Issue";
+        const content_id = prOrIssue.id;
         if (column_id === 0) {
-            this.log(`Skip creating ${content_type} card.`);
+            this.log(`Skip creating ${content_type} card for #${prOrIssue.number}.`);
         } else {
-            this.log(`Creating ${content_type} card`);
-            return (await this.rest.projects.createCard({ column_id, content_id, content_type })).data;            
+            this.log(`Creating ${content_type} card for #${prOrIssue.number}`);
+            return (await this.rest.projects.createCard({ column_id, content_id, content_type })).data;
         }
     }
 }
