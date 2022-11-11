@@ -22,6 +22,10 @@ export class ProjectContent {
         // We should start caching these results in case we need to call it multiple times from a single action
         for (const column_id of this.columns) {
             const cards = await this.action.rest.projects.listCards({ column_id });
+
+            // FIXME: REMOVE DEBUG
+            this.action.logSerialized(cards);
+
             const card = cards.data.find(x => x.content_url == content_url);
             if (card) {
                 return card;
