@@ -82,6 +82,11 @@ export abstract class OctokitAction extends Action {
             this.log(`Skip creating ${content_type} card for #${prOrIssue.number}.`);
         } else {
             this.log(`Creating ${content_type} card for #${prOrIssue.number}`);
+
+            // FIXME: Remove debug
+            this.logSerialized({ column_id, content_id, content_type });
+            this.logSerialized(prOrIssue);
+
             return (await this.rest.projects.createCard({ column_id, content_id, content_type })).data;
         }
     }
