@@ -1,6 +1,6 @@
-# RequestReview
+# MoveCardToReview
 
-Move fixed issue or PR card to "Review in progress" column and assign it to the reviewer.
+Move fixed issue or PR card to `Review in progress` column and assign it to the reviewer.
 
 If relevant card does not exist, a new one is created in the selected GitHub project column.
 
@@ -30,11 +30,13 @@ on:
     types: ["review_requested"]
 
 jobs:
-  RequestReview_job:
-    name: Request review
+  MoveCardToReview_job:
+    name: Move card to review
     runs-on: ubuntu-latest
+    # PRs from forks don't have required token authorization
+    if: github.event.pull_request.head.repo.full_name == github.repository
     steps:
-      - uses: sonarsource/gh-action-lt-backlog/RequestReview@v1
+      - uses: sonarsource/gh-action-lt-backlog/MoveCardToReview@v1
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           column-id: 123456     # Kanban "Review in progress" column

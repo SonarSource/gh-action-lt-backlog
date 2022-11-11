@@ -1,8 +1,11 @@
-import { OctokitAction } from "../lib/OctokitAction";
-import { ProjectContent } from "../lib/ProjectContent";
+import { OctokitAction } from "./OctokitAction";
+import { ProjectContent } from "./ProjectContent";
 import { components } from "@octokit/openapi-types/types.d";
 
-class RequestReview extends OctokitAction {
+export abstract class PullRequestAction extends OctokitAction {
+
+    protected abstract processReassignment(issue: components["schemas"]["issue"]): Promise<void>;
+
     protected async execute(): Promise<void> {
         const column_id = this.getInputNumber("column-id");
         const project = ProjectContent.FromColumn(this, column_id);
@@ -27,9 +30,9 @@ class RequestReview extends OctokitAction {
         }
     }
 
-    private async processIssue(projectPromise: Promise<ProjectContent>, column_id: number, issue: components["schemas"]["issue"]): Promise<void> {
+    protected async processIssue(projectPromise: Promise<ProjectContent>, column_id: number, issue: components["schemas"]["issue"]): Promise<void> {
+        await this.processReassignment(issue);
         if (issue.state === "open") {
-            await this.reassignIssue(issue, this.payload.requested_reviewer.login);
             const project = await projectPromise;
             const card = await project.findCard(issue.url);
             if (card) {
@@ -40,6 +43,3 @@ class RequestReview extends OctokitAction {
         }
     }
 }
-
-const action = new RequestReview();
-action.run();

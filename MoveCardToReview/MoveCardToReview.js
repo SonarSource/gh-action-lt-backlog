@@ -9,21 +9,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const OctokitAction_1 = require("../lib/OctokitAction");
-class SubmitReview extends OctokitAction_1.OctokitAction {
-    execute() {
+const PullRequestAction_1 = require("../lib/PullRequestAction");
+class MoveCardToReview extends PullRequestAction_1.PullRequestAction {
+    processReassignment(issue) {
         return __awaiter(this, void 0, void 0, function* () {
-            //const pr = this.payload.pull_request as WebhookPayload["pull_request"] & { id: number };
-            //const matches = pr.body?.match(/(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*#\d+/gi);
-            //if (matches) {
-            //    this.log(`Skip, contains '$(matches[0])'`);
-            //} else {
-            //    this.addAssignee(pr, this.payload.sender.login);
-            //    await this.createCardPullRequest(pr, this.getInputNumber("column-id"));
-            //}
+            if (issue.state === "open") {
+                yield this.reassignIssue(issue, this.payload.requested_reviewer.login);
+            }
         });
     }
 }
-const action = new SubmitReview();
+const action = new MoveCardToReview();
 action.run();
-//# sourceMappingURL=SubmitReview.js.map
+//# sourceMappingURL=MoveCardToReview.js.map

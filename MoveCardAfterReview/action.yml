@@ -1,5 +1,5 @@
-name: 'Move card to "Review in progress" column'
-description: 'Move fixed issue or PR card to "Review in progress" column and assign it to the reviewer'
+name: 'Move card back to selected column after review'
+description: 'Move fixed issue or PR card to selected column and assign it to the PR author'
 inputs:
   github-token:
     description: 'GitHub auth Token'
@@ -9,4 +9,4 @@ inputs:
     required: true
 runs:
   using: 'node16'
-  main: 'RequestReview.js'
+  main: 'MoveCardAfterReview.js'
