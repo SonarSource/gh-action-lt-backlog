@@ -18,14 +18,14 @@ export abstract class PullRequestAction extends OctokitAction {
                 let linkedIssue = await this.getIssue(fixedIssue);
                 if (linkedIssue) {
                     processPR = false;
-                    this.processIssue(project, column_id, linkedIssue);
+                    await this.processIssue(project, column_id, linkedIssue);
                 }
             }
         }
         if (processPR) {
             const issue = await this.getIssue(pr.number);
             if (issue) {
-                this.processIssue(project, column_id, issue);
+                await this.processIssue(project, column_id, issue);
             }
         }
     }
