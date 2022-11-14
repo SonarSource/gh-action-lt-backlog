@@ -1,11 +1,11 @@
 import { PullRequestAction } from "../lib/PullRequestAction";
-import { components } from "@octokit/openapi-types/types.d";
+import { IssueOrPR } from "../lib/IssueOrPR";
 
 class MoveCardToReview extends PullRequestAction {
 
-    protected async processReassignment(issue: components["schemas"]["issue"]): Promise<void> {
-        if (issue.state === "open") {
-            await this.reassignIssue(issue, this.payload.requested_reviewer.login);
+    protected async processReassignment(issueOrPR: IssueOrPR): Promise<void> {
+        if (issueOrPR.state === "open") {
+            await this.reassignIssue(issueOrPR, this.payload.requested_reviewer.login);
         }
     }
 }

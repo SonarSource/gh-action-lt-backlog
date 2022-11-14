@@ -1,10 +1,10 @@
-import { components } from "@octokit/openapi-types/types.d";
+import { IssueOrPR } from "../lib/IssueOrPR";
 import { PullRequestAction } from "../lib/PullRequestAction";
 
 class MoveCardAfterReview extends PullRequestAction {
 
-    protected async processReassignment(issue: components["schemas"]["issue"]): Promise<void> {
-        await this.reassignIssue(issue, this.payload.pull_request.user.login); // Also for closed issues
+    protected async processReassignment(issueOrPR: IssueOrPR): Promise<void> {
+        await this.reassignIssue(issueOrPR, this.payload.pull_request.user.login); // Also for closed issues
     }
 }
 

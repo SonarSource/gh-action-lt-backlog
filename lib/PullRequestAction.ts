@@ -1,10 +1,10 @@
 import { OctokitAction } from "./OctokitAction";
 import { ProjectContent } from "./ProjectContent";
-import { components } from "@octokit/openapi-types/types.d";
+import { IssueOrPR } from "./IssueOrPR";
 
 export abstract class PullRequestAction extends OctokitAction {
 
-    protected abstract processReassignment(issue: components["schemas"]["issue"]): Promise<void>;
+    protected abstract processReassignment(issueOrPR: IssueOrPR): Promise<void>;
 
     protected async execute(): Promise<void> {
         const column_id = this.getInputNumber("column-id");
@@ -23,22 +23,22 @@ export abstract class PullRequestAction extends OctokitAction {
             }
         }
         if (processPR) {
-            const issue = await this.getIssue(pr.number);
-            if (issue) {
-                await this.processIssue(project, column_id, issue);
+            const fullPR = await this.getPullRequest(pr.number);
+            if (fullPR) {
+                await this.processIssue(project, column_id, fullPR);
             }
         }
     }
 
-    protected async processIssue(projectPromise: Promise<ProjectContent>, column_id: number, issue: components["schemas"]["issue"]): Promise<void> {
-        await this.processReassignment(issue);
-        if (issue.state === "open") {
+    protected async processIssue(projectPromise: Promise<ProjectContent>, column_id: number, issueOrPR: IssueOrPR): Promise<void> {
+        await this.processReassignment(issueOrPR);
+        if (issueOrPR.state === "open") {
             const project = await projectPromise;
-            const card = await project.findCard(issue.url);
+            const card = await project.findCard(issueOrPR.url);
             if (card) {
                 await project.moveCard(card, column_id);
             } else {
-                await this.createCard(issue, column_id);
+                await this.createCard(issueOrPR, column_id);
             }
         }
     }

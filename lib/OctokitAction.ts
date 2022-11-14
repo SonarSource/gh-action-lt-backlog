@@ -4,6 +4,7 @@ import { GitHub } from "@actions/github/lib/utils";
 import { Action } from "./Action";
 import { RestEndpointMethods } from "@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types";
 import { components } from "@octokit/openapi-types/types.d";
+import { IssueOrPR } from "./IssueOrPR";
 
 export abstract class OctokitAction extends Action {
 
@@ -46,6 +47,17 @@ export abstract class OctokitAction extends Action {
         }
     }
 
+    protected async getPullRequest(pull_number: number): Promise<components["schemas"]["pull-request"]> {
+        try {
+            this.log(`Getting PR #${pull_number}`);
+            return (await this.rest.pulls.get(this.addRepo({ pull_number }))).data;
+        }
+        catch (error) {
+            this.log(`Pull Request #${pull_number} not found: ${error}`);
+            return null;
+        }
+    }
+
     protected async addAssignee(issue: { number: number }, login: string): Promise<void> {
         console.log("Assigning to: " + login);
         await this.rest.issues.addAssignees(this.addRepo({
@@ -75,17 +87,17 @@ export abstract class OctokitAction extends Action {
         return matches && matches.length !== 0 ? matches.map(x => parseInt(x.split("#")[1])) : null;
     }
 
-    protected async createCard(prOrIssue: components["schemas"]["issue"], column_id: number): Promise<components["schemas"]["project-card"]> {
-        const content_type = prOrIssue.pull_request ? "PullRequest" : "Issue";
-        const content_id = prOrIssue.id;
+    protected async createCard(issueOrPR: IssueOrPR, column_id: number): Promise<components["schemas"]["project-card"]> {
+        const content_type = issueOrPR["pull_request"] ? "PullRequest" : "Issue";
+        const content_id = issueOrPR.id;
         if (column_id === 0) {
-            this.log(`Skip creating ${content_type} card for #${prOrIssue.number}.`);
+            this.log(`Skip creating ${content_type} card for #${issueOrPR.number}.`);
         } else {
-            this.log(`Creating ${content_type} card for #${prOrIssue.number}`);
+            this.log(`Creating ${content_type} card for #${issueOrPR.number}`);
 
             // FIXME: Remove debug
             this.logSerialized({ column_id, content_id, content_type });
-            this.logSerialized(prOrIssue);
+            this.logSerialized(issueOrPR);
 
             return (await this.rest.projects.createCard({ column_id, content_id, content_type })).data;
         }

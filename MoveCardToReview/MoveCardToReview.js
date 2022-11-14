@@ -11,10 +11,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const PullRequestAction_1 = require("../lib/PullRequestAction");
 class MoveCardToReview extends PullRequestAction_1.PullRequestAction {
-    processReassignment(issue) {
+    processReassignment(issueOrPR) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (issue.state === "open") {
-                yield this.reassignIssue(issue, this.payload.requested_reviewer.login);
+            if (issueOrPR.state === "open") {
+                yield this.reassignIssue(issueOrPR, this.payload.requested_reviewer.login);
             }
         });
     }
