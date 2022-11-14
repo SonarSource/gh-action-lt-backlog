@@ -10,7 +10,7 @@ Token to access GitHub API.
 
 ### `column-id`
 
-ID of the Kanban column where the card should be created. Typically ID of `In Progress` column.
+ID of the Kanban column where the card should be created. Typically ID of `In progress` column.
 
 ## Outputs
 
@@ -39,5 +39,5 @@ jobs:
       - uses: sonarsource/gh-action-lt-backlog/CreateCardForStandalonePR@v1
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          column-id: 123456         # FIXME: Replace with "In Progress" column ID
+          column-id: 123456         # Kanban "In progress" column
 ```

@@ -18,7 +18,8 @@ All actions should be consumed from these branches.
 
 [AssignCardToSender](AssignCardToSender) - Assign Kanban card to sender of the event, mainly when moving card from `To do` column.
 
+[CreateCardForStandalonePR](CreateCardForStandalonePR) - Create card for Standalone PR in `In progress` column.
+
 [CreateRspecIssue](CreateRspecIssue) - Create issue to update RSPEC after milestone is created.
 
 [LogPayload](LogPayload) - Log payload to console
-
