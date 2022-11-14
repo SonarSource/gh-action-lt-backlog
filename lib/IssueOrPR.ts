@@ -5,4 +5,5 @@ export type IssueOrPR = {
     id: number;
     number: number;
     url: string;
+    issue_url?: string; // Present only on PRs
 }

@@ -1,5 +1,6 @@
 import { OctokitAction } from "./OctokitAction";
 import { components } from "@octokit/openapi-types/types.d";
+import { IssueOrPR } from "./IssueOrPR";
 
 export class ProjectContent {
 
@@ -18,14 +19,11 @@ export class ProjectContent {
         return new ProjectContent(action, columns.map(x => x.id));
     }
 
-    public async findCard(content_url: string): Promise<any> {
+    public async findCard(issueOrPR: IssueOrPR): Promise<any> {
         // We should start caching these results in case we need to call it multiple times from a single action
+        const content_url = issueOrPR.issue_url ?? issueOrPR.url;
         for (const column_id of this.columns) {
             const cards = await this.action.rest.projects.listCards({ column_id });
-
-            // FIXME: REMOVE DEBUG
-            this.action.logSerialized(cards);
-
             const card = cards.data.find(x => x.content_url == content_url);
             if (card) {
                 return card;

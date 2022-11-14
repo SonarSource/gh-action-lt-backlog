@@ -34,7 +34,7 @@ export abstract class PullRequestAction extends OctokitAction {
         await this.processReassignment(issueOrPR);
         if (issueOrPR.state === "open") {
             const project = await projectPromise;
-            const card = await project.findCard(issueOrPR.url);
+            const card = await project.findCard(issueOrPR);
             if (card) {
                 await project.moveCard(card, column_id);
             } else {
