@@ -88,7 +88,7 @@ export abstract class OctokitAction extends Action {
     }
 
     protected async createCard(issueOrPR: IssueOrPR, column_id: number): Promise<components["schemas"]["project-card"]> {
-        const content_type = issueOrPR["pull_request"] ? "PullRequest" : "Issue";
+        const content_type = issueOrPR.url.indexOf("/pulls/") < 0 ? "Issue" : "PullRequest";
         const content_id = issueOrPR.id;
         if (column_id === 0) {
             this.log(`Skip creating ${content_type} card for #${issueOrPR.number}.`);
