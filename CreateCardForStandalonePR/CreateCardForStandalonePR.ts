@@ -1,15 +1,16 @@
-import { WebhookPayload } from "@actions/github/lib/interfaces";
 import { OctokitAction } from "../lib/OctokitAction";
+import { Issue } from "../lib/OctokitTypes";
 
 class CreateCardForStandalonePR extends OctokitAction {
+
     protected async execute(): Promise<void> {
-        const pr = this.payload.pull_request as WebhookPayload["pull_request"] & { id: number };
-        const matches = pr.body?.match(/(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*#\d+/gi);
-        if (matches) {
-            this.log(`Skip, contains '$(matches[0])'`);
+        const pr = this.payload.pull_request as Issue;
+        const fixedIssues = this.fixedIssues(pr);
+        if (fixedIssues.length === 0) {
+            await this.addAssignee(pr, this.payload.sender.login);
+            await this.createCard(pr, this.getInputNumber("column-id"));
         } else {
-            this.addAssignee(pr, this.payload.sender.login);
-            await this.createCardPullRequest(pr, this.getInputNumber("column-id"));
+            this.log(`Skip, fixes issues`);
         }
     }
 }

@@ -30,6 +30,10 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="MoveCardAfterReview\action.yml" />
+    <Content Include="MoveCardAfterReview\ReadMe.md" />
+    <Content Include="MoveCardToReview\action.yml" />
+    <Content Include="MoveCardToReview\ReadMe.md" />
     <Content Include="CreateCardForStandalonePR\action.yml" />
     <Content Include="CreateCardForStandalonePR\ReadMe.md" />
     <Content Include="AssignCardToSender\action.yml" />
@@ -43,6 +47,8 @@
     <Content Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="MoveCardAfterReview\" />
+    <Folder Include="MoveCardToReview\" />
     <Folder Include="CreateCardForStandalonePR\" />
     <Folder Include="AssignCardToSender\" />
     <Folder Include="CreateRspecIssue\" />
@@ -50,6 +56,12 @@
     <Folder Include="lib\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="lib\IssueOrPR.ts" />
+    <TypeScriptCompile Include="lib\OctokitTypes.ts" />
+    <TypeScriptCompile Include="lib\PullRequestAction.ts" />
+    <TypeScriptCompile Include="lib\ProjectContent.ts" />
+    <TypeScriptCompile Include="MoveCardAfterReview\MoveCardAfterReview.ts" />
+    <TypeScriptCompile Include="MoveCardToReview\MoveCardToReview.ts" />
     <TypeScriptCompile Include="CreateCardForStandalonePR\CreateCardForStandalonePR.ts" />
     <TypeScriptCompile Include="AssignCardToSender\AssignCardToSender.ts" />
     <TypeScriptCompile Include="CreateRspecIssue\CreateRspecIssue.ts" />

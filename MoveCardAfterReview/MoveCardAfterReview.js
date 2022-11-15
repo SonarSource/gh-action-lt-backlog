@@ -9,22 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const OctokitAction_1 = require("../lib/OctokitAction");
-class CreateCardForStandalonePR extends OctokitAction_1.OctokitAction {
-    execute() {
+const PullRequestAction_1 = require("../lib/PullRequestAction");
+class MoveCardAfterReview extends PullRequestAction_1.PullRequestAction {
+    processReassignment(issueOrPR) {
         return __awaiter(this, void 0, void 0, function* () {
-            const pr = this.payload.pull_request;
-            const fixedIssues = this.fixedIssues(pr);
-            if (fixedIssues.length === 0) {
-                yield this.addAssignee(pr, this.payload.sender.login);
-                yield this.createCard(pr, this.getInputNumber("column-id"));
-            }
-            else {
-                this.log(`Skip, fixes issues`);
-            }
+            yield this.reassignIssue(issueOrPR, this.payload.pull_request.user.login); // Also for closed issues
         });
     }
 }
-const action = new CreateCardForStandalonePR();
+const action = new MoveCardAfterReview();
 action.run();
-//# sourceMappingURL=CreateCardForStandalonePR.js.map
+//# sourceMappingURL=MoveCardAfterReview.js.map

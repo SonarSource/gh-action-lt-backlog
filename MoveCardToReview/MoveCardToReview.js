@@ -9,38 +9,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Action = void 0;
-const core = require("@actions/core");
-const github = require("@actions/github");
-class Action {
-    constructor() {
-        this.context = github.context;
-        this.repo = github.context.repo;
-        this.payload = github.context.payload;
-    }
-    run() {
+const PullRequestAction_1 = require("../lib/PullRequestAction");
+class MoveCardToReview extends PullRequestAction_1.PullRequestAction {
+    processReassignment(issueOrPR) {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                yield this.execute();
-                this.log("Done");
-            }
-            catch (ex) {
-                core.setFailed(ex.message);
+            if (issueOrPR.state === "open") {
+                yield this.reassignIssue(issueOrPR, this.payload.requested_reviewer.login);
             }
         });
     }
-    log(line) {
-        console.log(line);
-    }
-    logSerialized(value) {
-        console.log(this.serializeToString(value));
-    }
-    addRepo(other) {
-        return Object.assign(Object.assign({}, this.repo), other);
-    }
-    serializeToString(value) {
-        return JSON.stringify(value, undefined, 2);
-    }
 }
-exports.Action = Action;
-//# sourceMappingURL=Action.js.map
+const action = new MoveCardToReview();
+action.run();
+//# sourceMappingURL=MoveCardToReview.js.map
