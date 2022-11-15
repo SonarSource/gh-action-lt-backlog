@@ -37,23 +37,25 @@ export abstract class OctokitAction extends Action {
     }
 
     protected async getIssue(issue_number: number): Promise<Issue> {
-        this.log(`Getting issue #${issue_number}`);
-        return this.rest.issues.get(this.addRepo({ issue_number }))
-            .then(x => x.data)
-            .catch(error => {
-                this.log(`Issue #${issue_number} not found: ${error}`);
-                return null;
-            });
+        try {
+            this.log(`Getting issue #${issue_number}`);
+            return (await this.rest.issues.get(this.addRepo({ issue_number }))).data;
+        }
+        catch (error) {
+            this.log(`Issue #${issue_number} not found: ${error}`);
+            return null;
+        }
     }
 
     protected async getPullRequest(pull_number: number): Promise<PullRequest> {
-        this.log(`Getting PR #${pull_number}`);
-        return this.rest.pulls.get(this.addRepo({ pull_number }))
-            .then(x => x.data)
-            .catch(error => {
-                this.log(`Pull Request #${pull_number} not found: ${error}`);
-                return null;
-            });
+        try {
+            this.log(`Getting PR #${pull_number}`);
+            return (await this.rest.pulls.get(this.addRepo({ pull_number }))).data;
+        }
+        catch (error) {
+            this.log(`Pull Request #${pull_number} not found: ${error}`);
+            return null;
+        }
     }
 
     protected async addAssignee(issue: { number: number }, login: string): Promise<void> {
