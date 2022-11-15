@@ -10,11 +10,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const OctokitAction_1 = require("../lib/OctokitAction");
+const ProjectContent_1 = require("../lib/ProjectContent");
 class CreateCardForIssue extends OctokitAction_1.OctokitAction {
     execute() {
         return __awaiter(this, void 0, void 0, function* () {
             const column_id = this.getInputNumber("column-id");
-            yield this.createCard(this.payload.issue, column_id);
+            const project = yield ProjectContent_1.ProjectContent.FromColumn(this, column_id);
+            const issue = this.payload.issue;
+            if (!(yield project.findCard(issue))) {
+                yield this.createCard(issue, column_id);
+            }
         });
     }
 }

@@ -1,11 +1,16 @@
 import { IssueOrPR } from "../lib/IssueOrPR";
 import { OctokitAction } from "../lib/OctokitAction";
+import { ProjectContent } from "../lib/ProjectContent";
 
 class CreateCardForIssue extends OctokitAction {
 
     protected async execute(): Promise<void> {
         const column_id = this.getInputNumber("column-id");
-        await this.createCard(this.payload.issue as IssueOrPR, column_id);
+        const project = await ProjectContent.FromColumn(this, column_id);
+        const issue = this.payload.issue as IssueOrPR;
+        if (!(await project.findCard(issue))) {
+            await this.createCard(issue, column_id);
+        }
     }
 }
 
