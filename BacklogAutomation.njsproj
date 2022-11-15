@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="lib\IssueOrPR.ts" />
+    <TypeScriptCompile Include="lib\OctokitTypes.ts" />
     <TypeScriptCompile Include="lib\PullRequestAction.ts" />
     <TypeScriptCompile Include="lib\ProjectContent.ts" />
     <TypeScriptCompile Include="MoveCardAfterReview\MoveCardAfterReview.ts" />

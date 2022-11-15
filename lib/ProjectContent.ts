@@ -1,6 +1,6 @@
 import { OctokitAction } from "./OctokitAction";
-import { components } from "@octokit/openapi-types/types.d";
 import { IssueOrPR } from "./IssueOrPR";
+import { ProjectCard } from "./OctokitTypes";
 
 export class ProjectContent {
 
@@ -23,8 +23,8 @@ export class ProjectContent {
         // We should start caching these results in case we need to call it multiple times from a single action
         const content_url = issueOrPR.issue_url ?? issueOrPR.url;
         for (const column_id of this.columns) {
-            const cards = await this.action.rest.projects.listCards({ column_id });
-            const card = cards.data.find(x => x.content_url == content_url);
+            const { data: cards } = await this.action.rest.projects.listCards({ column_id });
+            const card = cards.find(x => x.content_url == content_url);
             if (card) {
                 return card;
             }
@@ -33,7 +33,7 @@ export class ProjectContent {
         return null;
     }
 
-    public async moveCard(card: components["schemas"]["project-card"], column_id: number): Promise<void> {
+    public async moveCard(card: ProjectCard, column_id: number): Promise<void> {
         console.log(`Moving card to column ${column_id}`);
         await this.action.rest.projects.moveCard({
             card_id: card.id,

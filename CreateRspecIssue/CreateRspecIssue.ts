@@ -1,6 +1,7 @@
 import { OctokitAction } from "../lib/OctokitAction";
 
 class CreateRspecIssue extends OctokitAction {
+
     protected async execute(): Promise<void> {
         this.log("Creating issue");
         const { data: issue } = await this.rest.issues.create(this.addRepo({
@@ -9,7 +10,7 @@ class CreateRspecIssue extends OctokitAction {
             labels: ["Type: Tooling"]
         }));
         this.log(`Created issue #${issue.number}: ${issue.html_url}`);
-        this.createCard(issue, this.getInputNumber("column-id"));
+        await this.createCard(issue, this.getInputNumber("column-id"));
     }
 }
 

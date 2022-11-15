@@ -13,13 +13,11 @@ export abstract class PullRequestAction extends OctokitAction {
         let processPR = true;
         const pr = this.payload.pull_request;
         const fixedIssues = this.fixedIssues(pr);
-        if (fixedIssues) {
-            for (const fixedIssue of fixedIssues) {
-                let linkedIssue = await this.getIssue(fixedIssue);
-                if (linkedIssue) {
-                    processPR = false;
-                    await this.processIssue(project, column_id, linkedIssue);
-                }
+        for (const fixedIssue of fixedIssues) {
+            let linkedIssue = await this.getIssue(fixedIssue);
+            if (linkedIssue) {
+                processPR = false;
+                await this.processIssue(project, column_id, linkedIssue);
             }
         }
         if (processPR) {

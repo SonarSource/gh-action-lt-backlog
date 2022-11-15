@@ -20,7 +20,7 @@ class CreateRspecIssue extends OctokitAction_1.OctokitAction {
                 labels: ["Type: Tooling"]
             }));
             this.log(`Created issue #${issue.number}: ${issue.html_url}`);
-            this.createCard(issue, this.getInputNumber("column-id"));
+            yield this.createCard(issue, this.getInputNumber("column-id"));
         });
     }
 }
