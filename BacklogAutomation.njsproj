@@ -32,6 +32,8 @@
   <ItemGroup>
     <Content Include="MoveCardAfterReview\action.yml" />
     <Content Include="MoveCardAfterReview\ReadMe.md" />
+    <Content Include="CreateCardForIssue\action.yml" />
+    <Content Include="CreateCardForIssue\ReadMe.md" />
     <Content Include="MoveCardToReview\action.yml" />
     <Content Include="MoveCardToReview\ReadMe.md" />
     <Content Include="CreateCardForStandalonePR\action.yml" />
@@ -48,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="MoveCardAfterReview\" />
+    <Folder Include="CreateCardForIssue\" />
     <Folder Include="MoveCardToReview\" />
     <Folder Include="CreateCardForStandalonePR\" />
     <Folder Include="AssignCardToSender\" />
@@ -61,6 +64,7 @@
     <TypeScriptCompile Include="lib\PullRequestAction.ts" />
     <TypeScriptCompile Include="lib\ProjectContent.ts" />
     <TypeScriptCompile Include="MoveCardAfterReview\MoveCardAfterReview.ts" />
+    <TypeScriptCompile Include="CreateCardForIssue\CreateCardForIssue.ts" />
     <TypeScriptCompile Include="MoveCardToReview\MoveCardToReview.ts" />
     <TypeScriptCompile Include="CreateCardForStandalonePR\CreateCardForStandalonePR.ts" />
     <TypeScriptCompile Include="AssignCardToSender\AssignCardToSender.ts" />
