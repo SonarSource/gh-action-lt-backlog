@@ -20,6 +20,8 @@ All actions should be consumed from these branches.
 
 [CreateCardForIssue](CreateCardForIssue) - Crate card for issue, mainly when milestoned.
 
+[CreateCardForIssueFromLabel](CreateCardForIssueFromLabel) - Crate card for issue in a project column determined by issue label. Mainly to organize backlog project.
+
 [CreateCardForStandalonePR](CreateCardForStandalonePR) - Create card for Standalone PR in `In progress` column.
 
 [CreateRspecIssue](CreateRspecIssue) - Create issue to update RSPEC after milestone is created.
