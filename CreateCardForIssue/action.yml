@@ -1,0 +1,12 @@
+name: 'Create card for issue'
+description: 'Create card for issue in the configured column'
+inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
+  column-id:
+    description: 'ID of the Kanban column where the card should be created'
+    required: true
+runs:
+  using: 'node16'
+  main: 'CreateCardForIssue.js'
