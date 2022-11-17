@@ -1,5 +1,5 @@
-name: 'Crate card for issue'
-description: 'Crate card for issue in selected column'
+name: 'Create card for issue'
+description: 'Create card for issue in the configured column'
 inputs:
   github-token:
     description: 'GitHub auth Token'

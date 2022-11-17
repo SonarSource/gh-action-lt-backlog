@@ -18,7 +18,7 @@ All actions should be consumed from these branches.
 
 [AssignCardToSender](AssignCardToSender) - Assign Kanban card to sender of the event, mainly when moving card from `To do` column.
 
-[CreateCardForIssue](CreateCardForIssue) - Crate card for issue, mainly when milestoned.
+[CreateCardForIssue](CreateCardForIssue) - Create card for issue, mainly when milestoned.
 
 [CreateCardForStandalonePR](CreateCardForStandalonePR) - Create card for Standalone PR in `In progress` column.
 
