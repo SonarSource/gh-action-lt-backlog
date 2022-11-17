@@ -1,10 +1,10 @@
 # CreateCardForIssueFromLabel
 
-Crate card for issue in a project column determined by issue label. 
+Create card for issue in a project column determined by the issue label. 
 
 There should exist a backlog project with columns to organize issues into different categories. When an issue is labeled with a label in common format `<label-prefix> <column-name>`, card is created in `<column-name>` column of the project.
 
-For example, the default `<label-prefix>` is `Type:`. Adding label `Type: False Positive` will create card in `False Positive` column of selected backlog project.
+For example, the default `<label-prefix>` is `Type:`. Adding label `Type: False Positive` will create card in `False Positive` column of the configured backlog project.
 
 ## Inputs
 
