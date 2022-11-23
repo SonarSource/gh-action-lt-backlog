@@ -87,7 +87,7 @@ export abstract class OctokitAction extends Action {
         return matches ? matches.map(x => parseInt(x.split("#")[1])) : [];
     }
 
-    protected async createCard(issueOrPR: IssueOrPR, column_id: number): Promise<ProjectCard> {
+    public async createCard(issueOrPR: IssueOrPR, column_id: number): Promise<ProjectCard> {
         const content_type = issueOrPR.url.indexOf("/pulls/") < 0 ? "Issue" : "PullRequest";
         const content_id = issueOrPR.id;
         if (column_id === 0) {

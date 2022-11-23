@@ -30,6 +30,8 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="CreateCardForIssueFromLabel\action.yml" />
+    <Content Include="CreateCardForIssueFromLabel\ReadMe.md" />
     <Content Include="MoveCardAfterReview\action.yml" />
     <Content Include="MoveCardAfterReview\ReadMe.md" />
     <Content Include="CreateCardForIssue\action.yml" />
@@ -49,6 +51,7 @@
     <Content Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="CreateCardForIssueFromLabel\" />
     <Folder Include="MoveCardAfterReview\" />
     <Folder Include="CreateCardForIssue\" />
     <Folder Include="MoveCardToReview\" />
@@ -59,6 +62,7 @@
     <Folder Include="lib\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="CreateCardForIssueFromLabel\CreateCardForIssueFromLabel.ts" />
     <TypeScriptCompile Include="lib\IssueOrPR.ts" />
     <TypeScriptCompile Include="lib\OctokitTypes.ts" />
     <TypeScriptCompile Include="lib\PullRequestAction.ts" />

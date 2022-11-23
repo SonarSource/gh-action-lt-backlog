@@ -1,6 +1,6 @@
 # CreateCardForIssue
 
-Create a card for issue in the configured column. Typically used to add an issue on Kanban when it's milestoned.
+Create a card for an issue in the configured column. Typically used to add an issue on Kanban when it's milestoned.
 
 ## Inputs
 
