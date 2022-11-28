@@ -40,7 +40,7 @@ export abstract class Action {
         console.log(this.serializeToString(value));
     }
 
-    public addRepo(other: any): any {
+    public addRepo<T>(other: T): T & Repo {
         return { ...this.repo, ...other };
     }
 
