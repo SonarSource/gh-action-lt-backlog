@@ -30,6 +30,8 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="LockBranch\action.yml" />
+    <Content Include="LockBranch\ReadMe.md" />
     <Content Include="CreateCardForIssueFromLabel\action.yml" />
     <Content Include="CreateCardForIssueFromLabel\ReadMe.md" />
     <Content Include="MoveCardAfterReview\action.yml" />
@@ -51,6 +53,7 @@
     <Content Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="LockBranch\" />
     <Folder Include="CreateCardForIssueFromLabel\" />
     <Folder Include="MoveCardAfterReview\" />
     <Folder Include="CreateCardForIssue\" />
@@ -62,6 +65,7 @@
     <Folder Include="lib\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="LockBranch\LockBranch.ts" />
     <TypeScriptCompile Include="CreateCardForIssueFromLabel\CreateCardForIssueFromLabel.ts" />
     <TypeScriptCompile Include="lib\IssueOrPR.ts" />
     <TypeScriptCompile Include="lib\OctokitTypes.ts" />
