@@ -14,7 +14,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>de870850-f36a-4264-b9a2-a7e35d15d292</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>LockBranch\LockBranch.ts</StartupFile>
+    <StartupFile>ToggleLockBranch\ToggleLockBranch.ts</StartupFile>
     <StartWebBrowser>False</StartWebBrowser>
     <SearchPath>
     </SearchPath>
@@ -32,7 +32,6 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="LockBranch\ReadMe.md" />
     <Content Include="CreateCardForIssueFromLabel\action.yml" />
     <Content Include="CreateCardForIssueFromLabel\ReadMe.md" />
     <Content Include="MoveCardAfterReview\action.yml" />
@@ -56,7 +55,6 @@
     <Content Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="LockBranch\" />
     <Folder Include="ToggleLockBranch\" />
     <Folder Include="CreateCardForIssueFromLabel\" />
     <Folder Include="MoveCardAfterReview\" />
@@ -69,7 +67,7 @@
     <Folder Include="lib\" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="LockBranch\LockBranch.ts" />
+    <TypeScriptCompile Include="lib\GraphQLAction.ts" />
     <TypeScriptCompile Include="CreateCardForIssueFromLabel\CreateCardForIssueFromLabel.ts" />
     <TypeScriptCompile Include="lib\IssueOrPR.ts" />
     <TypeScriptCompile Include="lib\OctokitTypes.ts" />
@@ -82,9 +80,7 @@
     <TypeScriptCompile Include="AssignCardToSender\AssignCardToSender.ts" />
     <TypeScriptCompile Include="CreateRspecIssue\CreateRspecIssue.ts" />
     <TypeScriptCompile Include="lib\Action.ts" />
-    <TypeScriptCompile Include="lib\OctokitAction.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
+    <TypeScriptCompile Include="lib\OctokitAction.ts" />
     <TypeScriptCompile Include="LogPayload\LogPayload.ts" />
     <TypeScriptCompile Include="ToggleLockBranch\ToggleLockBranch.ts" />
   </ItemGroup>
