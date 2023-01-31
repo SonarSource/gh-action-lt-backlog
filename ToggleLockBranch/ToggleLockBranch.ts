@@ -69,12 +69,3 @@ class LockBranch extends GraphQLAction {
 
 const action = new LockBranch();
 action.run();
-
-// FIXME: Docs
-/*
- * $env:GITHUB_REPOSITORY="pavel-mikula-sonarsource/GitHubActionPlayground"
- * ${env:INPUT_GITHUB-TOKEN}="ghp_...."
- * ${env:INPUT_LOCK}="True"
- * ${env:INPUT_BRANCH-PATTERN}="master"
- * clear; node .\LockBranch\LockBranch.js
- */
