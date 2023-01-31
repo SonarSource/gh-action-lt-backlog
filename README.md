@@ -26,7 +26,7 @@ All actions should be consumed from these branches.
 
 [CreateRspecIssue](CreateRspecIssue) - Create issue to update RSPEC after milestone is created.
 
-[LockBranch](LockBranch) - Lock or Unlock branch to prevent merge of PRs.
+[ToggleLockBranch](ToggleLockBranch) - Lock or Unlock branch to prevent merge of PRs.
 
 [LogPayload](LogPayload) - Log payload to console
 
