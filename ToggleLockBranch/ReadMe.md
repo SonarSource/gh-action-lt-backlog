@@ -1,4 +1,4 @@
-# LockBranch
+# ToggleLockBranch
 
 Modify branch protection rules to Lock or Unlock configured branch.
 
@@ -12,16 +12,9 @@ Intended usage is to prevent any changes on a repository that is about to be rel
 
 Token to access GitHub API.
 
-### `lock`
+### `branch-pattern`
 
-Boolean flag:
-
-* `True` to lock a branch and prevent any changes on it.
-* `False` to unlock a branch.
-
-### `branch-name`
-
-Name of the branch that should be locked or unlocked.
+Pattern of the branch protection rule that should be locked or unlocked.
 
 This parameter is optional. 
 
@@ -34,28 +27,18 @@ None
 ## Example usage
 
 ```yaml
-name: Lock branch
+name: Toggle lock branch
 
 on:
-  workflow_dispatch:
-    inputs:
-      lock:
-        description: 'Lock'
-        required: true
-        default: 'True'
-        type: choice
-        options:
-        - True
-        - False
+  workflow_dispatch:    # Triggered manually from GitHub UI / Actions
 
 jobs:
-  LockBranch_job:
-    name: Lock branch
+  ToggleLockBranch_job:
+    name: Toggle lock branch
     runs-on: ubuntu-latest
     steps:
-      - uses: sonarsource/gh-action-lt-backlog/LockBranch@v1
+      - uses: sonarsource/gh-action-lt-backlog/ToggleLockBranch@v1
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          lock: ${{ inputs.lock }}
           branch-name: "master"     # Optional
 ```

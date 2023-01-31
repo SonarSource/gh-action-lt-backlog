@@ -4,10 +4,8 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <Name>BacklogAutomation</Name>
     <RootNamespace>BacklogAutomation</RootNamespace>
-    <Environment>GITHUB_REPOSITORY=pavel-mikula-sonarsource/GitHubActionPlayground
-INPUT_GITHUB-TOKEN=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
-INPUT_LOCK=True
-INPUT_BRANCH-PATTERN=Pavel/Test</Environment>
+    <Environment>
+    </Environment>
     <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -34,7 +32,6 @@ INPUT_BRANCH-PATTERN=Pavel/Test</Environment>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="LockBranch\action.yml" />
     <Content Include="LockBranch\ReadMe.md" />
     <Content Include="CreateCardForIssueFromLabel\action.yml" />
     <Content Include="CreateCardForIssueFromLabel\ReadMe.md" />
@@ -54,10 +51,13 @@ INPUT_BRANCH-PATTERN=Pavel/Test</Environment>
     <Content Include="LogPayload\ReadMe.md" />
     <Content Include="package.json" />
     <Content Include="ReadMe.md" />
+    <Content Include="ToggleLockBranch\action.yml" />
+    <Content Include="ToggleLockBranch\ReadMe.md" />
     <Content Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="LockBranch\" />
+    <Folder Include="ToggleLockBranch\" />
     <Folder Include="CreateCardForIssueFromLabel\" />
     <Folder Include="MoveCardAfterReview\" />
     <Folder Include="CreateCardForIssue\" />
@@ -86,6 +86,7 @@ INPUT_BRANCH-PATTERN=Pavel/Test</Environment>
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="LogPayload\LogPayload.ts" />
+    <TypeScriptCompile Include="ToggleLockBranch\ToggleLockBranch.ts" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />
   <ProjectExtensions>
