@@ -34,7 +34,7 @@ class LockBranch extends GraphQLAction {
     private async LoadRules(): Promise<ProtectionRule[]> {
         const { repository: { branchProtectionRules: { nodes } } }: GraphQlQueryResponseData = await this.sendGraphQL(`
             query {
-                repository(name: "GitHubActionPlayground", owner: "pavel-mikula-sonarsource") {
+                repository(owner: "${this.repo.owner}", name: "${this.repo.repo}") {
                     branchProtectionRules(first: 100) {
                         totalCount
                         nodes {

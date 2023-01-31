@@ -41,7 +41,7 @@ class LockBranch extends GraphQLAction_1.GraphQLAction {
         return __awaiter(this, void 0, void 0, function* () {
             const { repository: { branchProtectionRules: { nodes } } } = yield this.sendGraphQL(`
             query {
-                repository(name: "GitHubActionPlayground", owner: "pavel-mikula-sonarsource") {
+                repository(owner: "${this.repo.owner}", name: "${this.repo.repo}") {
                     branchProtectionRules(first: 100) {
                         totalCount
                         nodes {
@@ -77,12 +77,4 @@ class LockBranch extends GraphQLAction_1.GraphQLAction {
 }
 const action = new LockBranch();
 action.run();
-// FIXME: Docs
-/*
- * $env:GITHUB_REPOSITORY="pavel-mikula-sonarsource/GitHubActionPlayground"
- * ${env:INPUT_GITHUB-TOKEN}="ghp_...."
- * ${env:INPUT_LOCK}="True"
- * ${env:INPUT_BRANCH-PATTERN}="master"
- * clear; node .\LockBranch\LockBranch.js
- */ 
 //# sourceMappingURL=ToggleLockBranch.js.map
