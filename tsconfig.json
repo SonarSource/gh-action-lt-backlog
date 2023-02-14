@@ -4,7 +4,9 @@
     "target": "es6",
     "lib": ["es6"],
     "sourceMap": true,
-    "newLine":  "lf"
+    "newLine":  "lf",
+    "rootDir": "./src",
+    "outDir": "./dist",
   },
   "exclude": [
     "node_modules"
