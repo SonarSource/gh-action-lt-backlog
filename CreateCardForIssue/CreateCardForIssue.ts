@@ -1,6 +1,6 @@
-import { IssueOrPR } from "../lib/IssueOrPR";
-import { OctokitAction } from "../lib/OctokitAction";
-import { ProjectContent } from "../lib/ProjectContent";
+import { IssueOrPR } from "../src/IssueOrPR";
+import { OctokitAction } from "../src/OctokitAction";
+import { ProjectContent } from "../src/ProjectContent";
 
 class CreateCardForIssue extends OctokitAction {
 

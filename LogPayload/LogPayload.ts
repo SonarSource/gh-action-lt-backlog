@@ -1,4 +1,4 @@
-import { Action } from "../lib/Action";
+import { Action } from "../src/Action";
 
 class LogPayload extends Action {
     protected async execute(): Promise<void> {

@@ -1,5 +1,5 @@
-import { PullRequestAction } from "../lib/PullRequestAction";
-import { IssueOrPR } from "../lib/IssueOrPR";
+import { PullRequestAction } from "../src/PullRequestAction";
+import { IssueOrPR } from "../src/IssueOrPR";
 
 class MoveCardToReview extends PullRequestAction {
 

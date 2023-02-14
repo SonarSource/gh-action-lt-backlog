@@ -1,5 +1,5 @@
-import { OctokitAction } from "../lib/OctokitAction";
-import { Issue } from "../lib/OctokitTypes";
+import { OctokitAction } from "../src/OctokitAction";
+import { Issue } from "../src/OctokitTypes";
 
 class CreateCardForStandalonePR extends OctokitAction {
 

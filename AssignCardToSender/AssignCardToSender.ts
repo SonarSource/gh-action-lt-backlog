@@ -1,4 +1,4 @@
-import { OctokitAction } from "../lib/OctokitAction";
+import { OctokitAction } from "../src/OctokitAction";
 
 class AssignCardToSender extends OctokitAction {
 
