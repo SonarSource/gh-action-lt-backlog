@@ -1,0 +1,9 @@
+name: 'Check if compiled is commited'
+description: 'Check if compiled code has been commited to git'
+inputs:
+  build-command:
+    description: 'The command(s) to run at the root of the repository to compile the source files.'
+    required: true
+runs:
+  using: 'node16'
+  main: '../dist/CheckCompiledCommited/CheckCompiledCommited.js'
