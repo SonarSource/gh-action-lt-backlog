@@ -26,6 +26,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # it is required to checkout the git repository because CheckCompiledCommited depends on git
+      - name: git checkout
+        uses: actions/checkout@v3
+
       - uses: sonarsource/gh-action-lt-backlog/CheckCompiledCommited@v1
         with:
           compile-command: npm run build
