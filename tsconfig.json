@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es6",
-    "lib": ["es6"],
+    "target": "es2020",
     "sourceMap": true,
     "newLine":  "lf",
     "outDir": "./dist",
