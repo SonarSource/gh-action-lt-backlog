@@ -14,9 +14,9 @@ const ProjectContent_1 = require("../lib/ProjectContent");
 class CreateCardForIssueFromLabel extends OctokitAction_1.OctokitAction {
     execute() {
         return __awaiter(this, void 0, void 0, function* () {
-            const labelPrefix = this.getInput("label-prefix");
+            const labelPrefix = this.getInput('label-prefix');
             const labelName = this.payload.label.name;
-            const project = yield ProjectContent_1.ProjectContent.FromProject(this, this.getInputNumber("project-id"));
+            const project = yield ProjectContent_1.ProjectContent.FromProject(this, this.getInputNumber('project-id'));
             if (labelName.startsWith(labelPrefix)) {
                 const columnName = labelName.substring(labelPrefix.length).trim();
                 const column = project.columnFromName(columnName);
@@ -25,7 +25,7 @@ class CreateCardForIssueFromLabel extends OctokitAction_1.OctokitAction {
                 }
             }
             else {
-                this.log("Unexpected label name: " + labelName);
+                this.log('Unexpected label name: ' + labelName);
             }
         });
     }

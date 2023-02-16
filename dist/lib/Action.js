@@ -22,7 +22,7 @@ class Action {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield this.execute();
-                this.log("Done");
+                this.log('Done');
             }
             catch (ex) {
                 core.setFailed(ex.message);

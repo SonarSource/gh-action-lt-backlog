@@ -18,7 +18,7 @@ class ProjectContent {
     static FromColumn(action, column_id) {
         return __awaiter(this, void 0, void 0, function* () {
             const { data: column } = yield action.rest.projects.getColumn({ column_id });
-            const project_id = parseInt(column.project_url.split("/").pop());
+            const project_id = parseInt(column.project_url.split('/').pop());
             return ProjectContent.FromProject(action, project_id);
         });
     }
@@ -60,8 +60,8 @@ class ProjectContent {
             console.log(`Moving card to column ${column_id}`);
             yield this.action.rest.projects.moveCard({
                 card_id: card.id,
-                position: "bottom",
-                column_id
+                position: 'bottom',
+                column_id,
             });
         });
     }

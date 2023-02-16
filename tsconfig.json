@@ -5,7 +5,6 @@
     "lib": ["es6"],
     "sourceMap": true,
     "newLine":  "lf",
-    "rootDir": "./src",
     "outDir": "./dist",
   },
   "exclude": [

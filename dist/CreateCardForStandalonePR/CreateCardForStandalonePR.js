@@ -17,7 +17,7 @@ class CreateCardForStandalonePR extends OctokitAction_1.OctokitAction {
             const fixedIssues = this.fixedIssues(pr);
             if (fixedIssues.length === 0) {
                 yield this.addAssignee(pr, this.payload.sender.login);
-                yield this.createCard(pr, this.getInputNumber("column-id"));
+                yield this.createCard(pr, this.getInputNumber('column-id'));
             }
             else {
                 this.log(`Skip, fixes issues`);

@@ -16,7 +16,7 @@ const Action_1 = require("./Action");
 class OctokitAction extends Action_1.Action {
     constructor() {
         super();
-        this.octokit = github.getOctokit(core.getInput("github-token"));
+        this.octokit = github.getOctokit(core.getInput('github-token'));
         this.rest = this.octokit.rest;
     }
     getInput(name) {
@@ -34,7 +34,7 @@ class OctokitAction extends Action_1.Action {
     }
     downloadData(url) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("Downloading " + url);
+            console.log('Downloading ' + url);
             return (yield this.octokit.request(url)).data;
         });
     }
@@ -64,10 +64,10 @@ class OctokitAction extends Action_1.Action {
     }
     addAssignee(issue, login) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("Assigning to: " + login);
+            console.log('Assigning to: ' + login);
             yield this.rest.issues.addAssignees(this.addRepo({
                 issue_number: issue.number,
-                assignees: [login]
+                assignees: [login],
             }));
         });
     }
@@ -75,10 +75,10 @@ class OctokitAction extends Action_1.Action {
         return __awaiter(this, void 0, void 0, function* () {
             const oldAssignees = issue.assignees.map(x => x.login);
             if (oldAssignees.length !== 0) {
-                console.log("Removing assignees: " + oldAssignees.join(", "));
+                console.log('Removing assignees: ' + oldAssignees.join(', '));
                 yield this.rest.issues.removeAssignees(this.addRepo({
                     issue_number: issue.number,
-                    assignees: oldAssignees
+                    assignees: oldAssignees,
                 }));
             }
         });
@@ -92,11 +92,11 @@ class OctokitAction extends Action_1.Action {
     fixedIssues(pr) {
         var _a;
         const matches = (_a = pr.body) === null || _a === void 0 ? void 0 : _a.match(/(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*#\d+/gi);
-        return matches ? matches.map(x => parseInt(x.split("#")[1])) : [];
+        return matches ? matches.map(x => parseInt(x.split('#')[1])) : [];
     }
     createCard(issueOrPR, column_id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const content_type = issueOrPR.url.indexOf("/pulls/") < 0 ? "Issue" : "PullRequest";
+            const content_type = issueOrPR.url.indexOf('/pulls/') < 0 ? 'Issue' : 'PullRequest';
             const content_id = issueOrPR.id;
             if (column_id === 0) {
                 this.log(`Skip creating ${content_type} card for #${issueOrPR.number}.`);
