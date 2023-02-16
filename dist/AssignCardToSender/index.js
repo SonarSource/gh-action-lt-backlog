@@ -11,4 +11,4 @@ class AssignCardToSender extends OctokitAction_1.OctokitAction {
 }
 const action = new AssignCardToSender();
 action.run();
-//# sourceMappingURL=AssignCardToSender.js.map
+//# sourceMappingURL=index.js.map
