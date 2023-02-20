@@ -9,4 +9,4 @@ inputs:
     default: '0'
 runs:
   using: 'node16'
-  main: '../dist/CreateRspecIssue/CreateRspecIssue.js'
+  main: '../dist/CreateRspecIssue/index.js'

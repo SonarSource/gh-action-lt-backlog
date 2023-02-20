@@ -9,4 +9,4 @@ inputs:
     required: true
 runs:
   using: 'node16'
-  main: '../dist/MoveCardAfterReview/MoveCardAfterReview.js'
+  main: '../dist/MoveCardAfterReview/index.js'

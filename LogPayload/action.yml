@@ -1,4 +1,4 @@
 name: 'Log event payload'
 runs:
   using: 'node16'
-  main: '../dist/LogPayload/LogPayload.js'
+  main: '../dist/LogPayload/index.js'
