@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc --build",
     "clean": "tsc --build --clean",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"**/*.ts\""
   },
   "devDependencies": {
     "@types/node": "^14.18.33",
