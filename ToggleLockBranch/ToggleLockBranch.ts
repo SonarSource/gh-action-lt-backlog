@@ -36,7 +36,6 @@ class LockBranch extends GraphQLAction {
             query {
                 repository(owner: "${this.repo.owner}", name: "${this.repo.repo}") {
                     branchProtectionRules(first: 100) {
-                        totalCount
                         nodes {
                             id
                             lockBranch
