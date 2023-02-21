@@ -12,17 +12,19 @@ class LockBranch extends GraphQLAction {
     protected async execute(): Promise<void> {
         const pattern = this.getInput("branch-pattern");
         let rule = await this.FindRule(pattern);
-        const lockBranch = !rule.lockBranch;
-        rule = await this.UpdateRule(rule.id, lockBranch)
-        if (rule.lockBranch == lockBranch) {
-            this.log(`Done: '${pattern}' was ${lockBranch ? "locked" : "unlocked and open for changes"}.`);
-        } else {
-            this.log(`Failed: '${pattern}' was not updated sucessfuly.`); // And we have no idea why
+        if (rule) {
+            const lockBranch = !rule.lockBranch;
+            rule = await this.UpdateRule(rule.id, lockBranch)
+            if (rule.lockBranch === lockBranch) {
+                this.log(`Done: '${pattern}' was ${lockBranch ? "locked" : "unlocked and open for changes"}.`);
+            } else {
+                this.log(`Failed: '${pattern}' was not updated sucessfuly.`); // And we have no idea why
+            }
         }
     }
 
     private async FindRule(pattern: string): Promise<ProtectionRule> {
-        const rules = (await this.LoadRules()).filter(x => x.pattern == pattern);
+        const rules = (await this.LoadRules()).filter(x => x.pattern === pattern);
         if (rules.length === 0) {
             this.log(`Branch protection rule with pattern '${pattern}' does not exist.`)
             return null;

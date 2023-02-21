@@ -32,7 +32,7 @@ export abstract class OctokitAction extends Action {
     }
 
     protected getInputBoolean(name: string): boolean {
-        return this.getInput(name).toLowerCase() == "true";
+        return this.getInput(name).toLowerCase() === "true";
     }
 
     public async downloadData(url: string): Promise<any> {
