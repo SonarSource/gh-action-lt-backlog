@@ -4,9 +4,6 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <Name>BacklogAutomation</Name>
     <RootNamespace>BacklogAutomation</RootNamespace>
-    <Environment>
-    </Environment>
-    <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -14,7 +11,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>de870850-f36a-4264-b9a2-a7e35d15d292</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>ToggleLockBranch\ToggleLockBranch.ts</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <StartWebBrowser>False</StartWebBrowser>
     <SearchPath>
     </SearchPath>
