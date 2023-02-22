@@ -10,7 +10,9 @@ The intended usage is to prevent any changes on a repository that is about to be
 
 ### `github-token`
 
-Token to access the GitHub API.
+Token to access the GitHub API. 
+
+The token needs `administration:write` permissions or `public_repo` scope from a user with admin rights to the repository.
 
 ### `branch-pattern`
 
