@@ -26,13 +26,13 @@ All actions should be consumed from these branches.
 
 [CreateRspecIssue](CreateRspecIssue) - Create issue to update RSPEC after milestone is created.
 
-[ToggleLockBranch](ToggleLockBranch) - Lock or Unlock branch to prevent merge of PRs.
-
 [LogPayload](LogPayload) - Log payload to console
 
 [MoveCardAfterReview](MoveCardAfterReview) - Move card back to `In Progress` or to `Review approved` column after review.
 
 [MoveCardToReview](MoveCardToReview) - Move card to `Review in progress` when PR author asks for a review.
+
+[ToggleLockBranch](ToggleLockBranch) - Lock or Unlock branch to prevent merge of PRs.
 
 ## Development notes
 
