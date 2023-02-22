@@ -1,0 +1,13 @@
+name: 'Toggle lock branch'
+description: 'Modify branch protection rules to lock or unlock the branch'
+inputs:
+  github-token:
+    description: 'GitHub auth Token with administration:write permissions or public_repo permissions from admin account.'
+    required: true
+  branch-pattern:
+    description: 'Pattern of the branch protection rule to modify.'
+    required: false
+    default: 'master'
+runs:
+  using: 'node16'
+  main: 'ToggleLockBranch.js'

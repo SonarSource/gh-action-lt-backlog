@@ -26,8 +26,25 @@ All actions should be consumed from these branches.
 
 [CreateRspecIssue](CreateRspecIssue) - Create issue to update RSPEC after milestone is created.
 
+[ToggleLockBranch](ToggleLockBranch) - Lock or Unlock branch to prevent merge of PRs.
+
 [LogPayload](LogPayload) - Log payload to console
 
 [MoveCardAfterReview](MoveCardAfterReview) - Move card back to `In Progress` or to `Review approved` column after review.
 
 [MoveCardToReview](MoveCardToReview) - Move card to `Review in progress` when PR author asks for a review.
+
+## Development notes
+
+### Run Octokit action from PowerShell:
+
+This syntax allows setting environment variables with hyphens in the name:
+
+```
+${env:GITHUB_REPOSITORY}="SonarSource/<YourRepoName>"
+${env:INPUT_GITHUB-TOKEN}="ghp_...."
+${env:INPUT_PARAM}="True"
+${env:INPUT_PARAM-NAME-WITH-HYPHEN}="Value"
+clear; node .\ActionName\ActionName.js
+```
+

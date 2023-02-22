@@ -31,6 +31,10 @@ export abstract class OctokitAction extends Action {
         }
     }
 
+    protected getInputBoolean(name: string): boolean {
+        return this.getInput(name).toLowerCase() === "true";
+    }
+
     public async downloadData(url: string): Promise<any> {
         console.log("Downloading " + url);
         return (await this.octokit.request(url)).data;
