@@ -30,6 +30,8 @@ None
 
 Send email to REs - ask to add a `github_lock` token to the Vault configuration of your repository - for each repository where you need to use this. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/3f5efb03a94a38d1346cbde62631ce1a340b5e14/orders/bubble-dotnet.yaml#L180-L182)
 
+A branch protection rule for the configured `branch-pattern` has to exist before running this action.
+
 ## Example usage
 
 ```yaml
