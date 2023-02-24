@@ -31,3 +31,20 @@ All actions should be consumed from these branches.
 [MoveCardAfterReview](MoveCardAfterReview) - Move card back to `In Progress` or to `Review approved` column after review.
 
 [MoveCardToReview](MoveCardToReview) - Move card to `Review in progress` when PR author asks for a review.
+
+[ToggleLockBranch](ToggleLockBranch) - Lock or Unlock branch to prevent merge of PRs.
+
+## Development notes
+
+### Run Octokit action from PowerShell:
+
+This syntax allows setting environment variables with hyphens in the name:
+
+```
+${env:GITHUB_REPOSITORY}="SonarSource/<YourRepoName>"
+${env:INPUT_GITHUB-TOKEN}="ghp_...."
+${env:INPUT_PARAM}="True"
+${env:INPUT_PARAM-NAME-WITH-HYPHEN}="Value"
+clear; node .\ActionName\ActionName.js
+```
+

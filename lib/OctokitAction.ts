@@ -54,6 +54,9 @@ export abstract class OctokitAction extends Action {
       return null;
     }
   }
+  protected getInputBoolean(name: string): boolean {
+    return this.getInput(name).toLowerCase() === 'true';
+  }
 
   protected async addAssignee(issue: { number: number }, login: string): Promise<void> {
     console.log('Assigning to: ' + login);

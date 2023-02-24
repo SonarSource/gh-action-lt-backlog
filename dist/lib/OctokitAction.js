@@ -47,6 +47,9 @@ class OctokitAction extends Action_1.Action {
             return null;
         }
     }
+    getInputBoolean(name) {
+        return this.getInput(name).toLowerCase() === 'true';
+    }
     async addAssignee(issue, login) {
         console.log('Assigning to: ' + login);
         await this.rest.issues.addAssignees(this.addRepo({
