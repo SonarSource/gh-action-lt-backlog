@@ -13,7 +13,7 @@ execSync(command, {stdio: 'inherit'});
   const status = await simpleGit().status();
   console.log('git status', status);
   if (!isEmpty(status)) {
-    throw new Error(`There are uncommited compiled files: ${JSON.stringify(status, null, 2)}`);
+    throw new Error(`There are uncommited file changes for script "${command}":\n${JSON.stringify(status, null, 2)}`);
   }
 })();
 
