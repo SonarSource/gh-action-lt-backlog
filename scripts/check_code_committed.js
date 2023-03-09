@@ -11,12 +11,11 @@ execSync(command);
 
 (async () => {
   const status = await simpleGit().status();
+  console.log('git status', status);
   if (!isEmpty(status)) {
     throw new Error(`There are uncommited compiled files: ${JSON.stringify(status, null, 2)}`);
   }
 })();
-
-console.log('delete me');
 
 function isEmpty(gitStatus) {
   return (
