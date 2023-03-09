@@ -1,7 +1,13 @@
 const { execSync } = require('child_process');
 const { simpleGit } = require('simple-git');
 
-execSync('npm run build');
+const [,,command] = process.argv;
+
+if (!command) {
+  throw new Error('Missing argument for script, please provide an action to perform.')
+}
+
+execSync(command);
 
 (async () => {
   const status = await simpleGit().status();
