@@ -7,6 +7,10 @@ if (!command) {
   throw new Error('Missing argument for script, please provide an action to perform.')
 }
 
+(async () => {
+  await simpleGit().add('.');
+})()
+
 execSync(command, {stdio: 'inherit'});
 
 (async () => {
