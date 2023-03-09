@@ -7,7 +7,7 @@ if (!command) {
   throw new Error('Missing argument for script, please provide an action to perform.')
 }
 
-execSync(command);
+execSync(command, {stdio: 'inherit'});
 
 (async () => {
   const status = await simpleGit().status();
@@ -22,6 +22,7 @@ function isEmpty(gitStatus) {
     gitStatus.not_added.length === 0 &&
     gitStatus.conflicted.length === 0 &&
     gitStatus.created.length === 0 &&
-    gitStatus.deleted.length === 0
+    gitStatus.deleted.length === 0 &&
+    gitStatus.modified.length === 0
   );
 }
