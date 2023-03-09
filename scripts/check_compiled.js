@@ -1,4 +1,5 @@
-import { execSync } from 'child_process';
+const { execSync } = require('child_process');
+const { simpleGit } = require('simple-git');
 
 execSync('npm run build');
 
