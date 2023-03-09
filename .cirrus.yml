@@ -1,0 +1,10 @@
+container:
+  image: node:latest
+
+check_task:
+  node_modules_cache:
+    folder: node_modules
+    fingerprint_script: cat package-lock.json
+    populate_script: npm ci
+  check_script:
+    - node scripts/check_compiled.js
