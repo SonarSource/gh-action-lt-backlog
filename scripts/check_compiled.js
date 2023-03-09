@@ -9,6 +9,7 @@ execSync('npm run build');
   }
 })();
 
+console.log('delete me');
 
 function isEmpty(gitStatus) {
   return (
