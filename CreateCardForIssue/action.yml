@@ -9,4 +9,4 @@ inputs:
     required: true
 runs:
   using: 'node16'
-  main: 'CreateCardForIssue.js'
+  main: '../dist/CreateCardForIssue/CreateCardForIssue.js'
