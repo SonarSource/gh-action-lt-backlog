@@ -1,47 +1,33 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const GraphQLAction_1 = require("../lib/GraphQLAction");
 class LockBranch extends GraphQLAction_1.GraphQLAction {
-    execute() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const pattern = this.getInput('branch-pattern');
-            let rule = yield this.FindRule(pattern);
-            if (rule) {
-                const lockBranch = !rule.lockBranch;
-                rule = yield this.UpdateRule(rule.id, lockBranch);
-                if (rule.lockBranch === lockBranch) {
-                    this.log(`Done: '${pattern}' was ${lockBranch ? 'locked' : 'unlocked and open for changes'}.`);
-                }
-                else {
-                    this.log(`Failed: '${pattern}' was not updated sucessfuly.`); // And we have no idea why
-                }
-            }
-        });
-    }
-    FindRule(pattern) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const rules = (yield this.LoadRules()).filter(x => x.pattern === pattern);
-            if (rules.length === 0) {
-                this.log(`Branch protection rule with pattern '${pattern}' does not exist.`);
-                return null;
+    async execute() {
+        const pattern = this.getInput('branch-pattern');
+        let rule = await this.FindRule(pattern);
+        if (rule) {
+            const lockBranch = !rule.lockBranch;
+            rule = await this.UpdateRule(rule.id, lockBranch);
+            if (rule.lockBranch === lockBranch) {
+                this.log(`Done: '${pattern}' was ${lockBranch ? 'locked' : 'unlocked and open for changes'}.`);
             }
             else {
-                return rules[0];
+                this.log(`Failed: '${pattern}' was not updated sucessfuly.`); // And we have no idea why
             }
-        });
+        }
     }
-    LoadRules() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { repository: { branchProtectionRules: { nodes }, }, } = yield this.sendGraphQL(`
+    async FindRule(pattern) {
+        const rules = (await this.LoadRules()).filter(x => x.pattern === pattern);
+        if (rules.length === 0) {
+            this.log(`Branch protection rule with pattern '${pattern}' does not exist.`);
+            return null;
+        }
+        else {
+            return rules[0];
+        }
+    }
+    async LoadRules() {
+        const { repository: { branchProtectionRules: { nodes }, }, } = await this.sendGraphQL(`
             query {
                 repository(owner: "${this.repo.owner}", name: "${this.repo.repo}") {
                     branchProtectionRules(first: 100) {
@@ -53,12 +39,10 @@ class LockBranch extends GraphQLAction_1.GraphQLAction {
                     }
                 }
             }`);
-            return nodes;
-        });
+        return nodes;
     }
-    UpdateRule(id, lockBranch) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { updateBranchProtectionRule: { branchProtectionRule }, } = yield this.sendGraphQL(`
+    async UpdateRule(id, lockBranch) {
+        const { updateBranchProtectionRule: { branchProtectionRule }, } = await this.sendGraphQL(`
             mutation {
                 updateBranchProtectionRule(input:{
                     branchProtectionRuleId: "${id}",
@@ -72,8 +56,7 @@ class LockBranch extends GraphQLAction_1.GraphQLAction {
                     }
                 }
             }`);
-            return branchProtectionRule;
-        });
+        return branchProtectionRule;
     }
 }
 const action = new LockBranch();

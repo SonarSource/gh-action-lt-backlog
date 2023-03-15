@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OctokitAction = void 0;
 const core = require("@actions/core");
@@ -35,80 +26,65 @@ class OctokitAction extends Action_1.Action {
     getInputBoolean(name) {
         return this.getInput(name).toLowerCase() === 'true';
     }
-    downloadData(url) {
-        return __awaiter(this, void 0, void 0, function* () {
-            console.log('Downloading ' + url);
-            return (yield this.octokit.request(url)).data;
-        });
+    async downloadData(url) {
+        console.log('Downloading ' + url);
+        return (await this.octokit.request(url)).data;
     }
-    getIssue(issue_number) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                this.log(`Getting issue #${issue_number}`);
-                return (yield this.rest.issues.get(this.addRepo({ issue_number }))).data;
-            }
-            catch (error) {
-                this.log(`Issue #${issue_number} not found: ${error}`);
-                return null;
-            }
-        });
+    async getIssue(issue_number) {
+        try {
+            this.log(`Getting issue #${issue_number}`);
+            return (await this.rest.issues.get(this.addRepo({ issue_number }))).data;
+        }
+        catch (error) {
+            this.log(`Issue #${issue_number} not found: ${error}`);
+            return null;
+        }
     }
-    getPullRequest(pull_number) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                this.log(`Getting PR #${pull_number}`);
-                return (yield this.rest.pulls.get(this.addRepo({ pull_number }))).data;
-            }
-            catch (error) {
-                this.log(`Pull Request #${pull_number} not found: ${error}`);
-                return null;
-            }
-        });
+    async getPullRequest(pull_number) {
+        try {
+            this.log(`Getting PR #${pull_number}`);
+            return (await this.rest.pulls.get(this.addRepo({ pull_number }))).data;
+        }
+        catch (error) {
+            this.log(`Pull Request #${pull_number} not found: ${error}`);
+            return null;
+        }
     }
-    addAssignee(issue, login) {
-        return __awaiter(this, void 0, void 0, function* () {
-            console.log('Assigning to: ' + login);
-            yield this.rest.issues.addAssignees(this.addRepo({
+    async addAssignee(issue, login) {
+        console.log('Assigning to: ' + login);
+        await this.rest.issues.addAssignees(this.addRepo({
+            issue_number: issue.number,
+            assignees: [login],
+        }));
+    }
+    async removeAssignees(issue) {
+        const oldAssignees = issue.assignees.map(x => x.login);
+        if (oldAssignees.length !== 0) {
+            console.log('Removing assignees: ' + oldAssignees.join(', '));
+            await this.rest.issues.removeAssignees(this.addRepo({
                 issue_number: issue.number,
-                assignees: [login],
+                assignees: oldAssignees,
             }));
-        });
+        }
     }
-    removeAssignees(issue) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const oldAssignees = issue.assignees.map(x => x.login);
-            if (oldAssignees.length !== 0) {
-                console.log('Removing assignees: ' + oldAssignees.join(', '));
-                yield this.rest.issues.removeAssignees(this.addRepo({
-                    issue_number: issue.number,
-                    assignees: oldAssignees,
-                }));
-            }
-        });
-    }
-    reassignIssue(issue, login) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.removeAssignees(issue);
-            yield this.addAssignee(issue, login);
-        });
+    async reassignIssue(issue, login) {
+        await this.removeAssignees(issue);
+        await this.addAssignee(issue, login);
     }
     fixedIssues(pr) {
-        var _a;
-        const matches = (_a = pr.body) === null || _a === void 0 ? void 0 : _a.match(/(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*#\d+/gi);
+        const matches = pr.body?.match(/(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*#\d+/gi);
         return matches ? matches.map(x => parseInt(x.split('#')[1])) : [];
     }
-    createCard(issueOrPR, column_id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const content_type = issueOrPR.url.indexOf('/pulls/') < 0 ? 'Issue' : 'PullRequest';
-            const content_id = issueOrPR.id;
-            if (column_id === 0) {
-                this.log(`Skip creating ${content_type} card for #${issueOrPR.number}.`);
-            }
-            else {
-                this.log(`Creating ${content_type} card for #${issueOrPR.number}`);
-                return (yield this.rest.projects.createCard({ column_id, content_id, content_type })).data;
-            }
-        });
+    async createCard(issueOrPR, column_id) {
+        const content_type = issueOrPR.url.indexOf('/pulls/') < 0 ? 'Issue' : 'PullRequest';
+        const content_id = issueOrPR.id;
+        if (column_id === 0) {
+            this.log(`Skip creating ${content_type} card for #${issueOrPR.number}.`);
+        }
+        else {
+            this.log(`Creating ${content_type} card for #${issueOrPR.number}`);
+            return (await this.rest.projects.createCard({ column_id, content_id, content_type })).data;
+        }
     }
 }
 exports.OctokitAction = OctokitAction;
