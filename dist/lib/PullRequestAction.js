@@ -15,7 +15,7 @@ const ProjectContent_1 = require("./ProjectContent");
 class PullRequestAction extends OctokitAction_1.OctokitAction {
     execute() {
         return __awaiter(this, void 0, void 0, function* () {
-            const column_id = this.getInputNumber("column-id");
+            const column_id = this.getInputNumber('column-id');
             const project = ProjectContent_1.ProjectContent.FromColumn(this, column_id);
             let processPR = true;
             const pr = this.payload.pull_request;
@@ -38,7 +38,7 @@ class PullRequestAction extends OctokitAction_1.OctokitAction {
     processIssue(projectPromise, column_id, issueOrPR) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.processReassignment(issueOrPR);
-            if (issueOrPR.state === "open") {
+            if (issueOrPR.state === 'open') {
                 const project = yield projectPromise;
                 yield project.moveOrCreateCard(issueOrPR, column_id);
             }

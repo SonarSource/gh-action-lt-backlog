@@ -13,13 +13,13 @@ const GraphQLAction_1 = require("../lib/GraphQLAction");
 class LockBranch extends GraphQLAction_1.GraphQLAction {
     execute() {
         return __awaiter(this, void 0, void 0, function* () {
-            const pattern = this.getInput("branch-pattern");
+            const pattern = this.getInput('branch-pattern');
             let rule = yield this.FindRule(pattern);
             if (rule) {
                 const lockBranch = !rule.lockBranch;
                 rule = yield this.UpdateRule(rule.id, lockBranch);
                 if (rule.lockBranch === lockBranch) {
-                    this.log(`Done: '${pattern}' was ${lockBranch ? "locked" : "unlocked and open for changes"}.`);
+                    this.log(`Done: '${pattern}' was ${lockBranch ? 'locked' : 'unlocked and open for changes'}.`);
                 }
                 else {
                     this.log(`Failed: '${pattern}' was not updated sucessfuly.`); // And we have no idea why
@@ -41,7 +41,7 @@ class LockBranch extends GraphQLAction_1.GraphQLAction {
     }
     LoadRules() {
         return __awaiter(this, void 0, void 0, function* () {
-            const { repository: { branchProtectionRules: { nodes } } } = yield this.sendGraphQL(`
+            const { repository: { branchProtectionRules: { nodes }, }, } = yield this.sendGraphQL(`
             query {
                 repository(owner: "${this.repo.owner}", name: "${this.repo.repo}") {
                     branchProtectionRules(first: 100) {
@@ -58,7 +58,7 @@ class LockBranch extends GraphQLAction_1.GraphQLAction {
     }
     UpdateRule(id, lockBranch) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { updateBranchProtectionRule: { branchProtectionRule } } = yield this.sendGraphQL(`
+            const { updateBranchProtectionRule: { branchProtectionRule }, } = yield this.sendGraphQL(`
             mutation {
                 updateBranchProtectionRule(input:{
                     branchProtectionRuleId: "${id}",
