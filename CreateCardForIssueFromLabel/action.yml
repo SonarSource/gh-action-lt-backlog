@@ -13,4 +13,4 @@ inputs:
     default: 'Type:'
 runs:
   using: 'node16'
-  main: 'CreateCardForIssueFromLabel.js'
+  main: '../dist/CreateCardForIssueFromLabel/CreateCardForIssueFromLabel.js'
