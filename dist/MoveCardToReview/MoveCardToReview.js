@@ -13,7 +13,7 @@ const PullRequestAction_1 = require("../lib/PullRequestAction");
 class MoveCardToReview extends PullRequestAction_1.PullRequestAction {
     processReassignment(issueOrPR) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (issueOrPR.state === "open") {
+            if (issueOrPR.state === 'open') {
                 yield this.reassignIssue(issueOrPR, this.payload.requested_reviewer.login);
             }
         });

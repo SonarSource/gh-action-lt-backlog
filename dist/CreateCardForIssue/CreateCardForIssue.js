@@ -14,11 +14,11 @@ const ProjectContent_1 = require("../lib/ProjectContent");
 class CreateCardForIssue extends OctokitAction_1.OctokitAction {
     execute() {
         return __awaiter(this, void 0, void 0, function* () {
-            const column_id = this.getInputNumber("column-id");
+            const column_id = this.getInputNumber('column-id');
             const project = yield ProjectContent_1.ProjectContent.FromColumn(this, column_id);
             const issue = this.payload.issue;
             if (yield project.findCard(issue)) {
-                this.log("Skip, card already exists");
+                this.log('Skip, card already exists');
             }
             else {
                 yield this.createCard(issue, column_id);

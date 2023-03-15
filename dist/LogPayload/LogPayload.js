@@ -13,9 +13,9 @@ const Action_1 = require("../lib/Action");
 class LogPayload extends Action_1.Action {
     execute() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.log("--- Event payload ---");
+            this.log('--- Event payload ---');
             this.logSerialized(this.payload);
-            this.log("----------");
+            this.log('----------');
         });
     }
 }

@@ -8,8 +8,8 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
         super();
         this.graphqlWithAuth = graphql_1.graphql.defaults({
             headers: {
-                authorization: `token ${this.getInput("github-token")}`,
-            }
+                authorization: `token ${this.getInput('github-token')}`,
+            },
         });
     }
     sendGraphQL(query) {
