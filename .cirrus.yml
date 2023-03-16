@@ -1,0 +1,12 @@
+container:
+  image: node:latest
+
+apply_changes_task:
+  apply_changes_script:
+    - npm run build
+
+check_code_committed_task:
+  depends_on:
+    - apply_changes
+  check_committed_script:
+    - ./scripts/check-commited.sh
