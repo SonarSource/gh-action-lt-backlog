@@ -5,6 +5,7 @@ class LogPayload extends Action {
         this.log("--- Event payload ---");
         this.logSerialized(this.payload);
         this.log("----------");
+        // Oh no
     }
 }
 
