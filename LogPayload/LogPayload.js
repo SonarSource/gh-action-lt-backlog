@@ -16,6 +16,7 @@ class LogPayload extends Action_1.Action {
             this.log("--- Event payload ---");
             this.logSerialized(this.payload);
             this.log("----------");
+            // Oh no
         });
     }
 }
