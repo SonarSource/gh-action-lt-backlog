@@ -10,4 +10,4 @@ inputs:
     default: 'master'
 runs:
   using: 'node16'
-  main: 'ToggleLockBranch.js'
+  main: '../dist/ToggleLockBranch/ToggleLockBranch.js'
