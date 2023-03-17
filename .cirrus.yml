@@ -1,0 +1,9 @@
+container:
+  image: node:latest
+
+apply_changes_and_check_task:
+  apply_changes_and_check_script:
+    - npm run build
+    # the check-committed.sh script should always be executed last
+    - ./scripts/check-committed.sh
+
