@@ -30,6 +30,7 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include=".editorconfig" />
     <Content Include="CreateCardForIssueFromLabel\action.yml" />
     <Content Include="CreateCardForIssueFromLabel\ReadMe.md" />
     <Content Include="MoveCardAfterReview\action.yml" />
