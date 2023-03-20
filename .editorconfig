@@ -1,0 +1,8 @@
+# top-most EditorConfig file
+root = true
+
+[*.js]
+indent_size = 2
+
+[*.ts]
+indent_size = 2
