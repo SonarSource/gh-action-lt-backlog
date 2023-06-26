@@ -4,6 +4,7 @@ exports.OctokitAction = void 0;
 const core = require("@actions/core");
 const github = require("@actions/github");
 const Action_1 = require("./Action");
+const ProjectContent_1 = require("./ProjectContent");
 class OctokitAction extends Action_1.Action {
     constructor() {
         super();
@@ -81,14 +82,12 @@ class OctokitAction extends Action_1.Action {
         return matches ? matches.map(x => parseInt(x.split('#')[1])) : [];
     }
     async createCard(issueOrPR, column_id) {
-        const content_type = issueOrPR.url.indexOf('/pulls/') < 0 ? 'Issue' : 'PullRequest';
-        const content_id = issueOrPR.id;
         if (column_id === 0) {
-            this.log(`Skip creating ${content_type} card for #${issueOrPR.number}.`);
+            this.log(`Skip creating card for #${issueOrPR.number}. column_id was not set.`);
         }
         else {
-            this.log(`Creating ${content_type} card for #${issueOrPR.number}`);
-            return (await this.rest.projects.createCard({ column_id, content_id, content_type })).data;
+            const project = await ProjectContent_1.ProjectContent.fromColumn(this, column_id);
+            project.createCard(issueOrPR, column_id);
         }
     }
 }

@@ -5,6 +5,7 @@ import { Action } from './Action';
 import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types';
 import { IssueOrPR } from './IssueOrPR';
 import { Issue, ProjectCard, PullRequest } from './OctokitTypes';
+import { ProjectContent } from './ProjectContent';
 
 export abstract class OctokitAction extends Action {
   protected readonly octokit: InstanceType<typeof GitHub>;
@@ -99,14 +100,12 @@ export abstract class OctokitAction extends Action {
     return matches ? matches.map(x => parseInt(x.split('#')[1])) : [];
   }
 
-  public async createCard(issueOrPR: IssueOrPR, column_id: number): Promise<ProjectCard> {
-    const content_type = issueOrPR.url.indexOf('/pulls/') < 0 ? 'Issue' : 'PullRequest';
-    const content_id = issueOrPR.id;
+  public async createCard(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
     if (column_id === 0) {
-      this.log(`Skip creating ${content_type} card for #${issueOrPR.number}.`);
+      this.log(`Skip creating card for #${issueOrPR.number}. column_id was not set.`);
     } else {
-      this.log(`Creating ${content_type} card for #${issueOrPR.number}`);
-      return (await this.rest.projects.createCard({ column_id, content_id, content_type })).data;
+      const project = await ProjectContent.fromColumn(this, column_id);
+      project.createCard(issueOrPR, column_id);
     }
   }
 }

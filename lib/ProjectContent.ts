@@ -11,16 +11,16 @@ export class ProjectContent {
     this.columns = columns;
   }
 
-  public static async FromColumn(
+  public static async fromColumn(
     action: OctokitAction,
     column_id: number,
   ): Promise<ProjectContent> {
     const { data: column } = await action.rest.projects.getColumn({ column_id });
     const project_id = parseInt(column.project_url.split('/').pop());
-    return ProjectContent.FromProject(action, project_id);
+    return ProjectContent.fromProject(action, project_id);
   }
 
-  public static async FromProject(
+  public static async fromProject(
     action: OctokitAction,
     project_id: number,
   ): Promise<ProjectContent> {
@@ -28,7 +28,7 @@ export class ProjectContent {
     return new ProjectContent(action, columns);
   }
 
-  public async findCard(issueOrPR: IssueOrPR): Promise<any> {
+  public async findCard(issueOrPR: IssueOrPR): Promise<ProjectCard> {
     // We should start caching these results in case we need to call it multiple times from a single action
     const content_url = issueOrPR.issue_url ?? issueOrPR.url;
     for (const column of this.columns) {
@@ -47,7 +47,7 @@ export class ProjectContent {
     if (card) {
       await this.moveCard(card, column_id);
     } else {
-      await this.action.createCard(issueOrPR, column_id);
+      await this.createCardCore(issueOrPR, column_id);
     }
   }
 
@@ -60,6 +60,15 @@ export class ProjectContent {
     });
   }
 
+  public async createCard(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
+    const card = await this.findCard(issueOrPR);
+    if (card) {
+      this.action.log(`Card already exists for #${issueOrPR.number} in ${card.column_url}`);
+    } else {
+      await this.createCardCore(issueOrPR, column_id);
+    }
+  }
+
   public columnFromName(columnName: string): ProjectColumn {
     const columns = this.columns.filter(x => x.name === columnName);
     if (columns.length === 0) {
@@ -67,6 +76,18 @@ export class ProjectContent {
       return null;
     } else {
       return columns[0];
+    }
+  }
+
+  private async createCardCore(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
+    const content_type = issueOrPR.url.indexOf('/pulls/') < 0 ? 'Issue' : 'PullRequest';
+    const content_id = issueOrPR.id;
+    this.action.log(`Creating ${content_type} card for #${issueOrPR.number}`);
+    try {
+      await this.action.rest.projects.createCard({ column_id, content_id, content_type });
+    }
+    catch (ex) {  // Issues or PRs can be assigned to a project in "Awaiting triage" state. Those are not discoverable via REST API
+      this.action.log(`Failed to create a card: ${ex}`);
     }
   }
 }
