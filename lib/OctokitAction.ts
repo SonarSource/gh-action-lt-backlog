@@ -83,8 +83,13 @@ export abstract class OctokitAction extends Action {
   }
 
   protected async reassignIssue(issue: { number: number }, login: string): Promise<void> {
-    await this.removeAssignees(issue);
-    await this.addAssignee(issue, login);
+    if (login.indexOf("[bot]") === -1) {    // Avoid dependabot[bot]
+      await this.removeAssignees(issue);
+      await this.addAssignee(issue, login);
+    }
+    else {
+      console.log(`Skipping reassignment to: ${login}`);
+    }
   }
 
   protected fixedIssues(pr: { body?: string }): number[] {
