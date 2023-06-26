@@ -7,7 +7,7 @@ export abstract class PullRequestAction extends OctokitAction {
 
   protected async execute(): Promise<void> {
     const column_id = this.getInputNumber('column-id');
-    const project = ProjectContent.FromColumn(this, column_id);
+    const project = ProjectContent.fromColumn(this, column_id);
 
     let processPR = true;
     const pr = this.payload.pull_request;
