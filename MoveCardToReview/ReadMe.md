@@ -34,7 +34,9 @@ jobs:
     name: Move card to review
     runs-on: ubuntu-latest
     # PRs from forks don't have required token authorization
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+        github.event.pull_request.head.repo.full_name == github.repository
+        && github.event.review.author_association != 'NONE'
     steps:
       - uses: sonarsource/gh-action-lt-backlog/MoveCardToReview@v1
         with:
