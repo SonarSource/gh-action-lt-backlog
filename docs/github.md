@@ -2,7 +2,7 @@ For multiple of these actions, you need to get the column_id for parameters. Her
 
 ## Create personal access token
 
-[docs](https://docs.github.com/en/enterprise-server@3.4/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+[docs](https://docs.github.com/en/enterprise-server@3.9/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 
 ### Save it
 
