@@ -108,4 +108,13 @@ export abstract class OctokitAction extends Action {
       project.createCard(issueOrPR, column_id);
     }
   }
+
+  public async createNote(note: string, column_id: number): Promise<void> {
+    if (column_id === 0) {
+      this.log("Skip creating card for note. column_id was not set.");
+    } else {
+      this.log(`Creating note in column ${column_id}`);
+      await this.rest.projects.createCard({ column_id, note });
+    }
+  }
 }
