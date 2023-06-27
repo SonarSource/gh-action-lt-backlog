@@ -84,7 +84,12 @@ export class ProjectContent {
     const content_id = issueOrPR.id;
     this.action.log(`Creating ${content_type} card for #${issueOrPR.number}`);
     try {
-      await this.action.rest.projects.createCard({ column_id, content_id, content_type });
+      const { data: card } = await this.action.rest.projects.createCard({ column_id, content_id, content_type });
+      await this.action.rest.projects.moveCard({  // Move it to the bottom of the column
+        card_id: card.id,
+        position: 'bottom',
+        column_id,
+      });
     }
     catch (ex) {  // Issues or PRs can be assigned to a project in "Awaiting triage" state. Those are not discoverable via REST API
       this.action.log(`Failed to create a card: ${ex}`);
