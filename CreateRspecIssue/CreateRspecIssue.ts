@@ -6,6 +6,7 @@ class CreateRspecIssue extends OctokitAction {
     const { data: issue } = await this.rest.issues.create(
       this.addRepo({
         title: `Update RSPEC before ${this.payload.milestone.title} release`,
+        body: this.getInput("body"),
         milestone: this.payload.milestone.number,
         labels: ['Type: Tooling'],
       }),
