@@ -83,7 +83,7 @@ export abstract class OctokitAction extends Action {
   }
 
   protected async reassignIssue(issue: { number: number }, login: string): Promise<void> {
-    if (login.indexOf("[bot]") === -1) {    // Avoid dependabot[bot]
+    if (!login.includes("[bot]")) {    // Avoid "dependabot[bot]"
       await this.removeAssignees(issue);
       await this.addAssignee(issue, login);
     }
