@@ -93,21 +93,24 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected fixedIssues(pr: { body?: string }): number[] {
-    const fixes = "(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)";
-    const url = this.escapeRegex(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/`);
-    const capturingId = "(\\d+)";
-    const issueId = "#" + capturingId;
-    const issueUrl = url + capturingId;
-    const issueLink = `\\[[^\\]]+\\]\\(${url}${capturingId}\\)`;
-    const pattern = `${fixes}\\s*(?:${issueId}|${issueUrl}|${issueLink})`;
-    const regex = new RegExp(pattern, "gi");
-    let result = [];
-    let match;
-    while (match = regex.exec(pr.body)) {
-      result = result.concat(match.map(x => parseInt(x)).filter(x => !isNaN(x)));
+  protected async addLabels(issue: { number: number } , labels: string[]): Promise<void> {
+    if (labels.length === 0) {
+      console.log(`Skipping adding labels to #${issue.number}`)
+    } else {
+      console.log(`Adding ${labels.length} label(s) to #${issue.number}`)
+      await this.rest.issues.addLabels(this.addRepo({
+        issue_number: issue.number,
+        labels
+      }));
     }
-    return result;
+  }
+
+  protected fixedIssues(pr: { body?: string }): number[] {
+    return this.mentionedIssuesCore(pr, "(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)");
+  }
+
+  protected mentionedIssues(pr: { body?: string }): number[] {
+    return this.mentionedIssuesCore(pr, "");
   }
 
   public async createCard(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
@@ -126,6 +129,22 @@ export abstract class OctokitAction extends Action {
       this.log(`Creating note in column ${column_id}`);
       await this.rest.projects.createCard({ column_id, note });
     }
+  }
+
+  protected mentionedIssuesCore(pr: { body?: string }, regexPrefix: string): number[] {
+    const url = this.escapeRegex(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/`);
+    const capturingId = "(\\d+)";
+    const issueId = "#" + capturingId;
+    const issueUrl = url + capturingId;
+    const issueLink = `\\[[^\\]]+\\]\\(${url}${capturingId}\\)`;
+    const pattern = `${regexPrefix}\\s*(?:${issueId}|${issueUrl}|${issueLink})`
+    const regex = new RegExp(pattern, "gi");
+    let result = [];
+    let match;
+    while (match = regex.exec(pr.body)) {
+      result = result.concat(match.map(x => parseInt(x)).filter(x => !isNaN(x)));
+    }
+    return result;
   }
 
   private escapeRegex(string): string {
