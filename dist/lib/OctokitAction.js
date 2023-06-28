@@ -68,8 +68,13 @@ class OctokitAction extends Action_1.Action {
         }
     }
     async reassignIssue(issue, login) {
-        await this.removeAssignees(issue);
-        await this.addAssignee(issue, login);
+        if (login.includes("[bot]")) { // Avoid "dependabot[bot]"
+            console.log(`Skipping reassignment to: ${login}`);
+        }
+        else {
+            await this.removeAssignees(issue);
+            await this.addAssignee(issue, login);
+        }
     }
     fixedIssues(pr) {
         const matches = pr.body?.match(/(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*#\d+/gi);
