@@ -68,12 +68,12 @@ class OctokitAction extends Action_1.Action {
         }
     }
     async reassignIssue(issue, login) {
-        if (login.indexOf("[bot]") === -1) { // Avoid dependabot[bot]
-            await this.removeAssignees(issue);
-            await this.addAssignee(issue, login);
+        if (login.includes("[bot]")) { // Avoid "dependabot[bot]"
+            console.log(`Skipping reassignment to: ${login}`);
         }
         else {
-            console.log(`Skipping reassignment to: ${login}`);
+            await this.removeAssignees(issue);
+            await this.addAssignee(issue, login);
         }
     }
     fixedIssues(pr) {
