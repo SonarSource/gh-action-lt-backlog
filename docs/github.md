@@ -2,80 +2,70 @@ For multiple of these actions, you need to get the column_id for parameters. Her
 
 ## Create personal access token
 
+Create a personal access token (classic) with permissions for:
+- repo
+- workflow
+- user
+- project
+
 [docs](https://docs.github.com/en/enterprise-server@3.9/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 
 ### Save it
+
+Save it in your shell like this:
 
 ```bash
 TOKEN=YOUR_GITHUB_PERSONAL_TOKEN
 ```
 
-## Find project id
+Or set it as a `Authorization` header in GraphiQL (in every tag) like this:
 
-[docs](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects#finding-the-node-id-of-an-organization-project)
-
-Kanban URL: https://github.com/orgs/SonarSource/projects/8
-
-```bash
-curl --request POST \
-  --url https://api.github.com/graphql \
-  --header "Authorization: Bearer $TOKEN" \
-  --data '{"query":"query{organization(login: \"SonarSource\") {projectV2(number: 8){id}}}"}'
+```
+bearer YOUR_GITHUB_PERSONAL_TOKEN
 ```
 
-### Response
+## Find column id for Projects V2
 
-```json
-{ "data": { "organization": { "projectV2": { "id": "PVT_kwDOAAhUxM4AJVQV" } } } }
-```
+### Find project number
 
-### Save it
+The project number is available in the URL of your project as: https://github.com/orgs/SonarSource/projects/NUMBER
 
-```bash
-PROJECT_ID=PVT_kwDOAAhUxM4AJVQV
-```
+The organisation is `SonarSource`.
 
-## Find column ids
+To get the column ids, use the following query:
 
-[doc](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects#finding-the-node-id-of-a-field)
-
-```bash
-curl --request POST \
-  --url https://api.github.com/graphql \
-  --header "Authorization: Bearer $TOKEN" \
-  --data "{\"query\":\"query{ node(id: \\\"$PROJECT_ID\\\") { ... on ProjectV2 { fields(first: 20) { nodes { ... on ProjectV2Field { id name } ... on ProjectV2IterationField { id name configuration { iterations { startDate id }}} ... on ProjectV2SingleSelectField { id name options { id name }}}}}}}\"}"
-```
-
-### Response
-
-```json
-{
-  "data": {
-    "node": {
-      "fields": {
-        "nodes": [
-          { "id": "PVTF_lADOAAhUxM4AJVQVzgFuY1Y", "name": "Title" },
-          { "id": "PVTF_lADOAAhUxM4AJVQVzgFuY1c", "name": "Assignees" },
-          {
-            "id": "PVTSSF_lADOAAhUxM4AJVQVzgFuY1g",
-            "name": "Status",
-            "options": [
-              { "id": "f75ad846", "name": "Todo" },
-              { "id": "47fc9ee4", "name": "In Progress" },
-              { "id": "14c3336d", "name": "In Review" },
-              { "id": "dd10adad", "name": "To Merge" },
-              { "id": "98236657", "name": "Done" }
-            ]
-          },
-          { "id": "PVTF_lADOAAhUxM4AJVQVzgFuY1k", "name": "Labels" },
-          { "id": "PVTF_lADOAAhUxM4AJVQVzgFuY1o", "name": "Linked pull requests" },
-          { "id": "PVTF_lADOAAhUxM4AJVQVzgFuY1s", "name": "Reviewers" },
-          { "id": "PVTF_lADOAAhUxM4AJVQVzgFuY1w", "name": "Repository" },
-          { "id": "PVTF_lADOAAhUxM4AJVQVzgFuY10", "name": "Milestone" }
-        ]
+```graphql
+query ($org: String!, $number: Int!) {
+  organization(login: $org) {
+    projectV2(number: $number) {
+      id
+      fields(first: 20) {
+        nodes {
+          ... on ProjectV2Field {
+            id
+            name
+          }
+          ... on ProjectV2SingleSelectField {
+            id
+            name
+            options {
+              id
+              name
+            }
+          }
+        }
       }
     }
   }
 }
+
+{
+  "org": "SonarSource",
+  "number": 8
+}
 ```
+
+[docs](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects#finding-the-node-id-of-an-organization-project)
+
+
 
