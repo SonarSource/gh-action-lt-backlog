@@ -94,10 +94,20 @@ export abstract class OctokitAction extends Action {
   }
 
   protected fixedIssues(pr: { body?: string }): number[] {
-    const matches = pr.body?.match(
-      /(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s*#\d+/gi,
-    );
-    return matches ? matches.map(x => parseInt(x.split('#')[1])) : [];
+    const fixes = "(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)";
+    const url = this.escapeRegex(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/`);
+    const capturingId = "(\\d+)";
+    const issueId = "#" + capturingId;
+    const issueUrl = url + capturingId;
+    const issueLink = `\\[[^\\]]+\\]\\(${url}${capturingId}\\)`;
+    const pattern = `${fixes}\\s*(?:${issueId}|${issueUrl}|${issueLink})`;
+    const regex = new RegExp(pattern, "gi");
+    let result = [];
+    let match;
+    while (match = regex.exec(pr.body)) {
+      result = result.concat(match.map(x => parseInt(x)).filter(x => !isNaN(x)));
+    }
+    return result;
   }
 
   public async createCard(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
@@ -116,5 +126,9 @@ export abstract class OctokitAction extends Action {
       this.log(`Creating note in column ${column_id}`);
       await this.rest.projects.createCard({ column_id, note });
     }
+  }
+
+  private escapeRegex(string): string {
+    return string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&');
   }
 }
