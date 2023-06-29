@@ -90,6 +90,15 @@ class OctokitAction extends Action_1.Action {
             project.createCard(issueOrPR, column_id);
         }
     }
+    async createNote(note, column_id) {
+        if (column_id === 0) {
+            this.log("Skip creating card for note. column_id was not set.");
+        }
+        else {
+            this.log(`Creating note in column ${column_id}`);
+            await this.rest.projects.createCard({ column_id, note });
+        }
+    }
 }
 exports.OctokitAction = OctokitAction;
 //# sourceMappingURL=OctokitAction.js.map
