@@ -49,10 +49,4 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           column-id: 123456     # Kanban "To do" column
           note: ${{ format('Release notes{0} {1} implemented {2}{3}', ':', github.event.pull_request.user.login, '#',  github.event.pull_request.number) }}
-
-  LogPayload_job:
-    name: Log payload
-    runs-on: ubuntu-latest
-    steps:
-      - uses: sonarsource/gh-action-lt-backlog/LogPayload@v1
 ```
