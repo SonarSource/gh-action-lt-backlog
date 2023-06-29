@@ -55,7 +55,7 @@ jobs:
     # Only limited global functions are available in this context https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#functions
     if: |
         github.event.issue.state == 'Open'
-        && startsWith(github.event.label.name, 'Type: ')
+        && startsWith(github.event.label.name, 'Type:')
 
     steps:
       - uses: sonarsource/gh-action-lt-backlog/CreateCardForIssueFromLabel@v1
