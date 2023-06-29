@@ -7,6 +7,9 @@ inputs:
   column-id:
     description: 'ID of the Kanban column, if a card should be also created'
     default: '0'
+  body:
+    description: 'Optional description of the created issue'
+    default: ''
 runs:
   using: 'node16'
   main: '../dist/CreateRspecIssue/CreateRspecIssue.js'
