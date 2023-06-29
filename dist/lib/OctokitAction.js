@@ -77,21 +77,23 @@ class OctokitAction extends Action_1.Action {
             await this.addAssignee(issue, login);
         }
     }
-    fixedIssues(pr) {
-        const fixes = "(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)";
-        const url = this.escapeRegex(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/`);
-        const capturingId = "(\\d+)";
-        const issueId = "#" + capturingId;
-        const issueUrl = url + capturingId;
-        const issueLink = `\\[[^\\]]+\\]\\(${url}${capturingId}\\)`;
-        const pattern = `${fixes}\\s*(?:${issueId}|${issueUrl}|${issueLink})`;
-        const regex = new RegExp(pattern, "gi");
-        let result = [];
-        let match;
-        while (match = regex.exec(pr.body)) {
-            result = result.concat(match.map(x => parseInt(x)).filter(x => !isNaN(x)));
+    async addLabels(issue, labels) {
+        if (labels.length === 0) {
+            console.log(`Skipping adding labels to #${issue.number}`);
         }
-        return result;
+        else {
+            console.log(`Adding ${labels.length} label(s) to #${issue.number}`);
+            await this.rest.issues.addLabels(this.addRepo({
+                issue_number: issue.number,
+                labels
+            }));
+        }
+    }
+    fixedIssues(pr) {
+        return this.mentionedIssuesCore(pr, "(?:close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)");
+    }
+    mentionedIssues(pr) {
+        return this.mentionedIssuesCore(pr, "");
     }
     async createCard(issueOrPR, column_id) {
         if (column_id === 0) {
@@ -110,6 +112,36 @@ class OctokitAction extends Action_1.Action {
             this.log(`Creating note in column ${column_id}`);
             await this.rest.projects.createCard({ column_id, note });
         }
+    }
+    /**
+     * This method will extract mentioned issue IDs (that are automatically translated into issue links in GitHub UI) from a PR body. The text like
+     * ```
+     * Fixes #42 because https://github.com/SonarSource/this-repo/issues/41 broke the logic that [link](https://github.com/SonarSource/this-repo/issues/40) added.
+     * ```
+     * Supported formats:
+     * regexPrefix #42
+     * regexPrefix https://github.com/SonarSource/this-repo/issues/42
+     * regexPrefix [text](https://github.com/SonarSource/this-repo/issues/42)
+     *
+     * Full link URLs must point to the current repo. GitHub issues from other repositories will not be returned.
+     *
+     * @param regexPrefix Regular expression that should be prefixed before the actual issue mention.
+     * @returns Array of mentioned issue numbers. The example above would return 42, 41, 40.
+     */
+    mentionedIssuesCore(pr, regexPrefix) {
+        const url = this.escapeRegex(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/`);
+        const capturingId = "(\\d+)";
+        const issueId = "#" + capturingId;
+        const issueUrl = url + capturingId;
+        const issueLink = `\\[[^\\]]+\\]\\(${url}${capturingId}\\)`;
+        const pattern = `${regexPrefix}\\s*(?:${issueId}|${issueUrl}|${issueLink})`;
+        const regex = new RegExp(pattern, "gi");
+        let result = [];
+        let match;
+        while (match = regex.exec(pr.body)) {
+            result = result.concat(match.map(x => parseInt(x)).filter(x => !isNaN(x)));
+        }
+        return result;
     }
     escapeRegex(string) {
         return string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&');

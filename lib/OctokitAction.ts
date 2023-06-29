@@ -113,7 +113,7 @@ export abstract class OctokitAction extends Action {
     return this.mentionedIssuesCore(pr, "");
   }
 
-  public async createCard(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
+  protected async createCard(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
     if (column_id === 0) {
       this.log(`Skip creating card for #${issueOrPR.number}. column_id was not set.`);
     } else {
@@ -122,7 +122,7 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  public async createNote(note: string, column_id: number): Promise<void> {
+  protected async createNote(note: string, column_id: number): Promise<void> {
     if (column_id === 0) {
       this.log("Skip creating card for note. column_id was not set.");
     } else {
@@ -131,6 +131,21 @@ export abstract class OctokitAction extends Action {
     }
   }
 
+  /**
+   * This method will extract mentioned issue IDs (that are automatically translated into issue links in GitHub UI) from a PR body. The text like
+   * ```
+   * Fixes #42 because https://github.com/SonarSource/this-repo/issues/41 broke the logic that [link](https://github.com/SonarSource/this-repo/issues/40) added.
+   * ```
+   * Supported formats:
+   * regexPrefix #42
+   * regexPrefix https://github.com/SonarSource/this-repo/issues/42
+   * regexPrefix [text](https://github.com/SonarSource/this-repo/issues/42)
+   * 
+   * Full link URLs must point to the current repo. GitHub issues from other repositories will not be returned.
+   * 
+   * @param regexPrefix Regular expression that should be prefixed before the actual issue mention.
+   * @returns Array of mentioned issue numbers. The example above would return 42, 41, 40.
+   */
   protected mentionedIssuesCore(pr: { body?: string }, regexPrefix: string): number[] {
     const url = this.escapeRegex(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/`);
     const capturingId = "(\\d+)";
