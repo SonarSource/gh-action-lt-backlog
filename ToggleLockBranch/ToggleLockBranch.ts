@@ -15,9 +15,9 @@ class LockBranch extends GraphQLAction {
       const lockBranch = !rule.lockBranch;
       rule = await this.UpdateRule(rule.id, lockBranch);
       if (rule.lockBranch === lockBranch) {
-        this.log(
-          `Done: '${pattern}' was ${lockBranch ? 'locked' : 'unlocked and open for changes'}.`,
-        );
+        const message = `${this.repo.repo}: The branch \`${pattern}\` was ${lockBranch ? 'locked :ice_cube:' : 'unlocked and is now open for changes :sunny:'}`
+        this.log(`Done: ${message}'`);
+        this.sendSlackMessage(message);
       } else {
         this.log(`Failed: '${pattern}' was not updated sucessfuly.`); // And we have no idea why
       }

@@ -14,6 +14,12 @@ Token to access the GitHub API.
 
 The token needs `administration:write` permissions or `public_repo` scope from a user with admin rights to the repository.
 
+### `slack-token`
+
+Slack auth Token with `chat-write` and `chat-write.public` scope. This parameter is needed only when `slack-channel` is also specified.
+
+This parameter is optional. 
+
 ### `branch-pattern`
 
 The pattern of the branch protection rule that should be locked or unlocked.
@@ -21,6 +27,12 @@ The pattern of the branch protection rule that should be locked or unlocked.
 This parameter is optional. 
 
 Default value: `master`
+
+### `slack-channel`
+
+Slack channel name or ID to send the notification to.
+
+This parameter is optional. 
 
 ## Outputs
 
@@ -52,8 +64,11 @@ jobs:
         with:
           secrets: |
             development/github/token/{REPO_OWNER_NAME_DASH}-lock token | lock_token;
+            development/kv/data/slack token | slack_api_token;
       - uses: sonarsource/gh-action-lt-backlog/ToggleLockBranch@v1
         with:
           github-token: ${{ fromJSON(steps.secrets.outputs.vault).lock_token }}
-          branch-pattern: "master"     # Optional
+          slack-token: ${{ fromJSON(steps.secrets.outputs.vault).slack_api_token }} # Optional, needed only when slack-channel is set
+          branch-pattern: "master"              # Optional
+          slack-channel: public-channel-name    # Optional
 ```

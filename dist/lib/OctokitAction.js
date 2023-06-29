@@ -5,6 +5,7 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 const Action_1 = require("./Action");
 const ProjectContent_1 = require("./ProjectContent");
+const node_fetch_1 = require("node-fetch");
 class OctokitAction extends Action_1.Action {
     constructor() {
         super();
@@ -28,7 +29,7 @@ class OctokitAction extends Action_1.Action {
         return this.getInput(name).toLowerCase() === 'true';
     }
     async downloadData(url) {
-        console.log('Downloading ' + url);
+        this.log('Downloading ' + url);
         return (await this.octokit.request(url)).data;
     }
     async getIssue(issue_number) {
@@ -52,7 +53,7 @@ class OctokitAction extends Action_1.Action {
         }
     }
     async addAssignee(issue, login) {
-        console.log('Assigning to: ' + login);
+        this.log('Assigning to: ' + login);
         await this.rest.issues.addAssignees(this.addRepo({
             issue_number: issue.number,
             assignees: [login],
@@ -61,7 +62,7 @@ class OctokitAction extends Action_1.Action {
     async removeAssignees(issue) {
         const oldAssignees = issue.assignees.map(x => x.login);
         if (oldAssignees.length !== 0) {
-            console.log('Removing assignees: ' + oldAssignees.join(', '));
+            this.log('Removing assignees: ' + oldAssignees.join(', '));
             await this.rest.issues.removeAssignees(this.addRepo({
                 issue_number: issue.number,
                 assignees: oldAssignees,
@@ -70,7 +71,7 @@ class OctokitAction extends Action_1.Action {
     }
     async reassignIssue(issue, login) {
         if (login.includes("[bot]")) { // Avoid "dependabot[bot]"
-            console.log(`Skipping reassignment to: ${login}`);
+            this.log(`Skipping reassignment to: ${login}`);
         }
         else {
             await this.removeAssignees(issue);
@@ -79,10 +80,10 @@ class OctokitAction extends Action_1.Action {
     }
     async addLabels(issue, labels) {
         if (labels.length === 0) {
-            console.log(`Skipping adding labels to #${issue.number}`);
+            this.log(`Skipping adding labels to #${issue.number}`);
         }
         else {
-            console.log(`Adding ${labels.length} label(s) to #${issue.number}`);
+            this.log(`Adding ${labels.length} label(s) to #${issue.number}`);
             await this.rest.issues.addLabels(this.addRepo({
                 issue_number: issue.number,
                 labels
@@ -143,8 +144,48 @@ class OctokitAction extends Action_1.Action {
         }
         return result;
     }
+    async sendSlackMessage(text) {
+        const channel = this.getInput("slack-channel");
+        if (channel) {
+            this.log("Sending Slack message");
+            await this.sendSlackPost("https://slack.com/api/chat.postMessage", { channel, text });
+        }
+        else {
+            this.log("Skip sending slack message, channel was not set.");
+        }
+    }
     escapeRegex(string) {
         return string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
+    async sendSlackPost(url, jsonRequest) {
+        const token = this.getInput("slack-token");
+        if (!token) {
+            throw new Error("slack-token was not set");
+        }
+        try {
+            const body = JSON.stringify(jsonRequest);
+            this.log(`Sending slack POST: ${body}`);
+            const response = await (0, node_fetch_1.default)(url, {
+                method: "POST",
+                body,
+                headers: { "Content-Type": "application/json; charset=utf-8", authorization: `Bearer ${token}` }
+            });
+            if (!response.ok) {
+                this.log(`Failed to send API request. Error ${response.status}: ${response.statusText}`);
+                return null;
+            }
+            const data = await response.json();
+            if (!data.ok) {
+                this.log(`Failed to send API request. Error: ${data.error}`);
+                return null;
+            }
+            return data;
+        }
+        catch (ex) {
+            this.log("Failed to send Slack request");
+            this.log(ex);
+            return null;
+        }
     }
 }
 exports.OctokitAction = OctokitAction;
