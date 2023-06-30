@@ -76,7 +76,11 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
       owner: repositoryOwner,
       issueNumber,
     };
-    const { data: { repository: issue } } = await this.sendGraphQL(query);
+    const data = await this.sendGraphQL(query);
+    this.log('received response from getIssueV2');
+    this.logSerialized(data);
+    const issue = data.repository.issue;
+    //const { data: { repository: issue } } = await this.sendGraphQL(query);
     this.log(`retrieved issue`)
     this.logSerialized(issue);
     return issue;
