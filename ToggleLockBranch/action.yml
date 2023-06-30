@@ -4,10 +4,19 @@ inputs:
   github-token:
     description: 'GitHub auth Token with administration:write permissions or public_repo permissions from admin account.'
     required: true
+  slack-token:
+    description: 'Slack auth Token with chat-write and chat-write.public scope. This is needed only when slack-channel parameter is also specified.'
+    required: false
+    default: ''
   branch-pattern:
     description: 'Pattern of the branch protection rule to modify.'
     required: false
     default: 'master'
+  slack-channel:
+    description: 'Slack channel name or ID to send the notification to.  When set, requires `slack-token` to be set as well.'
+    required: false
+    default: ''
+
 runs:
   using: 'node16'
   main: '../dist/ToggleLockBranch/ToggleLockBranch.js'
