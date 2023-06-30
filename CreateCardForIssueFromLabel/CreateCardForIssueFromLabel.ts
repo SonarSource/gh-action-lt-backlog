@@ -6,8 +6,8 @@ class CreateCardForIssueFromLabel extends OctokitAction {
   protected async execute(): Promise<void> {
     const labelPrefix = this.getInput('label-prefix');
     const labelName = this.payload.label.name;
-    const project = await ProjectContent.fromProject(this, this.getInputNumber('project-id'));
     if (labelName.startsWith(labelPrefix)) {
+      const project = await ProjectContent.fromProject(this, this.getInputNumber('project-id'));
       const columnName = labelName.substring(labelPrefix.length).trim();
       const column = project.columnFromName(columnName);
       if (column) {
