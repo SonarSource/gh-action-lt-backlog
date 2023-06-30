@@ -74,7 +74,6 @@
   <ItemGroup>
     <TypeScriptCompile Include="CopyLabelToPR\CopyLabelToPR.ts" />
     <TypeScriptCompile Include="CreateNote\CreateNote.ts" />
-    <TypeScriptCompile Include="lib\GraphQLAction.ts" />
     <TypeScriptCompile Include="CreateCardForIssueFromLabel\CreateCardForIssueFromLabel.ts" />
     <TypeScriptCompile Include="lib\IssueOrPR.ts" />
     <TypeScriptCompile Include="lib\OctokitTypes.ts" />
