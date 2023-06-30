@@ -24,11 +24,11 @@ class MoveCardToReviewV2 extends PullRequestActionV2_1.PullRequestActionV2 {
         }
     }
     async reassignIssueV2(issueOrPr, loginToAdd, loginToRemove) {
-        this.log(`reassigning assignees: ` + {
+        this.log(`reassigning assignees: ${JSON.stringify({
             newUserId: loginToAdd,
             oldUserId: loginToRemove,
             issueId: issueOrPr.id,
-        });
+        }, null, 2)}`);
         const query = {
             query: `
       mutation($newUserId: ID! $oldUserId: ID! $issueId: ID!) {
