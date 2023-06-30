@@ -14,7 +14,7 @@ export abstract class GraphQLAction extends OctokitAction {
     });
   }
 
-  protected sendGraphQL(query: string): Promise<GraphQlQueryResponseData> {
+  sendGraphQL(query: string | any): Promise<GraphQlQueryResponseData> {
     return this.graphqlWithAuth(query);
   }
 }
