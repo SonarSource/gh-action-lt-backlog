@@ -13,7 +13,7 @@ const PullRequestActionV2_1 = require("../lib/PullRequestActionV2");
 class MoveCardToReviewV2 extends PullRequestActionV2_1.PullRequestActionV2 {
     async processReassignment(issueOrPR) {
         this.log(`processing reassignment for ${JSON.stringify(issueOrPR, null, 2)}`);
-        if (issueOrPR.state === 'open') {
+        if (issueOrPR.state.toLocaleLowerCase() === 'open') {
             const login = this.payload.requested_reviewer.login;
             if (login) {
                 await this.reassignIssueV2(issueOrPR, login, issueOrPR.assignees.edges[0].node.id);

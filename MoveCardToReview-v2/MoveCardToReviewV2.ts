@@ -14,7 +14,7 @@ import { IssueOrPR } from '../lib/IssueOrPR';
 class MoveCardToReviewV2 extends PullRequestActionV2 {
   protected async processReassignment(issueOrPR: IssueOrPR): Promise<void> {
     this.log(`processing reassignment for ${JSON.stringify(issueOrPR, null, 2)}`);
-    if (issueOrPR.state === 'open') {
+    if (issueOrPR.state.toLocaleLowerCase() === 'open') {
       const login = this.payload.requested_reviewer.login;
       if (login) {
         await this.reassignIssueV2(issueOrPR, login, (issueOrPR as any).assignees.edges[0].node.id);
