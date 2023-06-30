@@ -112,7 +112,7 @@ class OctokitAction extends Action_1.Action {
             this.log(`Skip creating card for #${issueOrPR.number}. column_id was not set.`);
         }
         else {
-            const project = await ProjectContent_1.ProjectContent.fromColumn(this, column_id);
+            const project = await ProjectContent_1.ProjectContentV1.fromColumn(this, column_id);
             project.createCard(issueOrPR, column_id);
         }
     }

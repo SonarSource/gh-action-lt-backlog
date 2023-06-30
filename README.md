@@ -49,6 +49,6 @@ ${env:GITHUB_REPOSITORY}="SonarSource/<YourRepoName>"
 ${env:INPUT_GITHUB-TOKEN}="ghp_...."
 ${env:INPUT_PARAM}="True"
 ${env:INPUT_PARAM-NAME-WITH-HYPHEN}="Value"
-clear; node .\ActionName\ActionName.js
+clear; node .\dist\ActionName\ActionName.js
 ```
 

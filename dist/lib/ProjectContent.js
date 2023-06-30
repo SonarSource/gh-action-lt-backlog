@@ -1,19 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProjectContent = void 0;
+exports.ProjectContentV2 = exports.ProjectContentV1 = exports.ProjectContent = void 0;
 class ProjectContent {
     constructor(action, columns) {
         this.action = action;
         this.columns = columns;
-    }
-    static async fromColumn(action, column_id) {
-        const { data: column } = await action.rest.projects.getColumn({ column_id });
-        const project_id = parseInt(column.project_url.split('/').pop());
-        return ProjectContent.fromProject(action, project_id);
-    }
-    static async fromProject(action, project_id) {
-        const { data: columns } = await action.rest.projects.listColumns({ project_id });
-        return new ProjectContent(action, columns);
     }
     async findCard(issueOrPR) {
         // We should start caching these results in case we need to call it multiple times from a single action
@@ -82,4 +73,37 @@ class ProjectContent {
     }
 }
 exports.ProjectContent = ProjectContent;
+class ProjectContentV1 extends ProjectContent {
+    static async fromColumn(action, column_id) {
+        const { data: column } = await action.rest.projects.getColumn({ column_id });
+        const project_id = parseInt(column.project_url.split('/').pop());
+        return ProjectContentV1.fromProject(action, project_id);
+    }
+    static async fromProject(action, project_id) {
+        const { data: columns } = await action.rest.projects.listColumns({ project_id });
+        return new ProjectContentV1(action, columns);
+    }
+}
+exports.ProjectContentV1 = ProjectContentV1;
+class ProjectContentV2 extends ProjectContent {
+    static async fromProject(action, number) {
+        const { organization: { projectV2: { field: { options: columns } } } } = await action.sendGraphQL(`
+        query {
+          organization(login: "${action.repo.owner}") {
+              projectV2 (number: ${number}) {
+                  field (name: "Status"){
+                      ... on ProjectV2SingleSelectField {
+                          options { 
+                            id 
+                            name 
+                          }
+                      }
+                  }
+              }
+          }
+      }`);
+        return new ProjectContentV1(action, columns); // Only "id" and "name" are filled. We can query more if we need to
+    }
+}
+exports.ProjectContentV2 = ProjectContentV2;
 //# sourceMappingURL=ProjectContent.js.map
