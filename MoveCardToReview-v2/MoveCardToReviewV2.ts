@@ -25,6 +25,11 @@ class MoveCardToReviewV2 extends PullRequestActionV2 {
   }
 
   protected async reassignIssueV2(issueOrPr, loginToAdd: string, loginToRemove: string) {
+    this.log(`reassigning assignees: ` + {
+      newUserId: loginToAdd,
+      oldUserId: loginToRemove,
+      issueId: issueOrPr.id,
+    });
     const query = {
       query: `
       mutation($newUserId: ID! $oldUserId: ID! $issueId: ID!) {
@@ -60,11 +65,6 @@ class MoveCardToReviewV2 extends PullRequestActionV2 {
       issueId: issueOrPr.id,
     };
     const response = await this.sendGraphQL(query);
-    this.log(`reassigned assignees: ` + {
-      newUserId: loginToAdd,
-      oldUserId: loginToRemove,
-      issueId: issueOrPr.id,
-    });
     this.logSerialized(response);
   }
 
