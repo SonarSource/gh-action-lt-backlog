@@ -18,30 +18,31 @@ class MoveCardToReviewV2 extends PullRequestActionV2 {
       const login = this.payload.requested_reviewer.login;
       const newUserId = await this.getUserId(login);
       if (login) {
-        await this.reassignIssueV2(issueOrPR, newUserId, (issueOrPR as any).assignees.edges[0].node.id);
+        await this.reassignIssueV2(issueOrPR, newUserId, (issueOrPR as any).assignees.edges.map(edge => edge.node.id);
       } else {  // Review requested from a group - keep it unassigned to raise a suspicion about the card
         await this.removeAssignees(issueOrPR);
       }
     }
   }
 
-  protected async reassignIssueV2(issueOrPr, loginToAdd: string, loginToRemove: string) {
+  protected async reassignIssueV2(issueOrPr, loginToAdd: string, loginsToRemove: string[]) {
     this.log(`reassigning assignees: ${JSON.stringify({
       newUserId: loginToAdd,
-      oldUserId: loginToRemove,
+      oldUserIds: loginsToRemove,
       issueId: issueOrPr.id,
     }, null, 2)}`);
     const query = {
       query: `
-      mutation($newUserId: ID! $oldUserId: ID! $issueId: ID!) {
+      mutation($newUserId: ID! $oldUserIds: [ID!]! $issueId: ID!) {
         removeAssigneesFromAssignable(input: {
           assignableId: $issueId
-          assigneeIds: [$oldUserId]
+          assigneeIds: $oldUserIds
         }) {
           assignable {
             assignees(last: 1) {
               nodes {
                 name
+                login
               }
             }
           }
@@ -55,6 +56,7 @@ class MoveCardToReviewV2 extends PullRequestActionV2 {
             assignees(last: 10) {
               nodes {
                 name
+                login
               }
             }
           }
@@ -62,7 +64,7 @@ class MoveCardToReviewV2 extends PullRequestActionV2 {
       }
       `,
       newUserId: loginToAdd,
-      oldUserId: loginToRemove,
+      oldUserIds: loginsToRemove,
       issueId: issueOrPr.id,
     };
     const response = await this.sendGraphQL(query);
