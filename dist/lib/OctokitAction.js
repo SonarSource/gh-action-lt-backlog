@@ -6,11 +6,22 @@ const github = require("@actions/github");
 const Action_1 = require("./Action");
 const ProjectContent_1 = require("./ProjectContent");
 const node_fetch_1 = require("node-fetch");
+const graphql_1 = require("@octokit/graphql");
 class OctokitAction extends Action_1.Action {
     constructor() {
         super();
         this.octokit = github.getOctokit(core.getInput('github-token'));
         this.rest = this.octokit.rest;
+    }
+    sendGraphQL(query) {
+        if (!this.graphqlWithAuth) {
+            this.graphqlWithAuth = graphql_1.graphql.defaults({
+                headers: {
+                    authorization: `token ${this.getInput('github-token')}`,
+                },
+            });
+        }
+        return this.graphqlWithAuth(query);
     }
     getInput(name) {
         return core.getInput(name);

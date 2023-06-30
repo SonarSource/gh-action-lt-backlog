@@ -1,5 +1,5 @@
 import type { GraphQlQueryResponseData } from '@octokit/graphql';
-import { GraphQLAction } from '../lib/GraphQLAction';
+import { OctokitAction } from '../lib/OctokitAction';
 
 type ProtectionRule = {
   id: string;
@@ -7,7 +7,7 @@ type ProtectionRule = {
   pattern: string;
 };
 
-class LockBranch extends GraphQLAction {
+class LockBranch extends OctokitAction {
   protected async execute(): Promise<void> {
     const pattern = this.getInput('branch-pattern');
     let rule = await this.FindRule(pattern);

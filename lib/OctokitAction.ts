@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
+import * as graphqlTypes from '@octokit/graphql/dist-types/types';
 import { GitHub } from '@actions/github/lib/utils';
 import { Action } from './Action';
 import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types';
@@ -7,15 +8,28 @@ import { IssueOrPR } from './IssueOrPR';
 import { Issue, PullRequest } from './OctokitTypes';
 import { ProjectContent } from './ProjectContent';
 import fetch from 'node-fetch';
+import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
 
 export abstract class OctokitAction extends Action {
-  protected readonly octokit: InstanceType<typeof GitHub>;
   public readonly rest: RestEndpointMethods;
+  protected readonly octokit: InstanceType<typeof GitHub>;
+  private graphqlWithAuth: graphqlTypes.graphql;
 
   constructor() {
     super();
     this.octokit = github.getOctokit(core.getInput('github-token'));
     this.rest = this.octokit.rest;
+  }
+
+  public sendGraphQL(query: string): Promise<GraphQlQueryResponseData> {
+    if (!this.graphqlWithAuth) {
+      this.graphqlWithAuth = graphql.defaults({
+        headers: {
+          authorization: `token ${this.getInput('github-token')}`,
+        },
+      });
+    }
+    return this.graphqlWithAuth(query);
   }
 
   protected getInput(name: string): string {
