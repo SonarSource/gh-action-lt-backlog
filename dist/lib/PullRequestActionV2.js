@@ -24,6 +24,7 @@ const GraphQLAction_1 = require("./GraphQLAction");
 class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
     async execute() {
         const column_id = this.getInputNumber('column-id');
+        this.log(`retrieved col number ${column_id}`);
         //const project = ProjectContent.fromColumn(this, column_id);
         let isProcessPR = true;
         const pr = this.payload.pull_request;

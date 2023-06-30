@@ -28,6 +28,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
 
   protected async execute(): Promise<void> {
     const column_id = this.getInputNumber('column-id');
+    this.log(`retrieved col number ${column_id}`);
     //const project = ProjectContent.fromColumn(this, column_id);
 
     let isProcessPR = true;
