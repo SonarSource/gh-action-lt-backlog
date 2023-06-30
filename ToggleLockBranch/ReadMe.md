@@ -30,7 +30,7 @@ Default value: `master`
 
 ### `slack-channel`
 
-Slack channel name or ID to send the notification to.
+Slack channel name or ID to send the notification to. When set, requires `slack-token` to be set as well.
 
 This parameter is optional. 
 

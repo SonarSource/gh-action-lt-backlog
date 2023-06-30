@@ -13,7 +13,7 @@ inputs:
     required: false
     default: 'master'
   slack-channel:
-    description: 'Slack channel name or ID to send the notification to.'
+    description: 'Slack channel name or ID to send the notification to.  When set, requires `slack-token` to be set as well.'
     required: false
     default: ''
 
