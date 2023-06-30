@@ -78,11 +78,8 @@ class MoveCardToReviewV2 extends PullRequestActionV2_1.PullRequestActionV2 {
       `,
             username: login,
         };
-        const data = await this.sendGraphQL(query);
-        this.log('got user id for' + login);
-        this.logSerialized(data);
-        //const { data: { user: { id }}} = await this.sendGraphQL(query);
-        return data.user.id;
+        const { user: { id } } = await this.sendGraphQL(query);
+        return id;
     }
     async removeAssignees(issue) {
     }
