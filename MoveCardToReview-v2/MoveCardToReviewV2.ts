@@ -13,6 +13,7 @@ import { IssueOrPR } from '../lib/IssueOrPR';
 
 class MoveCardToReviewV2 extends PullRequestActionV2 {
   protected async processReassignment(issueOrPR: IssueOrPR): Promise<void> {
+    this.log(`processing reassignment for ${JSON.stringify(issueOrPR, null, 2)}`);
     if (issueOrPR.state === 'open') {
       const login = this.payload.requested_reviewer.login;
       if (login) {
