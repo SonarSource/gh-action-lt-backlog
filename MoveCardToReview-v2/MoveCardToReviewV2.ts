@@ -16,8 +16,9 @@ class MoveCardToReviewV2 extends PullRequestActionV2 {
     this.log(`processing reassignment for ${JSON.stringify(issueOrPR, null, 2)}`);
     if (issueOrPR.state.toLocaleLowerCase() === 'open') {
       const login = this.payload.requested_reviewer.login;
+      const newUserId = await this.getUserId(login);
       if (login) {
-        await this.reassignIssueV2(issueOrPR, login, (issueOrPR as any).assignees.edges[0].node.id);
+        await this.reassignIssueV2(issueOrPR, newUserId, (issueOrPR as any).assignees.edges[0].node.id);
       } else {  // Review requested from a group - keep it unassigned to raise a suspicion about the card
         await this.removeAssignees(issueOrPR);
       }
@@ -66,6 +67,21 @@ class MoveCardToReviewV2 extends PullRequestActionV2 {
     };
     const response = await this.sendGraphQL(query);
     this.logSerialized(response);
+  }
+
+  protected async getUserId(login: string) {
+    const query = {
+      query: `
+      query($username: String!) {
+        user(login: $username) {
+          id
+        }
+      }
+      `,
+      username: login,
+    };
+    const { data: { user: { id }}} = await this.sendGraphQL(query);
+    return id;
   }
 
   protected async removeAssignees(issue: any): Promise<void> {
