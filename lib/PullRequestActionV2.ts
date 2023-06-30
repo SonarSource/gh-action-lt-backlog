@@ -27,7 +27,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
   protected abstract processReassignment(issueOrPR: IssueOrPR): Promise<void>;
 
   protected async execute(): Promise<void> {
-    const column_id = this.getInputNumber('column-id');
+    const column_id = this.getInput('column-id');
     this.log(`retrieved col number ${column_id}`);
     //const project = ProjectContent.fromColumn(this, column_id);
 
@@ -83,7 +83,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
   }
 
   protected async processIssue(
-    column_id: number,
+    column_id: string,
     issueOrPR: IssueOrPR,
   ): Promise<void> {
     await this.processReassignment(issueOrPR);
