@@ -108,8 +108,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
       owner: repositoryOwner,
       issueNumber,
     };
-    const { repository: issue } = await this.sendGraphQL(query);
-    console.log('issue?', issue);
+    const { repository: { issue }} = await this.sendGraphQL(query);
     // remove extra layers
     issue.assignees = issue.assignees.edges.map(edge => edge.user);
     const projectItem = findProjectItem(issue, columnId);
