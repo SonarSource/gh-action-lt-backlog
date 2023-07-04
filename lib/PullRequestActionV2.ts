@@ -129,7 +129,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
     return issue;
 
     function findProjectItem(issue: any, projectNumber: number) {
-      const projectItem = issue.projectItems.nodes.find(projectItem => projectItem.number === projectNumber);
+      const projectItem = issue.projectItems.nodes.find(projectItem => projectItem.project.number === projectNumber);
       if (!projectItem) {
         throw new Error(`Project item not found for issue ${issue.title} and project #${projectNumber}`);
       }

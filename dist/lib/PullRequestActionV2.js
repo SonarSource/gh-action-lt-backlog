@@ -101,7 +101,7 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         delete issue.projectItems;
         return issue;
         function findProjectItem(issue, projectNumber) {
-            const projectItem = issue.projectItems.nodes.find(projectItem => projectItem.number === projectNumber);
+            const projectItem = issue.projectItems.nodes.find(projectItem => projectItem.project.number === projectNumber);
             if (!projectItem) {
                 throw new Error(`Project item not found for issue ${issue.title} and project #${projectNumber}`);
             }
