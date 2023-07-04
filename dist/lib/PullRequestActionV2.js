@@ -97,7 +97,7 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         // remove extra layers
         issue.assignees = issue.assignees.edges.map(edge => edge.node);
         issue.projectItemId = projectItem.id;
-        issue.project = issue.projectItem.project;
+        issue.project = projectItem.project;
         delete issue.projectItems;
         return issue;
         function findProjectItem(issue, projectNumber) {
