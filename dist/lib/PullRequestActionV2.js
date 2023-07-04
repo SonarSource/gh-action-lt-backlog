@@ -2,31 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PullRequestActionV2 = void 0;
 const GraphQLAction_1 = require("./GraphQLAction");
-/**
- * 1. change assignees
- *  1.1. column_id is known
- *  1.2. write mutation call
- *    params: issueId, user_id to remove, user_id to add
- *    1.2.1: get issueId
- *      retrieve issueId from:
- *        - payload.repository.name
- *        - payload.repository.owner
- *        - issues(payload.pr.body)
- *      retrieve project Id from "get column_ids" call
- *      retrieve all issues for a project using "get issues" call
- *      having retrieved the issue number, use it to retrieve the issue id
- *    1.2.2: get old_user_id -
- *    1.2.3: get new user_id -
- * 2. change column:
- *  - projectId
- *  - id of column field in project
- *  - id of column
- *  - id of projectItem linked to the issue
- */
 class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
     async execute() {
         const columnId = this.getInput('column-id');
-        this.log(`retrieved col number ${columnId}`);
         //const project = ProjectContent.fromColumn(this, column_id);
         let isProcessPR = true;
         const pr = this.payload.pull_request;
@@ -94,16 +72,10 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
             owner: repositoryOwner,
             issueNumber,
         };
-        const data = await this.sendGraphQL(query);
-        this.log('received response from getIssueV2');
-        this.logSerialized(data);
-        const issue = data.repository.issue;
-        //const { data: { repository: issue } } = await this.sendGraphQL(query);
-        this.log(`retrieved issue`);
-        this.logSerialized(issue);
-        const projectItem = findProjectItem(issue, columnId);
+        const { repository: issue } = await this.sendGraphQL(query);
         // remove extra layers
         issue.assignees = issue.assignees.edges.map(edge => edge.user);
+        const projectItem = findProjectItem(issue, columnId);
         issue.projectItemId = projectItem.id;
         issue.project = projectItem.project;
         issue.project = Object.assign(issue.project, issue.project.props);

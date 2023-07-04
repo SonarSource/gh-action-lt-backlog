@@ -3,31 +3,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const PullRequestActionV2_1 = require("../lib/PullRequestActionV2");
 class MoveCardToReviewV2 extends PullRequestActionV2_1.PullRequestActionV2 {
     async processReassignment(issueOrPR, columnId) {
-        this.log(`processing reassignment for ${JSON.stringify(issueOrPR, null, 2)}`);
         if (issueOrPR.state.toLocaleLowerCase() === 'open') {
             const login = this.payload.requested_reviewer.login;
             const newUserId = await this.getUserId(login);
             if (login) {
                 await this.reassignIssueV2(issueOrPR, newUserId, issueOrPR.assignees.map(assignee => assignee.id));
             }
-            else { // Review requested from a group - keep it unassigned to raise a suspicion about the card
+            else {
+                // Review requested from a group - keep it unassigned to raise a suspicion about the card
                 await this.removeAssignees(issueOrPR);
             }
-            this.changeColumn({
-                projectNumber: issueOrPR.project.number,
-                projectItemId: issueOrPR.projectItemId,
-                columnId,
-                projectId: issueOrPR.project.id,
-                columnFieldId: issueOrPR.project.columnFieldId,
-            });
+            this.changeColumn(issueOrPR.project.id, issueOrPR.projectItemId, columnId, issueOrPR.project.columnFieldId);
         }
     }
+    /**
+     * Reassign issue from oldUserIds to newUserId
+     *
+     * @param issueOrPr
+     * @param newUserId
+     * @param oldUserIds
+     */
     async reassignIssueV2(issueOrPr, newUserId, oldUserIds) {
-        this.log(`reassigning assignees: ${JSON.stringify({
-            newUserId,
-            oldUserIds,
-            issueId: issueOrPr.id,
-        }, null, 2)}`);
         const query = {
             query: `
       mutation($newUserId: ID! $oldUserIds: [ID!]! $issueId: ID!) {
@@ -64,8 +60,7 @@ class MoveCardToReviewV2 extends PullRequestActionV2_1.PullRequestActionV2 {
             oldUserIds,
             issueId: issueOrPr.id,
         };
-        const response = await this.sendGraphQL(query);
-        this.logSerialized(response);
+        await this.sendGraphQL(query);
     }
     async getUserId(login) {
         const query = {
@@ -78,21 +73,24 @@ class MoveCardToReviewV2 extends PullRequestActionV2_1.PullRequestActionV2 {
       `,
             username: login,
         };
-        const { user: { id } } = await this.sendGraphQL(query);
+        const { user: { id }, } = await this.sendGraphQL(query);
         return id;
     }
-    async removeAssignees(issue) {
-    }
+    async removeAssignees(issue) { }
     /**
+     * Changes column for a projectV2 item
      *
-     * @param params
+     * @param projectId
+     * @param projectItemId
+     * @param columnId
+     * @param columnFieldId
      */
-    async changeColumn(params) {
+    async changeColumn(projectId, projectItemId, columnId, columnFieldId) {
         const query = {
-            projectId: params.projectId,
-            projectItemId: params.projectItemId,
-            columnFieldId: params.columnFieldId,
-            columnId: params.columnId,
+            projectId,
+            projectItemId,
+            columnFieldId,
+            columnId,
             query: `
       mutation (
         $projectId: ID!,
@@ -113,11 +111,9 @@ class MoveCardToReviewV2 extends PullRequestActionV2_1.PullRequestActionV2 {
           }
         }
       }
-      `
+      `,
         };
-        const response = await this.sendGraphQL(query);
-        this.log('change column response');
-        this.logSerialized(response);
+        await this.sendGraphQL(query);
     }
 }
 const action = new MoveCardToReviewV2();
