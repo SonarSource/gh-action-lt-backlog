@@ -11,36 +11,42 @@ const PullRequestActionV2_1 = require("../lib/PullRequestActionV2");
  *   2. set assignee
  */
 class MoveCardToReviewV2 extends PullRequestActionV2_1.PullRequestActionV2 {
-    async processReassignment(issueOrPR) {
+    async processReassignment(issueOrPR, columnId) {
         this.log(`processing reassignment for ${JSON.stringify(issueOrPR, null, 2)}`);
         if (issueOrPR.state.toLocaleLowerCase() === 'open') {
             const login = this.payload.requested_reviewer.login;
             const newUserId = await this.getUserId(login);
             if (login) {
-                await this.reassignIssueV2(issueOrPR, newUserId, issueOrPR.assignees.edges[0].node.id);
+                await this.reassignIssueV2(issueOrPR, newUserId, issueOrPR.assignees);
             }
             else { // Review requested from a group - keep it unassigned to raise a suspicion about the card
                 await this.removeAssignees(issueOrPR);
             }
+            this.changeColumn({
+                projectNumber: issueOrPR.project.number,
+                projectItemId: issueOrPR.projectItemId,
+                columnId,
+            });
         }
     }
-    async reassignIssueV2(issueOrPr, loginToAdd, loginToRemove) {
+    async reassignIssueV2(issueOrPr, loginToAdd, loginsToRemove) {
         this.log(`reassigning assignees: ${JSON.stringify({
             newUserId: loginToAdd,
-            oldUserId: loginToRemove,
+            oldUserIds: loginsToRemove,
             issueId: issueOrPr.id,
         }, null, 2)}`);
         const query = {
             query: `
-      mutation($newUserId: ID! $oldUserId: ID! $issueId: ID!) {
+      mutation($newUserId: ID! $oldUserIds: [ID!]! $issueId: ID!) {
         removeAssigneesFromAssignable(input: {
           assignableId: $issueId
-          assigneeIds: [$oldUserId]
+          assigneeIds: $oldUserIds
         }) {
           assignable {
             assignees(last: 1) {
               nodes {
                 name
+                login
               }
             }
           }
@@ -54,6 +60,7 @@ class MoveCardToReviewV2 extends PullRequestActionV2_1.PullRequestActionV2 {
             assignees(last: 10) {
               nodes {
                 name
+                login
               }
             }
           }
@@ -61,7 +68,7 @@ class MoveCardToReviewV2 extends PullRequestActionV2_1.PullRequestActionV2 {
       }
       `,
             newUserId: loginToAdd,
-            oldUserId: loginToRemove,
+            oldUserIds: loginsToRemove,
             issueId: issueOrPr.id,
         };
         const response = await this.sendGraphQL(query);
@@ -82,6 +89,97 @@ class MoveCardToReviewV2 extends PullRequestActionV2_1.PullRequestActionV2 {
         return id;
     }
     async removeAssignees(issue) {
+    }
+    async changeColumn(params) {
+        const { projectId, columnFieldId, } = await this.getColumnData({
+            projectNumber: params.projectNumber,
+            columnId: params.columnId,
+        });
+        const query = {
+            projectId,
+            projectItemId: params.projectItemId,
+            columnFieldId,
+            columnId: params.columnId,
+            query: `
+      mutation (
+        $projectId: ID!,
+        $projectItemId: ID!,
+        $columnFieldId: ID!,
+        $columnId: String!,
+      ) {
+        set_status: updateProjectV2ItemFieldValue(input: {
+          projectId: $projectId,
+          itemId: $projectItemId,
+          fieldId: $columnFieldId,
+          value: {
+            singleSelectOptionId: $columnId
+          }
+        }) {
+          projectV2Item {
+            id
+          }
+        }
+      }
+      `
+        };
+        const response = await this.sendGraphQL(query);
+        this.log('change column response');
+        this.logSerialized(response);
+    }
+    /**
+     * Based on the project number, returns the project data:
+     * {
+     *    projectId,
+     *    columnFieldId,
+     *    columnId,
+     * }
+     *
+     * Inspired from # https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/automating-projects-using-actions
+     *
+     * @param params
+     */
+    async getColumnData(params) {
+        const query = {
+            projectNumber: params.projectNumber,
+            query: `
+  query ($projectNumber: Int!){
+    user(login: "ilia-kebets-sonarsource") {
+      projectV2(number: $projectNumber) {
+        projectId: id
+        field(name: "Status") {
+          ... on ProjectV2SingleSelectField {
+            columnFieldId: id
+            columns: options {
+              columnId: id
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+        `,
+        };
+        const response = await this.sendGraphQL(query);
+        this.log('got project data');
+        this.logSerialized(response);
+        const { data: { user: { projectV2: { projectId, field: { columnFieldId, columns } } } } } = response;
+        const result = {
+            projectId,
+            columnFieldId,
+            columnId: params.columnId
+        };
+        if (!result.columnId) {
+            result.columnId = retrieveColumnId(columns, params.columnName);
+        }
+        return result;
+        function retrieveColumnId(columns, columnName) {
+            const column = columns.find(col => columnName === col.name);
+            if (!column) {
+                throw new Error(`column with name ${columnName} not found in project #${params.projectNumber}`);
+            }
+            return column.columnId;
+        }
     }
 }
 const action = new MoveCardToReviewV2();
