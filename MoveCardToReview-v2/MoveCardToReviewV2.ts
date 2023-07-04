@@ -1,15 +1,5 @@
 import { Issue, PullRequestActionV2 } from '../lib/PullRequestActionV2';
 
-/**
- * 1. move card
- *  1. column_id is known
- *  2. write mutation call
- *    params: issueId, user_id to remove, user_id to add
- * 2. change assignees
- *   1. remove assignee
- *   2. set assignee
- */
-
 class MoveCardToReviewV2 extends PullRequestActionV2 {
   protected async processReassignment(issueOrPR: Issue, columnId: string): Promise<void> {
     this.log(`processing reassignment for ${JSON.stringify(issueOrPR, null, 2)}`);
@@ -96,6 +86,10 @@ class MoveCardToReviewV2 extends PullRequestActionV2 {
 
   }
 
+  /**
+   * 
+   * @param params
+   */
   protected async changeColumn(params: {
     projectId: string,
     projectNumber: number,

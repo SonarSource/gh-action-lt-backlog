@@ -1,15 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const PullRequestActionV2_1 = require("../lib/PullRequestActionV2");
-/**
- * 1. move card
- *  1. column_id is known
- *  2. write mutation call
- *    params: issueId, user_id to remove, user_id to add
- * 2. change assignees
- *   1. remove assignee
- *   2. set assignee
- */
 class MoveCardToReviewV2 extends PullRequestActionV2_1.PullRequestActionV2 {
     async processReassignment(issueOrPR, columnId) {
         this.log(`processing reassignment for ${JSON.stringify(issueOrPR, null, 2)}`);
@@ -92,6 +83,10 @@ class MoveCardToReviewV2 extends PullRequestActionV2_1.PullRequestActionV2 {
     }
     async removeAssignees(issue) {
     }
+    /**
+     *
+     * @param params
+     */
     async changeColumn(params) {
         const query = {
             projectId: params.projectId,

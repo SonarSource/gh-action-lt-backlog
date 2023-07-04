@@ -53,9 +53,8 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
   protected abstract processReassignment(issueOrPR: Issue, columnId: string): Promise<void>;
 
   protected async execute(): Promise<void> {
-    const column_id = this.getInput('column-id');
-    const projectNumber = this.getInputNumber('project-number');
-    this.log(`retrieved col number ${column_id}`);
+    const columnId = this.getInput('column-id');
+    this.log(`retrieved col number ${columnId}`);
     //const project = ProjectContent.fromColumn(this, column_id);
 
     let isProcessPR = true;
@@ -63,10 +62,10 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
     const repo = this.payload.repository;
     const fixedIssues = this.fixedIssues(pr);
     for (const fixedIssue of fixedIssues) {
-      let linkedIssue = await this.getIssueV2(repo.name, repo.owner.login, fixedIssue, projectNumber);
+      let linkedIssue = await this.getIssueV2(repo.name, repo.owner.login, fixedIssue, columnId);
       if (linkedIssue) {
         isProcessPR = false;
-        await this.processIssue(column_id, linkedIssue);
+        await this.processIssue(columnId, linkedIssue);
       }
     }
    /*  if (isProcessPR) {
@@ -77,7 +76,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
     } */
   }
 
-  async getIssueV2(repositoryName: string, repositoryOwner: string, issueNumber: number, projectNumber: number): Promise<Issue> {
+  async getIssueV2(repositoryName: string, repositoryOwner: string, issueNumber: number, columnId: string): Promise<Issue> {
     const query = {
       query: `
       query ($repoName: String!, $owner: String!, $issueNumber: Int!) {
@@ -133,7 +132,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
     this.log(`retrieved issue`)
     this.logSerialized(issue);
 
-    const projectItem = findProjectItem(issue, projectNumber);
+    const projectItem = findProjectItem(issue, columnId);
     // remove extra layers
     issue.assignees = issue.assignees.edges.map(edge => edge.user);
     issue.projectItemId = projectItem.id;
@@ -143,10 +142,10 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
 
     return issue;
 
-    function findProjectItem(issue: any, projectNumber: number) {
-      const projectItem = issue.projectItems.nodes.find(projectItem => projectItem.project.number === projectNumber);
+    function findProjectItem(issue: any, columnId: string) {
+      const projectItem = issue.projectItems.nodes.find(projectItem => projectItem.project.props.columns.some(column => column.id === columnId));
       if (!projectItem) {
-        throw new Error(`Project item not found for issue ${issue.title} and project #${projectNumber}`);
+        throw new Error(`Project item not found for issue "${issue.title}" and columnId "${columnId}"`);
       }
       return projectItem;
     }
