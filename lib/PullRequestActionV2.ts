@@ -19,6 +19,11 @@ export type Issue = {
   project: {
     id: string;
     number: number;
+    columnFieldId: string;
+    columns: {
+      id: string;
+      name: string
+    }[]
   };
 }
 
@@ -75,7 +80,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
   async getIssueV2(repositoryName: string, repositoryOwner: string, issueNumber: number, projectNumber: number): Promise<Issue> {
     const query = {
       query: `
-      query ($repoName: String!, $owner: String!, $issueNumber: Int! ) {
+      query ($repoName: String!, $owner: String!, $issueNumber: Int!) {
         repository(name: $repoName, owner: $owner) {
           issue(number: $issueNumber) {
             title
@@ -86,7 +91,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
             url
             assignees(first: 10) {
               edges {
-                node {
+                user: node {
                   id
                   login
                 }
@@ -100,6 +105,15 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
                 project {
                   id
                   number
+                  props: field(name: "Status") {
+                    ... on ProjectV2SingleSelectField {
+                      columnFieldId: id
+                      columns: options {
+                        id
+                        name
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -121,9 +135,10 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
 
     const projectItem = findProjectItem(issue, projectNumber);
     // remove extra layers
-    issue.assignees = issue.assignees.edges.map(edge => edge.node);
+    issue.assignees = issue.assignees.edges.map(edge => edge.user);
     issue.projectItemId = projectItem.id;
     issue.project = projectItem.project;
+    issue.project = Object.assign(issue.project, issue.project.props);
     delete issue.projectItems;
 
     return issue;

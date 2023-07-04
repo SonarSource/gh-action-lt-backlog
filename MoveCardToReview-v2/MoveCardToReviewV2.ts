@@ -25,6 +25,8 @@ class MoveCardToReviewV2 extends PullRequestActionV2 {
         projectNumber: issueOrPR.project.number,
         projectItemId: issueOrPR.projectItemId,
         columnId,
+        projectId: issueOrPR.project.id,
+        columnFieldId: issueOrPR.project.columnFieldId,
       });
     }
   }
@@ -95,22 +97,17 @@ class MoveCardToReviewV2 extends PullRequestActionV2 {
   }
 
   protected async changeColumn(params: {
+    projectId: string,
     projectNumber: number,
     projectItemId: string,
-    columnId: string
+    columnId: string,
+    columnFieldId: string,
   }) {
-    const {
-      projectId,
-      columnFieldId,
-    } = await this.getColumnData({
-      projectNumber: params.projectNumber,
-      columnId: params.columnId,
-    });
 
     const query = {
-      projectId,
+      projectId: params.projectId,
       projectItemId: params.projectItemId,
-      columnFieldId,
+      columnFieldId: params.columnFieldId,
       columnId: params.columnId,
       query: `
       mutation (
@@ -137,68 +134,6 @@ class MoveCardToReviewV2 extends PullRequestActionV2 {
     const response = await this.sendGraphQL(query);
     this.log('change column response');
     this.logSerialized(response);
-  }
-
-  /**
-   * Based on the project number, returns the project data:
-   * {
-   *    projectId,
-   *    columnFieldId,
-   *    columnId,
-   * }
-   *
-   * Inspired from # https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/automating-projects-using-actions
-   *
-   * @param params
-   */
-  protected async getColumnData(params: { projectNumber: number, columnName?: string, columnId: string }) {
-    const query = {
-      projectNumber: params.projectNumber,
-      query: `
-  query ($projectNumber: Int!){
-    user(login: "ilia-kebets-sonarsource") {
-      projectV2(number: $projectNumber) {
-        projectId: id
-        field(name: "Status") {
-          ... on ProjectV2SingleSelectField {
-            columnFieldId: id
-            columns: options {
-              columnId: id
-              name
-            }
-          }
-        }
-      }
-    }
-  }
-        `,
-    };
-    const response = await this.sendGraphQL(query);
-    this.log('got project data');
-    this.logSerialized(response);
-    const { user: { projectV2: { projectId, field: { columnFieldId, columns } } } } = response;
-    const result = {
-      projectId,
-      columnFieldId,
-      columnId: params.columnId
-    }
-    if (!result.columnId) {
-      result.columnId = retrieveColumnId(columns, params.columnName);
-    }
-    return result;
-
-    type ColumnData = {
-      columnId: string,
-      name: string,
-    }
-
-    function retrieveColumnId(columns: ColumnData[], columnName: string) {
-      const column = columns.find(col => columnName === col.name);
-      if (!column) {
-        throw new Error(`column with name ${columnName} not found in project #${params.projectNumber}`);
-      }
-      return column.columnId;
-    }
   }
 }
 

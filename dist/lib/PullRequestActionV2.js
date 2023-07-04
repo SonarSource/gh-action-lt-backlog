@@ -50,7 +50,7 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
     async getIssueV2(repositoryName, repositoryOwner, issueNumber, projectNumber) {
         const query = {
             query: `
-      query ($repoName: String!, $owner: String!, $issueNumber: Int! ) {
+      query ($repoName: String!, $owner: String!, $issueNumber: Int!) {
         repository(name: $repoName, owner: $owner) {
           issue(number: $issueNumber) {
             title
@@ -61,7 +61,7 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
             url
             assignees(first: 10) {
               edges {
-                node {
+                user: node {
                   id
                   login
                 }
@@ -75,6 +75,15 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
                 project {
                   id
                   number
+                  props: field(name: "Status") {
+                    ... on ProjectV2SingleSelectField {
+                      columnFieldId: id
+                      columns: options {
+                        id
+                        name
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -95,9 +104,10 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         this.logSerialized(issue);
         const projectItem = findProjectItem(issue, projectNumber);
         // remove extra layers
-        issue.assignees = issue.assignees.edges.map(edge => edge.node);
+        issue.assignees = issue.assignees.edges.map(edge => edge.user);
         issue.projectItemId = projectItem.id;
         issue.project = projectItem.project;
+        issue.project = Object.assign(issue.project, issue.project.props);
         delete issue.projectItems;
         return issue;
         function findProjectItem(issue, projectNumber) {
