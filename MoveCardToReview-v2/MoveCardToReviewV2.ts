@@ -176,7 +176,7 @@ class MoveCardToReviewV2 extends PullRequestActionV2 {
     const response = await this.sendGraphQL(query);
     this.log('got project data');
     this.logSerialized(response);
-    const { data: { user: { projectV2: { projectId, field: { columnFieldId, columns } } } } } = response;
+    const { user: { projectV2: { projectId, field: { columnFieldId, columns } } } } = response;
     const result = {
       projectId,
       columnFieldId,
