@@ -110,7 +110,7 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
     }
     async processIssue(columnId, issueOrPR) {
         await this.processReassignment(issueOrPR);
-        if (issueOrPR.state === 'open') {
+        if (issueOrPR.state.toLocaleLowerCase() === 'open') {
             await this.changeColumn(issueOrPR.project.id, issueOrPR.projectItemId, columnId, issueOrPR.project.columnFieldId);
         }
     }

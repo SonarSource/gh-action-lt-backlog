@@ -164,7 +164,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
 
   protected async processIssue(columnId: string, issueOrPR: IssueOrPR): Promise<void> {
     await this.processReassignment(issueOrPR);
-    if (issueOrPR.state === 'open') {
+    if (issueOrPR.state.toLocaleLowerCase() === 'open') {
       await this.changeColumn(
         issueOrPR.project.id,
         issueOrPR.projectItemId,
