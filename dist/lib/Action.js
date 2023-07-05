@@ -18,8 +18,8 @@ class Action {
             core.setFailed(ex.message);
         }
     }
-    log(line) {
-        console.log(line);
+    log(...line) {
+        console.log(...line);
     }
     logSerialized(value) {
         console.log(this.serializeToString(value));

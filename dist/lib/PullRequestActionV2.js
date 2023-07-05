@@ -83,16 +83,18 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
             repositoryOwner,
             itemNumber,
         };
-        const { repository: { issue } } = await this.sendGraphQL(query);
+        const { repository } = await this.sendGraphQL(query);
+        const issueOrPr = repository[item];
         // remove extra layers
-        issue.assignees = issue.assignees.edges.map(edge => edge.user);
-        const projectItem = findProjectItem(issue, columnId);
-        issue.projectItemId = projectItem.id;
-        issue.project = projectItem.project;
+        issueOrPr.assignees = issueOrPr.assignees.edges.map(edge => edge.user);
+        const projectItem = findProjectItem(issueOrPr, columnId);
+        issueOrPr.projectItemId = projectItem.id;
+        issueOrPr.project = projectItem.project;
         // remove extra layers
-        issue.project = Object.assign(issue.project, issue.project.props);
-        delete issue.projectItems;
-        return issue;
+        issueOrPr.project = Object.assign(issueOrPr.project, issueOrPr.project.props);
+        delete issueOrPr.projectItems;
+        this.log('fetched PR: ', issueOrPr);
+        return issueOrPr;
         /**
          * Find the project item whose project contains the columnId we want to move it in
          *

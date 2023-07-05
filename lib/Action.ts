@@ -30,8 +30,8 @@ export abstract class Action {
     }
   }
 
-  public log(line: string) {
-    console.log(line);
+  public log(...line: string[]) {
+    console.log(...line);
   }
 
   public logSerialized(value: any) {
