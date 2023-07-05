@@ -11,25 +11,36 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         const repo = this.payload.repository;
         const fixedIssues = this.fixedIssues(pr);
         for (const fixedIssue of fixedIssues) {
-            let linkedIssue = await this.getIssueV2(repo.name, repo.owner.login, fixedIssue, columnId);
+            let linkedIssue = await this.getIssueOrPrV2(repo.name, repo.owner.login, fixedIssue, columnId);
             if (linkedIssue) {
                 isProcessPR = false;
                 await this.processIssue(columnId, linkedIssue);
             }
         }
-        /*  if (isProcessPR) {
-           const fullPR = await this.getPullRequest(pr.number);
-           if (fullPR) {
-             await this.processIssue(column_id, fullPR);
-           }
-         } */
+        if (isProcessPR) {
+            const fullPR = await this.getIssueOrPrV2(repo.name, repo.owner.login, pr.number, columnId, false);
+            if (fullPR) {
+                await this.processIssue(columnId, fullPR);
+            }
+        }
     }
-    async getIssueV2(repositoryName, repositoryOwner, issueNumber, columnId) {
+    /**
+     * Retrieves the Issue or Pull Request and all its data as defined by its type
+     *
+     * @param repositoryName eg.: SonarJS
+     * @param repositoryOwner eg.: SonarSource
+     * @param itemNumber the issue or PR number, available in the URL like: https://github.com/SonarSource/SonarJS/pull/3
+     * @param columnId
+     * @param isIssue fetches issue if true, otherwise pull request
+     * @returns
+     */
+    async getIssueOrPrV2(repositoryName, repositoryOwner, itemNumber, columnId, isIssue = true) {
+        const item = isIssue ? 'issue' : 'pullRequest';
         const query = {
             query: `
-      query ($repoName: String!, $owner: String!, $issueNumber: Int!) {
-        repository(name: $repoName, owner: $owner) {
-          issue(number: $issueNumber) {
+      query ($repositoryName: String!, $repositoryOwner: String!, $itemNumber: Int!) {
+        repository(name: $repositoryName, owner: $repositoryOwner) {
+          ${item}(number: $itemNumber) {
             title
             createdAt
             id
@@ -68,9 +79,9 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         }
       }
       `,
-            repoName: repositoryName,
-            owner: repositoryOwner,
-            issueNumber,
+            repositoryName,
+            repositoryOwner,
+            itemNumber,
         };
         const { repository: { issue } } = await this.sendGraphQL(query);
         // remove extra layers
@@ -78,9 +89,17 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         const projectItem = findProjectItem(issue, columnId);
         issue.projectItemId = projectItem.id;
         issue.project = projectItem.project;
+        // remove extra layers
         issue.project = Object.assign(issue.project, issue.project.props);
         delete issue.projectItems;
         return issue;
+        /**
+         * Find the project item whose project contains the columnId we want to move it in
+         *
+         * @param issue
+         * @param columnId
+         * @returns
+         */
         function findProjectItem(issue, columnId) {
             const projectItem = issue.projectItems.nodes.find(projectItem => projectItem.project.props.columns.some(column => column.id === columnId));
             if (!projectItem) {

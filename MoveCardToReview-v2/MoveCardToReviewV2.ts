@@ -1,7 +1,7 @@
-import { Issue, PullRequestActionV2 } from '../lib/PullRequestActionV2';
+import { IssueOrPR, PullRequestActionV2 } from '../lib/PullRequestActionV2';
 
 class MoveCardToReviewV2 extends PullRequestActionV2 {
-  protected async processReassignment(issueOrPR: Issue, columnId: string): Promise<void> {
+  protected async processReassignment(issueOrPR: IssueOrPR, columnId: string): Promise<void> {
     if (issueOrPR.state.toLocaleLowerCase() === 'open') {
       const login = this.payload.requested_reviewer.login;
       const newUserId = await this.getUserId(login);
@@ -31,7 +31,7 @@ class MoveCardToReviewV2 extends PullRequestActionV2 {
    * @param newUserId
    * @param oldUserIds
    */
-  protected async reassignIssueV2(issueOrPr: Issue, newUserId: string, oldUserIds: string[]) {
+  protected async reassignIssueV2(issueOrPr: IssueOrPR, newUserId: string, oldUserIds: string[]) {
     const query = {
       query: `
       mutation($newUserId: ID! $oldUserIds: [ID!]! $issueId: ID!) {
