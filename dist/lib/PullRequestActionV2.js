@@ -85,16 +85,13 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         };
         const { repository } = await this.sendGraphQL(query);
         const issueOrPr = repository[item];
-        this.log('retrieved', JSON.stringify(issueOrPr, null, 2));
-        // remove extra layers
-        issueOrPr.assignees = issueOrPr.assignees.edges.map(edge => edge.user);
         const projectItem = findProjectItem(issueOrPr, columnId);
         issueOrPr.projectItemId = projectItem.id;
         issueOrPr.project = projectItem.project;
         // remove extra layers
         issueOrPr.project = Object.assign(issueOrPr.project, issueOrPr.project.props);
+        issueOrPr.assignees = issueOrPr.assignees.edges.map(edge => edge.user);
         delete issueOrPr.projectItems;
-        this.log('fetched PR: ', issueOrPr);
         return issueOrPr;
         /**
          * Find the project item whose project contains the columnId we want to move it in
@@ -112,10 +109,48 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         }
     }
     async processIssue(columnId, issueOrPR) {
-        await this.processReassignment(issueOrPR, columnId);
+        await this.processReassignment(issueOrPR);
         if (issueOrPR.state === 'open') {
-            //await project.moveOrCreateCard(issueOrPR, column_id);
+            await this.changeColumn(issueOrPR.project.id, issueOrPR.projectItemId, columnId, issueOrPR.project.columnFieldId);
         }
+    }
+    /**
+     * Changes column for a projectV2 item
+     *
+     * @param projectId
+     * @param projectItemId
+     * @param columnId
+     * @param columnFieldId
+     */
+    async changeColumn(projectId, projectItemId, columnId, columnFieldId) {
+        const query = {
+            projectId,
+            projectItemId,
+            columnFieldId,
+            columnId,
+            query: `
+      mutation (
+        $projectId: ID!,
+        $projectItemId: ID!,
+        $columnFieldId: ID!,
+        $columnId: String!,
+      ) {
+        set_status: updateProjectV2ItemFieldValue(input: {
+          projectId: $projectId,
+          itemId: $projectItemId,
+          fieldId: $columnFieldId,
+          value: {
+            singleSelectOptionId: $columnId
+          }
+        }) {
+          projectV2Item {
+            id
+          }
+        }
+      }
+      `,
+        };
+        await this.sendGraphQL(query);
     }
 }
 exports.PullRequestActionV2 = PullRequestActionV2;

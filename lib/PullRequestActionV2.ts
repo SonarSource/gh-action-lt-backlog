@@ -28,7 +28,7 @@ export type IssueOrPR = {
 };
 
 export abstract class PullRequestActionV2 extends GraphQLAction {
-  protected abstract processReassignment(issueOrPR: IssueOrPR, columnId: string): Promise<void>;
+  protected abstract processReassignment(issueOrPR: IssueOrPR): Promise<void>;
 
   protected async execute(): Promise<void> {
     const columnId = this.getInput('column-id');
@@ -39,18 +39,29 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
     const repo = this.payload.repository;
     const fixedIssues = this.fixedIssues(pr);
     for (const fixedIssue of fixedIssues) {
-      let linkedIssue = await this.getIssueOrPrV2(repo.name, repo.owner.login, fixedIssue, columnId);
+      let linkedIssue = await this.getIssueOrPrV2(
+        repo.name,
+        repo.owner.login,
+        fixedIssue,
+        columnId,
+      );
       if (linkedIssue) {
         isProcessPR = false;
         await this.processIssue(columnId, linkedIssue);
       }
     }
-     if (isProcessPR) {
-       const fullPR = await this.getIssueOrPrV2(repo.name, repo.owner.login, pr.number, columnId, false);
-       if (fullPR) {
-         await this.processIssue(columnId, fullPR);
-       }
-     }
+    if (isProcessPR) {
+      const fullPR = await this.getIssueOrPrV2(
+        repo.name,
+        repo.owner.login,
+        pr.number,
+        columnId,
+        false,
+      );
+      if (fullPR) {
+        await this.processIssue(columnId, fullPR);
+      }
+    }
   }
 
   /**
@@ -120,16 +131,15 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
     };
     const { repository } = await this.sendGraphQL(query);
     const issueOrPr = repository[item];
-    this.log('retrieved', JSON.stringify(issueOrPr, null, 2));
-    // remove extra layers
-    issueOrPr.assignees = issueOrPr.assignees.edges.map(edge => edge.user);
+
     const projectItem = findProjectItem(issueOrPr, columnId);
     issueOrPr.projectItemId = projectItem.id;
     issueOrPr.project = projectItem.project;
     // remove extra layers
     issueOrPr.project = Object.assign(issueOrPr.project, issueOrPr.project.props);
+    issueOrPr.assignees = issueOrPr.assignees.edges.map(edge => edge.user);
     delete issueOrPr.projectItems;
-    this.log('fetched PR: ', issueOrPr)
+
     return issueOrPr;
 
     /**
@@ -153,9 +163,58 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
   }
 
   protected async processIssue(columnId: string, issueOrPR: IssueOrPR): Promise<void> {
-    await this.processReassignment(issueOrPR, columnId);
+    await this.processReassignment(issueOrPR);
     if (issueOrPR.state === 'open') {
-      //await project.moveOrCreateCard(issueOrPR, column_id);
+      await this.changeColumn(
+        issueOrPR.project.id,
+        issueOrPR.projectItemId,
+        columnId,
+        issueOrPR.project.columnFieldId,
+      );
     }
+  }
+
+  /**
+   * Changes column for a projectV2 item
+   *
+   * @param projectId
+   * @param projectItemId
+   * @param columnId
+   * @param columnFieldId
+   */
+  protected async changeColumn(
+    projectId: string,
+    projectItemId: string,
+    columnId: string,
+    columnFieldId: string,
+  ) {
+    const query = {
+      projectId,
+      projectItemId,
+      columnFieldId,
+      columnId,
+      query: `
+      mutation (
+        $projectId: ID!,
+        $projectItemId: ID!,
+        $columnFieldId: ID!,
+        $columnId: String!,
+      ) {
+        set_status: updateProjectV2ItemFieldValue(input: {
+          projectId: $projectId,
+          itemId: $projectItemId,
+          fieldId: $columnFieldId,
+          value: {
+            singleSelectOptionId: $columnId
+          }
+        }) {
+          projectV2Item {
+            id
+          }
+        }
+      }
+      `,
+    };
+    await this.sendGraphQL(query);
   }
 }

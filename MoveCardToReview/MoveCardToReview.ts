@@ -7,7 +7,8 @@ class MoveCardToReview extends PullRequestAction {
       const login = this.payload.requested_reviewer.login;
       if (login) {
         await this.reassignIssue(issueOrPR, login);
-      } else {  // Review requested from a group - keep it unassigned to raise a suspicion about the card
+      } else {
+        // Review requested from a group - keep it unassigned to raise a suspicion about the card
         await this.removeAssignees(issueOrPR);
       }
     }
