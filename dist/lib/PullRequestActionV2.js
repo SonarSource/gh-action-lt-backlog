@@ -6,7 +6,7 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
     async execute() {
         const columnId = this.getInput('column-id');
         const projectNumber = this.getInputNumber('project-number');
-        const isOrg = parseIsOrg();
+        const isOrg = false;
         let isProcessPR = true;
         const pr = this.payload.pull_request;
         const repo = this.payload.repository;

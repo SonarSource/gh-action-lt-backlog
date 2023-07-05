@@ -33,7 +33,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
   protected async execute(): Promise<void> {
     const columnId = this.getInput('column-id');
     const projectNumber = this.getInputNumber('project-number');
-    const isOrg = parseIsOrg();
+    const isOrg = false;
 
     let isProcessPR = true;
     const pr = this.payload.pull_request;
