@@ -5,6 +5,8 @@ const GraphQLAction_1 = require("./GraphQLAction");
 class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
     async execute() {
         const columnId = this.getInput('column-id');
+        const projectId = this.getInputNumber('project-id');
+        const isOrg = parseIsOrg();
         let isProcessPR = true;
         const pr = this.payload.pull_request;
         const repo = this.payload.repository;
@@ -13,13 +15,22 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
             let linkedIssue = await this.getIssueOrPrV2(repo.name, repo.owner.login, fixedIssue, columnId);
             if (linkedIssue) {
                 isProcessPR = false;
-                await this.processIssue(columnId, linkedIssue);
+                await this.processIssue(columnId, linkedIssue, repo.owner.login, projectId, isOrg);
             }
         }
         if (isProcessPR) {
             const fullPR = await this.getIssueOrPrV2(repo.name, repo.owner.login, pr.number, columnId, false);
             if (fullPR) {
-                await this.processIssue(columnId, fullPR);
+                await this.processIssue(columnId, fullPR, repo.owner.login, projectId, isOrg);
+            }
+        }
+        function parseIsOrg() {
+            const isOrg = this.getInput('is-org');
+            if (isOrg && Boolean(isOrg)) {
+                return true;
+            }
+            else {
+                return false;
             }
         }
     }
@@ -85,8 +96,10 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         const { repository } = await this.sendGraphQL(query);
         const issueOrPr = repository[item];
         const projectItem = findProjectItem(issueOrPr, columnId);
-        issueOrPr.projectItemId = projectItem.id;
-        issueOrPr.project = projectItem.project;
+        if (projectItem) {
+            issueOrPr.projectItemId = projectItem.id;
+            issueOrPr.project = projectItem.project;
+        }
         // remove extra layers
         issueOrPr.project = Object.assign(issueOrPr.project, issueOrPr.project.props);
         issueOrPr.assignees = issueOrPr.assignees.edges.map(edge => edge.user);
@@ -102,16 +115,99 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         function findProjectItem(issue, columnId) {
             const projectItem = issue.projectItems.nodes.find(projectItem => projectItem.project.props.columns.some(column => column.id === columnId));
             if (!projectItem) {
-                throw new Error(`Project item not found for issue "${issue.title}" and columnId "${columnId}"`);
+                this.log(`Project item not found for issue "${issue.title}" and columnId "${columnId}"`);
             }
             return projectItem;
         }
     }
-    async processIssue(columnId, issueOrPR) {
+    async processIssue(columnId, issueOrPR, repoOwner, projectNumber, isOrg) {
         await this.processReassignment(issueOrPR);
         if (issueOrPR.state.toLocaleLowerCase() === 'open') {
-            await this.changeColumn(issueOrPR.project.id, issueOrPR.projectItemId, columnId, issueOrPR.project.columnFieldId);
+            await this.moveOrCreateCardV2(issueOrPR, columnId, repoOwner, projectNumber, isOrg);
         }
+    }
+    /**
+     * If the card is already part of the porject, simply moves it to columnId
+     * Otherwise,
+     *  - fetches project data
+     *  - creates a project card for the PR
+     *  - moves the card to columnId
+     *
+     * @param issueOrPR
+     * @param columnId
+     * @param repoOwner
+     * @param projectNumber
+     * @param isOrg
+     */
+    async moveOrCreateCardV2(issueOrPR, columnId, repoOwner, projectNumber, isOrg) {
+        if (!issueOrPR.project) {
+            issueOrPR.project = await this.getProjectDataV2(repoOwner, projectNumber, isOrg);
+            issueOrPR.projectItemId = await this.createCardV2(issueOrPR, issueOrPR.project.id);
+        }
+        await this.changeColumn(issueOrPR.project.id, issueOrPR.projectItemId, columnId, issueOrPR.project.columnFieldId);
+    }
+    /**
+     * Creates a card for the project
+     *
+     * @param issueOrPr
+     * @param projectId
+     * @returns the projectItemId
+     */
+    async createCardV2(issueOrPr, projectId) {
+        const query = {
+            pullRequestId: issueOrPr.id,
+            projectId,
+            query: `
+      mutation($pullRequestId: ID! $projectId: ID!) {
+        addProjectV2ItemById(input: { contentId: $pullRequestId, projectId: $projectId }) {
+          item {
+            id
+            content {
+              ... on PullRequest {
+                title
+              }
+            }
+          }
+        }
+      }
+      `
+        };
+        const response = await this.sendGraphQL(query);
+        return response.addProjectV2ItemById.item.id;
+    }
+    async getProjectDataV2(owner, projectNumber, isOrg) {
+        const ownerType = isOrg ? 'organization' : 'user';
+        const query = {
+            owner,
+            projectNumber,
+            query: `
+      query ($owner: String!, $projectNumber: Int!) {
+        ${ownerType}(login: $owner) {
+          projectV2(number: $projectNumber) {
+            id
+            field(name: "Status") {
+              ... on ProjectV2SingleSelectField {
+                columnFieldId: id
+                columns: options {
+                  id
+                  name
+                }
+              }
+            }
+          }
+        }
+      }
+
+      `,
+        };
+        const response = await this.sendGraphQL(query);
+        const project = response[ownerType].projectV2;
+        return {
+            id: project.id,
+            columnFieldId: project.field.columnFieldId,
+            columns: project.columns,
+            number: projectNumber,
+        };
     }
     /**
      * Changes column for a projectV2 item
