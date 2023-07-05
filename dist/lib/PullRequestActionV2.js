@@ -99,9 +99,10 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         if (projectItem) {
             issueOrPr.projectItemId = projectItem.id;
             issueOrPr.project = projectItem.project;
+            // remove extra layers
+            issueOrPr.project = Object.assign(issueOrPr.project, issueOrPr.project.props);
         }
         // remove extra layers
-        issueOrPr.project = Object.assign(issueOrPr.project, issueOrPr.project.props);
         issueOrPr.assignees = issueOrPr.assignees.edges.map(edge => edge.user);
         delete issueOrPr.projectItems;
         return issueOrPr;
