@@ -32,7 +32,6 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
 
   protected async execute(): Promise<void> {
     const columnId = this.getInput('column-id');
-    //const project = ProjectContent.fromColumn(this, column_id);
 
     let isProcessPR = true;
     const pr = this.payload.pull_request;
@@ -176,6 +175,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
 
   /**
    * Changes column for a projectV2 item
+   * inspired from # https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/automating-projects-using-actions
    *
    * @param projectId
    * @param projectItemId
@@ -200,7 +200,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
         $columnFieldId: ID!,
         $columnId: String!,
       ) {
-        set_status: updateProjectV2ItemFieldValue(input: {
+        updateProjectV2ItemFieldValue(input: {
           projectId: $projectId,
           itemId: $projectItemId,
           fieldId: $columnFieldId,

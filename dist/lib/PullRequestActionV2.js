@@ -5,7 +5,6 @@ const GraphQLAction_1 = require("./GraphQLAction");
 class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
     async execute() {
         const columnId = this.getInput('column-id');
-        //const project = ProjectContent.fromColumn(this, column_id);
         let isProcessPR = true;
         const pr = this.payload.pull_request;
         const repo = this.payload.repository;
@@ -116,6 +115,7 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
     }
     /**
      * Changes column for a projectV2 item
+     * inspired from # https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/automating-projects-using-actions
      *
      * @param projectId
      * @param projectItemId
@@ -135,7 +135,7 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         $columnFieldId: ID!,
         $columnId: String!,
       ) {
-        set_status: updateProjectV2ItemFieldValue(input: {
+        updateProjectV2ItemFieldValue(input: {
           projectId: $projectId,
           itemId: $projectItemId,
           fieldId: $columnFieldId,
