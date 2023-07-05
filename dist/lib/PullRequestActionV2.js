@@ -115,7 +115,7 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         function findProjectItem(issue, columnId) {
             const projectItem = issue.projectItems.nodes.find(projectItem => projectItem.project.props.columns.some(column => column.id === columnId));
             if (!projectItem) {
-                this.log(`Project item not found for issue "${issue.title}" and columnId "${columnId}"`);
+                console.log(`Project item not found for issue "${issue.title}" and columnId "${columnId}"`);
             }
             return projectItem;
         }

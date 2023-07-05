@@ -168,7 +168,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
         projectItem.project.props.columns.some(column => column.id === columnId),
       );
       if (!projectItem) {
-        this.log(
+        console.log(
           `Project item not found for issue "${issue.title}" and columnId "${columnId}"`,
         );
       }
