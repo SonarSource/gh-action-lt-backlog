@@ -32,7 +32,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
 
   protected async execute(): Promise<void> {
     const columnId = this.getInput('column-id');
-    const projectId = this.getInputNumber('project-id');
+    const projectNumber = this.getInputNumber('project-number');
     const isOrg = parseIsOrg();
 
     let isProcessPR = true;
@@ -48,7 +48,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
       );
       if (linkedIssue) {
         isProcessPR = false;
-        await this.processIssue(columnId, linkedIssue, repo.owner.login, projectId, isOrg);
+        await this.processIssue(columnId, linkedIssue, repo.owner.login, projectNumber, isOrg);
       }
     }
     if (isProcessPR) {
@@ -60,17 +60,18 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
         false,
       );
       if (fullPR) {
-        await this.processIssue(columnId, fullPR, repo.owner.login, projectId, isOrg);
+        await this.processIssue(columnId, fullPR, repo.owner.login, projectNumber, isOrg);
       }
     }
 
+    /**
+     * Defaults to true
+     *
+     * @returns
+     */
     function parseIsOrg() {
       const isOrg = this.getInput('is-org');
-      if (isOrg && Boolean(isOrg)) {
-        return true;
-      } else {
-        return false;
-      }
+      return !isOrg || Boolean(isOrg);
     }
   }
 

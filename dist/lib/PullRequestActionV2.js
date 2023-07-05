@@ -5,7 +5,7 @@ const GraphQLAction_1 = require("./GraphQLAction");
 class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
     async execute() {
         const columnId = this.getInput('column-id');
-        const projectId = this.getInputNumber('project-id');
+        const projectNumber = this.getInputNumber('project-number');
         const isOrg = parseIsOrg();
         let isProcessPR = true;
         const pr = this.payload.pull_request;
@@ -15,23 +15,23 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
             let linkedIssue = await this.getIssueOrPrV2(repo.name, repo.owner.login, fixedIssue, columnId);
             if (linkedIssue) {
                 isProcessPR = false;
-                await this.processIssue(columnId, linkedIssue, repo.owner.login, projectId, isOrg);
+                await this.processIssue(columnId, linkedIssue, repo.owner.login, projectNumber, isOrg);
             }
         }
         if (isProcessPR) {
             const fullPR = await this.getIssueOrPrV2(repo.name, repo.owner.login, pr.number, columnId, false);
             if (fullPR) {
-                await this.processIssue(columnId, fullPR, repo.owner.login, projectId, isOrg);
+                await this.processIssue(columnId, fullPR, repo.owner.login, projectNumber, isOrg);
             }
         }
+        /**
+         * Defaults to true
+         *
+         * @returns
+         */
         function parseIsOrg() {
             const isOrg = this.getInput('is-org');
-            if (isOrg && Boolean(isOrg)) {
-                return true;
-            }
-            else {
-                return false;
-            }
+            return !isOrg || Boolean(isOrg);
         }
     }
     /**
