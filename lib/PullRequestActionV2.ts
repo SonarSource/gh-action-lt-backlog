@@ -6,7 +6,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
   protected async execute(): Promise<void> {
     const columnId = this.getInput('column-id');
     const projectNumber = this.getInputNumber('project-number');
-    const isOrg = parseIsOrg();
+    const isOrg = parseIsOrg(this.getInput('is-org'));
     console.log('walala', columnId, projectNumber, isOrg)
 
     let isProcessPR = true;
@@ -43,8 +43,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
      *
      * @returns
      */
-    function parseIsOrg() {
-      const isOrg = this.getInput('is-org');
+    function parseIsOrg(isOrg) {
       return !isOrg || (isOrg === 'true');
     }
   }
