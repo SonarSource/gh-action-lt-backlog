@@ -86,6 +86,7 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
         // remove extra layers
         issueOrPr.assignees = issueOrPr.assignees.edges.map(edge => edge.user);
         delete issueOrPr.projectItems;
+        console.log('returnin issueorpr', issueOrPr);
         return issueOrPr;
         /**
          * Find the project item whose project contains the columnId we want to move it in
@@ -184,6 +185,7 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
 
     `,
         };
+        console.log('fetchin project wid', query.query);
         const response = await this.sendGraphQL(query);
         const project = response[ownerType].projectV2;
         return {

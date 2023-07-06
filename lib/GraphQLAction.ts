@@ -124,7 +124,7 @@ export abstract class GraphQLAction extends OctokitAction {
     // remove extra layers
     issueOrPr.assignees = issueOrPr.assignees.edges.map(edge => edge.user);
     delete issueOrPr.projectItems;
-
+    console.log('returnin issueorpr', issueOrPr);
     return issueOrPr;
 
     /**
@@ -162,6 +162,7 @@ export abstract class GraphQLAction extends OctokitAction {
    */
   async moveOrCreateCardV2(issueOrPR: IssueOrPR, columnId: string, repoOwner: string, projectNumber: number, isOrg: boolean): Promise<void> {
     if (!issueOrPR.project) {
+
       issueOrPR.project = await this.getProjectDataV2(repoOwner, projectNumber, isOrg);
       issueOrPR.projectItemId = await this.createCardV2(issueOrPR, issueOrPR.project.id);
     }
@@ -237,6 +238,7 @@ export abstract class GraphQLAction extends OctokitAction {
 
     `,
     };
+    console.log('fetchin project wid', query.query);
     const response = await this.sendGraphQL(query);
     const project = response[ownerType].projectV2;
     return {
