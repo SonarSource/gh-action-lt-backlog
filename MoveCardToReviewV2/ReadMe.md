@@ -46,7 +46,7 @@ jobs:
         github.event.pull_request.head.repo.full_name == github.repository
         && github.event.review.author_association != 'NONE'
     steps:
-      - uses: sonarsource/gh-action-lt-backlog/MoveCardToReview-v2@v1
+      - uses: sonarsource/gh-action-lt-backlog/MoveCardToReviewV2@v1
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           column-id: "9b76wgdbaw"     # Kanban "Review in progress" column
