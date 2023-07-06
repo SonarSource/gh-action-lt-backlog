@@ -86,7 +86,6 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
         // remove extra layers
         issueOrPr.assignees = issueOrPr.assignees.edges.map(edge => edge.user);
         delete issueOrPr.projectItems;
-        console.log('returnin issueorpr', issueOrPr);
         return issueOrPr;
         /**
          * Find the project item whose project contains the columnId we want to move it in
@@ -118,7 +117,6 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
      */
     async moveOrCreateCardV2(issueOrPR, columnId, repoOwner, projectNumber, isOrg) {
         if (!issueOrPR.project) {
-            console.log('callin move or create card for', arguments);
             issueOrPR.project = await this.getProjectDataV2(repoOwner, projectNumber, isOrg);
             issueOrPR.projectItemId = await this.createCardV2(issueOrPR, issueOrPR.project.id);
         }
@@ -186,7 +184,6 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
 
     `,
         };
-        console.log('fetchin project wid', query.query);
         const response = await this.sendGraphQL(query);
         const project = response[ownerType].projectV2;
         return {
@@ -317,7 +314,6 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
             oldUserIds,
             issueOrPrId: issueOrPr.id,
         };
-        console.log('reassigning', query.query);
         await this.sendGraphQL(query);
     }
 }
