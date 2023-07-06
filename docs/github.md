@@ -24,7 +24,7 @@ Or set it as a `Authorization` header in [GraphiQL](https://github.com/graphql/g
 bearer YOUR_GITHUB_PERSONAL_TOKEN
 ```
 
-## Find data Projects V2
+## Find data for Projects V2
 
 ### Find project number
 
