@@ -15,4 +15,4 @@ inputs:
     required: false
 runs:
   using: 'node16'
-  main: '../dist/MoveCardAfterReview-v2/MoveCardAfterReviewV2.js'
+  main: '../dist/MoveCardAfterReviewV2/MoveCardAfterReviewV2.js'
