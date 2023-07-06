@@ -18,7 +18,7 @@ Save it in your shell like this:
 TOKEN=YOUR_GITHUB_PERSONAL_TOKEN
 ```
 
-Or set it as a `Authorization` header in GraphiQL (in every tag) like this:
+Or set it as a `Authorization` header in [GraphiQL](https://github.com/graphql/graphiql) like this:
 
 ```
 bearer YOUR_GITHUB_PERSONAL_TOKEN
@@ -35,23 +35,16 @@ The organisation is `SonarSource`.
 To get the column ids, use the following query:
 
 ```graphql
-query ($org: String!, $number: Int!) {
+query ($org: String!, $projectNumber: Int!) {
   organization(login: $org) {
-    projectV2(number: $number) {
+    projectV2(number: $projectNumber) {
       id
-      fields(first: 20) {
-        nodes {
-          ... on ProjectV2Field {
+      field(name: "Status") {
+        ... on ProjectV2SingleSelectField {
+          columnFieldId: id
+          columns: options {
             id
             name
-          }
-          ... on ProjectV2SingleSelectField {
-            id
-            name
-            options {
-              id
-              name
-            }
           }
         }
       }
@@ -61,11 +54,13 @@ query ($org: String!, $number: Int!) {
 
 {
   "org": "SonarSource",
-  "number": 8
+  "projectNumber": 8
 }
 ```
 
 [docs](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects#finding-the-node-id-of-an-organization-project)
 
+## Find column id for Projects (classic)
 
+Copy the column link and retrieve the id from the end of the URL
 
