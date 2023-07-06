@@ -24,13 +24,15 @@ Or set it as a `Authorization` header in [GraphiQL](https://github.com/graphql/g
 bearer YOUR_GITHUB_PERSONAL_TOKEN
 ```
 
-## Find column id for Projects V2
+## Find data Projects V2
 
 ### Find project number
 
 The project number is available in the URL of your project as: https://github.com/orgs/SonarSource/projects/NUMBER
 
 The organisation is `SonarSource`.
+
+### Find the project id
 
 To get the column ids, use the following query:
 
