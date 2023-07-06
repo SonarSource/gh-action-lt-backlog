@@ -7,11 +7,11 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         const columnId = this.getInput('column-id');
         const projectNumber = this.getInputNumber('project-number');
         const isOrg = parseIsOrg(this.getInput('is-org'));
-        console.log('walala', columnId, projectNumber, isOrg);
         let isProcessPR = true;
         const pr = this.payload.pull_request;
         const repo = this.payload.repository;
         const fixedIssues = this.fixedIssues(pr);
+        console.log('repo.owner', repo.owner);
         for (const fixedIssue of fixedIssues) {
             let linkedIssue = await this.getIssueOrPrV2(repo.name, repo.owner.login, fixedIssue, columnId);
             if (linkedIssue) {
