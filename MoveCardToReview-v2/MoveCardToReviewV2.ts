@@ -1,4 +1,5 @@
-import { IssueOrPR, PullRequestActionV2 } from '../lib/PullRequestActionV2';
+import { IssueOrPR } from '../lib/GraphQLAction';
+import { PullRequestActionV2 } from '../lib/PullRequestActionV2';
 
 class MoveCardToReviewV2 extends PullRequestActionV2 {
   protected async processReassignment(issueOrPR: IssueOrPR): Promise<void> {
@@ -13,95 +14,6 @@ class MoveCardToReviewV2 extends PullRequestActionV2 {
         await this.removeAssigneesV2(issueOrPR, oldUserIds);
       }
     }
-  }
-
-  /**
-   * Reassign issue from oldUserIds to newUserId
-   *
-   * @param issueOrPr
-   * @param newUserId
-   * @param oldUserIds
-   */
-  protected async reassignIssueV2(issueOrPr: IssueOrPR, newUserId: string, oldUserIds: string[]) {
-    const query = {
-      query: `
-      mutation($newUserId: ID! $oldUserIds: [ID!]! $issueOrPrId: ID!) {
-        removeAssigneesFromAssignable(input: {
-          assignableId: $issueOrPrId
-          assigneeIds: $oldUserIds
-        }) {
-          assignable {
-            assignees(last: 1) {
-              nodes {
-                name
-                login
-              }
-            }
-          }
-        }
-        addAssigneesToAssignable(input: {
-          assignableId: $issueOrPrId
-          assigneeIds: [$newUserId]
-          clientMutationId: "gh action"
-        }) {
-          assignable {
-            assignees(last: 10) {
-              nodes {
-                name
-                login
-              }
-            }
-          }
-        }
-      }
-      `,
-      newUserId,
-      oldUserIds,
-      issueOrPrId: issueOrPr.id,
-    };
-    await this.sendGraphQL(query);
-  }
-
-  protected async getUserId(login: string) {
-    const query = {
-      query: `
-      query($username: String!) {
-        user(login: $username) {
-          id
-        }
-      }
-      `,
-      username: login,
-    };
-    const {
-      user: { id },
-    } = await this.sendGraphQL(query);
-    return id;
-  }
-
-  protected async removeAssigneesV2(issueOrPr: IssueOrPR, oldUserIds: string[]): Promise<void> {
-    const query = {
-      query: `
-      mutation($oldUserIds: [ID!]! $issueOrPrId: ID!) {
-        removeAssigneesFromAssignable(input: {
-          assignableId: $issueOrPrId
-          assigneeIds: $oldUserIds
-        }) {
-          assignable {
-            assignees(last: 1) {
-              nodes {
-                name
-                login
-              }
-            }
-          }
-        }
-      }
-      `,
-      oldUserIds,
-      issueOrPrId: issueOrPr.id,
-    };
-    await this.sendGraphQL(query);
   }
 }
 
