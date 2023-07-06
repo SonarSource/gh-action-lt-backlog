@@ -380,6 +380,7 @@ export abstract class GraphQLAction extends OctokitAction {
       oldUserIds,
       issueOrPrId: issueOrPr.id,
     };
+    console.log('reassigning', query.query);
     await this.sendGraphQL(query);
   }
 }

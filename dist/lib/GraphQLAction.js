@@ -317,6 +317,7 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
             oldUserIds,
             issueOrPrId: issueOrPr.id,
         };
+        console.log('reassigning', query.query);
         await this.sendGraphQL(query);
     }
 }
