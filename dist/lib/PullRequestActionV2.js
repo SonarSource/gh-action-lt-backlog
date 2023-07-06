@@ -7,6 +7,7 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
         const columnId = this.getInput('column-id');
         const projectNumber = this.getInputNumber('project-number');
         const isOrg = parseIsOrg();
+        console.log('walala', columnId, projectNumber, isOrg);
         let isProcessPR = true;
         const pr = this.payload.pull_request;
         const repo = this.payload.repository;
