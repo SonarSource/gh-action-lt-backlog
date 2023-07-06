@@ -1,10 +1,10 @@
 # MoveCardAfterReview - V2
 
-Assign fixed issue or PR card to PR author and move the card to the `In Progress` or `Review approved` column.
+Assign a fixed issue or a PR card to the PR author and move the card to the `In Progress` or `Review approved` column.
 
-If relevant card does not exist, a new one is created in the selected GitHub project column.
+If the relevant card does not exist, a new one is created in the selected GitHub project column.
 
-When PR contains one or more `Fixes #...` in the description, all referenced issues are moved. Otherwise, card for the standalone PR itself is moved.
+When PR contains one or more `Fixes #...` in the description, all referenced issues are moved. Otherwise, the card for the standalone PR itself is moved.
 
 ## Inputs
 
@@ -15,6 +15,14 @@ Token to access GitHub API.
 ### `column-id`
 
 ID of the Kanban column where the card should be moved to. Typically ID of `In progress` or `Review approved` column.
+
+### `project-number`
+
+Number of the project where the column is. [This page](docs/github.md) explains how this can be obtained.
+
+### `is-org`
+
+Optional parameter, set to `false` in case you wish to use this action in a repository that belongs to a user.
 
 ## Outputs
 
@@ -40,10 +48,10 @@ jobs:
         && github.event.review.author_association != 'NONE'
         && github.event.review.state == 'changes_requested'
     steps:
-      - uses: sonarsource/gh-action-lt-backlog/MoveCardAfterReview@v1
+      - uses: sonarsource/gh-action-lt-backlog/MoveCardAfterReview-v2@v1
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          column-id: 123456     # Kanban "In progress" column
+          column-id: "ba9wd9dwa"     # Kanban "In progress" column
 
   ReviewApproved_job:
     name: Move card to review approved
@@ -53,8 +61,8 @@ jobs:
         && github.event.review.author_association != 'NONE'
         && github.event.review.state == 'approved'
     steps:
-      - uses: sonarsource/gh-action-lt-backlog/MoveCardAfterReview@v1
+      - uses: sonarsource/gh-action-lt-backlog/MoveCardAfterReview-v2@v1
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          column-id: 123456     # Kanban "Review approved" column
+          column-id: "7gabwd97ga"     # Kanban "Review approved" column
 ```
