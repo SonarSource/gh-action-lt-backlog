@@ -41,7 +41,6 @@ query ($org: String!, $projectNumber: Int!) {
       id
       field(name: "Status") {
         ... on ProjectV2SingleSelectField {
-          columnFieldId: id
           columns: options {
             id
             name
@@ -52,9 +51,10 @@ query ($org: String!, $projectNumber: Int!) {
   }
 }
 
+# query variables
 {
   "org": "SonarSource",
-  "projectNumber": 8
+  "projectNumber": NUMBER
 }
 ```
 
