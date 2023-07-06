@@ -10,6 +10,9 @@ inputs:
   project-number:
     description: 'The number of the project'
     required: true
+  is-org:
+    description: 'Boolean representing if the action is for an organization or a user. Defaults to "true". Set to "false" when using for a user.'
+    required: false
 runs:
   using: 'node16'
   main: '../dist/MoveCardAfterReview-v2/MoveCardAfterReviewV2.js'

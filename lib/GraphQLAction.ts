@@ -162,7 +162,7 @@ export abstract class GraphQLAction extends OctokitAction {
    */
   async moveOrCreateCardV2(issueOrPR: IssueOrPR, columnId: string, repoOwner: string, projectNumber: number, isOrg: boolean): Promise<void> {
     if (!issueOrPR.project) {
-
+      console.log('callin move or create card for', arguments);
       issueOrPR.project = await this.getProjectDataV2(repoOwner, projectNumber, isOrg);
       issueOrPR.projectItemId = await this.createCardV2(issueOrPR, issueOrPR.project.id);
     }
