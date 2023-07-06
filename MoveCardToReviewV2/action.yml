@@ -1,4 +1,4 @@
-name: 'Move card to "Review in progress" column - v2'
+name: 'Move card to "Review in progress" column - V2'
 description: 'Move fixed issue or PR card to "Review in progress" column and assign it to the reviewer'
 inputs:
   github-token:
@@ -15,4 +15,4 @@ inputs:
     required: false
 runs:
   using: 'node16'
-  main: '../dist/MoveCardToReview-v2/MoveCardToReviewV2.js'
+  main: '../dist/MoveCardToReviewV2/MoveCardToReviewV2.js'
