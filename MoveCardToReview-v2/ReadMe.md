@@ -14,11 +14,15 @@ Token to access GitHub API.
 
 ### `column-id`
 
-ID of the Kanban column where the card should be moved to. Typically ID of `Review in progress` column.
+ID of the Kanban column where the card should be moved to. Typically ID of `Review in progress` column. [This page](docs/github.md) explains how this can be obtained.
 
 ### `project-number`
 
-Number of the project where the column is. [This page]() explains how this can be obtained.
+Number of the project where the column is. [This page](docs/github.md) explains how this can be obtained.
+
+### `is-org`
+
+Optional parameter, set to `false` in case you wish to use this action in a repository that belongs to a user.
 
 ## Outputs
 
@@ -42,7 +46,7 @@ jobs:
         github.event.pull_request.head.repo.full_name == github.repository
         && github.event.review.author_association != 'NONE'
     steps:
-      - uses: sonarsource/gh-action-lt-backlog/MoveCardToReview@v1
+      - uses: sonarsource/gh-action-lt-backlog/MoveCardToReview-v2@v1
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           column-id: "9b76wgdbaw"     # Kanban "Review in progress" column
