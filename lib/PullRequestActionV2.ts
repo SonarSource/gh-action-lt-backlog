@@ -1,5 +1,4 @@
-import { GraphQLAction } from './GraphQLAction';
-import { IssueOrPR, getIssueOrPrV2, moveOrCreateCardV2 } from './ProjectV2Content';
+import { GraphQLAction, IssueOrPR } from './GraphQLAction';
 
 export abstract class PullRequestActionV2 extends GraphQLAction {
   protected abstract processReassignment(issueOrPR: IssueOrPR): Promise<void>;
@@ -14,7 +13,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
     const repo = this.payload.repository;
     const fixedIssues = this.fixedIssues(pr);
     for (const fixedIssue of fixedIssues) {
-      let linkedIssue = await getIssueOrPrV2(
+      let linkedIssue = await this.getIssueOrPrV2(
         repo.name,
         repo.owner.login,
         fixedIssue,
@@ -26,7 +25,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
       }
     }
     if (isProcessPR) {
-      const fullPR = await getIssueOrPrV2(
+      const fullPR = await this.getIssueOrPrV2(
         repo.name,
         repo.owner.login,
         pr.number,
@@ -52,7 +51,7 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
   protected async processIssue(columnId: string, issueOrPR: IssueOrPR, repoOwner: string, projectNumber: number, isOrg: boolean): Promise<void> {
     await this.processReassignment(issueOrPR);
     if (issueOrPR.state.toLocaleLowerCase() === 'open') {
-      await moveOrCreateCardV2(issueOrPR, columnId, repoOwner, projectNumber, isOrg);
+      await this.moveOrCreateCardV2(issueOrPR, columnId, repoOwner, projectNumber, isOrg);
     }
   }
 }
