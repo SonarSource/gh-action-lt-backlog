@@ -32,7 +32,7 @@ The project number is available in the URL of your project as: https://github.co
 
 ### Find the column ID
 
-To get the column ids, use the following command:
+To get the column ids, use the following command, replacing `YOUR_GITHUB_PERSONAL_ACCESS_TOKEN` and `NUMBER`:
 
 ```bash
 curl -H 'Content-Type: application/json' -H "Authorization: bearer <YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>" -X POST -d '{ "query": "query {  organization(login: \"SonarSource\") { projectV2(number: <NUMBER>) { field(name: \"Status\") { ... on ProjectV2SingleSelectField { columns: options { id name }}}}}}" }' https://api.github.com/graphql
