@@ -5,4 +5,5 @@ export type IssueOrPR = {
   number: number;
   url: string;
   issue_url?: string; // Present only on PRs
+  node_id: string;
 };
