@@ -16,7 +16,7 @@ export type IssueOrPR = {
     },
   ];
   projectItemId?: string;
-  project?: ProjectV2
+  project?: ProjectV2;
 };
 
 export type ProjectV2 = {
@@ -46,15 +46,15 @@ export abstract class GraphQLAction extends OctokitAction {
   }
 
   /**
- * Retrieves the Issue or Pull Request and all its data as defined by its type
- *
- * @param repositoryName eg.: SonarJS
- * @param repositoryOwner eg.: SonarSource
- * @param itemNumber the issue or PR number, available in the URL like: https://github.com/SonarSource/SonarJS/pull/3
- * @param columnId
- * @param isIssue fetches issue if true, otherwise pull request
- * @returns
- */
+   * Retrieves the Issue or Pull Request and all its data as defined by its type
+   *
+   * @param repositoryName eg.: SonarJS
+   * @param repositoryOwner eg.: SonarSource
+   * @param itemNumber the issue or PR number, available in the URL like: https://github.com/SonarSource/SonarJS/pull/3
+   * @param columnId
+   * @param isIssue fetches issue if true, otherwise pull request
+   * @returns
+   */
   async getIssueOrPrV2(
     repositoryName: string,
     repositoryOwner: string,
@@ -139,9 +139,7 @@ export abstract class GraphQLAction extends OctokitAction {
         projectItem.project.props.columns.some(column => column.id === columnId),
       );
       if (!projectItem) {
-        console.log(
-          `Project item not found for issue "${issue.title}" and columnId "${columnId}"`,
-        );
+        console.log(`Project item not found for issue "${issue.title}" and columnId "${columnId}"`);
       }
       return projectItem;
     }
@@ -160,7 +158,13 @@ export abstract class GraphQLAction extends OctokitAction {
    * @param projectNumber
    * @param isOrg
    */
-  async moveOrCreateCardV2(issueOrPR: IssueOrPR, columnId: string, repoOwner: string, projectNumber: number, isOrg: boolean): Promise<void> {
+  async moveOrCreateCardV2(
+    issueOrPR: IssueOrPR,
+    columnId: string,
+    repoOwner: string,
+    projectNumber: number,
+    isOrg: boolean,
+  ): Promise<void> {
     if (!issueOrPR.project) {
       issueOrPR.project = await this.getProjectDataV2(repoOwner, projectNumber, isOrg);
       issueOrPR.projectItemId = await this.createCardV2(issueOrPR, issueOrPR.project.id);
@@ -181,7 +185,6 @@ export abstract class GraphQLAction extends OctokitAction {
    * @returns the projectItemId
    */
   async createCardV2(issueOrPr: IssueOrPR, projectId: string): Promise<string> {
-
     const query = {
       pullRequestId: issueOrPr.id,
       projectId,
@@ -198,7 +201,7 @@ export abstract class GraphQLAction extends OctokitAction {
           }
         }
       }
-      `
+      `,
     };
     const response = await this.sendGraphQL(query);
     return response.addProjectV2ItemById.item.id;
@@ -335,12 +338,12 @@ export abstract class GraphQLAction extends OctokitAction {
   }
 
   /**
-    * Reassign issue from oldUserIds to newUserId
-    *
-    * @param issueOrPr
-    * @param newUserId
-    * @param oldUserIds
-    */
+   * Reassign issue from oldUserIds to newUserId
+   *
+   * @param issueOrPr
+   * @param newUserId
+   * @param oldUserIds
+   */
   async reassignIssueV2(issueOrPr: IssueOrPR, newUserId: string, oldUserIds: string[]) {
     const query = {
       query: `

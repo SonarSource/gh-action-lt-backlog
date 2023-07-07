@@ -7,7 +7,6 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
     const columnId = this.getInput('column-id');
     const projectNumber = this.getInputNumber('project-number');
     const isOrg = parseIsOrg(this.getInput('is-org'));
-    console.log('walala', columnId, projectNumber, isOrg)
 
     let isProcessPR = true;
     const pr = this.payload.pull_request;
@@ -44,11 +43,17 @@ export abstract class PullRequestActionV2 extends GraphQLAction {
      * @returns
      */
     function parseIsOrg(isOrg) {
-      return !isOrg || (isOrg === 'true');
+      return !isOrg || isOrg === 'true';
     }
   }
 
-  protected async processIssue(columnId: string, issueOrPR: IssueOrPR, repoOwner: string, projectNumber: number, isOrg: boolean): Promise<void> {
+  protected async processIssue(
+    columnId: string,
+    issueOrPR: IssueOrPR,
+    repoOwner: string,
+    projectNumber: number,
+    isOrg: boolean,
+  ): Promise<void> {
     await this.processReassignment(issueOrPR);
     if (issueOrPR.state.toLocaleLowerCase() === 'open') {
       await this.moveOrCreateCardV2(issueOrPR, columnId, repoOwner, projectNumber, isOrg);

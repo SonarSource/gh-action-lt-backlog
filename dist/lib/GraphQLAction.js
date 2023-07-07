@@ -16,15 +16,15 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
         return this.graphqlWithAuth(query);
     }
     /**
-   * Retrieves the Issue or Pull Request and all its data as defined by its type
-   *
-   * @param repositoryName eg.: SonarJS
-   * @param repositoryOwner eg.: SonarSource
-   * @param itemNumber the issue or PR number, available in the URL like: https://github.com/SonarSource/SonarJS/pull/3
-   * @param columnId
-   * @param isIssue fetches issue if true, otherwise pull request
-   * @returns
-   */
+     * Retrieves the Issue or Pull Request and all its data as defined by its type
+     *
+     * @param repositoryName eg.: SonarJS
+     * @param repositoryOwner eg.: SonarSource
+     * @param itemNumber the issue or PR number, available in the URL like: https://github.com/SonarSource/SonarJS/pull/3
+     * @param columnId
+     * @param isIssue fetches issue if true, otherwise pull request
+     * @returns
+     */
     async getIssueOrPrV2(repositoryName, repositoryOwner, itemNumber, columnId, isIssue = true) {
         const item = isIssue ? 'issue' : 'pullRequest';
         const query = {
@@ -146,7 +146,7 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
           }
         }
       }
-      `
+      `,
         };
         const response = await this.sendGraphQL(query);
         return response.addProjectV2ItemById.item.id;
@@ -271,12 +271,12 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
         return id;
     }
     /**
-      * Reassign issue from oldUserIds to newUserId
-      *
-      * @param issueOrPr
-      * @param newUserId
-      * @param oldUserIds
-      */
+     * Reassign issue from oldUserIds to newUserId
+     *
+     * @param issueOrPr
+     * @param newUserId
+     * @param oldUserIds
+     */
     async reassignIssueV2(issueOrPr, newUserId, oldUserIds) {
         const query = {
             query: `
