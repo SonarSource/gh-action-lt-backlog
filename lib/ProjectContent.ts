@@ -1,29 +1,22 @@
 import { OctokitAction } from './OctokitAction';
 import { IssueOrPR } from './IssueOrPR';
-import { ProjectCard, ProjectColumn } from './OctokitTypes';
+import { ProjectColumn } from './OctokitTypes';
 import type { GraphQlQueryResponseData } from '@octokit/graphql';
 
+export type Card = {
+  id: string;
+  columnName: string;
+};
+
 export abstract class ProjectContent {
-  private readonly action: OctokitAction;
-  private readonly columns: ProjectColumn[];
+  protected readonly action: OctokitAction;
+  protected readonly columns: ProjectColumn[];
+
+  public abstract findCard(issueOrPR: IssueOrPR): Promise<Card>;
 
   protected constructor(action: OctokitAction, columns: ProjectColumn[]) {
     this.action = action;
     this.columns = columns;
-  }
-
-  public async findCard(issueOrPR: IssueOrPR): Promise<ProjectCard> {
-    // We should start caching these results in case we need to call it multiple times from a single action
-    const content_url = issueOrPR.issue_url ?? issueOrPR.url;
-    for (const column of this.columns) {
-      const { data: cards } = await this.action.rest.projects.listCards({ column_id: column.id });
-      const card = cards.find(x => x.content_url == content_url);
-      if (card) {
-        return card;
-      }
-    }
-    this.action.log(`Card not found for: ${content_url}`);
-    return null;
   }
 
   public async moveOrCreateCard(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
@@ -35,10 +28,10 @@ export abstract class ProjectContent {
     }
   }
 
-  public async moveCard(card: ProjectCard, column_id: number): Promise<void> {
+  public async moveCard(card: Card, column_id: number): Promise<void> {
     console.log(`Moving card to column ${column_id}`);
     await this.action.rest.projects.moveCard({
-      card_id: card.id,
+      card_id: parseInt(card.id),
       position: 'bottom',
       column_id,
     });
@@ -47,7 +40,7 @@ export abstract class ProjectContent {
   public async createCard(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
     const card = await this.findCard(issueOrPR);
     if (card) {
-      this.action.log(`Card already exists for #${issueOrPR.number} in ${card.column_url}`);
+      this.action.log(`Card already exists for #${issueOrPR.number} in ${card.columnName}`);
     } else {
       await this.createCardCore(issueOrPR, column_id);
     }
@@ -98,9 +91,30 @@ export class ProjectContentV1 extends ProjectContent {
     const { data: columns } = await action.rest.projects.listColumns({ project_id });
     return new ProjectContentV1(action, columns);
   }
+
+  public async findCard(issueOrPR: IssueOrPR): Promise<Card> {
+    // We should start caching these results in case we need to call it multiple times from a single action
+    const content_url = issueOrPR.issue_url ?? issueOrPR.url;
+    for (const column of this.columns) {
+      const { data: cards } = await this.action.rest.projects.listCards({ column_id: column.id });
+      const card = cards.find(x => x.content_url == content_url);
+      if (card) {
+        return { id: card.id.toString(), columnName: card.column_url };
+      }
+    }
+    this.action.log(`Card not found for: ${content_url}`);
+    return null;
+  }
 }
 
 export class ProjectContentV2 extends ProjectContent {
+  protected readonly number: number;
+
+  protected constructor(action: OctokitAction, columns: ProjectColumn[], number: number) {
+    super(action, columns);
+    this.number = number;
+  }
+
   public static async fromProject(
     action: OctokitAction,
     number: number,
@@ -126,6 +140,46 @@ export class ProjectContentV2 extends ProjectContent {
               }
           }
       }`);
-    return new ProjectContentV1(action, columns); // Only "id" and "name" are filled. We can query more if we need to
+    return new ProjectContentV2(action, columns, number); // Only "id" and "name" are filled. We can query more if we need to
+  }
+
+  public async findCard(issueOrPR: IssueOrPR): Promise<Card> {
+    // FIXME: Pagination - replace "first:100" with paging. There will be more than 100 issues
+    console.log("FIXME pagination");
+    const {
+      organization: {
+        projectV2: {
+          items
+        }
+      }
+    }: GraphQlQueryResponseData = await this.action.sendGraphQL(`
+        query {
+          organization(login: "${this.action.repo.owner}") {
+              projectV2 (number: ${this.number}) {
+                items (first:100){
+                    totalCount
+                    nodes {
+                        id
+                        fieldValueByName (name:"Status")
+                        {
+                            ... on ProjectV2ItemFieldSingleSelectValue { name }
+                        }
+                        content
+                        {
+                            ... on Issue { number }
+                            ... on PullRequest { number }
+                        }
+                    }
+                }
+              }
+          }
+      }`);
+    for (const item of items.nodes) {
+      if (item.content.number === issueOrPR.number) {
+        return { id: item.id, columnName: item.fieldValueByName?.name };
+      }
+    }
+    this.action.log(`Card not found for #${issueOrPR.number}`);
+    return null;
   }
 }
