@@ -101,9 +101,9 @@ class ProjectContentV2 extends ProjectContent {
                   field (name: "Status"){
                       ... on ProjectV2SingleSelectField {
                           id
-                          options { 
-                            id 
-                            name 
+                          options {
+                            id
+                            name
                           }
                       }
                   }
@@ -156,7 +156,7 @@ class ProjectContentV2 extends ProjectContent {
           value: {
             singleSelectOptionId: "${column_id}"
           }
-        }) 
+        })
         {
           projectV2Item { id }
         }
@@ -166,10 +166,10 @@ class ProjectContentV2 extends ProjectContent {
         this.action.log(`Creating card for #${issueOrPR.number}`);
         const { addProjectV2ItemById: { item: { id } } } = await this.action.sendGraphQL(`
       mutation {
-        addProjectV2ItemById(input: { 
-          contentId: "${issueOrPR.node_id}", 
-          projectId: "${this.id}" 
-        }) 
+        addProjectV2ItemById(input: {
+          contentId: "${issueOrPR.node_id}",
+          projectId: "${this.id}"
+        })
         {
           item { id }
         }

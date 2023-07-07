@@ -5,8 +5,16 @@ const OctokitAction_1 = require("./OctokitAction");
 const ProjectContent_1 = require("./ProjectContent");
 class PullRequestAction extends OctokitAction_1.OctokitAction {
     async execute() {
-        const column_id = this.getInputNumber('column-id');
-        const project = ProjectContent_1.ProjectContentV1.fromColumn(this, column_id);
+        let column_id = this.getInput('column-id');
+        const projectNumber = this.getInput('project-number');
+        let project;
+        if (projectNumber) {
+            project = ProjectContent_1.ProjectContentV2.fromProject(this, parseInt(projectNumber));
+        }
+        else {
+            column_id = parseInt(column_id);
+            project = ProjectContent_1.ProjectContentV1.fromColumn(this, column_id);
+        }
         let processPR = true;
         const pr = this.payload.pull_request;
         const fixedIssues = this.fixedIssues(pr);
