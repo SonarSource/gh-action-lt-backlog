@@ -13,6 +13,7 @@ export abstract class ProjectContent {
   protected readonly columns: ProjectColumn[];
 
   public abstract findCard(issueOrPR: IssueOrPR): Promise<Card>;
+  public abstract moveCard(card: Card, column_id: number): Promise<void>;
 
   protected constructor(action: OctokitAction, columns: ProjectColumn[]) {
     this.action = action;
@@ -26,15 +27,6 @@ export abstract class ProjectContent {
     } else {
       await this.createCardCore(issueOrPR, column_id);
     }
-  }
-
-  public async moveCard(card: Card, column_id: number): Promise<void> {
-    console.log(`Moving card to column ${column_id}`);
-    await this.action.rest.projects.moveCard({
-      card_id: parseInt(card.id),
-      position: 'bottom',
-      column_id,
-    });
   }
 
   public async createCard(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
@@ -105,14 +97,27 @@ export class ProjectContentV1 extends ProjectContent {
     this.action.log(`Card not found for: ${content_url}`);
     return null;
   }
+
+  public async moveCard(card: Card, column_id: number): Promise<void> {
+    console.log(`Moving card to column ${column_id}`);
+    await this.action.rest.projects.moveCard({
+      card_id: parseInt(card.id),
+      position: 'bottom',
+      column_id,
+    });
+  }
 }
 
 export class ProjectContentV2 extends ProjectContent {
   protected readonly number: number;
+  protected readonly id: string;
+  protected readonly columnFieldId: string;
 
-  protected constructor(action: OctokitAction, columns: ProjectColumn[], number: number) {
+  protected constructor(action: OctokitAction, columns: ProjectColumn[], number: number, id: string, columnFieldId: string) {
     super(action, columns);
     this.number = number;
+    this.id = id;
+    this.columnFieldId = columnFieldId;
   }
 
   public static async fromProject(
@@ -122,15 +127,18 @@ export class ProjectContentV2 extends ProjectContent {
     const {
       organization: {
         projectV2: {
-          field: { options: columns }
+          id,
+          field: { options: columns, id: columnFieldId }
         }
       }
     }: GraphQlQueryResponseData = await action.sendGraphQL(`
         query {
           organization(login: "${action.repo.owner}") {
               projectV2 (number: ${number}) {
+                  id
                   field (name: "Status"){
                       ... on ProjectV2SingleSelectField {
+                          id
                           options { 
                             id 
                             name 
@@ -140,7 +148,7 @@ export class ProjectContentV2 extends ProjectContent {
               }
           }
       }`);
-    return new ProjectContentV2(action, columns, number); // Only "id" and "name" are filled. We can query more if we need to
+    return new ProjectContentV2(action, columns, number, id, columnFieldId); // Only "id" and "name" are filled. We can query more if we need to
   }
 
   public async findCard(issueOrPR: IssueOrPR): Promise<Card> {
@@ -181,5 +189,23 @@ export class ProjectContentV2 extends ProjectContent {
     }
     this.action.log(`Card not found for #${issueOrPR.number}`);
     return null;
+  }
+
+  public async moveCard(card: Card, column_id: number): Promise<void> {
+    console.log(`Moving card to column ${column_id}`);
+    await this.action.sendGraphQL(`
+      mutation {
+        updateProjectV2ItemFieldValue(input: {
+          projectId: "${this.id}",
+          itemId: "${card.id}",
+          fieldId: "${this.columnFieldId}",
+          value: {
+            singleSelectOptionId: "${column_id}"
+          }
+        }) 
+        {
+          projectV2Item { id }
+        }
+      }`);
   }
 }

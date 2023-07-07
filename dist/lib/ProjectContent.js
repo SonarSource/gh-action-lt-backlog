@@ -15,14 +15,6 @@ class ProjectContent {
             await this.createCardCore(issueOrPR, column_id);
         }
     }
-    async moveCard(card, column_id) {
-        console.log(`Moving card to column ${column_id}`);
-        await this.action.rest.projects.moveCard({
-            card_id: parseInt(card.id),
-            position: 'bottom',
-            column_id,
-        });
-    }
     async createCard(issueOrPR, column_id) {
         const card = await this.findCard(issueOrPR);
         if (card) {
@@ -83,20 +75,32 @@ class ProjectContentV1 extends ProjectContent {
         this.action.log(`Card not found for: ${content_url}`);
         return null;
     }
+    async moveCard(card, column_id) {
+        console.log(`Moving card to column ${column_id}`);
+        await this.action.rest.projects.moveCard({
+            card_id: parseInt(card.id),
+            position: 'bottom',
+            column_id,
+        });
+    }
 }
 exports.ProjectContentV1 = ProjectContentV1;
 class ProjectContentV2 extends ProjectContent {
-    constructor(action, columns, number) {
+    constructor(action, columns, number, id, columnFieldId) {
         super(action, columns);
         this.number = number;
+        this.id = id;
+        this.columnFieldId = columnFieldId;
     }
     static async fromProject(action, number) {
-        const { organization: { projectV2: { field: { options: columns } } } } = await action.sendGraphQL(`
+        const { organization: { projectV2: { id, field: { options: columns, id: columnFieldId } } } } = await action.sendGraphQL(`
         query {
           organization(login: "${action.repo.owner}") {
               projectV2 (number: ${number}) {
+                  id
                   field (name: "Status"){
                       ... on ProjectV2SingleSelectField {
+                          id
                           options { 
                             id 
                             name 
@@ -106,7 +110,7 @@ class ProjectContentV2 extends ProjectContent {
               }
           }
       }`);
-        return new ProjectContentV2(action, columns, number); // Only "id" and "name" are filled. We can query more if we need to
+        return new ProjectContentV2(action, columns, number, id, columnFieldId); // Only "id" and "name" are filled. We can query more if we need to
     }
     async findCard(issueOrPR) {
         // FIXME: Pagination - replace "first:100" with paging. There will be more than 100 issues
@@ -140,6 +144,23 @@ class ProjectContentV2 extends ProjectContent {
         }
         this.action.log(`Card not found for #${issueOrPR.number}`);
         return null;
+    }
+    async moveCard(card, column_id) {
+        console.log(`Moving card to column ${column_id}`);
+        await this.action.sendGraphQL(`
+      mutation {
+        updateProjectV2ItemFieldValue(input: {
+          projectId: "${this.id}",
+          itemId: "${card.id}",
+          fieldId: "${this.columnFieldId}",
+          value: {
+            singleSelectOptionId: "${column_id}"
+          }
+        }) 
+        {
+          projectV2Item { id }
+        }
+      }`);
     }
 }
 exports.ProjectContentV2 = ProjectContentV2;
