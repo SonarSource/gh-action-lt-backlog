@@ -14,6 +14,7 @@ export abstract class ProjectContent {
 
   public abstract findCard(issueOrPR: IssueOrPR): Promise<Card>;
   public abstract moveCard(card: Card, column_id: number): Promise<void>;
+  protected abstract createCardCore(issueOrPR: IssueOrPR, column_id: number): Promise<void>;
 
   protected constructor(action: OctokitAction, columns: ProjectColumn[]) {
     this.action = action;
@@ -47,30 +48,13 @@ export abstract class ProjectContent {
       return columns[0];
     }
   }
-
-  private async createCardCore(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
-    const content_type = issueOrPR.url.indexOf('/pulls/') < 0 ? 'Issue' : 'PullRequest';
-    const content_id = issueOrPR.id;
-    this.action.log(`Creating ${content_type} card for #${issueOrPR.number}`);
-    try {
-      const { data: card } = await this.action.rest.projects.createCard({ column_id, content_id, content_type });
-      await this.action.rest.projects.moveCard({  // Move it to the bottom of the column
-        card_id: card.id,
-        position: 'bottom',
-        column_id,
-      });
-    }
-    catch (ex) {  // Issues or PRs can be assigned to a project in "Awaiting triage" state. Those are not discoverable via REST API
-      this.action.log(`Failed to create a card: ${ex}`);
-    }
-  }
 }
 
 export class ProjectContentV1 extends ProjectContent {
   public static async fromColumn(
     action: OctokitAction,
     column_id: number,
-  ): Promise<ProjectContent> {
+  ): Promise<ProjectContentV1> {
     const { data: column } = await action.rest.projects.getColumn({ column_id });
     const project_id = parseInt(column.project_url.split('/').pop());
     return ProjectContentV1.fromProject(action, project_id);
@@ -79,7 +63,7 @@ export class ProjectContentV1 extends ProjectContent {
   public static async fromProject(
     action: OctokitAction,
     project_id: number,
-  ): Promise<ProjectContent> {
+  ): Promise<ProjectContentV1> {
     const { data: columns } = await action.rest.projects.listColumns({ project_id });
     return new ProjectContentV1(action, columns);
   }
@@ -105,6 +89,23 @@ export class ProjectContentV1 extends ProjectContent {
       position: 'bottom',
       column_id,
     });
+  }
+
+  protected async createCardCore(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
+    const content_type = issueOrPR.url.indexOf('/pulls/') < 0 ? 'Issue' : 'PullRequest';
+    const content_id = issueOrPR.id;
+    this.action.log(`Creating ${content_type} card for #${issueOrPR.number}`);
+    try {
+      const { data: card } = await this.action.rest.projects.createCard({ column_id, content_id, content_type });
+      await this.action.rest.projects.moveCard({  // Move it to the bottom of the column
+        card_id: card.id,
+        position: 'bottom',
+        column_id,
+      });
+    }
+    catch (ex) {  // Issues or PRs can be assigned to a project in "Awaiting triage" state. Those are not discoverable via REST API
+      this.action.log(`Failed to create a card: ${ex}`);
+    }
   }
 }
 
@@ -207,5 +208,24 @@ export class ProjectContentV2 extends ProjectContent {
           projectV2Item { id }
         }
       }`);
+  }
+
+  protected async createCardCore(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
+    this.action.log(`Creating card for #${issueOrPR.number}`);
+    const {
+      addProjectV2ItemById: {
+        item: { id }
+      }
+    }: GraphQlQueryResponseData = await this.action.sendGraphQL(`
+      mutation {
+        addProjectV2ItemById(input: { 
+          contentId: "${issueOrPR.node_id}", 
+          projectId: "${this.id}" 
+        }) 
+        {
+          item { id }
+        }
+      }`);
+    await this.moveCard({ id, columnName: "" }, column_id);
   }
 }

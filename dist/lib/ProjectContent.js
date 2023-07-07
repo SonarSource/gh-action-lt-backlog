@@ -34,22 +34,6 @@ class ProjectContent {
             return columns[0];
         }
     }
-    async createCardCore(issueOrPR, column_id) {
-        const content_type = issueOrPR.url.indexOf('/pulls/') < 0 ? 'Issue' : 'PullRequest';
-        const content_id = issueOrPR.id;
-        this.action.log(`Creating ${content_type} card for #${issueOrPR.number}`);
-        try {
-            const { data: card } = await this.action.rest.projects.createCard({ column_id, content_id, content_type });
-            await this.action.rest.projects.moveCard({
-                card_id: card.id,
-                position: 'bottom',
-                column_id,
-            });
-        }
-        catch (ex) { // Issues or PRs can be assigned to a project in "Awaiting triage" state. Those are not discoverable via REST API
-            this.action.log(`Failed to create a card: ${ex}`);
-        }
-    }
 }
 exports.ProjectContent = ProjectContent;
 class ProjectContentV1 extends ProjectContent {
@@ -82,6 +66,22 @@ class ProjectContentV1 extends ProjectContent {
             position: 'bottom',
             column_id,
         });
+    }
+    async createCardCore(issueOrPR, column_id) {
+        const content_type = issueOrPR.url.indexOf('/pulls/') < 0 ? 'Issue' : 'PullRequest';
+        const content_id = issueOrPR.id;
+        this.action.log(`Creating ${content_type} card for #${issueOrPR.number}`);
+        try {
+            const { data: card } = await this.action.rest.projects.createCard({ column_id, content_id, content_type });
+            await this.action.rest.projects.moveCard({
+                card_id: card.id,
+                position: 'bottom',
+                column_id,
+            });
+        }
+        catch (ex) { // Issues or PRs can be assigned to a project in "Awaiting triage" state. Those are not discoverable via REST API
+            this.action.log(`Failed to create a card: ${ex}`);
+        }
     }
 }
 exports.ProjectContentV1 = ProjectContentV1;
@@ -161,6 +161,20 @@ class ProjectContentV2 extends ProjectContent {
           projectV2Item { id }
         }
       }`);
+    }
+    async createCardCore(issueOrPR, column_id) {
+        this.action.log(`Creating card for #${issueOrPR.number}`);
+        const { addProjectV2ItemById: { item: { id } } } = await this.action.sendGraphQL(`
+      mutation {
+        addProjectV2ItemById(input: { 
+          contentId: "${issueOrPR.node_id}", 
+          projectId: "${this.id}" 
+        }) 
+        {
+          item { id }
+        }
+      }`);
+        await this.moveCard({ id, columnName: "" }, column_id);
     }
 }
 exports.ProjectContentV2 = ProjectContentV2;
