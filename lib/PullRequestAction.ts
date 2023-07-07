@@ -1,5 +1,5 @@
 import { OctokitAction } from './OctokitAction';
-import { ProjectContent } from './ProjectContent';
+import { ProjectContentV1 } from './ProjectContent';
 import { IssueOrPR } from './IssueOrPR';
 
 export abstract class PullRequestAction extends OctokitAction {
@@ -7,7 +7,7 @@ export abstract class PullRequestAction extends OctokitAction {
 
   protected async execute(): Promise<void> {
     const column_id = this.getInputNumber('column-id');
-    const project = ProjectContent.fromColumn(this, column_id);
+    const project = ProjectContentV1.fromColumn(this, column_id);
 
     let processPR = true;
     const pr = this.payload.pull_request;
@@ -28,7 +28,7 @@ export abstract class PullRequestAction extends OctokitAction {
   }
 
   protected async processIssue(
-    projectPromise: Promise<ProjectContent>,
+    projectPromise: Promise<ProjectContentV1>,
     column_id: number,
     issueOrPR: IssueOrPR,
   ): Promise<void> {

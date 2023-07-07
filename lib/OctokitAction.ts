@@ -6,7 +6,7 @@ import { Action } from './Action';
 import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types';
 import { IssueOrPR } from './IssueOrPR';
 import { Issue, PullRequest } from './OctokitTypes';
-import { ProjectContent } from './ProjectContent';
+import { ProjectContentV1 } from './ProjectContent';
 import fetch from 'node-fetch';
 import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
 
@@ -132,7 +132,7 @@ export abstract class OctokitAction extends Action {
     if (column_id === 0) {
       this.log(`Skip creating card for #${issueOrPR.number}. column_id was not set.`);
     } else {
-      const project = await ProjectContent.fromColumn(this, column_id);
+      const project = await ProjectContentV1.fromColumn(this, column_id);
       project.createCard(issueOrPR, column_id);
     }
   }

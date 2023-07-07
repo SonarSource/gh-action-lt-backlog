@@ -9,8 +9,8 @@ export type Repo = {
 };
 
 export abstract class Action {
+  public readonly repo: Repo;
   protected readonly context: Context;
-  protected readonly repo: Repo;
   protected readonly payload: WebhookPayload;
 
   protected abstract execute(): Promise<void>;

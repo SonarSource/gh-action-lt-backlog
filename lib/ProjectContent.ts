@@ -1,31 +1,15 @@
 import { OctokitAction } from './OctokitAction';
 import { IssueOrPR } from './IssueOrPR';
 import { ProjectCard, ProjectColumn } from './OctokitTypes';
+import type { GraphQlQueryResponseData } from '@octokit/graphql';
 
-export class ProjectContent {
+export abstract class ProjectContent {
   private readonly action: OctokitAction;
   private readonly columns: ProjectColumn[];
 
-  private constructor(action: OctokitAction, columns: ProjectColumn[]) {
+  protected constructor(action: OctokitAction, columns: ProjectColumn[]) {
     this.action = action;
     this.columns = columns;
-  }
-
-  public static async fromColumn(
-    action: OctokitAction,
-    column_id: number,
-  ): Promise<ProjectContent> {
-    const { data: column } = await action.rest.projects.getColumn({ column_id });
-    const project_id = parseInt(column.project_url.split('/').pop());
-    return ProjectContent.fromProject(action, project_id);
-  }
-
-  public static async fromProject(
-    action: OctokitAction,
-    project_id: number,
-  ): Promise<ProjectContent> {
-    const { data: columns } = await action.rest.projects.listColumns({ project_id });
-    return new ProjectContent(action, columns);
   }
 
   public async findCard(issueOrPR: IssueOrPR): Promise<ProjectCard> {
@@ -94,5 +78,54 @@ export class ProjectContent {
     catch (ex) {  // Issues or PRs can be assigned to a project in "Awaiting triage" state. Those are not discoverable via REST API
       this.action.log(`Failed to create a card: ${ex}`);
     }
+  }
+}
+
+export class ProjectContentV1 extends ProjectContent {
+  public static async fromColumn(
+    action: OctokitAction,
+    column_id: number,
+  ): Promise<ProjectContent> {
+    const { data: column } = await action.rest.projects.getColumn({ column_id });
+    const project_id = parseInt(column.project_url.split('/').pop());
+    return ProjectContentV1.fromProject(action, project_id);
+  }
+
+  public static async fromProject(
+    action: OctokitAction,
+    project_id: number,
+  ): Promise<ProjectContent> {
+    const { data: columns } = await action.rest.projects.listColumns({ project_id });
+    return new ProjectContentV1(action, columns);
+  }
+}
+
+export class ProjectContentV2 extends ProjectContent {
+  public static async fromProject(
+    action: OctokitAction,
+    number: number,
+  ): Promise<ProjectContent> {
+    const {
+      organization: {
+        projectV2: {
+          field: { options: columns }
+        }
+      }
+    }: GraphQlQueryResponseData = await action.sendGraphQL(`
+        query {
+          organization(login: "${action.repo.owner}") {
+              projectV2 (number: ${number}) {
+                  field (name: "Status"){
+                      ... on ProjectV2SingleSelectField {
+                          options { 
+                            id 
+                            name 
+                          }
+                      }
+                  }
+              }
+          }
+      }`);
+    return new ProjectContentV1(action, columns); // Only "id" and "name" are filled. We can query more if we need to
   }
 }
