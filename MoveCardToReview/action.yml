@@ -7,6 +7,9 @@ inputs:
   column-id:
     description: 'ID of the Kanban column where the card should be moved to'
     required: true
+  project-number:
+    description: 'The number of the project, only required for Projects V2'
+    required: false
 runs:
   using: 'node16'
   main: '../dist/MoveCardToReview/MoveCardToReview.js'
