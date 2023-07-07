@@ -16,15 +16,15 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
         return this.graphqlWithAuth(query);
     }
     /**
-   * Retrieves the Issue or Pull Request and all its data as defined by its type
-   *
-   * @param repositoryName eg.: SonarJS
-   * @param repositoryOwner eg.: SonarSource
-   * @param itemNumber the issue or PR number, available in the URL like: https://github.com/SonarSource/SonarJS/pull/3
-   * @param columnId
-   * @param isIssue fetches issue if true, otherwise pull request
-   * @returns
-   */
+     * Retrieves the Issue or Pull Request and all its data as defined by its type
+     *
+     * @param repositoryName eg.: SonarJS
+     * @param repositoryOwner eg.: SonarSource
+     * @param itemNumber the issue or PR number, available in the URL like: https://github.com/SonarSource/SonarJS/pull/3
+     * @param columnId
+     * @param isIssue fetches issue if true, otherwise pull request
+     * @returns
+     */
     async getIssueOrPrV2(repositoryName, repositoryOwner, itemNumber, columnId, isIssue = true) {
         const item = isIssue ? 'issue' : 'pullRequest';
         const query = {
@@ -146,7 +146,7 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
           }
         }
       }
-      `
+      `,
         };
         const response = await this.sendGraphQL(query);
         return response.addProjectV2ItemById.item.id;
@@ -232,13 +232,18 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
         };
         await this.sendGraphQL(query);
     }
-    async removeAssigneesV2(issueOrPr, oldUserIds) {
+    /**
+     *
+     * @param issueOrPr
+     * @param userIdsToRemove
+     */
+    async removeAssigneesV2(issueOrPr, userIdsToRemove) {
         const query = {
             query: `
-    mutation($oldUserIds: [ID!]! $issueOrPrId: ID!) {
+    mutation($userIdsToRemove: [ID!]! $issueOrPrId: ID!) {
       removeAssigneesFromAssignable(input: {
         assignableId: $issueOrPrId
-        assigneeIds: $oldUserIds
+        assigneeIds: $userIdsToRemove
       }) {
         assignable {
           assignees(last: 1) {
@@ -251,7 +256,7 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
       }
     }
     `,
-            oldUserIds,
+            userIdsToRemove,
             issueOrPrId: issueOrPr.id,
         };
         await this.sendGraphQL(query);
@@ -271,19 +276,19 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
         return id;
     }
     /**
-      * Reassign issue from oldUserIds to newUserId
-      *
-      * @param issueOrPr
-      * @param newUserId
-      * @param oldUserIds
-      */
-    async reassignIssueV2(issueOrPr, newUserId, oldUserIds) {
+     * Reassign issue from oldUserIds to newUserId
+     *
+     * @param issueOrPr
+     * @param userIdToAdd
+     * @param userIdsToRemove
+     */
+    async reassignIssueV2(issueOrPr, userIdToAdd, userIdsToRemove) {
         const query = {
             query: `
-    mutation($newUserId: ID! $oldUserIds: [ID!]! $issueOrPrId: ID!) {
+    mutation($userIdToAdd: ID! $userIdsToRemove: [ID!]! $issueOrPrId: ID!) {
       removeAssigneesFromAssignable(input: {
         assignableId: $issueOrPrId
-        assigneeIds: $oldUserIds
+        assigneeIds: $userIdsToRemove
       }) {
         assignable {
           assignees(last: 1) {
@@ -296,7 +301,7 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
       }
       addAssigneesToAssignable(input: {
         assignableId: $issueOrPrId
-        assigneeIds: [$newUserId]
+        assigneeIds: [$userIdToAdd]
         clientMutationId: "gh action"
       }) {
         assignable {
@@ -310,8 +315,8 @@ class GraphQLAction extends OctokitAction_1.OctokitAction {
       }
     }
     `,
-            newUserId,
-            oldUserIds,
+            userIdToAdd,
+            userIdsToRemove,
             issueOrPrId: issueOrPr.id,
         };
         await this.sendGraphQL(query);

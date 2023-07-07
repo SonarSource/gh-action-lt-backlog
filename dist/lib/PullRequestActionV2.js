@@ -30,7 +30,7 @@ class PullRequestActionV2 extends GraphQLAction_1.GraphQLAction {
          * @returns
          */
         function parseIsOrg(isOrg) {
-            return !isOrg || (isOrg === 'true');
+            return !isOrg || isOrg === 'true';
         }
     }
     async processIssue(columnId, issueOrPR, repoOwner, projectNumber, isOrg) {
