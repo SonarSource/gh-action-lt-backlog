@@ -295,13 +295,18 @@ export abstract class GraphQLAction extends OctokitAction {
     await this.sendGraphQL(query);
   }
 
-  async removeAssigneesV2(issueOrPr: IssueOrPR, oldUserIds: string[]): Promise<void> {
+  /**
+   *
+   * @param issueOrPr
+   * @param userIdsToRemove
+   */
+  async removeAssigneesV2(issueOrPr: IssueOrPR, userIdsToRemove: string[]): Promise<void> {
     const query = {
       query: `
-    mutation($oldUserIds: [ID!]! $issueOrPrId: ID!) {
+    mutation($userIdsToRemove: [ID!]! $issueOrPrId: ID!) {
       removeAssigneesFromAssignable(input: {
         assignableId: $issueOrPrId
-        assigneeIds: $oldUserIds
+        assigneeIds: $userIdsToRemove
       }) {
         assignable {
           assignees(last: 1) {
@@ -314,7 +319,7 @@ export abstract class GraphQLAction extends OctokitAction {
       }
     }
     `,
-      oldUserIds,
+      userIdsToRemove,
       issueOrPrId: issueOrPr.id,
     };
     await this.sendGraphQL(query);
@@ -341,16 +346,16 @@ export abstract class GraphQLAction extends OctokitAction {
    * Reassign issue from oldUserIds to newUserId
    *
    * @param issueOrPr
-   * @param newUserId
-   * @param oldUserIds
+   * @param userIdToAdd
+   * @param userIdsToRemove
    */
-  async reassignIssueV2(issueOrPr: IssueOrPR, newUserId: string, oldUserIds: string[]) {
+  async reassignIssueV2(issueOrPr: IssueOrPR, userIdToAdd: string, userIdsToRemove: string[]) {
     const query = {
       query: `
-    mutation($newUserId: ID! $oldUserIds: [ID!]! $issueOrPrId: ID!) {
+    mutation($userIdToAdd: ID! $userIdsToRemove: [ID!]! $issueOrPrId: ID!) {
       removeAssigneesFromAssignable(input: {
         assignableId: $issueOrPrId
-        assigneeIds: $oldUserIds
+        assigneeIds: $userIdsToRemove
       }) {
         assignable {
           assignees(last: 1) {
@@ -363,7 +368,7 @@ export abstract class GraphQLAction extends OctokitAction {
       }
       addAssigneesToAssignable(input: {
         assignableId: $issueOrPrId
-        assigneeIds: [$newUserId]
+        assigneeIds: [$userIdToAdd]
         clientMutationId: "gh action"
       }) {
         assignable {
@@ -377,8 +382,8 @@ export abstract class GraphQLAction extends OctokitAction {
       }
     }
     `,
-      newUserId,
-      oldUserIds,
+      userIdToAdd,
+      userIdsToRemove,
       issueOrPrId: issueOrPr.id,
     };
     await this.sendGraphQL(query);
