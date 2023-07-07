@@ -153,40 +153,17 @@ export class ProjectContentV2 extends ProjectContent {
   }
 
   public async findCard(issueOrPR: IssueOrPR): Promise<Card> {
-    // FIXME: Pagination - replace "first:100" with paging. There will be more than 100 issues
-    console.log("FIXME pagination");
-    const {
-      organization: {
-        projectV2: {
-          items
+    let hasNextPage = true;
+    let endCursor = "";
+    while (hasNextPage) {
+      const items = await this.loadPaginatedCardItems(endCursor);
+      for (const node of items.nodes) {
+        if (node.content.number === issueOrPR.number) {
+          return { id: node.id, columnName: node.fieldValueByName?.name };
         }
       }
-    }: GraphQlQueryResponseData = await this.action.sendGraphQL(`
-        query {
-          organization(login: "${this.action.repo.owner}") {
-              projectV2 (number: ${this.number}) {
-                items (first:100){
-                    totalCount
-                    nodes {
-                        id
-                        fieldValueByName (name:"Status")
-                        {
-                            ... on ProjectV2ItemFieldSingleSelectValue { name }
-                        }
-                        content
-                        {
-                            ... on Issue { number }
-                            ... on PullRequest { number }
-                        }
-                    }
-                }
-              }
-          }
-      }`);
-    for (const item of items.nodes) {
-      if (item.content.number === issueOrPR.number) {
-        return { id: item.id, columnName: item.fieldValueByName?.name };
-      }
+      hasNextPage = items.pageInfo.hasNextPage;
+      endCursor = items.pageInfo.endCursor;
     }
     this.action.log(`Card not found for #${issueOrPR.number}`);
     return null;
@@ -227,5 +204,40 @@ export class ProjectContentV2 extends ProjectContent {
         }
       }`);
     await this.moveCard({ id, columnName: "" }, column_id);
+  }
+
+  private async loadPaginatedCardItems(endCursor: string): Promise<any> {
+    const {
+      organization: {
+        projectV2: {
+          items
+        }
+      }
+    }: GraphQlQueryResponseData = await this.action.sendGraphQL(`
+        query {
+          organization(login: "${this.action.repo.owner}") {
+            projectV2 (number: ${this.number}) {
+              items (first: 100, after: "${endCursor}") {
+                pageInfo { 
+                  hasNextPage 
+                  endCursor
+                }
+                nodes {
+                  id
+                  fieldValueByName (name:"Status")
+                  {
+                    ... on ProjectV2ItemFieldSingleSelectValue { name }
+                  }
+                  content
+                  {
+                    ... on Issue { number }
+                    ... on PullRequest { number }
+                  }
+                }
+              }
+            }
+          }
+        }`);
+    return items;
   }
 }
