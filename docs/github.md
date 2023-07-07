@@ -3,9 +3,6 @@ For multiple of these actions, you need to get the column_id for parameters. Her
 ## Create personal access token
 
 Create a personal access token (classic) with permissions for:
-- repo
-- workflow
-- user
 - project
 
 [docs](https://docs.github.com/en/enterprise-server@3.9/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
@@ -28,11 +25,10 @@ bearer YOUR_GITHUB_PERSONAL_TOKEN
 
 ### Find project number
 
-The project number is available in the URL of your project as: https://github.com/orgs/SonarSource/projects/NUMBER
+The project number is available in the URL of your project as: https://github.com/orgs/SonarSource/projects/<NUMBER>
 
-The organisation is `SonarSource`.
 
-### Find the project id
+### Find the column ID
 
 To get the column ids, use the following query:
 
@@ -40,7 +36,6 @@ To get the column ids, use the following query:
 query ($org: String!, $projectNumber: Int!) {
   organization(login: $org) {
     projectV2(number: $projectNumber) {
-      id
       field(name: "Status") {
         ... on ProjectV2SingleSelectField {
           columns: options {
