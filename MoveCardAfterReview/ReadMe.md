@@ -14,7 +14,7 @@ Token to access GitHub API.
 
 ### `column-id`
 
-ID of the Kanban column where the card should be moved to. Typically ID of `In progress` or `Review approved` column.
+ID of the Kanban column where the card should be moved to. Typically ID of `In progress` or `Review approved` column. [This page](../docs/github.md) explains how this can be obtained.
 
 ## Outputs
 
