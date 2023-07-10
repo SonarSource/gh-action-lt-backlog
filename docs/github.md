@@ -13,6 +13,7 @@ Copy the column link and retrieve the id from the end of the URL
 ### Find project number
 
 The project number is available in the URL of your project as: `https://github.com/orgs/SonarSource/projects/<NUMBER>`
+
 ### Find column ID
 
 #### Create personal access token
@@ -27,6 +28,3 @@ To get the column ids, use the following command, replacing `YOUR_GITHUB_PERSONA
 ```bash
 curl -H 'Content-Type: application/json' -H "Authorization: bearer <YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>" -X POST -d '{ "query": "query {  organization(login: \"SonarSource\") { projectV2(number: <NUMBER>) { field(name: \"Status\") { ... on ProjectV2SingleSelectField { columns: options { id name }}}}}}" }' https://api.github.com/graphql
 ```
-
-[docs](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects#finding-the-node-id-of-an-organization-project)
-
