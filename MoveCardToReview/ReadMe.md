@@ -8,7 +8,7 @@ When the PR contains one or more `Fixes #...` in the description, all the refere
 
 ## Compatibility
 
-This action is compatible with GitHub's Projects classic and V2. V2 requires you to set the project number.
+This action is compatible with GitHub's Projects classic and V2. V2 requires you to set the `project-number` parameter.
 
 ## Inputs
 
