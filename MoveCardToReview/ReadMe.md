@@ -51,8 +51,8 @@ jobs:
       - uses: sonarsource/gh-action-lt-backlog/MoveCardToReview@v1
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          column-id: "3cab0eb0"     # Kanban "Review in progress" column
-          project-number: 2
+          column-id: "abcdef00"     # Kanban "Review in progress" column
+          project-number: 42
 ```
 
 ### Projects (classic)
