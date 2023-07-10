@@ -68,7 +68,7 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           column-id: "abcdef02"     # Kanban "Review approved" column
-          project-number: 2
+          project-number: 42
 ```
 
 ### Projects (classic)
