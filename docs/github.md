@@ -1,12 +1,12 @@
 # GitHub Actions params fetching
 
-For multiple of these actions, you need to get the value for the `column-id` parameter. Here are the instructions on how to retrieve them.
+For multiple of these actions, you need to get the value for the `column-id` and `project-number` parameters. Here are the instructions on how to retrieve them.
 
 ## Projects (classic)
 
 ### Find column id
 
-Copy the column link and retrieve the id from the end of the URL
+Copy the column link and retrieve the id from the end of the URL.
 
 ## Projects (V2)
 
