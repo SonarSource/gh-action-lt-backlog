@@ -27,7 +27,7 @@ Create a personal access token (classic) with permissions for:
 
 ### Find project number
 
-The project number is available in the URL of your project as: https://github.com/orgs/SonarSource/projects/<NUMBER>
+The project number is available in the URL of your project as: `https://github.com/orgs/SonarSource/projects/<NUMBER>`
 
 
 ### Find the column ID
