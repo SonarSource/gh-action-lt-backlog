@@ -32,6 +32,7 @@ export abstract class ProjectContent {
   }
 
   public async createCard(issueOrPR: IssueOrPR, column_id: ColumnId): Promise<void> {
+    this.action.log(`Creating card for issue #${issueOrPR.number} on column ${column_id}`);
     const card = await this.findCard(issueOrPR);
     if (card) {
       this.action.log(`Card already exists for #${issueOrPR.number} in ${card.columnName}`);
