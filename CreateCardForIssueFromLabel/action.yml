@@ -1,11 +1,11 @@
-name: 'Create card for issue from label'
-description: 'Create card for issue in a project column determined by the issue label'
+name: 'Create card for issue from label in Project V2'
+description: 'Create card for issue in a project V2 column determined by the issue label'
 inputs:
   github-token:
     description: 'GitHub auth Token'
     required: true
-  project-id:
-    description: 'ID of the Kanban project where the card should be created'
+  project-number:
+    description: 'Number of the Backlog project V2 where the card should be created'
     required: true
   label-prefix:
     description: 'Prefix of the label that activates this action'
