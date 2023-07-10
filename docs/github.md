@@ -1,6 +1,6 @@
 # GitHub Actions params fetching
 
-For multiple of these actions, you need to get the column_id for parameters. Here are the instructions on how to retrieve them.
+For multiple of these actions, you need to get the value for the `column-id` parameter. Here are the instructions on how to retrieve them.
 
 ## Projects (classic)
 
@@ -20,7 +20,7 @@ The project number is available in the URL of your project as: https://github.co
 Create a personal access token (classic) with permissions for:
 - project
 
-[docs](https://docs.github.com/en/enterprise-server@3.9/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+[GitHub docs on personal token creation](https://docs.github.com/en/enterprise-server@3.9/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 #### query
 
 ## Find data for Projects V2
