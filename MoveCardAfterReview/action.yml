@@ -8,7 +8,7 @@ inputs:
     description: 'ID of the Kanban column where the card should be moved to'
     required: true
   project-number:
-    description: 'The number of the project, only required for Projects V2'
+    description: 'The project number when Projects V2 is used'
     required: false
 runs:
   using: 'node16'
