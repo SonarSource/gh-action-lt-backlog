@@ -22,7 +22,7 @@ ID of the Kanban column where the card should be moved to. Typically ID of `Revi
 
 ### `project-number`
 
-The project number. [This page](../docs/github.md) explains how this can be obtained.
+The project number, only required for projects V2. [This page](../docs/github.md) explains how this can be obtained.
 
 ## Outputs
 
@@ -51,7 +51,8 @@ jobs:
       - uses: sonarsource/gh-action-lt-backlog/MoveCardToReview@v1
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          column-id: 123456     # Kanban "Review in progress" column
+          column-id: "3cab0eb0"     # Kanban "Review in progress" column
+          project-number: 2
 ```
 
 ### Projects (classic)
@@ -75,6 +76,5 @@ jobs:
       - uses: sonarsource/gh-action-lt-backlog/MoveCardToReview@v1
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          column-id: "3cab0eb0"     # Kanban "Review in progress" column
-          project-number: 2
+          column-id: 123456     # Kanban "Review in progress" column
 ```
