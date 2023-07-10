@@ -54,7 +54,7 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           column-id: "e926f6bf"     # Kanban "In progress" column
-          project-number: 2
+          project-number: 42
 
   ReviewApproved_job:
     name: Move card to review approved
