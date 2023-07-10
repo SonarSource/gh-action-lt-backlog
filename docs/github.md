@@ -17,8 +17,7 @@ The project number is available in the URL of your project as: https://github.co
 
 #### Create personal access token
 
-Create a personal access token (classic) with permissions for:
-- project
+Create a personal access token (classic) with permissions for `read:project`.
 
 [GitHub docs on personal token creation](https://docs.github.com/en/enterprise-server@3.9/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 #### query
