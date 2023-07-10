@@ -22,7 +22,7 @@ ID of the Kanban column where the card should be moved to. Typically ID of `Revi
 
 ### `project-number`
 
-The project number, only required for projects V2. [This page](../docs/github.md) explains how this can be obtained.
+The project number when Projects V2 is used. [This page](../docs/github.md) explains how this can be obtained.
 
 ## Outputs
 
