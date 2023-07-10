@@ -18,7 +18,7 @@ Token to access GitHub API.
 
 ### `column-id`
 
-ID of the Kanban column where the card should be moved to. Typically ID of `Review in progress` column. It is a number for Project classic and a string for V2. [This page](../docs/github.md) explains how this can be obtained.
+ID of the Kanban column where the card should be moved to. Typically the ID of the `In progress` or `Review approved` column. It is a number for Project classic and a string for V2. [This page](../docs/github.md) explains how this can be obtained.
 
 ### `project-number`
 
