@@ -1,0 +1,15 @@
+name: 'Create card with a note'
+description: 'Create card with a note in the configured column'
+inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
+  column-id:
+    description: 'ID of the Kanban column where the card should be created'
+    required: true
+  note:
+    description: 'Text of the note'
+    required: true
+runs:
+  using: 'node16'
+  main: '../dist/CreateNote/CreateNote.js'

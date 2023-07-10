@@ -31,6 +31,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include=".editorconfig" />
+    <Content Include="CopyLabelToPR\action.yml" />
+    <Content Include="CopyLabelToPR\ReadMe.md" />
+    <Content Include="CreateNote\action.yml" />
+    <Content Include="CreateNote\ReadMe.md" />
     <Content Include="CreateCardForIssueFromLabel\action.yml" />
     <Content Include="CreateCardForIssueFromLabel\ReadMe.md" />
     <Content Include="MoveCardAfterReview\action.yml" />
@@ -54,6 +58,8 @@
     <Content Include="tsconfig.json" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="CopyLabelToPR\" />
+    <Folder Include="CreateNote\" />
     <Folder Include="ToggleLockBranch\" />
     <Folder Include="CreateCardForIssueFromLabel\" />
     <Folder Include="MoveCardAfterReview\" />
@@ -66,7 +72,8 @@
     <Folder Include="lib\" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="lib\GraphQLAction.ts" />
+    <TypeScriptCompile Include="CopyLabelToPR\CopyLabelToPR.ts" />
+    <TypeScriptCompile Include="CreateNote\CreateNote.ts" />
     <TypeScriptCompile Include="CreateCardForIssueFromLabel\CreateCardForIssueFromLabel.ts" />
     <TypeScriptCompile Include="lib\IssueOrPR.ts" />
     <TypeScriptCompile Include="lib\OctokitTypes.ts" />

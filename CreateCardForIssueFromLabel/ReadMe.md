@@ -16,6 +16,16 @@ Token to access GitHub API.
 
 ID of the Kanban project where the card should be created.
 
+You can list repository projects like this
+```
+curl -L -H "Authorization: Bearer <YOUR-TOKEN>" https://api.github.com/repos/SonarSource/<repository>/projects
+```
+
+You can list organization projects like this
+```
+curl -L -H "Authorization: Bearer <YOUR-TOKEN>" https://api.github.com/orgs/SonarSource/projects
+```
+
 ### `label-prefix`
 
 Label prefix that activates this feature. Only labels with this prefix will create card. Project should contain column names without this prefix.
@@ -45,7 +55,7 @@ jobs:
     # Only limited global functions are available in this context https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#functions
     if: |
         github.event.issue.state == 'Open'
-        && startsWith(github.event.label.name, 'Type: ')
+        && startsWith(github.event.label.name, 'Type:')
 
     steps:
       - uses: sonarsource/gh-action-lt-backlog/CreateCardForIssueFromLabel@v1
