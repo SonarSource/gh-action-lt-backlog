@@ -8,7 +8,7 @@ When the PR contains one or more `Fixes #...` in the description, all the refere
 
 ## Compatibility
 
-This action is compatible with GitHub's Projects classic and V2. V2 requires you to set the project number.
+This action is compatible with GitHub's Projects classic and V2. V2 requires you to set the `project-number` parameter.
 
 ## Inputs
 
@@ -22,7 +22,7 @@ ID of the Kanban column where the card should be moved to. Typically ID of `Revi
 
 ### `project-number`
 
-The project number, only required for projects V2. [This page](../docs/github.md) explains how this can be obtained.
+The project number when Projects V2 is used. [This page](../docs/github.md) explains how this can be obtained.
 
 ## Outputs
 
@@ -43,16 +43,23 @@ jobs:
   MoveCardToReview_job:
     name: Move card to review
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     # PRs from forks don't have required token authorization
     if: |
         github.event.pull_request.head.repo.full_name == github.repository
         && github.event.review.author_association != 'NONE'
     steps:
+      - id: secrets
+        uses: SonarSource/vault-action-wrapper@2.5.0-4
+        with:
+          secrets: |
+            development/github/token/{REPO_OWNER_NAME_DASH}-kanban token | kanban_token;
       - uses: sonarsource/gh-action-lt-backlog/MoveCardToReview@v1
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          column-id: "3cab0eb0"     # Kanban "Review in progress" column
-          project-number: 2
+          github-token: ${{ fromJSON(steps.secrets.outputs.vault).kanban_token }}
+          column-id: "abcdef00"     # Kanban "Review in progress" column
+          project-number: 42
 ```
 
 ### Projects (classic)
