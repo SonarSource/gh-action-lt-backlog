@@ -43,6 +43,8 @@ jobs:
   MoveCardToProgress_job:
     name: Move card to progress
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     # Single quotes must be used here https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#literals
     # PRs from forks don't have required token authorization
     if: |
@@ -50,23 +52,35 @@ jobs:
         && github.event.review.author_association != 'NONE'
         && github.event.review.state == 'changes_requested'
     steps:
+      - id: secrets
+        uses: SonarSource/vault-action-wrapper@2.5.0-4
+        with:
+          secrets: |
+            development/github/token/{REPO_OWNER_NAME_DASH}-kanban token | kanban_token;
       - uses: sonarsource/gh-action-lt-backlog/MoveCardAfterReview@v1
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{ fromJSON(steps.secrets.outputs.vault).kanban_token }}
           column-id: "abcdef01"     # Kanban "In progress" column
           project-number: 42
 
   ReviewApproved_job:
     name: Move card to review approved
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     if: |
         github.event.pull_request.head.repo.full_name == github.repository
         && github.event.review.author_association != 'NONE'
         && github.event.review.state == 'approved'
     steps:
+      - id: secrets
+        uses: SonarSource/vault-action-wrapper@2.5.0-4
+        with:
+          secrets: |
+            development/github/token/{REPO_OWNER_NAME_DASH}-kanban token | kanban_token;
       - uses: sonarsource/gh-action-lt-backlog/MoveCardAfterReview@v1
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{ fromJSON(steps.secrets.outputs.vault).kanban_token }}
           column-id: "abcdef02"     # Kanban "Review approved" column
           project-number: 42
 ```
