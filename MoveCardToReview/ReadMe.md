@@ -43,14 +43,21 @@ jobs:
   MoveCardToReview_job:
     name: Move card to review
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     # PRs from forks don't have required token authorization
     if: |
         github.event.pull_request.head.repo.full_name == github.repository
         && github.event.review.author_association != 'NONE'
     steps:
+      - id: secrets
+        uses: SonarSource/vault-action-wrapper@2.5.0-4
+        with:
+          secrets: |
+            development/github/token/{REPO_OWNER_NAME_DASH}-kanban token | kanban_token;
       - uses: sonarsource/gh-action-lt-backlog/MoveCardToReview@v1
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{ fromJSON(steps.secrets.outputs.vault).kanban_token }}
           column-id: "abcdef00"     # Kanban "Review in progress" column
           project-number: 42
 ```
