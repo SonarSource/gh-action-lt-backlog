@@ -7,21 +7,22 @@ export type Card = {
   id: string;
   columnName: string;
 };
+export type ColumnId = number | string;
 
 export abstract class ProjectContent {
   protected readonly action: OctokitAction;
   protected readonly columns: ProjectColumn[];
 
   public abstract findCard(issueOrPR: IssueOrPR): Promise<Card>;
-  public abstract moveCard(card: Card, column_id: number): Promise<void>;
-  protected abstract createCardCore(issueOrPR: IssueOrPR, column_id: number): Promise<void>;
+  public abstract moveCard(card: Card, column_id: ColumnId): Promise<void>;
+  protected abstract createCardCore(issueOrPR: IssueOrPR, column_id: ColumnId): Promise<void>;
 
   protected constructor(action: OctokitAction, columns: ProjectColumn[]) {
     this.action = action;
     this.columns = columns;
   }
 
-  public async moveOrCreateCard(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
+  public async moveOrCreateCard(issueOrPR: IssueOrPR, column_id: ColumnId): Promise<void> {
     const card = await this.findCard(issueOrPR);
     if (card) {
       await this.moveCard(card, column_id);
@@ -30,7 +31,7 @@ export abstract class ProjectContent {
     }
   }
 
-  public async createCard(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
+  public async createCard(issueOrPR: IssueOrPR, column_id: ColumnId): Promise<void> {
     const card = await this.findCard(issueOrPR);
     if (card) {
       this.action.log(`Card already exists for #${issueOrPR.number} in ${card.columnName}`);
@@ -124,7 +125,7 @@ export class ProjectContentV2 extends ProjectContent {
   public static async fromProject(
     action: OctokitAction,
     number: number,
-  ): Promise<ProjectContent> {
+  ): Promise<ProjectContentV2> {
     const {
       organization: {
         projectV2: {
@@ -140,9 +141,9 @@ export class ProjectContentV2 extends ProjectContent {
                   field (name: "Status"){
                       ... on ProjectV2SingleSelectField {
                           id
-                          options { 
-                            id 
-                            name 
+                          options {
+                            id
+                            name
                           }
                       }
                   }
@@ -169,7 +170,7 @@ export class ProjectContentV2 extends ProjectContent {
     return null;
   }
 
-  public async moveCard(card: Card, column_id: number): Promise<void> {
+  public async moveCard(card: Card, column_id: string): Promise<void> {
     console.log(`Moving card to column ${column_id}`);
     await this.action.sendGraphQL(`
       mutation {
@@ -180,14 +181,14 @@ export class ProjectContentV2 extends ProjectContent {
           value: {
             singleSelectOptionId: "${column_id}"
           }
-        }) 
+        })
         {
           projectV2Item { id }
         }
       }`);
   }
 
-  protected async createCardCore(issueOrPR: IssueOrPR, column_id: number): Promise<void> {
+  protected async createCardCore(issueOrPR: IssueOrPR, column_id: string): Promise<void> {
     this.action.log(`Creating card for #${issueOrPR.number}`);
     const {
       addProjectV2ItemById: {
@@ -195,10 +196,10 @@ export class ProjectContentV2 extends ProjectContent {
       }
     }: GraphQlQueryResponseData = await this.action.sendGraphQL(`
       mutation {
-        addProjectV2ItemById(input: { 
-          contentId: "${issueOrPR.node_id}", 
-          projectId: "${this.id}" 
-        }) 
+        addProjectV2ItemById(input: {
+          contentId: "${issueOrPR.node_id}",
+          projectId: "${this.id}"
+        })
         {
           item { id }
         }
@@ -218,8 +219,8 @@ export class ProjectContentV2 extends ProjectContent {
           organization(login: "${this.action.repo.owner}") {
             projectV2 (number: ${this.number}) {
               items (first: 100, after: "${endCursor}") {
-                pageInfo { 
-                  hasNextPage 
+                pageInfo {
+                  hasNextPage
                   endCursor
                 }
                 nodes {

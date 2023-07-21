@@ -1,13 +1,20 @@
 import { OctokitAction } from './OctokitAction';
-import { ProjectContentV1 } from './ProjectContent';
+import { ColumnId, ProjectContent, ProjectContentV1, ProjectContentV2 } from './ProjectContent';
 import { IssueOrPR } from './IssueOrPR';
 
 export abstract class PullRequestAction extends OctokitAction {
   protected abstract processReassignment(issueOrPR: IssueOrPR): Promise<void>;
 
   protected async execute(): Promise<void> {
-    const column_id = this.getInputNumber('column-id');
-    const project = ProjectContentV1.fromColumn(this, column_id);
+    let column_id: ColumnId = this.getInput('column-id');
+    const projectNumber = this.getInput('project-number');
+    let project: Promise<ProjectContent>;
+    if (projectNumber) {
+      project = ProjectContentV2.fromProject(this, parseInt(projectNumber))
+    } else {
+      column_id = parseInt(column_id);
+      project = ProjectContentV1.fromColumn(this, column_id);
+    }
 
     let processPR = true;
     const pr = this.payload.pull_request;
@@ -28,8 +35,8 @@ export abstract class PullRequestAction extends OctokitAction {
   }
 
   protected async processIssue(
-    projectPromise: Promise<ProjectContentV1>,
-    column_id: number,
+    projectPromise: Promise<ProjectContent>,
+    column_id: ColumnId,
     issueOrPR: IssueOrPR,
   ): Promise<void> {
     await this.processReassignment(issueOrPR);
