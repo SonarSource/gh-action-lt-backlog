@@ -28,6 +28,11 @@ The project number when Projects V2 is used. [This page](../docs/github.md) expl
 
 None
 
+## Prerequisites
+
+Send an email to REs asking to add a `github_kanban` token to the Vault configuration of your repository for each repository where you need to use this.
+A change like that [for the squad](https://github.com/SonarSource/re-terraform-aws-vault/blob/edba176cf3d89dd3a7e9ffed5807a8082076fbfe/orders/squad-jsts.yaml#L21-L29) and like that [for each repository](https://github.com/SonarSource/re-terraform-aws-vault/blob/edba176cf3d89dd3a7e9ffed5807a8082076fbfe/orders/squad-jsts.yaml#L53-L54).
+
 ## Usage examples
 
 ### Projects V2
