@@ -101,9 +101,9 @@ class ProjectContentV2 extends ProjectContent {
                   field (name: "Status"){
                       ... on ProjectV2SingleSelectField {
                           id
-                          options { 
-                            id 
-                            name 
+                          options {
+                            id
+                            name
                           }
                       }
                   }
@@ -113,34 +113,17 @@ class ProjectContentV2 extends ProjectContent {
         return new ProjectContentV2(action, columns, number, id, columnFieldId); // Only "id" and "name" are filled. We can query more if we need to
     }
     async findCard(issueOrPR) {
-        // FIXME: Pagination - replace "first:100" with paging. There will be more than 100 issues
-        console.log("FIXME pagination");
-        const { organization: { projectV2: { items } } } = await this.action.sendGraphQL(`
-        query {
-          organization(login: "${this.action.repo.owner}") {
-              projectV2 (number: ${this.number}) {
-                items (first:100){
-                    totalCount
-                    nodes {
-                        id
-                        fieldValueByName (name:"Status")
-                        {
-                            ... on ProjectV2ItemFieldSingleSelectValue { name }
-                        }
-                        content
-                        {
-                            ... on Issue { number }
-                            ... on PullRequest { number }
-                        }
-                    }
+        let hasNextPage = true;
+        let endCursor = "";
+        while (hasNextPage) {
+            const items = await this.loadPaginatedCardItems(endCursor);
+            for (const node of items.nodes) {
+                if (node.content.number === issueOrPR.number) {
+                    return { id: node.id, columnName: node.fieldValueByName?.name };
                 }
-              }
-          }
-      }`);
-        for (const item of items.nodes) {
-            if (item.content.number === issueOrPR.number) {
-                return { id: item.id, columnName: item.fieldValueByName?.name };
             }
+            hasNextPage = items.pageInfo.hasNextPage;
+            endCursor = items.pageInfo.endCursor;
         }
         this.action.log(`Card not found for #${issueOrPR.number}`);
         return null;
@@ -156,7 +139,7 @@ class ProjectContentV2 extends ProjectContent {
           value: {
             singleSelectOptionId: "${column_id}"
           }
-        }) 
+        })
         {
           projectV2Item { id }
         }
@@ -166,15 +149,43 @@ class ProjectContentV2 extends ProjectContent {
         this.action.log(`Creating card for #${issueOrPR.number}`);
         const { addProjectV2ItemById: { item: { id } } } = await this.action.sendGraphQL(`
       mutation {
-        addProjectV2ItemById(input: { 
-          contentId: "${issueOrPR.node_id}", 
-          projectId: "${this.id}" 
-        }) 
+        addProjectV2ItemById(input: {
+          contentId: "${issueOrPR.node_id}",
+          projectId: "${this.id}"
+        })
         {
           item { id }
         }
       }`);
         await this.moveCard({ id, columnName: "" }, column_id);
+    }
+    async loadPaginatedCardItems(endCursor) {
+        const { organization: { projectV2: { items } } } = await this.action.sendGraphQL(`
+        query {
+          organization(login: "${this.action.repo.owner}") {
+            projectV2 (number: ${this.number}) {
+              items (first: 100, after: "${endCursor}") {
+                pageInfo {
+                  hasNextPage
+                  endCursor
+                }
+                nodes {
+                  id
+                  fieldValueByName (name:"Status")
+                  {
+                    ... on ProjectV2ItemFieldSingleSelectValue { name }
+                  }
+                  content
+                  {
+                    ... on Issue { number }
+                    ... on PullRequest { number }
+                  }
+                }
+              }
+            }
+          }
+        }`);
+        return items;
     }
 }
 exports.ProjectContentV2 = ProjectContentV2;
