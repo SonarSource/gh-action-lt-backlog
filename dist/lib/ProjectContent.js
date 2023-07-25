@@ -118,7 +118,7 @@ class ProjectContentV2 extends ProjectContent {
         while (hasNextPage) {
             const items = await this.loadPaginatedCardItems(endCursor);
             for (const node of items.nodes) {
-                if (node.content.number === issueOrPR.number) {
+                if (node.content?.number === issueOrPR.number) {
                     return { id: node.id, columnName: node.fieldValueByName?.name };
                 }
             }
