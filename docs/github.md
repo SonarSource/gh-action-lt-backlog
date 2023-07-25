@@ -28,5 +28,6 @@ Create a personal access token (classic) with permissions for:
 To get the column ids, use the following command, replacing `YOUR_GITHUB_PERSONAL_ACCESS_TOKEN` and `NUMBER`:
 
 ```bash
-curl -H "Content-Type: application/json" -H "Authorization: bearer <YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>" -X POST -d '{ "query": "query {  organization(login: \"SonarSource\") { projectV2(number: <NUMBER>) { field(name: \"Status\") { ... on ProjectV2SingleSelectField { columns: options { id name }}}}}}" }' https://api.github.com/graphql
+curl -H "Content-Type: application/json" -H "Authorization: bearer <YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>" -X POST -d "{ \"query\": \"query { organization(login: \u0022SonarSource\u0022) { projectV2(number: <NUMBER>) { field(name: \u0022Status\u0022) { ... on ProjectV2SingleSelectField { columns: options { id name }}}}}}\" }" https://api.github.com/graphql
 ```
+
