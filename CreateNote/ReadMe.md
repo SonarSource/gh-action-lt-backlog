@@ -10,7 +10,7 @@ Token to access GitHub API.
 
 ### `column-id`
 
-ID of the Kanban column where the card should be created.
+ID of the Kanban column where the card should be created. [This page](../docs/github.md) explains how this can be obtained.
 
 ### `note`
 
