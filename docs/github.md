@@ -23,7 +23,8 @@ Create a personal access token (classic) with permissions for:
 - `public_repo`
 
 [GitHub docs on personal token creation](https://docs.github.com/en/enterprise-server@3.9/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
-#### query
+
+#### Query
 
 To get the column ids, use the following command, replacing `YOUR_GITHUB_PERSONAL_ACCESS_TOKEN` and `NUMBER`:
 
