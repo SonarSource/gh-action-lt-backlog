@@ -56,7 +56,7 @@ jobs:
     # PRs from forks don't have required token authorization
     if: |
         github.event.pull_request.head.repo.full_name == github.repository
-        && (github.event.review.author_association == 'COLLABORATOR' || github.event.review.author_association == 'MEMBER')
+        && github.event.review.author_association != 'NONE'
         && github.event.review.state == 'changes_requested'
     steps:
       - id: secrets
@@ -77,7 +77,7 @@ jobs:
       id-token: write
     if: |
         github.event.pull_request.head.repo.full_name == github.repository
-        && (github.event.review.author_association == 'COLLABORATOR' || github.event.review.author_association == 'MEMBER')
+        && github.event.review.author_association != 'NONE'
         && github.event.review.state == 'approved'
     steps:
       - id: secrets
@@ -109,7 +109,7 @@ jobs:
     # PRs from forks don't have required token authorization
     if: |
         github.event.pull_request.head.repo.full_name == github.repository
-        && (github.event.review.author_association == 'COLLABORATOR' || github.event.review.author_association == 'MEMBER')
+        && github.event.review.author_association != 'NONE'
         && github.event.review.state == 'changes_requested'
     steps:
       - uses: sonarsource/gh-action-lt-backlog/MoveCardAfterReview@v1
@@ -122,7 +122,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
         github.event.pull_request.head.repo.full_name == github.repository
-        && (github.event.review.author_association == 'COLLABORATOR' || github.event.review.author_association == 'MEMBER')
+        && github.event.review.author_association != 'NONE'
         && github.event.review.state == 'approved'
     steps:
       - uses: sonarsource/gh-action-lt-backlog/MoveCardAfterReview@v1
