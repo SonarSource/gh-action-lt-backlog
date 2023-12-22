@@ -53,7 +53,7 @@ jobs:
     # PRs from forks don't have required token authorization
     if: |
         github.event.pull_request.head.repo.full_name == github.repository
-        && github.event.review.author_association != 'NONE'
+        && (github.event.review.author_association == 'COLLABORATOR' || github.event.review.author_association == 'MEMBER')
     steps:
       - id: secrets
         uses: SonarSource/vault-action-wrapper@2.5.0-4
@@ -83,7 +83,7 @@ jobs:
     # PRs from forks don't have required token authorization
     if: |
         github.event.pull_request.head.repo.full_name == github.repository
-        && github.event.review.author_association != 'NONE'
+        && (github.event.review.author_association == 'COLLABORATOR' || github.event.review.author_association == 'MEMBER')
     steps:
       - uses: sonarsource/gh-action-lt-backlog/MoveCardToReview@v1
         with:
