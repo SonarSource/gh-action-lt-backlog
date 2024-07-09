@@ -60,7 +60,7 @@ jobs:
         && github.event.review.state == 'changes_requested'
     steps:
       - id: secrets
-        uses: SonarSource/vault-action-wrapper@2.5.0-4
+        uses: SonarSource/vault-action-wrapper@v3
         with:
           secrets: |
             development/github/token/{REPO_OWNER_NAME_DASH}-kanban token | kanban_token;
@@ -81,7 +81,7 @@ jobs:
         && github.event.review.state == 'approved'
     steps:
       - id: secrets
-        uses: SonarSource/vault-action-wrapper@2.5.0-4
+        uses: SonarSource/vault-action-wrapper@v3
         with:
           secrets: |
             development/github/token/{REPO_OWNER_NAME_DASH}-kanban token | kanban_token;
