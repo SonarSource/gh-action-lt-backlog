@@ -6,9 +6,11 @@ const github = require("@actions/github");
 const Action_1 = require("./Action");
 const node_fetch_1 = require("node-fetch");
 const graphql_1 = require("@octokit/graphql");
+const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
 class OctokitAction extends Action_1.Action {
     constructor() {
         super();
+        this.jiraAuthToken = Buffer.from(core.getInput('jira-token')).toString('base64');
         this.octokit = github.getOctokit(core.getInput('github-token'));
         this.rest = this.octokit.rest;
     }
@@ -21,6 +23,20 @@ class OctokitAction extends Action_1.Action {
             });
         }
         return this.graphqlWithAuth(query);
+    }
+    async moveIssue(issueId, transitionName) {
+        try {
+            let response = await this.jiraTransitionRequest("GET", issueId);
+            const transition = response.transitions.find((t) => t.name === transitionName);
+            if (transition == null) {
+                throw new Error(`Could not find the transition '${transitionName}'`);
+            }
+            await this.jiraTransitionRequest("POST", issueId, { transition: { id: transition.id } });
+            console.log(`${issueId}: Transition '${transitionName}' successfully excecuted.`);
+        }
+        catch (error) {
+            console.warn(`${issueId}: Failed to move issue with the '${transitionName}' transition: ${error}`);
+        }
     }
     getInput(name) {
         return core.getInput(name);
@@ -57,6 +73,22 @@ class OctokitAction extends Action_1.Action {
         else {
             this.log("Skip sending slack message, channel was not set.");
         }
+    }
+    async jiraTransitionRequest(method, issueId, body) {
+        const url = `${JIRA_DOMAIN}/rest/api/3/issue/${issueId}/transitions`;
+        const response = await (0, node_fetch_1.default)(url, {
+            method,
+            headers: {
+                'Authorization': `Basic ${this.jiraAuthToken}`,
+                'Accept': 'application/json',
+            },
+            body: body ? JSON.stringify(body) : undefined,
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.errorMessages[0]);
+        }
+        return data;
     }
     async sendSlackPost(url, jsonRequest) {
         const token = this.getInput("slack-token");

@@ -8,13 +8,17 @@ import { PullRequest } from './OctokitTypes';
 import fetch from 'node-fetch';
 import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
 
+const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
+
 export abstract class OctokitAction extends Action {
   public readonly rest: RestEndpointMethods;
   protected readonly octokit: InstanceType<typeof GitHub>;
+  private readonly jiraAuthToken: string;
   private graphqlWithAuth: graphqlTypes.graphql;
 
   constructor() {
     super();
+    this.jiraAuthToken = Buffer.from(core.getInput('jira-token')).toString('base64');
     this.octokit = github.getOctokit(core.getInput('github-token'));
     this.rest = this.octokit.rest;
   }
@@ -28,6 +32,20 @@ export abstract class OctokitAction extends Action {
       });
     }
     return this.graphqlWithAuth(query);
+  }
+
+  protected async moveIssue(issueId: string, transitionName: string): Promise<void> {
+    try {
+      let response = await this.jiraTransitionRequest("GET", issueId);
+      const transition = response.transitions.find((t: any) => t.name === transitionName);
+      if (transition == null) {
+        throw new Error(`Could not find the transition '${transitionName}'`);
+      }
+      await this.jiraTransitionRequest("POST", issueId, { transition: { id: transition.id } });
+      console.log(`${issueId}: Transition '${transitionName}' successfully excecuted.`);
+    } catch (error) {
+      console.warn(`${issueId}: Failed to move issue with the '${transitionName}' transition: ${error}`);
+    }
   }
 
   protected getInput(name: string): string {
@@ -66,6 +84,27 @@ export abstract class OctokitAction extends Action {
     } else {
       this.log("Skip sending slack message, channel was not set.")
     }
+  }
+
+  private async jiraTransitionRequest(method: "GET" | "POST", issueId: string, body?: any): Promise<any> {
+    const url = `${JIRA_DOMAIN}/rest/api/3/issue/${issueId}/transitions`;
+
+    const response = await fetch(url, {
+      method,
+      headers: {
+        'Authorization': `Basic ${this.jiraAuthToken}`,
+        'Accept': 'application/json',
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.errorMessages[0]);
+    }
+
+    return data;
   }
 
   private async sendSlackPost(url: string, jsonRequest: any): Promise<any> {
