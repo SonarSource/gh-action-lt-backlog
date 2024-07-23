@@ -1,0 +1,12 @@
+name: 'Move card back to the INPROGRESS state after review'
+description: 'Move fixed issue or PR card to the INPROGRESS state'
+inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
+  jira-token:
+    description: 'JIRA auth Token'
+    required: true
+runs:
+  using: 'node16'
+  main: '../dist/MoveCardBackToInProgress/MoveCardBackToInProgress.js'
