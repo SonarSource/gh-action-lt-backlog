@@ -10,7 +10,7 @@ const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
 class OctokitAction extends Action_1.Action {
     constructor() {
         super();
-        this.jiraAuthToken = Buffer.from(core.getInput('jira-token')).toString('base64');
+        this.jiraToken = Buffer.from(core.getInput('jira-token')).toString('base64');
         this.octokit = github.getOctokit(core.getInput('github-token'));
         this.rest = this.octokit.rest;
     }
@@ -27,13 +27,13 @@ class OctokitAction extends Action_1.Action {
     async moveIssue(issueId, transitionName) {
         try {
             console.log(`${issueId}: Getting transition id for '${transitionName}'`);
-            let response = await this.jiraTransitionRequest("GET", issueId);
-            const transition = response.transitions.find((t) => t.name === transitionName);
+            let transitions = await this.listTransitions(issueId);
+            const transition = transitions.find((t) => t.name === transitionName);
             if (transition == null) {
                 throw new Error(`Could not find the transition '${transitionName}'`);
             }
             console.log(`${issueId}: Executing '${transitionName}' (${transition.id}) transition`);
-            await this.jiraTransitionRequest("POST", issueId, { transition: { id: transition.id } });
+            await this.transitionIssue(issueId, transition.id);
             console.log(`${issueId}: Transition '${transitionName}' successfully excecuted.`);
         }
         catch (error) {
@@ -76,20 +76,33 @@ class OctokitAction extends Action_1.Action {
             this.log("Skip sending slack message, channel was not set.");
         }
     }
-    async jiraTransitionRequest(method, issueId, body) {
-        const url = `${JIRA_DOMAIN}/rest/api/3/issue/${issueId}/transitions`;
+    async listTransitions(issueId) {
+        return (await this.sendJiraGet(`issue/${issueId}/transitions`)).transitions;
+    }
+    async transitionIssue(issueId, transitionId) {
+        this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transitionId } });
+    }
+    async sendJiraGet(endpoint) {
+        return this.sendJiraRequest("GET", endpoint);
+    }
+    async sendJiraPost(endpoint, body) {
+        return this.sendJiraRequest("POST", endpoint, body);
+    }
+    async sendJiraRequest(method, endpoint, body) {
+        const url = `${JIRA_DOMAIN}/rest/api/3/${endpoint}`;
         const response = await (0, node_fetch_1.default)(url, {
             method,
             headers: {
-                'Authorization': `Basic ${this.jiraAuthToken}`,
+                'Authorization': `Basic ${this.jiraToken}`,
                 'Accept': 'application/json',
+                'Content-Type': 'application/json',
             },
             body: body ? JSON.stringify(body) : undefined,
         });
-        const data = response.headers.get('Content-Length') === '0' ? null : await response.json();
-        ;
+        const responseContent = await response.text();
+        const data = responseContent.length > 0 ? JSON.parse(responseContent) : null;
         if (!response.ok) {
-            throw new Error(data?.errorMessages[0] ?? `${response.status} (${response.statusText}): Unknown error`);
+            throw new Error(`${response.status} (${response.statusText}): ${data?.errorMessages.join('. ') ?? 'Unknown error'}`);
         }
         return data;
     }

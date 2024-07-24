@@ -13,6 +13,7 @@ class PullRequestAction extends OctokitAction_1.OctokitAction {
         }
     }
     async getLinkedJiraIssues() {
+        return ["PAVEL-26"];
         let pullRequest = await this.getPullRequest(this.payload.pull_request.number);
         if (!pullRequest) {
             // This can happen in case GITHUB_TOKEN does not have sufficient permissions
