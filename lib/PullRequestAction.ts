@@ -4,10 +4,10 @@ export abstract class PullRequestAction extends OctokitAction {
   protected abstract processJiraIssue(issueId: string): Promise<void>;
 
   protected async execute(): Promise<void> {
-    const issueIds = await this.getLinkedJiraIssues();
+    const issueIds = await this.fixedJiraIssues();
 
     if (issueIds.length === 0) {
-      console.warn('No JIRA issue found in the PR title.');
+      console.warn('No Jira issue found in the PR title.');
     }
 
     for (const issueId of issueIds) {
@@ -15,16 +15,13 @@ export abstract class PullRequestAction extends OctokitAction {
     }
   }
 
-  private async getLinkedJiraIssues(): Promise<string[]> {
-    return ["PAVEL-26"];
+  private async fixedJiraIssues(): Promise<string[]> {
     let pullRequest = await this.getPullRequest(this.payload.pull_request.number);
 
-    if (!pullRequest) {
-      // This can happen in case GITHUB_TOKEN does not have sufficient permissions
-      // More info: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
-      throw new Error(`Pull request not found: #${this.payload.pull_request.number}. Please check GITHUB_TOKEN permissions.`);
+    if (pullRequest == null) {
+      console.log('Pull request not found.');
     }
 
-    return pullRequest.title.match(/[A-Z]+-\d+/g) || [];
+    return pullRequest?.title.match(/[A-Z]+-\d+/g) || [];
   }
 }

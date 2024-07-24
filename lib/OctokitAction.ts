@@ -5,20 +5,20 @@ import { GitHub } from '@actions/github/lib/utils';
 import { Action } from './Action';
 import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types';
 import { PullRequest } from './OctokitTypes';
-import fetch, { Response } from 'node-fetch';
+import fetch from 'node-fetch';
 import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
+import { JiraClient } from './JiraClient';
 
-const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
 
 export abstract class OctokitAction extends Action {
   public readonly rest: RestEndpointMethods;
   protected readonly octokit: InstanceType<typeof GitHub>;
-  private readonly jiraToken: string;
+  private readonly jiraClient: JiraClient;
   private graphqlWithAuth: graphqlTypes.graphql;
 
   constructor() {
     super();
-    this.jiraToken = Buffer.from(core.getInput('jira-token')).toString('base64');
+    this.jiraClient = new JiraClient(Buffer.from(core.getInput('jira-token')).toString('base64'));
     this.octokit = github.getOctokit(core.getInput('github-token'));
     this.rest = this.octokit.rest;
   }
@@ -35,18 +35,9 @@ export abstract class OctokitAction extends Action {
   }
 
   protected async moveIssue(issueId: string, transitionName: string): Promise<void> {
-    try {
-      console.log(`${issueId}: Getting transition id for '${transitionName}'`);
-      let transitions = await this.listTransitions(issueId);
-      const transition = transitions.find((t: any) => t.name === transitionName);
-      if (transition == null) {
-        throw new Error(`Could not find the transition '${transitionName}'`);
-      }
-      console.log(`${issueId}: Executing '${transitionName}' (${transition.id}) transition`);
-      await this.transitionIssue(issueId, transition.id);
-      console.log(`${issueId}: Transition '${transitionName}' successfully excecuted.`);
-    } catch (error) {
-      console.warn(`${issueId}: Failed to move issue with the '${transitionName}' transition: ${error}`);
+    const transition = await this.findTransition(issueId, transitionName);
+    if (transition != null) {
+      await this.jiraClient.transitionIssue(issueId, transition);
     }
   }
 
@@ -88,43 +79,16 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  private async listTransitions(issueId: string): Promise<any> {
-    return (await this.sendJiraGet(`issue/${issueId}/transitions`)).transitions;
-  }
+  private async findTransition(issueId: string, transitionName: string): Promise<any> {
+    const transitions = await this.jiraClient.listTransitions(issueId);
+    const transition = transitions.find((t: any) => t.name === transitionName);
 
-  private async transitionIssue(issueId: string, transitionId: string): Promise<void> {
-    this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transitionId } });
-  }
-
-  private async sendJiraGet(endpoint: string): Promise<any> {
-    return this.sendJiraRequest("GET", endpoint);
-  }
-
-  private async sendJiraPost(endpoint: string, body: any): Promise<any> {
-    return this.sendJiraRequest("POST", endpoint, body);
-  }
-
-  private async sendJiraRequest(method: "GET" | "POST" , endpoint: string, body?: any): Promise<any> {
-    const url = `${JIRA_DOMAIN}/rest/api/3/${endpoint}`;
-
-    const response = await fetch(url, {
-      method,
-      headers: {
-        'Authorization': `Basic ${this.jiraToken}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-
-    const responseContent = await response.text();
-    const data = responseContent.length > 0 ? JSON.parse(responseContent) : null;
-
-    if (!response.ok) {
-      throw new Error(`${response.status} (${response.statusText}): ${data?.errorMessages.join('. ') ?? 'Unknown error'}`);
+    if (transition == null) {
+      console.log(`${issueId}: Could not find the transition '${transitionName}'`);
     }
 
-    return data;
+    return transition;
+
   }
 
   private async sendSlackPost(url: string, jsonRequest: any): Promise<any> {

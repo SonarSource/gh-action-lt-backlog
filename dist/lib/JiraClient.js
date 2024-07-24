@@ -1,0 +1,45 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.JiraClient = void 0;
+const fetch = require("node-fetch");
+const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
+class JiraClient {
+    constructor(jiraToken) {
+        this.jiraToken = jiraToken;
+    }
+    async listTransitions(issueId) {
+        console.log(`${issueId}: Listing transitions`);
+        return (await this.sendJiraGet(`issue/${issueId}/transitions`)).transitions;
+    }
+    async transitionIssue(issueId, transition) {
+        console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
+        this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transition.id } });
+        console.log(`${issueId}: Transition '${transition.name}' successfully excecuted.`);
+    }
+    async sendJiraGet(endpoint) {
+        return this.sendJiraRequest("GET", endpoint);
+    }
+    async sendJiraPost(endpoint, body) {
+        return this.sendJiraRequest("POST", endpoint, body);
+    }
+    async sendJiraRequest(method, endpoint, body) {
+        const url = `${JIRA_DOMAIN}/rest/api/3/${endpoint}`;
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Authorization': `Basic ${this.jiraToken}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: body ? JSON.stringify(body) : undefined,
+        });
+        const responseContent = await response.text();
+        const data = responseContent.length > 0 ? JSON.parse(responseContent) : null;
+        if (response.ok) {
+            return data;
+        }
+        throw new Error(`${response.status} (${response.statusText}): ${data?.errorMessages.join('. ') ?? 'Unknown error'}`);
+    }
+}
+exports.JiraClient = JiraClient;
+//# sourceMappingURL=JiraClient.js.map
