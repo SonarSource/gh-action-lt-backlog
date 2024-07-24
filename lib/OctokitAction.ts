@@ -100,10 +100,10 @@ export abstract class OctokitAction extends Action {
       body: body ? JSON.stringify(body) : undefined,
     });
 
-    const data = await response.json();
+    const data = response.headers.get('Content-Length') === '0' ? null : await response.json();;
 
     if (!response.ok) {
-      throw new Error(data.errorMessages[0]);
+      throw new Error(data?.errorMessages[0] ?? "Unknown error");
     }
 
     return data;
