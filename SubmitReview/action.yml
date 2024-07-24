@@ -1,11 +1,11 @@
-name: 'Move card back to the INPROGRESS state after review'
-description: 'Move fixed issue or PR card to the INPROGRESS state'
+name: 'Move card back after submitting review'
+description: "Move card using the 'Request Changes' transition after submitting a review on a pull request"
 inputs:
   github-token:
     description: 'GitHub auth Token'
     required: true
   jira-token:
-    description: 'JIRA auth Token'
+    description: 'Jira auth Token'
     required: true
 runs:
   using: 'node20'
