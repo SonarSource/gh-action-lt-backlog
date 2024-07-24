@@ -8,4 +8,4 @@ class SubmitReview extends PullRequestAction_1.PullRequestAction {
 }
 const action = new SubmitReview();
 action.run();
-//# sourceMappingURL=RequestChanges.js.map
+//# sourceMappingURL=SubmitReview.js.map

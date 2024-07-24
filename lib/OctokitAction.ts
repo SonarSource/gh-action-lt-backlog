@@ -36,11 +36,13 @@ export abstract class OctokitAction extends Action {
 
   protected async moveIssue(issueId: string, transitionName: string): Promise<void> {
     try {
+      console.log(`${issueId}: Getting transition id for '${transitionName}'`);
       let response = await this.jiraTransitionRequest("GET", issueId);
       const transition = response.transitions.find((t: any) => t.name === transitionName);
       if (transition == null) {
         throw new Error(`Could not find the transition '${transitionName}'`);
       }
+      console.log(`${issueId}: Executing '${transitionName}' (${transition.id}) transition`);
       await this.jiraTransitionRequest("POST", issueId, { transition: { id: transition.id } });
       console.log(`${issueId}: Transition '${transitionName}' successfully excecuted.`);
     } catch (error) {

@@ -16,7 +16,8 @@ class PullRequestAction extends OctokitAction_1.OctokitAction {
         let pullRequest = await this.getPullRequest(this.payload.pull_request.number);
         if (!pullRequest) {
             // This can happen in case GITHUB_TOKEN does not have sufficient permissions
-            throw new Error(`Pull request not found: #${this.payload.pull_request.number}`);
+            // More info: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+            throw new Error(`Pull request not found: #${this.payload.pull_request.number}. Please check GITHUB_TOKEN permissions.`);
         }
         return pullRequest.title.match(/[A-Z]+-\d+/g) || [];
     }

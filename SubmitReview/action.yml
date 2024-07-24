@@ -8,5 +8,5 @@ inputs:
     description: 'JIRA auth Token'
     required: true
 runs:
-  using: 'node16'
-  main: '../dist/RequestChanges/RequestChanges.js'
+  using: 'node20'
+  main: '../dist/SubmitReview/SubmitReview.js'
