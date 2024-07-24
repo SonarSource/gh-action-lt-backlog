@@ -18,5 +18,5 @@ inputs:
     default: ''
 
 runs:
-  using: 'node16'
+  using: 'node20'
   main: '../dist/ToggleLockBranch/ToggleLockBranch.js'
