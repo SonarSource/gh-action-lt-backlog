@@ -81,7 +81,7 @@ export abstract class OctokitAction extends Action {
 
   private async findTransition(issueId: string, transitionName: string): Promise<any> {
     const transitions = await this.jiraClient.listTransitions(issueId);
-    const transition = transitions.find((t: any) => t.name === transitionName);
+    const transition = transitions?.find((t: any) => t.name === transitionName);
 
     if (transition == null) {
       console.log(`${issueId}: Could not find the transition '${transitionName}'`);

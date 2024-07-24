@@ -9,7 +9,7 @@ class JiraClient {
     }
     async listTransitions(issueId) {
         console.log(`${issueId}: Listing transitions`);
-        return (await this.sendJiraGet(`issue/${issueId}/transitions`)).transitions;
+        return (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions;
     }
     async transitionIssue(issueId, transition) {
         console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
@@ -38,7 +38,8 @@ class JiraClient {
         if (response.ok) {
             return data;
         }
-        throw new Error(`${response.status} (${response.statusText}): ${data?.errorMessages.join('. ') ?? 'Unknown error'}`);
+        console.log(`${response.status} (${response.statusText}): ${data?.errorMessages.join('. ') ?? 'Unknown error'}`);
+        return null;
     }
 }
 exports.JiraClient = JiraClient;

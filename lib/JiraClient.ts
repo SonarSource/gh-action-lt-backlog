@@ -8,7 +8,7 @@ export class JiraClient {
 
     public async listTransitions(issueId: string): Promise<any> {
         console.log(`${issueId}: Listing transitions`);
-        return (await this.sendJiraGet(`issue/${issueId}/transitions`)).transitions;
+        return (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions;
     }
 
     public async transitionIssue(issueId: string, transition: any): Promise<void> {
@@ -45,6 +45,7 @@ export class JiraClient {
             return data
         }
 
-        throw new Error(`${response.status} (${response.statusText}): ${data?.errorMessages.join('. ') ?? 'Unknown error'}`);
+        console.log(`${response.status} (${response.statusText}): ${data?.errorMessages.join('. ') ?? 'Unknown error'}`);
+        return null
     }
 }
