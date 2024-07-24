@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const PullRequestAction_1 = require("../lib/PullRequestAction");
 class SubmitReview extends PullRequestAction_1.PullRequestAction {
     async processJiraIssue(issueId) {
-        await this.moveIssue(issueId, "Request Changes");
+        await this.moveIssue(issueId, this.payload.review.state === 'changes_requested' ? 'Request Changes' : 'Approve');
     }
 }
 const action = new SubmitReview();
