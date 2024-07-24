@@ -16,6 +16,7 @@ export abstract class PullRequestAction extends OctokitAction {
   }
 
   private async getLinkedJiraIssues(): Promise<string[]> {
+    return ['PAVEL-26'];
     let pullRequest = await this.getPullRequest(this.payload.pull_request.number);
 
     if (!pullRequest) {
