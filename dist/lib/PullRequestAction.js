@@ -8,16 +8,19 @@ class PullRequestAction extends OctokitAction_1.OctokitAction {
         if (issueIds.length === 0) {
             console.warn('No Jira issue found in the PR title.');
         }
-        for (const issueId of issueIds) {
-            await this.processJiraIssue(issueId);
+        else {
+            for (const issueId of issueIds) {
+                await this.processJiraIssue(issueId);
+            }
         }
     }
     async fixedJiraIssues() {
-        let pullRequest = await this.getPullRequest(this.payload.pull_request.number);
-        if (pullRequest == null) {
+        const pr = await this.getPullRequest(this.payload.pull_request.number);
+        if (pr == null) {
             console.log('Pull request not found.');
+            return [];
         }
-        return pullRequest?.title.match(/[A-Z]+-\d+/g) || [];
+        return pr.title.match(/[A-Z]+-\d+/g) || [];
     }
 }
 exports.PullRequestAction = PullRequestAction;

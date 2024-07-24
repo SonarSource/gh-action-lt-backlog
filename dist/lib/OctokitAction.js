@@ -10,7 +10,7 @@ const JiraClient_1 = require("./JiraClient");
 class OctokitAction extends Action_1.Action {
     constructor() {
         super();
-        this.jiraClient = new JiraClient_1.JiraClient(Buffer.from(core.getInput('jira-token')).toString('base64'));
+        this.jira = new JiraClient_1.JiraClient(core.getInput('jira-user'), core.getInput('jira-token'));
         this.octokit = github.getOctokit(core.getInput('github-token'));
         this.rest = this.octokit.rest;
     }
@@ -23,12 +23,6 @@ class OctokitAction extends Action_1.Action {
             });
         }
         return this.graphqlWithAuth(query);
-    }
-    async moveIssue(issueId, transitionName) {
-        const transition = await this.findTransition(issueId, transitionName);
-        if (transition != null) {
-            await this.jiraClient.transitionIssue(issueId, transition);
-        }
     }
     getInput(name) {
         return core.getInput(name);
@@ -56,6 +50,12 @@ class OctokitAction extends Action_1.Action {
             return null;
         }
     }
+    async moveIssue(issueId, transitionName) {
+        const transition = await this.jira.findTransition(issueId, transitionName);
+        if (transition != null) {
+            await this.jira.transitionIssue(issueId, transition);
+        }
+    }
     async sendSlackMessage(text) {
         const channel = this.getInput("slack-channel");
         if (channel) {
@@ -65,14 +65,6 @@ class OctokitAction extends Action_1.Action {
         else {
             this.log("Skip sending slack message, channel was not set.");
         }
-    }
-    async findTransition(issueId, transitionName) {
-        const transitions = await this.jiraClient.listTransitions(issueId);
-        const transition = transitions?.find((t) => t.name === transitionName);
-        if (transition == null) {
-            console.log(`${issueId}: Could not find the transition '${transitionName}'`);
-        }
-        return transition;
     }
     async sendSlackPost(url, jsonRequest) {
         const token = this.getInput("slack-token");

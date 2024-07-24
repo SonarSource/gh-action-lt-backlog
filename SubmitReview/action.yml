@@ -1,8 +1,11 @@
-name: 'Move card back after submitting review'
+name: 'Move card after submitting a review'
 description: "Move card using the 'Request Changes' transition after submitting a review on a pull request"
 inputs:
   github-token:
     description: 'GitHub auth Token'
+    required: true
+  jira-user:
+    description: 'Jira auth user'
     required: true
   jira-token:
     description: 'Jira auth Token'

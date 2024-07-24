@@ -2,11 +2,17 @@
 
 Move fixed Jira tickets from one state to another using the `Request Changes` transitions.
 
+This action will attempt to move all tickets mentionned in the pull request title.
+
 ## Inputs
 
 ### `github-token`
 
 Token to access the GitHub API. 
+
+### `jira-user`
+
+User to access the Jira API.
 
 ### `jira-token`
 
@@ -17,10 +23,6 @@ The token need the following [project permissions](https://confluence.atlassian.
 - `Transition issues`
 
 ## Outputs
-
-None
-
-## Prerequisites
 
 None
 
@@ -42,9 +44,11 @@ jobs:
         uses: SonarSource/vault-action-wrapper@v3
         with:
           secrets: |
-            development/jira/token/{REPO_OWNER_NAME_DASH}-jira token | jira_token;
-      - uses: sonarsource/gh-action-lt-backlog/SubmitReview@v2
+            development/kv/data/jira user | JIRA_USER;
+            development/kv/data/jira password | JIRA_TOKEN;
+    - uses: sonarsource/gh-action-lt-backlog/SubmitReview@v2
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          jira-token: ${{ fromJSON(steps.secrets.outputs.vault).jira_token }}
+          jira-user: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
+          jira-token: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
 ```

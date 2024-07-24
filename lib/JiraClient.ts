@@ -1,14 +1,21 @@
-import fetch = require("node-fetch");
+import fetch from 'node-fetch';
 
 const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
 
 export class JiraClient {
+    private readonly token: string;
 
-    constructor(private readonly jiraToken: string) { }
+    constructor(jiraUser: string, jiraToken: string) { 
+        this.token = Buffer.from(`${jiraUser}:${jiraToken}`).toString('base64');
+    }
 
-    public async listTransitions(issueId: string): Promise<any> {
-        console.log(`${issueId}: Listing transitions`);
-        return (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions;
+    public async findTransition(issueId: string, transitionName: string): Promise<any> {
+        const transitions = (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions ?? [];
+        const transition = transitions.find((x: any) => x.name === transitionName);
+        if (transition == null) {
+            console.log(`${issueId}: Could not find the transition '${transitionName}'`);
+        }
+        return transition;
     }
 
     public async transitionIssue(issueId: string, transition: any): Promise<void> {
@@ -27,25 +34,22 @@ export class JiraClient {
 
     private async sendJiraRequest(method: "GET" | "POST", endpoint: string, body?: any): Promise<any> {
         const url = `${JIRA_DOMAIN}/rest/api/3/${endpoint}`;
-
         const response = await fetch(url, {
             method,
             headers: {
-                'Authorization': `Basic ${this.jiraToken}`,
+                'Authorization': `Basic ${this.token}`,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
             body: body ? JSON.stringify(body) : undefined,
         });
-
         const responseContent = await response.text();
         const data = responseContent.length > 0 ? JSON.parse(responseContent) : null;
-
         if (response.ok) {
             return data
+        } else {
+            console.log(`${response.status} (${response.statusText}): ${data?.errorMessages.join('. ') ?? 'Unknown error'}`);
+            return null
         }
-
-        console.log(`${response.status} (${response.statusText}): ${data?.errorMessages.join('. ') ?? 'Unknown error'}`);
-        return null
     }
 }

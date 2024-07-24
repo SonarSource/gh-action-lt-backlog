@@ -1,15 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JiraClient = void 0;
-const fetch = require("node-fetch");
+const node_fetch_1 = require("node-fetch");
 const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
 class JiraClient {
-    constructor(jiraToken) {
-        this.jiraToken = jiraToken;
+    constructor(user, token) {
+        this.jiraToken = Buffer.from(`${user}:${token}`).toString('base64');
     }
-    async listTransitions(issueId) {
-        console.log(`${issueId}: Listing transitions`);
-        return (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions;
+    async findTransition(issueId, transitionName) {
+        const transitions = (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions ?? [];
+        const transition = transitions.find((x) => x.name === transitionName);
+        if (transition == null) {
+            console.log(`${issueId}: Could not find the transition '${transitionName}'`);
+        }
+        return transition;
     }
     async transitionIssue(issueId, transition) {
         console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
@@ -24,7 +28,7 @@ class JiraClient {
     }
     async sendJiraRequest(method, endpoint, body) {
         const url = `${JIRA_DOMAIN}/rest/api/3/${endpoint}`;
-        const response = await fetch(url, {
+        const response = await (0, node_fetch_1.default)(url, {
             method,
             headers: {
                 'Authorization': `Basic ${this.jiraToken}`,
@@ -38,8 +42,10 @@ class JiraClient {
         if (response.ok) {
             return data;
         }
-        console.log(`${response.status} (${response.statusText}): ${data?.errorMessages.join('. ') ?? 'Unknown error'}`);
-        return null;
+        else {
+            console.log(`${response.status} (${response.statusText}): ${data?.errorMessages.join('. ') ?? 'Unknown error'}`);
+            return null;
+        }
     }
 }
 exports.JiraClient = JiraClient;

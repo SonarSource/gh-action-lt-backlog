@@ -13,12 +13,12 @@ import { JiraClient } from './JiraClient';
 export abstract class OctokitAction extends Action {
   public readonly rest: RestEndpointMethods;
   protected readonly octokit: InstanceType<typeof GitHub>;
-  private readonly jiraClient: JiraClient;
+  private readonly jira: JiraClient;
   private graphqlWithAuth: graphqlTypes.graphql;
 
   constructor() {
     super();
-    this.jiraClient = new JiraClient(Buffer.from(core.getInput('jira-token')).toString('base64'));
+    this.jira = new JiraClient(core.getInput('jira-user'), core.getInput('jira-token'));
     this.octokit = github.getOctokit(core.getInput('github-token'));
     this.rest = this.octokit.rest;
   }
@@ -32,13 +32,6 @@ export abstract class OctokitAction extends Action {
       });
     }
     return this.graphqlWithAuth(query);
-  }
-
-  protected async moveIssue(issueId: string, transitionName: string): Promise<void> {
-    const transition = await this.findTransition(issueId, transitionName);
-    if (transition != null) {
-      await this.jiraClient.transitionIssue(issueId, transition);
-    }
   }
 
   protected getInput(name: string): string {
@@ -69,6 +62,13 @@ export abstract class OctokitAction extends Action {
     }
   }
 
+  protected async moveIssue(issueId: string, transitionName: string): Promise<void> {
+    const transition = await this.jira.findTransition(issueId, transitionName);
+    if (transition != null) {
+      await this.jira.transitionIssue(issueId, transition);
+    }
+  }
+
   protected async sendSlackMessage(text: string): Promise<void> {
     const channel = this.getInput("slack-channel");
     if (channel) {
@@ -77,18 +77,6 @@ export abstract class OctokitAction extends Action {
     } else {
       this.log("Skip sending slack message, channel was not set.")
     }
-  }
-
-  private async findTransition(issueId: string, transitionName: string): Promise<any> {
-    const transitions = await this.jiraClient.listTransitions(issueId);
-    const transition = transitions?.find((t: any) => t.name === transitionName);
-
-    if (transition == null) {
-      console.log(`${issueId}: Could not find the transition '${transitionName}'`);
-    }
-
-    return transition;
-
   }
 
   private async sendSlackPost(url: string, jsonRequest: any): Promise<any> {
