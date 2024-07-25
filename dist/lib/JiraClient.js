@@ -7,16 +7,22 @@ class JiraClient {
     constructor(user, token) {
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
     }
-    async createIssue(projectKey, issueTypeId, summary) {
-        console.log(`Creating issue in project '${projectKey}' with summary: ${summary}`);
+    async createIssue(projectKey, issueType, summary, additionalFields) {
+        console.log(`Creating issue in project '${projectKey}' of type '${issueType}' with summary: ${summary} and additional fields: ${JSON.stringify(additionalFields, null, 2)}`);
         const response = await this.sendJiraPost('issue', {
             fields: {
                 project: { key: projectKey },
-                issuetype: { id: issueTypeId },
-                summary
-            }
+                issuetype: { name: issueType },
+                summary,
+                ...additionalFields
+            },
         });
         return response?.key;
+    }
+    async getIssue(issueKey) {
+        console.log(`Get issue '${issueKey}'`);
+        const response = await this.sendJiraGet(`issue/${issueKey}`);
+        return response;
     }
     async moveIssue(issueId, transitionName) {
         const transition = await this.findTransition(issueId, transitionName);

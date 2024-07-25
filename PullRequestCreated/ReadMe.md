@@ -3,7 +3,12 @@
 Upon pull request creation, create a Jira ticket if no tickets are mentioned in the title.
 
 Depending on the content of the PR description, this action will create different types of Jira tickets:
-- A `Task` with no parent if there is no ticket mentioned in the description
+- A `Task` with no parent
+  - if there is no ticket mentioned in the description
+  - or, there is no `Epic` mentioned when multiple tickets are mentioned in the description
+- A `Task` with the mentioned `Epic` as a parent
+- A `Task` with the first `Epic` mentioned as a parent if there are multiple tickets mentioned
+- A `Sub-task` with the mentioned `Task` as a parent
 
 ## Inputs
 

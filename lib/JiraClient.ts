@@ -5,20 +5,27 @@ const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
 export class JiraClient {
     private readonly token: string;
 
-    constructor(user: string, token: string) { 
+    constructor(user: string, token: string) {
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
     }
 
-    public async createIssue(projectKey: string, issueTypeId: number, summary: string): Promise<string> {
-        console.log(`Creating issue in project '${projectKey}' with summary: ${summary}`);
+    public async createIssue(projectKey: string, issueType: string, summary: string, additionalFields?: any): Promise<string> {
+        console.log(`Creating issue in project '${projectKey}' of type '${issueType}' with summary: ${summary} and additional fields: ${JSON.stringify(additionalFields, null, 2)}`);
         const response = await this.sendJiraPost('issue', {
             fields: {
                 project: { key: projectKey },
-                issuetype: { id: issueTypeId },
-                summary
-            }
+                issuetype: { name: issueType },
+                summary,
+                ...additionalFields
+            },
         });
         return response?.key;
+    }
+
+    public async getIssue(issueKey: string): Promise<any> {
+        console.log(`Get issue '${issueKey}'`);
+        const response = await this.sendJiraGet(`issue/${issueKey}`);
+        return response;
     }
 
     public async moveIssue(issueId: string, transitionName: string): Promise<void> {

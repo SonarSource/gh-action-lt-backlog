@@ -2,7 +2,7 @@ import { PullRequestAction } from '../lib/PullRequestAction';
 
 class PullRequestClosed extends PullRequestAction {
   protected async processJiraIssue(issueId: string): Promise<void> {
-    this.moveIssue(issueId, this.isReleaseBranch(this.payload.pull_request.base.ref) ? "Merge into master" : "Merge into branch");
+    this.jira.moveIssue(issueId, this.isReleaseBranch(this.payload.pull_request.base.ref) ? "Merge into master" : "Merge into branch");
   }
 
   private isReleaseBranch(ref: string): boolean {
