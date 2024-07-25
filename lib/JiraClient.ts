@@ -9,6 +9,27 @@ export class JiraClient {
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
     }
 
+    public async createIssue(projectKey: string, issueType: any, summary: string): Promise<string> {
+        console.log(`Creating issue in project '${projectKey}' of type '${issueType.name}' with summary: ${summary}`);
+        const response = await this.sendJiraPost('issue', {
+            fields: {
+                project: { key: projectKey },
+                issuetype: { id: issueType.id },
+                summary
+            }
+        });
+        return response?.key;
+    }
+
+    public async findIssueType(projectKey: string, issueTypeName: string): Promise<any> {
+        const issueTypes = (await this.sendJiraGet(`issue/createmeta/${projectKey}/issuetypes`))?.issueTypes ?? [];
+        const issueType = issueTypes.find((x: any) => x.name === issueTypeName);
+        if (issueType == null) {
+            console.log(`Could not find issue type '${issueTypeName}' for project '${projectKey}'`);
+        }
+        return issueType;
+    }
+
     public async findTransition(issueId: string, transitionName: string): Promise<any> {
         const transitions = (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions ?? [];
         const transition = transitions.find((x: any) => x.name === transitionName);

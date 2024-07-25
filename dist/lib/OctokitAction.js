@@ -50,6 +50,22 @@ class OctokitAction extends Action_1.Action {
             return null;
         }
     }
+    updatePullRequestTitle(prNumber, newTitle) {
+        this.log(`Updating PR #${prNumber} title to: ${newTitle}`);
+        return this.updatePullRequest(prNumber, { title: newTitle });
+    }
+    updatePullRequestDescription(prNumber, description) {
+        this.log(`Updating PR #${prNumber} description`);
+        return this.updatePullRequest(prNumber, { body: description });
+    }
+    async updatePullRequest(prNumber, update) {
+        try {
+            await this.rest.pulls.update(this.addRepo({ pull_number: prNumber, ...update }));
+        }
+        catch (error) {
+            this.log(`Failed to update PR #${prNumber}: ${error}`);
+        }
+    }
     async moveIssue(issueId, transitionName) {
         const transition = await this.jira.findTransition(issueId, transitionName);
         if (transition != null) {

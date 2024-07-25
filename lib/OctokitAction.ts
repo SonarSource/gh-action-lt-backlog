@@ -13,7 +13,7 @@ import { JiraClient } from './JiraClient';
 export abstract class OctokitAction extends Action {
   public readonly rest: RestEndpointMethods;
   protected readonly octokit: InstanceType<typeof GitHub>;
-  private readonly jira: JiraClient;
+  protected readonly jira: JiraClient;
   private graphqlWithAuth: graphqlTypes.graphql;
 
   constructor() {
@@ -59,6 +59,24 @@ export abstract class OctokitAction extends Action {
     } catch (error) {
       this.log(`Pull Request #${pull_number} not found: ${error}`);
       return null;
+    }
+  }
+
+  protected updatePullRequestTitle(prNumber: number, newTitle: string): Promise<void> {
+    this.log(`Updating PR #${prNumber} title to: ${newTitle}`);
+    return this.updatePullRequest(prNumber, { title: newTitle });
+  }
+
+  protected updatePullRequestDescription(prNumber: number, description: string): Promise<void> {
+    this.log(`Updating PR #${prNumber} description`);
+    return this.updatePullRequest(prNumber, { body: description });
+  }
+
+  private async updatePullRequest(prNumber: number, update: { title?: string, body?: string }): Promise<void> {
+    try {
+      await this.rest.pulls.update(this.addRepo({ pull_number: prNumber, ...update }));
+    } catch (error) {
+      this.log(`Failed to update PR #${prNumber}: ${error}`);
     }
   }
 
