@@ -1,6 +1,7 @@
 # SubmitReview
 
-Move fixed Jira tickets from one state to another using the `Request Changes` transitions.
+Move fixed Jira tickets using the 'Request Changes' transition after submitting a review on a pull request.
+For instance, it would a ticket from `IN REVIEW` to `IN PROGRESS`.
 
 This action will attempt to move all tickets mentionned in the pull request title.
 
@@ -17,10 +18,6 @@ User to access the Jira API.
 ### `jira-token`
 
 Token to access the Jira API.
-
-The token need the following [project permissions](https://confluence.atlassian.com/adminjiraserver/managing-project-permissions-938847145.html):
-- `Browse projects`
-- `Transition issues`
 
 ## Outputs
 
@@ -45,7 +42,7 @@ jobs:
         with:
           secrets: |
             development/kv/data/jira user | JIRA_USER;
-            development/kv/data/jira password | JIRA_TOKEN;
+            development/kv/data/jira token | JIRA_TOKEN;
     - uses: sonarsource/gh-action-lt-backlog/SubmitReview@v2
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}

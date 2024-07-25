@@ -5,7 +5,6 @@ export abstract class PullRequestAction extends OctokitAction {
 
   protected async execute(): Promise<void> {
     const issueIds = await this.fixedJiraIssues();
-
     if (issueIds.length === 0) {
       console.warn('No Jira issue found in the PR title.');
     } else {
@@ -17,12 +16,6 @@ export abstract class PullRequestAction extends OctokitAction {
 
   private async fixedJiraIssues(): Promise<string[]> {
     const pr = await this.getPullRequest(this.payload.pull_request.number);
-
-    if (pr == null) {
-      console.log('Pull request not found.');
-      return [];
-    }
-
-    return pr.title.match(/[A-Z]+-\d+/g) || [];
+    return pr?.title.match(/[A-Z]+-\d+/g) || [];
   }
 }

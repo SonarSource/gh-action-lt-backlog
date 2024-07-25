@@ -16,11 +16,7 @@ class PullRequestAction extends OctokitAction_1.OctokitAction {
     }
     async fixedJiraIssues() {
         const pr = await this.getPullRequest(this.payload.pull_request.number);
-        if (pr == null) {
-            console.log('Pull request not found.');
-            return [];
-        }
-        return pr.title.match(/[A-Z]+-\d+/g) || [];
+        return pr?.title.match(/[A-Z]+-\d+/g) || [];
     }
 }
 exports.PullRequestAction = PullRequestAction;

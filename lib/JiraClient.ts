@@ -5,8 +5,8 @@ const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
 export class JiraClient {
     private readonly token: string;
 
-    constructor(jiraUser: string, jiraToken: string) { 
-        this.token = Buffer.from(`${jiraUser}:${jiraToken}`).toString('base64');
+    constructor(user: string, token: string) { 
+        this.token = Buffer.from(`${user}:${token}`).toString('base64');
     }
 
     public async findTransition(issueId: string, transitionName: string): Promise<any> {
