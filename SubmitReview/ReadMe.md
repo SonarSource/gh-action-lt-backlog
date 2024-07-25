@@ -1,7 +1,7 @@
 # SubmitReview
 
 Move fixed Jira tickets using the 'Request Changes' transition after submitting a review on a pull request.
-For instance, it would a ticket from `IN REVIEW` to `IN PROGRESS`.
+Typically, it would a ticket from `IN REVIEW` to `IN PROGRESS`.
 
 This action will attempt to move all tickets mentionned in the pull request title.
 
