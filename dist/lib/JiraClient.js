@@ -4,8 +4,8 @@ exports.JiraClient = void 0;
 const node_fetch_1 = require("node-fetch");
 const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
 class JiraClient {
-    constructor(user, token) {
-        this.jiraToken = Buffer.from(`${user}:${token}`).toString('base64');
+    constructor(jiraUser, jiraToken) {
+        this.token = Buffer.from(`${jiraUser}:${jiraToken}`).toString('base64');
     }
     async findTransition(issueId, transitionName) {
         const transitions = (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions ?? [];
@@ -31,7 +31,7 @@ class JiraClient {
         const response = await (0, node_fetch_1.default)(url, {
             method,
             headers: {
-                'Authorization': `Basic ${this.jiraToken}`,
+                'Authorization': `Basic ${this.token}`,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
