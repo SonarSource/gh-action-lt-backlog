@@ -45,7 +45,17 @@ class PullRequestCreated extends OctokitAction {
   private async newIssueParameters(pr: PullRequest): Promise<IssueParameters> {
     const mentionedIssues = this.findMentionedIssues(pr);
     console.log(`Found mentioned issues: ${mentionedIssues}`);
-    const parent = mentionedIssues.length === 1 ? await this.jira.getIssue(mentionedIssues[0]) : null;
+    let parent = mentionedIssues.length === 1 ? await this.jira.getIssue(mentionedIssues[0]) : null;
+    if (mentionedIssues.length > 1) {
+      console.log('Looking for a non-Sub-task ticket');
+      for (const issueKey of mentionedIssues) {
+        const issue = await this.jira.getIssue(issueKey);
+        if (issue?.fields.issuetype.name !== 'Sub-task') {
+          parent = issue;
+          break;
+        }
+      }
+    }
     console.log(`Parent issue: ${parent?.key} (${parent?.fields.issuetype.name})`);
     switch (parent?.fields.issuetype.name) {
       case 'Epic':
@@ -60,7 +70,7 @@ class PullRequestCreated extends OctokitAction {
   }
 
   private findMentionedIssues(pr: PullRequest): string[] {
-    return pr.body?.match(JIRA_ISSUE_PATTERN) || [];
+    return [...new Set(pr.body?.match(JIRA_ISSUE_PATTERN) || [])];
   }
 
   private issueLink(issue: string): string {
