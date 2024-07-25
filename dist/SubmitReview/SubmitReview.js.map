@@ -1,0 +1,1 @@
+{"version":3,"file":"SubmitReview.js","sourceRoot":"","sources":["../../SubmitReview/SubmitReview.ts"],"names":[],"mappings":";;AAAA,gEAA6D;AAG7D,MAAM,YAAa,SAAQ,qCAAiB;IAEhC,KAAK,CAAC,gBAAgB,CAAC,OAAe;QAC9C,MAAM,IAAI,CAAC,SAAS,CAAC,OAAO,EAAE,iBAAiB,CAAC,CAAC;IACnD,CAAC;CACF;AAED,MAAM,MAAM,GAAG,IAAI,YAAY,EAAE,CAAC;AAClC,MAAM,CAAC,GAAG,EAAE,CAAC"}

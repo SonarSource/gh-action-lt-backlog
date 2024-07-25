@@ -7,14 +7,18 @@ import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-
 import { PullRequest } from './OctokitTypes';
 import fetch from 'node-fetch';
 import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
+import { JiraClient } from './JiraClient';
+
 
 export abstract class OctokitAction extends Action {
   public readonly rest: RestEndpointMethods;
   protected readonly octokit: InstanceType<typeof GitHub>;
+  private readonly jira: JiraClient;
   private graphqlWithAuth: graphqlTypes.graphql;
 
   constructor() {
     super();
+    this.jira = new JiraClient(core.getInput('jira-user'), core.getInput('jira-token'));
     this.octokit = github.getOctokit(core.getInput('github-token'));
     this.rest = this.octokit.rest;
   }
@@ -55,6 +59,13 @@ export abstract class OctokitAction extends Action {
     } catch (error) {
       this.log(`Pull Request #${pull_number} not found: ${error}`);
       return null;
+    }
+  }
+
+  protected async moveIssue(issueId: string, transitionName: string): Promise<void> {
+    const transition = await this.jira.findTransition(issueId, transitionName);
+    if (transition != null) {
+      await this.jira.transitionIssue(issueId, transition);
     }
   }
 

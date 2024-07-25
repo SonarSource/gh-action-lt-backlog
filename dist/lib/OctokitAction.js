@@ -6,9 +6,11 @@ const github = require("@actions/github");
 const Action_1 = require("./Action");
 const node_fetch_1 = require("node-fetch");
 const graphql_1 = require("@octokit/graphql");
+const JiraClient_1 = require("./JiraClient");
 class OctokitAction extends Action_1.Action {
     constructor() {
         super();
+        this.jira = new JiraClient_1.JiraClient(core.getInput('jira-user'), core.getInput('jira-token'));
         this.octokit = github.getOctokit(core.getInput('github-token'));
         this.rest = this.octokit.rest;
     }
@@ -46,6 +48,12 @@ class OctokitAction extends Action_1.Action {
         catch (error) {
             this.log(`Pull Request #${pull_number} not found: ${error}`);
             return null;
+        }
+    }
+    async moveIssue(issueId, transitionName) {
+        const transition = await this.jira.findTransition(issueId, transitionName);
+        if (transition != null) {
+            await this.jira.transitionIssue(issueId, transition);
         }
     }
     async sendSlackMessage(text) {
