@@ -40,6 +40,16 @@ All actions should be consumed from these branches.
 
 ## Development notes
 
+### Setup Repox authentication token
+
+Add the following line in `.npmrc` in your HOME folder:
+
+```ini
+//repox.jfrog.io/artifactory/api/npm/npm/:_auth = <npm-repox-token>
+```
+
+Generate the `npm-repox-token` on repox.
+
 ### Run Octokit action from PowerShell:
 
 This syntax allows setting environment variables with hyphens in the name:
