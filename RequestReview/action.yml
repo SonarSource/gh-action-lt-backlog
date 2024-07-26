@@ -7,12 +7,12 @@ inputs:
   github-token:
     description: 'GitHub auth Token'
     required: true
-  column-id:
-    description: 'ID of the Kanban column where the card should be moved to'
+  jira-user:
+    description: 'Jira auth User'
     required: true
-  project-number:
-    description: 'The project number when Projects V2 is used'
-    required: false
+  jira-token:
+    description: 'Jira auth Token'
+    required: true
 runs:
   using: 'node16'
   main: '../dist/RequestReview/RequestReview.js'
