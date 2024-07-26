@@ -24,11 +24,11 @@ class JiraClient {
         const accountId = await this.findAccountId(userEmail);
         if (accountId != null) {
             console.log(`${issueId}: Assigning to ${accountId}`);
-            await this.sendJiraPost(`issue/${issueId}/assignee`, { accountId });
+            await this.sendJiraPut(`issue/${issueId}/assignee`, { accountId });
         }
     }
     async findAccountId(email) {
-        const logUser = email.substring(0, email.indexOf('@') - 1).replace('.', ' '); // Do not leak email addresses to logs
+        const logUser = email.substring(0, email.indexOf('@')).replace('.', ' '); // Do not leak email addresses to logs
         console.log(`Searching for user: ${logUser}`);
         let accounts = (await this.sendJiraGet(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
         accounts = accounts.filter((x) => x.emailAddress === email); // Just in case the address is part of the name, or other unexpected field
@@ -51,6 +51,9 @@ class JiraClient {
     }
     async sendJiraPost(endpoint, body) {
         return this.sendJiraRequest("POST", endpoint, body);
+    }
+    async sendJiraPut(endpoint, body) {
+        return this.sendJiraRequest("PUT", endpoint, body);
     }
     async sendJiraRequest(method, endpoint, body) {
         const url = `${JIRA_DOMAIN}/rest/api/3/${endpoint}`;
