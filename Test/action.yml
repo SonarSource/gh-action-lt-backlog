@@ -10,6 +10,9 @@ inputs:
   jira-token:
     description: 'Jira auth Token'
     required: true
+  login:
+    description: 'Login to translate'
+    required: true
 runs:
   using: 'node20'
   main: '../dist/Test/Test.js'
