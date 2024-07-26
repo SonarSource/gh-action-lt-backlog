@@ -1,14 +1,12 @@
-import { OctokitAction } from '../lib/OctokitAction';
+import { PullRequestAction } from '../lib/PullRequestAction';
 
-class RequestReview extends OctokitAction {
-  protected async execute(): Promise<void> {
-    this.log("Lorem ipsum");
-    const pr = await this.getPullRequest(1);
-    this.log(pr.title);
-    // FIXME: Move card
-    // FIXME: Change assignee
-
-
+class RequestReview extends PullRequestAction {
+  protected async processJiraIssue(issueId: string): Promise<void> {
+    this.moveIssue(issueId, 'Request Review');
+    const userEmail = 'sebastien.marichal@sonarsource.com'; // FIXME: Map GitHub user to Jira user
+    if (userEmail != null) {
+      this.jira.assignIssue(issueId, userEmail);
+    }
   }
 }
 

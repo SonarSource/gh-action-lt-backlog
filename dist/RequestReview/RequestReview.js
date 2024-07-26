@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const OctokitAction_1 = require("../lib/OctokitAction");
-class RequestReview extends OctokitAction_1.OctokitAction {
-    async execute() {
-        this.log("Lorem ipsum");
-        const pr = await this.getPullRequest(1);
-        this.log(pr.title);
-        // FIXME: Move card
-        // FIXME: Change assignee
+const PullRequestAction_1 = require("../lib/PullRequestAction");
+class RequestReview extends PullRequestAction_1.PullRequestAction {
+    async processJiraIssue(issueId) {
+        this.moveIssue(issueId, 'Request Review');
+        const userEmail = 'sebastien.marichal@sonarsource.com'; // FIXME: Map GitHub user to Jira user
+        if (userEmail != null) {
+            this.jira.assignIssue(issueId, userEmail);
+        }
     }
 }
 const action = new RequestReview();
