@@ -1,0 +1,15 @@
+name: 'Move card after merging a pull request'
+description: 'Move fixed Jira tickets using the "Merge into branch" or "Merge into master" transition after merging the pull request.'
+inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
+  jira-user:
+    description: 'Jira auth User'
+    required: true
+  jira-token:
+    description: 'Jira auth Token'
+    required: true
+runs:
+  using: 'node20'
+  main: '../dist/PullRequestClosed/PullRequestClosed.js'
