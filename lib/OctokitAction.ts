@@ -13,7 +13,7 @@ import { JiraClient } from './JiraClient';
 export abstract class OctokitAction extends Action {
   public readonly rest: RestEndpointMethods;
   protected readonly octokit: InstanceType<typeof GitHub>;
-  private readonly jira: JiraClient;
+  protected readonly jira: JiraClient;
   private graphqlWithAuth: graphqlTypes.graphql;
 
   constructor() {
