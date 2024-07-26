@@ -30,34 +30,34 @@ class LockBranch extends OctokitAction_1.OctokitAction {
     }
     async LoadRules() {
         const { repository: { branchProtectionRules: { nodes }, }, } = await this.sendGraphQL(`
-            query {
-                repository(owner: "${this.repo.owner}", name: "${this.repo.repo}") {
-                    branchProtectionRules(first: 100) {
-                        nodes {
-                            id
-                            lockBranch
-                            pattern
-                        }
-                    }
-                }
-            }`);
-        return nodes;
-    }
-    async UpdateRule(id, lockBranch) {
-        const { updateBranchProtectionRule: { branchProtectionRule }, } = await this.sendGraphQL(`
-            mutation {
-                updateBranchProtectionRule(input:{
-                    branchProtectionRuleId: "${id}",
-                    lockBranch: ${lockBranch}
-                })
-                {
-                    branchProtectionRule {
+        query {
+            repository(owner: "${this.repo.owner}", name: "${this.repo.repo}") {
+                branchProtectionRules(first: 100) {
+                    nodes {
                         id
                         lockBranch
                         pattern
                     }
                 }
-            }`);
+            }
+        }`);
+        return nodes;
+    }
+    async UpdateRule(id, lockBranch) {
+        const { updateBranchProtectionRule: { branchProtectionRule }, } = await this.sendGraphQL(`
+        mutation {
+            updateBranchProtectionRule(input:{
+                branchProtectionRuleId: "${id}",
+                lockBranch: ${lockBranch}
+            })
+            {
+                branchProtectionRule {
+                    id
+                    lockBranch
+                    pattern
+                }
+            }
+        }`);
         return branchProtectionRule;
     }
 }

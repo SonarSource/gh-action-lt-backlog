@@ -1,0 +1,15 @@
+name: 'Manual Test'
+description: "Manual Test"
+inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
+  jira-user:
+    description: 'Jira auth User'
+    required: true
+  jira-token:
+    description: 'Jira auth Token'
+    required: true
+runs:
+  using: 'node20'
+  main: '../dist/Test/Test.js'
