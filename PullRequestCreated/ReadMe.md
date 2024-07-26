@@ -2,7 +2,7 @@
 
 Upon pull request creation, create a Jira ticket if no tickets are mentioned in the title.
 
-Depending on the content of the body, this action will create different types of Jira tickets:
+Depending on the content of the PR description, this action will create different types of Jira tickets:
 - A `Task` with no parent if there is no ticket mentioned
 
 ## Inputs
@@ -19,6 +19,10 @@ User to access the Jira API.
 
 Token to access the Jira API.
 
+### `jira-project`
+
+Project key in Jira.
+
 ## Outputs
 
 None
@@ -29,12 +33,12 @@ None
 name: Submit Review
 
 on:
-  pull_request_review:
-    types: [submitted]
+  pull_request:
+    types: ["opened"]
 
 jobs:
   PullRequestCreated_job:
-    name: Create pull request
+    name: Pull Request Created
     runs-on: ubuntu-latest
     steps:
       - id: secrets
@@ -46,7 +50,7 @@ jobs:
     - uses: sonarsource/gh-action-lt-backlog/PullRequestCreated@v2
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          jira-project: NET
           jira-user: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
           jira-token: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
+          jira-project: NET
 ```

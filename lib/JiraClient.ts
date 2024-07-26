@@ -21,15 +21,6 @@ export class JiraClient {
         return response?.key;
     }
 
-    public async findIssueType(projectKey: string, issueTypeName: string): Promise<any> {
-        const issueTypes = (await this.sendJiraGet(`issue/createmeta/${projectKey}/issuetypes`))?.issueTypes ?? [];
-        const issueType = issueTypes.find((x: any) => x.name === issueTypeName);
-        if (issueType == null) {
-            console.log(`Could not find issue type '${issueTypeName}' for project '${projectKey}'`);
-        }
-        return issueType;
-    }
-
     public async findTransition(issueId: string, transitionName: string): Promise<any> {
         const transitions = (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions ?? [];
         const transition = transitions.find((x: any) => x.name === transitionName);

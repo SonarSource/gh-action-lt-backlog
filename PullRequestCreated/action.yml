@@ -1,17 +1,17 @@
-name: 'Move card after submitting a review'
-description: "Move card using the 'Request Changes' transition after submitting a review on a pull request"
+name: 'Create Jira Issue when Pull Request Created if needed'
+description: 'Create Jira Issue when Pull Request Created if needed and link mentioned parent'
 inputs:
   github-token:
     description: 'GitHub auth Token'
-    required: true
-  jira-project:
-    description: 'Jira project key'
     required: true
   jira-user:
     description: 'Jira auth user'
     required: true
   jira-token:
     description: 'Jira auth Token'
+    required: true
+  jira-project:
+    description: 'Jira project key'
     required: true
 runs:
   using: 'node20'
