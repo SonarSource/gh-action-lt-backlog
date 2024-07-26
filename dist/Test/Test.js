@@ -3,7 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const OctokitAction_1 = require("../lib/OctokitAction");
 class Test extends OctokitAction_1.OctokitAction {
     async execute() {
-        const userEmail = await this.findEmail(this.getInput('login'));
+        //const userEmail = await this.findEmail(this.getInput('login'));
+        const userEmail = 'N/A';
         this.log(`Result: ${userEmail}`);
     }
 }
