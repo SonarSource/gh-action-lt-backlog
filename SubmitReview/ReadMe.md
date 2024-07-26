@@ -1,7 +1,9 @@
 # SubmitReview
 
-Move fixed Jira tickets using the 'Request Changes' transition after submitting a review on a pull request.
-Typically, it would a ticket from `IN REVIEW` to `IN PROGRESS`.
+Move fixed Jira tickets using the 'Request Changes' or 'Approved' transition after submitting a review on a pull request.
+
+If the pull request has been approved, the `Approved` transition will be used. It would typically move a ticket from `IN REVIEW` to `APPROVED`.
+If changes are requested, the `Request Changes` transition will be used. It would typically move a ticket from `IN REVIEW` to `IN PROGRESS`.
 
 This action will attempt to move all tickets mentionned in the pull request title.
 
@@ -36,6 +38,9 @@ jobs:
   SubmitReview_job:
     name: Submit Review
     runs-on: ubuntu-latest
+    if: |
+        github.event.review.state == 'changes_requested' 
+        || github.event.review.state == 'approved'
     steps:
       - id: secrets
         uses: SonarSource/vault-action-wrapper@v3
