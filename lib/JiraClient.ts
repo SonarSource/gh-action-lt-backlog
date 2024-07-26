@@ -61,8 +61,10 @@ export class JiraClient {
   private async findAccountId(email: string): Promise<string> {
     const logUser = email.substring(0, email.indexOf('@') - 1).replace('.', ' '); // Do not leak email addresses to logs
     console.log(`Searching for user: ${logUser}`);
-    const accounts: any[] = (await this.sendJiraGet(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
-    switch (accounts.length) {
+    let accounts: any[] = (await this.sendJiraGet(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
+    accounts = accounts.filter((x: any) => x.emailAddress === email); // Just in case the address is part of the name, or other unexpected field
+    switch (accounts.length)
+    {
       case 0:
         console.log(`Could not find user ${logUser} in Jira`);
         return null;
