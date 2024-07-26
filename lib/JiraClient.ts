@@ -54,12 +54,12 @@ export class JiraClient {
     const accountId = await this.findAccountId(userEmail);
     if (accountId != null) {
       console.log(`${issueId}: Assigning to ${accountId}`);
-      await this.sendJiraPost(`issue/${issueId}/assignee`, { accountId });
+      await this.sendJiraPut(`issue/${issueId}/assignee`, { accountId });
     }
   }
 
   private async findAccountId(email: string): Promise<string> {
-    const logUser = email.substring(0, email.indexOf('@') - 1).replace('.', ' '); // Do not leak email addresses to logs
+    const logUser = email.substring(0, email.indexOf('@')).replace('.', ' '); // Do not leak email addresses to logs
     console.log(`Searching for user: ${logUser}`);
     let accounts: any[] = (await this.sendJiraGet(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
     accounts = accounts.filter((x: any) => x.emailAddress === email); // Just in case the address is part of the name, or other unexpected field
@@ -85,7 +85,11 @@ export class JiraClient {
     return this.sendJiraRequest("POST", endpoint, body);
   }
 
-  private async sendJiraRequest(method: "GET" | "POST", endpoint: string, body?: any): Promise<any> {
+  private async sendJiraPut(endpoint: string, body: any): Promise<any> {
+    return this.sendJiraRequest("PUT", endpoint, body);
+  }
+
+  private async sendJiraRequest(method: "GET" | "POST" | "PUT", endpoint: string, body?: any): Promise<any> {
     const url = `${JIRA_DOMAIN}/rest/api/3/${endpoint}`;
     const response = await fetch(url, {
       method,
