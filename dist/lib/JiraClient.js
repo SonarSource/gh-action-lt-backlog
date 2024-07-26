@@ -18,6 +18,12 @@ class JiraClient {
         });
         return response?.key;
     }
+    async moveIssue(issueId, transitionName) {
+        const transition = await this.findTransition(issueId, transitionName);
+        if (transition != null) {
+            await this.transitionIssue(issueId, transition);
+        }
+    }
     async findTransition(issueId, transitionName) {
         const transitions = (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions ?? [];
         const transition = transitions.find((x) => x.name === transitionName);

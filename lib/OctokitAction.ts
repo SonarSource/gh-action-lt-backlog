@@ -80,13 +80,6 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected async moveIssue(issueId: string, transitionName: string): Promise<void> {
-    const transition = await this.jira.findTransition(issueId, transitionName);
-    if (transition != null) {
-      await this.jira.transitionIssue(issueId, transition);
-    }
-  }
-
   protected async sendSlackMessage(text: string): Promise<void> {
     const channel = this.getInput("slack-channel");
     if (channel) {

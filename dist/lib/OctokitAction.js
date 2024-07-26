@@ -66,12 +66,6 @@ class OctokitAction extends Action_1.Action {
             this.log(`Failed to update PR #${prNumber}: ${error}`);
         }
     }
-    async moveIssue(issueId, transitionName) {
-        const transition = await this.jira.findTransition(issueId, transitionName);
-        if (transition != null) {
-            await this.jira.transitionIssue(issueId, transition);
-        }
-    }
     async sendSlackMessage(text) {
         const channel = this.getInput("slack-channel");
         if (channel) {
