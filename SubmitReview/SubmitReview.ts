@@ -4,7 +4,11 @@ import { PullRequestAction } from '../lib/PullRequestAction';
 class SubmitReview extends PullRequestAction {
   
   protected async processJiraIssue(issueId: string): Promise<void> {
-    await this.moveIssue(issueId, this.payload.review.state === 'changes_requested' ? 'Request Changes' : 'Approve');
+    if (this.payload.review.state === 'approved') {
+      await this.moveIssue(issueId, 'Approve');
+    } else if (this.payload.review.state === 'changes_requested') {
+      await this.moveIssue(issueId, 'Request Changes');
+    }
   }
 }
 
