@@ -9,7 +9,26 @@ export class JiraClient {
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
     }
 
-    public async findTransition(issueId: string, transitionName: string): Promise<any> {
+    public async createIssue(projectKey: string, issueTypeId: number, summary: string): Promise<string> {
+        console.log(`Creating issue in project '${projectKey}' with summary: ${summary}`);
+        const response = await this.sendJiraPost('issue', {
+            fields: {
+                project: { key: projectKey },
+                issuetype: { id: issueTypeId },
+                summary
+            }
+        });
+        return response?.key;
+    }
+
+    public async moveIssue(issueId: string, transitionName: string): Promise<void> {
+      const transition = await this.findTransition(issueId, transitionName);
+      if (transition != null) {
+        await this.transitionIssue(issueId, transition);
+      }
+    }
+
+    private async findTransition(issueId: string, transitionName: string): Promise<any> {
         const transitions = (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions ?? [];
         const transition = transitions.find((x: any) => x.name === transitionName);
         if (transition == null) {
@@ -18,7 +37,7 @@ export class JiraClient {
         return transition;
     }
 
-    public async transitionIssue(issueId: string, transition: any): Promise<void> {
+    private async transitionIssue(issueId: string, transition: any): Promise<void> {
         console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
         this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transition.id } });
         console.log(`${issueId}: Transition '${transition.name}' successfully excecuted.`);

@@ -13,7 +13,7 @@ import { JiraClient } from './JiraClient';
 export abstract class OctokitAction extends Action {
   public readonly rest: RestEndpointMethods;
   protected readonly octokit: InstanceType<typeof GitHub>;
-  private readonly jira: JiraClient;
+  protected readonly jira: JiraClient;
   private graphqlWithAuth: graphqlTypes.graphql;
 
   constructor() {
@@ -62,10 +62,21 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected async moveIssue(issueId: string, transitionName: string): Promise<void> {
-    const transition = await this.jira.findTransition(issueId, transitionName);
-    if (transition != null) {
-      await this.jira.transitionIssue(issueId, transition);
+  protected updatePullRequestTitle(prNumber: number, title: string): Promise<void> {
+    this.log(`Updating PR #${prNumber} title to: ${title}`);
+    return this.updatePullRequest(prNumber, { title });
+  }
+
+  protected updatePullRequestDescription(prNumber: number, body: string): Promise<void> {
+    this.log(`Updating PR #${prNumber} description`);
+    return this.updatePullRequest(prNumber, { body });
+  }
+
+  private async updatePullRequest(prNumber: number, update: { title?: string, body?: string }): Promise<void> {
+    try {
+      await this.rest.pulls.update(this.addRepo({ pull_number: prNumber, ...update }));
+    } catch (error) {
+      this.log(`Failed to update PR #${prNumber}: ${error}`);
     }
   }
 

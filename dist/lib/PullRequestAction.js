@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PullRequestAction = void 0;
+const Constants_1 = require("./Constants");
 const OctokitAction_1 = require("./OctokitAction");
 class PullRequestAction extends OctokitAction_1.OctokitAction {
     async execute() {
@@ -16,7 +17,7 @@ class PullRequestAction extends OctokitAction_1.OctokitAction {
     }
     async fixedJiraIssues() {
         const pr = await this.getPullRequest(this.payload.pull_request.number);
-        return pr?.title.match(/[A-Z]+-\d+/g) || [];
+        return pr?.title.match(Constants_1.JIRA_ISSUE_PATTERN) || [];
     }
 }
 exports.PullRequestAction = PullRequestAction;

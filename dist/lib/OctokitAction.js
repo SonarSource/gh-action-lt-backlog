@@ -50,10 +50,20 @@ class OctokitAction extends Action_1.Action {
             return null;
         }
     }
-    async moveIssue(issueId, transitionName) {
-        const transition = await this.jira.findTransition(issueId, transitionName);
-        if (transition != null) {
-            await this.jira.transitionIssue(issueId, transition);
+    updatePullRequestTitle(prNumber, title) {
+        this.log(`Updating PR #${prNumber} title to: ${title}`);
+        return this.updatePullRequest(prNumber, { title });
+    }
+    updatePullRequestDescription(prNumber, body) {
+        this.log(`Updating PR #${prNumber} description`);
+        return this.updatePullRequest(prNumber, { body });
+    }
+    async updatePullRequest(prNumber, update) {
+        try {
+            await this.rest.pulls.update(this.addRepo({ pull_number: prNumber, ...update }));
+        }
+        catch (error) {
+            this.log(`Failed to update PR #${prNumber}: ${error}`);
         }
     }
     async sendSlackMessage(text) {
