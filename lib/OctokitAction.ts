@@ -88,13 +88,14 @@ export abstract class OctokitAction extends Action {
           query {
               organization(login: "${this.repo.owner}") {
 name
-#                  samlIdentityProvider {
+                  samlIdentityProvider {
+id
 #                      externalIdentities(first: 10, login: "${login}") {
 #                          nodes {
 #                              samlIdentity { nameId }
 #                          }
 #                      }
-#                  }
+                  }
               }
           }`);
     this.log("findExternalIdentities: awaiting request");
