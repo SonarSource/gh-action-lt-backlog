@@ -87,6 +87,7 @@ export abstract class OctokitAction extends Action {
     const ret = this.sendGraphQL(`
           query {
               organization(login: "${this.repo.owner}") {
+name
 #                  samlIdentityProvider {
 #                      externalIdentities(first: 10, login: "${login}") {
 #                          nodes {
