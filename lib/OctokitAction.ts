@@ -90,11 +90,11 @@ export abstract class OctokitAction extends Action {
 name
                   samlIdentityProvider {
 id
-#                      externalIdentities(first: 10, login: "${login}") {
-#                          nodes {
-#                              samlIdentity { nameId }
-#                          }
-#                      }
+                      externalIdentities(first: 10, login: "${login}") {
+                          nodes {
+                              samlIdentity { nameId }
+                          }
+                      }
                   }
               }
           }`);
