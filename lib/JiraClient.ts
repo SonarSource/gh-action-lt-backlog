@@ -28,12 +28,6 @@ export class JiraClient {
       }
     }
 
-    public async transitionIssue(issueId: string, transition: any): Promise<void> {
-        console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
-        this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transition.id } });
-        console.log(`${issueId}: Transition '${transition.name}' successfully excecuted.`);
-    }
-
     private async findTransition(issueId: string, transitionName: string): Promise<any> {
         const transitions = (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions ?? [];
         const transition = transitions.find((x: any) => x.name === transitionName);
@@ -41,6 +35,12 @@ export class JiraClient {
             console.log(`${issueId}: Could not find the transition '${transitionName}'`);
         }
         return transition;
+    }
+
+    private async transitionIssue(issueId: string, transition: any): Promise<void> {
+        console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
+        this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transition.id } });
+        console.log(`${issueId}: Transition '${transition.name}' successfully excecuted.`);
     }
 
     private async sendJiraGet(endpoint: string): Promise<any> {
