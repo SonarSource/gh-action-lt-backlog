@@ -87,23 +87,27 @@ export abstract class OctokitAction extends Action {
     const ret = this.sendGraphQL(`
           query {
               organization(login: "${this.repo.owner}") {
-                  samlIdentityProvider {
-                      externalIdentities(first: 10, login: "${login}") {
-                          nodes {
-                              samlIdentity { nameId }
-                          }
-                      }
-                  }
+#                  samlIdentityProvider {
+#                      externalIdentities(first: 10, login: "${login}") {
+#                          nodes {
+#                              samlIdentity { nameId }
+#                          }
+#                      }
+#                  }
               }
           }`);
     this.log("findExternalIdentities: awaiting request");
+    const awaited = await ret;
+    this.log("awaited ret");
+    this.logSerialized(awaited);
+
     const {
       organization: {
         samlIdentityProvider: {
           externalIdentities: { nodes },
         },
       },
-    }: GraphQlQueryResponseData = await ret;
+    }: GraphQlQueryResponseData = awaited;
     this.log("findExternalIdentities: returning nodes");
     this.logSerialized(nodes);
     //const {
