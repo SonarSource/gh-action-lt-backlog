@@ -50,13 +50,13 @@ class OctokitAction extends Action_1.Action {
             return null;
         }
     }
-    updatePullRequestTitle(prNumber, newTitle) {
-        this.log(`Updating PR #${prNumber} title to: ${newTitle}`);
-        return this.updatePullRequest(prNumber, { title: newTitle });
+    updatePullRequestTitle(prNumber, title) {
+        this.log(`Updating PR #${prNumber} title to: ${title}`);
+        return this.updatePullRequest(prNumber, { title });
     }
-    updatePullRequestDescription(prNumber, description) {
+    updatePullRequestDescription(prNumber, body) {
         this.log(`Updating PR #${prNumber} description`);
-        return this.updatePullRequest(prNumber, { body: description });
+        return this.updatePullRequest(prNumber, { body });
     }
     async updatePullRequest(prNumber, update) {
         try {

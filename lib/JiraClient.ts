@@ -9,12 +9,12 @@ export class JiraClient {
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
     }
 
-    public async createIssue(projectKey: string, issueType: any, summary: string): Promise<string> {
-        console.log(`Creating issue in project '${projectKey}' of type '${issueType.name}' with summary: ${summary}`);
+    public async createIssue(projectKey: string, issueTypeId: number, summary: string): Promise<string> {
+        console.log(`Creating issue in project '${projectKey}' with summary: ${summary}`);
         const response = await this.sendJiraPost('issue', {
             fields: {
                 project: { key: projectKey },
-                issuetype: { id: issueType.id },
+                issuetype: { id: issueTypeId },
                 summary
             }
         });
@@ -28,19 +28,19 @@ export class JiraClient {
       }
     }
 
-    public async findTransition(issueId: string, transitionName: string): Promise<any> {
+    public async transitionIssue(issueId: string, transition: any): Promise<void> {
+        console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
+        this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transition.id } });
+        console.log(`${issueId}: Transition '${transition.name}' successfully excecuted.`);
+    }
+
+    private async findTransition(issueId: string, transitionName: string): Promise<any> {
         const transitions = (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions ?? [];
         const transition = transitions.find((x: any) => x.name === transitionName);
         if (transition == null) {
             console.log(`${issueId}: Could not find the transition '${transitionName}'`);
         }
         return transition;
-    }
-
-    public async transitionIssue(issueId: string, transition: any): Promise<void> {
-        console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
-        this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transition.id } });
-        console.log(`${issueId}: Transition '${transition.name}' successfully excecuted.`);
     }
 
     private async sendJiraGet(endpoint: string): Promise<any> {

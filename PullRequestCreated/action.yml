@@ -1,5 +1,5 @@
-name: 'Create Jira Issue when Pull Request Created if needed'
-description: 'Create Jira Issue when Pull Request Created if needed and link mentioned parent'
+name: 'Create Jira Issue for PR without issue reference'
+description: 'Create Jira Issue for PR that does not reference any Jira issue in its title'
 inputs:
   github-token:
     description: 'GitHub auth Token'

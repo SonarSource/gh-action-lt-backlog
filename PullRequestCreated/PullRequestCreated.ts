@@ -14,7 +14,7 @@ class PullRequestCreated extends OctokitAction {
   }
 
   private shouldCreateIssue(pr: PullRequest): boolean {
-    return !JIRA_ISSUE_PATTERN.test(pr?.title);
+    return pr != null && !JIRA_ISSUE_PATTERN.test(pr?.title);
   }
 }
 

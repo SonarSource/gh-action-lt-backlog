@@ -62,14 +62,14 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected updatePullRequestTitle(prNumber: number, newTitle: string): Promise<void> {
-    this.log(`Updating PR #${prNumber} title to: ${newTitle}`);
-    return this.updatePullRequest(prNumber, { title: newTitle });
+  protected updatePullRequestTitle(prNumber: number, title: string): Promise<void> {
+    this.log(`Updating PR #${prNumber} title to: ${title}`);
+    return this.updatePullRequest(prNumber, { title });
   }
 
-  protected updatePullRequestDescription(prNumber: number, description: string): Promise<void> {
+  protected updatePullRequestDescription(prNumber: number, body: string): Promise<void> {
     this.log(`Updating PR #${prNumber} description`);
-    return this.updatePullRequest(prNumber, { body: description });
+    return this.updatePullRequest(prNumber, { body });
   }
 
   private async updatePullRequest(prNumber: number, update: { title?: string, body?: string }): Promise<void> {

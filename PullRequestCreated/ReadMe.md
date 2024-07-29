@@ -3,7 +3,7 @@
 Upon pull request creation, create a Jira ticket if no tickets are mentioned in the title.
 
 Depending on the content of the PR description, this action will create different types of Jira tickets:
-- A `Task` with no parent if there is no ticket mentioned
+- A `Task` with no parent if there is no ticket mentioned in the description
 
 ## Inputs
 
@@ -21,7 +21,7 @@ Token to access the Jira API.
 
 ### `jira-project`
 
-Project key in Jira.
+Jira project key that is used to create new issues.
 
 ## Outputs
 
@@ -30,7 +30,7 @@ None
 ## Example usage
 
 ```yaml
-name: Submit Review
+name: Pull Request Created
 
 on:
   pull_request:
@@ -52,5 +52,5 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           jira-user: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
           jira-token: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
-          jira-project: NET
+          jira-project: EXAMPLE
 ```

@@ -13,7 +13,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         }
     }
     shouldCreateIssue(pr) {
-        return !Constants_1.JIRA_ISSUE_PATTERN.test(pr?.title);
+        return pr != null && !Constants_1.JIRA_ISSUE_PATTERN.test(pr?.title);
     }
 }
 const action = new PullRequestCreated();
