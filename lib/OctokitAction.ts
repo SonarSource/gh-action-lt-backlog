@@ -31,7 +31,11 @@ export abstract class OctokitAction extends Action {
         },
       });
     }
-    return this.graphqlWithAuth(query);
+
+    this.log("Sending graphqlWithAuth")
+    const ret = this.graphqlWithAuth(query);
+    this.log("Done with graphqlWithAuth")
+    return ret;
   }
 
   protected getInput(name: string): string {

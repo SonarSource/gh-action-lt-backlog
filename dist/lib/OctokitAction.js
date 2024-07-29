@@ -22,7 +22,10 @@ class OctokitAction extends Action_1.Action {
                 },
             });
         }
-        return this.graphqlWithAuth(query);
+        this.log("Sending graphqlWithAuth");
+        const ret = this.graphqlWithAuth(query);
+        this.log("Done with graphqlWithAuth");
+        return ret;
     }
     getInput(name) {
         return core.getInput(name);
