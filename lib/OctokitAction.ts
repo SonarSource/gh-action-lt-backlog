@@ -83,13 +83,8 @@ export abstract class OctokitAction extends Action {
   }
 
   private async findExternalIdentities(login: string): Promise<any[]> {
-    const {
-      organization: {
-        samlIdentityProvider: {
-          externalIdentities: { nodes },
-        },
-      },
-    }: GraphQlQueryResponseData = await this.sendGraphQL(`
+    this.log("findExternalIdentities: Sending request");
+    const ret = this.sendGraphQL(`
           query {
               organization(login: "${this.repo.owner}") {
                   samlIdentityProvider {
@@ -101,6 +96,34 @@ export abstract class OctokitAction extends Action {
                   }
               }
           }`);
+    this.log("findExternalIdentities: awaiting request");
+    const {
+      organization: {
+        samlIdentityProvider: {
+          externalIdentities: { nodes },
+        },
+      },
+    }: GraphQlQueryResponseData = await ret;
+    this.log("findExternalIdentities: returning nodes");
+    this.logSerialized(nodes);
+    //const {
+    //  organization: {
+    //    samlIdentityProvider: {
+    //      externalIdentities: { nodes },
+    //    },
+    //  },
+    //}: GraphQlQueryResponseData = await this.sendGraphQL(`
+    //      query {
+    //          organization(login: "${this.repo.owner}") {
+    //              samlIdentityProvider {
+    //                  externalIdentities(first: 10, login: "${login}") {
+    //                      nodes {
+    //                          samlIdentity { nameId }
+    //                      }
+    //                  }
+    //              }
+    //          }
+    //      }`);
     return nodes;
   }
 

@@ -68,7 +68,8 @@ class OctokitAction extends Action_1.Action {
         return identities[0].samlIdentity.nameId;
     }
     async findExternalIdentities(login) {
-        const { organization: { samlIdentityProvider: { externalIdentities: { nodes }, }, }, } = await this.sendGraphQL(`
+        this.log("findExternalIdentities: Sending request");
+        const ret = this.sendGraphQL(`
           query {
               organization(login: "${this.repo.owner}") {
                   samlIdentityProvider {
@@ -80,6 +81,28 @@ class OctokitAction extends Action_1.Action {
                   }
               }
           }`);
+        this.log("findExternalIdentities: awaiting request");
+        const { organization: { samlIdentityProvider: { externalIdentities: { nodes }, }, }, } = await ret;
+        this.log("findExternalIdentities: returning nodes");
+        this.logSerialized(nodes);
+        //const {
+        //  organization: {
+        //    samlIdentityProvider: {
+        //      externalIdentities: { nodes },
+        //    },
+        //  },
+        //}: GraphQlQueryResponseData = await this.sendGraphQL(`
+        //      query {
+        //          organization(login: "${this.repo.owner}") {
+        //              samlIdentityProvider {
+        //                  externalIdentities(first: 10, login: "${login}") {
+        //                      nodes {
+        //                          samlIdentity { nameId }
+        //                      }
+        //                  }
+        //              }
+        //          }
+        //      }`);
         return nodes;
     }
     async sendSlackMessage(text) {
