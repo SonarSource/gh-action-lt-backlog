@@ -6,6 +6,9 @@ class Test extends OctokitAction_1.OctokitAction {
         //const userEmail = this.getInput('login');
         this.log("Getting PR");
         const pr = await this.getPullRequest(600);
+        this.log(`PR: ${pr.title}`);
+        const update = { title: pr.title + '.' };
+        await this.rest.pulls.update(this.addRepo({ pull_number: 600, ...update }));
         this.log("findingEmail");
         const userEmail = await this.findEmail(this.getInput('login'));
         this.log(`Result: ${userEmail}`);
