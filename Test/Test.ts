@@ -9,7 +9,9 @@ class Test extends OctokitAction {
     //const update = { title: pr.title + '.' };
     //await this.rest.pulls.update(this.addRepo({ pull_number: 600, ...update }));
 
+    this.log("Requesting getAuthenticated")
     var me = await this.rest.users.getAuthenticated();
+    this.log("Received getAuthenticated")
     this.logSerialized(me);
 
 
