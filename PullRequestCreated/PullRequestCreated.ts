@@ -1,9 +1,8 @@
 import { OctokitAction } from '../lib/OctokitAction';
 import { PullRequest } from '../lib/OctokitTypes';
 import { JIRA_ISSUE_PATTERN, JIRA_TASK_ISSUE } from '../lib/Constants';
-import { Console } from 'console';
 
-class PullRequestCreated extends OctokitAction {
+export class PullRequestCreated extends OctokitAction {
   protected async execute(): Promise<void> {
     const pr = await this.getPullRequest(this.payload.pull_request.number);
     const linkedIssues = pr?.title?.match(JIRA_ISSUE_PATTERN) || null;
