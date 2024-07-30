@@ -9,6 +9,8 @@ class Test extends OctokitAction_1.OctokitAction {
         //this.log(`PR: ${pr.title}`);
         //const update = { title: pr.title + '.' };
         //await this.rest.pulls.update(this.addRepo({ pull_number: 600, ...update }));
+        var me = await this.rest.users.getAuthenticated();
+        this.logSerialized(me);
         this.log("findingEmail");
         const userEmail = await this.findEmail(this.getInput('login'));
         this.log(`Result: ${userEmail}`);
