@@ -1,5 +1,5 @@
 name: 'Move card after submitting a review'
-description: "Move fixed Jira tickets using the 'Request Changes' or 'Approved' transition after submitting a review on a pull request."
+description: 'Move fixed Jira tickets using the "Request Changes" or "Approved" transition after submitting a review on a pull request.'
 inputs:
   github-token:
     description: 'GitHub auth Token'
