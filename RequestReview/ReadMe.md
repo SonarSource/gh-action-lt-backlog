@@ -8,11 +8,7 @@ This action would typically move a ticket from `IN PROGRESS` to `IN REVIEW`. It 
 
 ### `github-token`
 
-Token to access GitHub API.
-
-### `github-token`
-
-Token to access the GitHub API. 
+Token to access the GitHub API. This is a special token from Vault, see below. The default `secrets.GITHUB_TOKEN` does not have enough permissions.
 
 ### `jira-user`
 
