@@ -23,6 +23,10 @@ class PullRequestCreated extends OctokitAction {
         await this.updatePullRequestDescription(this.payload.pull_request.number, `${this.issueLink(issueKey)}\n\n${pr.body || ''}`);
         await this.jira.moveIssue(issueKey, 'Commit');  // OPEN  -> TO DO
         await this.jira.moveIssue(issueKey, 'Start');   // TO DO -> IN PROGRESS
+        const userEmail = await this.findEmail(this.payload.sender.login);
+        if (userEmail != null) {
+            await this.jira.assignIssue(issueKey, userEmail);
+        }
       }
     } else {
       const mentionedIssues = this.findMentionedIssues(pr);
