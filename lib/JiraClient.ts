@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
-
-const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
+import { JIRA_DOMAIN } from './Constants';
 
 export class JiraClient {
     private readonly token: string;
