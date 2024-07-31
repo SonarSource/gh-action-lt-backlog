@@ -30,7 +30,7 @@ Jira project key that is used to create new issues.
 Additional fields to set when creating the Jira issue. 
 
 ```yaml
-additional-fields: '{ "fixVersions": [ { "id": "15601" } ] }'
+additional-fields: '{ "priority": { "name": "Major" }'
 ```
 
 It overrides fields set by the action.
