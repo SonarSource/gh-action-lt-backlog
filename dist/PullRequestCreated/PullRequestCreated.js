@@ -27,7 +27,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         }
         else {
             const mentionedIssues = this.findMentionedIssues(pr);
-            const notMentionedIssues = linkedIssues.filter(x => !mentionedIssues.includes(x));
+            const notMentionedIssues = linkedIssues.filter(x => !mentionedIssues.has(x));
             console.log(`Adding the following ticket in description: ${notMentionedIssues}`);
             if (notMentionedIssues.length > 0) {
                 await this.updatePullRequestDescription(pr.number, `${notMentionedIssues.map(x => this.issueLink(x)).join('\n')}\n\n${pr.body || ''}`);
@@ -39,8 +39,8 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
     }
     async newIssueParameters(pr) {
         const mentionedIssues = this.findMentionedIssues(pr);
-        console.log(`Found mentioned issues: ${mentionedIssues}`);
-        const parent = mentionedIssues.length === 1 ? await this.jira.getIssue(mentionedIssues[0]) : null;
+        console.log('Looking for a non-Sub-task ticket');
+        const parent = await this.firstNonSubTask(mentionedIssues);
         console.log(`Parent issue: ${parent?.key} (${parent?.fields.issuetype.name})`);
         switch (parent?.fields.issuetype.name) {
             case 'Epic':
@@ -53,8 +53,19 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
                 return { type: 'Sub-task', parent: parent.key };
         }
     }
+    async firstNonSubTask(issues) {
+        for (const issueKey of issues) {
+            const issue = await this.jira.getIssue(issueKey);
+            if (issue?.fields.issuetype.name !== 'Sub-task') {
+                return issue;
+            }
+        }
+        return null;
+    }
     findMentionedIssues(pr) {
-        return pr.body?.match(Constants_1.JIRA_ISSUE_PATTERN) || [];
+        const mentionedIssues = pr.body?.match(Constants_1.JIRA_ISSUE_PATTERN) || [];
+        console.log(`Found mentioned issues: ${mentionedIssues} (prior to distinct)`);
+        return new Set(mentionedIssues);
     }
     issueLink(issue) {
         return `[${issue}](${Constants_1.JIRA_DOMAIN}/browse/${issue})`;
