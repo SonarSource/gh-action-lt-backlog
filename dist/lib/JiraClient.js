@@ -4,6 +4,9 @@ exports.JiraClient = void 0;
 const node_fetch_1 = require("node-fetch");
 const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
 class JiraClient {
+    get domain() {
+        return JIRA_DOMAIN;
+    }
     constructor(user, token) {
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
     }
