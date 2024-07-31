@@ -3,7 +3,7 @@ import { PullRequestAction } from '../lib/PullRequestAction';
 class RequestReview extends PullRequestAction {
   protected async processJiraIssue(issueId: string): Promise<void> {
     await this.jira.moveIssue(issueId, 'Request Review');
-    const userEmail = 'sebastien.marichal@sonarsource.com'; // FIXME: Map GitHub user to Jira user
+    const userEmail = await this.findEmail(this.payload.requested_reviewer.login);
     if (userEmail != null) {
       await this.jira.assignIssue(issueId, userEmail);
     }

@@ -80,6 +80,37 @@ export abstract class OctokitAction extends Action {
     }
   }
 
+  protected async findEmail(login: string): Promise<string> {
+    const identities = await this.findExternalIdentities(login);
+    if (identities.length === 0) {
+      this.log(`No SAML identity found for ${login}`);
+      return null;
+    }
+    return identities[0].samlIdentity.nameId;
+  }
+
+  private async findExternalIdentities(login: string): Promise<any[]> {
+    const {
+      organization: {
+        samlIdentityProvider: {
+          externalIdentities: { nodes },
+        },
+      },
+    }: GraphQlQueryResponseData = await this.sendGraphQL(`
+          query {
+              organization(login: "${this.repo.owner}") {
+                  samlIdentityProvider {
+                      externalIdentities(first: 10, login: "${login}") {
+                          nodes {
+                              samlIdentity { nameId }
+                          }
+                      }
+                  }
+              }
+          }`);
+    return nodes;
+  }
+
   protected async sendSlackMessage(text: string): Promise<void> {
     const channel = this.getInput("slack-channel");
     if (channel) {
