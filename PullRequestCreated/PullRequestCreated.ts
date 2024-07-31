@@ -31,7 +31,7 @@ class PullRequestCreated extends OctokitAction {
       }
     } else {
       const mentionedIssues = this.findMentionedIssues(pr);
-      const notMentionedIssues = linkedIssues.filter(x => !mentionedIssues.includes(x));
+      const notMentionedIssues = linkedIssues.filter(x => !mentionedIssues.has(x));
       console.log(`Adding the following ticket in description: ${notMentionedIssues}`);
       if (notMentionedIssues.length > 0) {
         await this.updatePullRequestDescription(pr.number, `${notMentionedIssues.map(x => this.issueLink(x)).join('\n')}\n\n${pr.body || ''}`);
@@ -44,7 +44,7 @@ class PullRequestCreated extends OctokitAction {
 
   private async newIssueParameters(pr: PullRequest): Promise<IssueParameters> {
     const mentionedIssues = this.findMentionedIssues(pr);
-    console.log(`Found mentioned issues: ${mentionedIssues}`);
+    console.log('Looking for a non-Sub-task ticket');
     const parent = await this.firstNonSubTask(mentionedIssues);
     console.log(`Parent issue: ${parent?.key} (${parent?.fields.issuetype.name})`);
     switch (parent?.fields.issuetype.name) {
@@ -59,8 +59,7 @@ class PullRequestCreated extends OctokitAction {
     }
   }
 
-  private async firstNonSubTask(issues: string[]): Promise<any | null> {
-    console.log('Looking for a non-Sub-task ticket');
+  private async firstNonSubTask(issues: Set<string>): Promise<any | null> {
     for (const issueKey of issues) {
       const issue = await this.jira.getIssue(issueKey);
       if (issue?.fields.issuetype.name !== 'Sub-task') {
@@ -70,8 +69,10 @@ class PullRequestCreated extends OctokitAction {
     return null;
   }
 
-  private findMentionedIssues(pr: PullRequest): string[] {
-    return [...new Set(pr.body?.match(JIRA_ISSUE_PATTERN) || [])];
+  private findMentionedIssues(pr: PullRequest): Set<string> {
+    const mentionedIssues =  pr.body?.match(JIRA_ISSUE_PATTERN) || [];
+    console.log(`Found mentioned issues: ${mentionedIssues} (prior to distinct)`);
+    return new Set(mentionedIssues);
   }
 
   private issueLink(issue: string): string {
