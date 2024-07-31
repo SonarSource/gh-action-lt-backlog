@@ -10,8 +10,8 @@ const JiraClient_1 = require("./JiraClient");
 class OctokitAction extends Action_1.Action {
     constructor() {
         super();
-        this.jira = new JiraClient_1.JiraClient(this.getInput('jira-user', true), this.getInput('jira-token', true));
-        this.octokit = github.getOctokit(core.getInput('github-token'));
+        this.jira = new JiraClient_1.JiraClient(this.getInput('jira-user'), this.getInput('jira-token'));
+        this.octokit = github.getOctokit(this.getInput('github-token'));
         this.rest = this.octokit.rest;
     }
     sendGraphQL(query) {
@@ -24,8 +24,8 @@ class OctokitAction extends Action_1.Action {
         }
         return this.graphqlWithAuth(query);
     }
-    getInput(name, required = false) {
-        return core.getInput(name, { required });
+    getInput(name) {
+        return core.getInput(name);
     }
     getInputNumber(name) {
         const input = this.getInput(name);

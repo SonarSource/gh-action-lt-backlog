@@ -18,8 +18,8 @@ export abstract class OctokitAction extends Action {
 
   constructor() {
     super();
-    this.jira = new JiraClient(this.getInput('jira-user', true), this.getInput('jira-token', true));
-    this.octokit = github.getOctokit(core.getInput('github-token'));
+    this.jira = new JiraClient(this.getInput('jira-user'), this.getInput('jira-token'));
+    this.octokit = github.getOctokit(this.getInput('github-token'));
     this.rest = this.octokit.rest;
   }
 
@@ -34,8 +34,8 @@ export abstract class OctokitAction extends Action {
     return this.graphqlWithAuth(query);
   }
 
-  protected getInput(name: string, required: boolean = false): string {
-    return core.getInput(name, { required });
+  protected getInput(name: string): string {
+    return core.getInput(name);
   }
 
   protected getInputNumber(name: string): number {
