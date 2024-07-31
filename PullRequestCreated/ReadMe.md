@@ -25,6 +25,16 @@ Token to access the Jira API.
 
 Jira project key that is used to create new issues.
 
+### `additional-fields`
+
+Additional fields to set when creating the Jira issue. 
+
+```yaml
+additional-fields: '{ "fixVersions": [ { "id": "15601" } ] }'
+```
+
+It overrides fields set by the action.
+
 ## Outputs
 
 None

@@ -13,7 +13,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         if (linkedIssues == null) {
             const parameters = await this.newIssueParameters(pr);
             const projectKey = this.getInput('jira-project');
-            const issueKey = await this.jira.createIssue(projectKey, parameters.type, pr.title, { parent: { key: parameters.parent } });
+            const issueKey = await this.jira.createIssue(projectKey, parameters.type, pr.title, this.additionalFields(parameters));
             if (issueKey != null) {
                 newTitle = `${issueKey} ${newTitle}`;
                 await this.updatePullRequestDescription(pr.number, `${this.issueLink(issueKey)}\n\n${pr.body || ''}`);
@@ -36,6 +36,23 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         if (pr.title !== newTitle) {
             await this.updatePullRequestTitle(pr.number, newTitle);
         }
+    }
+    additionalFields(parameters) {
+        let addutinalFields = {};
+        if (parameters?.parent) {
+            addutinalFields = { parent: { key: parameters.parent } };
+        }
+        const inputAdditionFields = this.getInput('additional-fields');
+        if (inputAdditionFields) {
+            try {
+                const fields = JSON.parse(inputAdditionFields);
+                addutinalFields = { ...addutinalFields, ...fields };
+            }
+            catch (error) {
+                console.log(`Unable to parse additional-fields: ${inputAdditionFields}`, error);
+            }
+        }
+        return addutinalFields;
     }
     async newIssueParameters(pr) {
         const mentionedIssues = this.findMentionedIssues(pr);
