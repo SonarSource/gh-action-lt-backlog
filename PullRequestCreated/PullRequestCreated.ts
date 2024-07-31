@@ -1,6 +1,6 @@
 import { OctokitAction } from '../lib/OctokitAction';
 import { PullRequest } from '../lib/OctokitTypes';
-import { JIRA_ISSUE_PATTERN } from '../lib/Constants';
+import { JIRA_DOMAIN, JIRA_ISSUE_PATTERN } from '../lib/Constants';
 
 interface IssueParameters {
   type: string;
@@ -54,7 +54,7 @@ class PullRequestCreated extends OctokitAction {
   }
 
   private issueLink(issue: string): string {
-    return `[${issue}](${this.jira.domain}/browse/${issue})`;
+    return `[${issue}](${JIRA_DOMAIN}/browse/${issue})`;
   }
 }
 

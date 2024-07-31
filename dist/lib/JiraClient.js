@@ -2,11 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JiraClient = void 0;
 const node_fetch_1 = require("node-fetch");
-const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
+const Constants_1 = require("./Constants");
 class JiraClient {
-    get domain() {
-        return JIRA_DOMAIN;
-    }
     constructor(user, token) {
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
     }
@@ -54,7 +51,7 @@ class JiraClient {
         return this.sendJiraRequest("POST", endpoint, body);
     }
     async sendJiraRequest(method, endpoint, body) {
-        const url = `${JIRA_DOMAIN}/rest/api/3/${endpoint}`;
+        const url = `${Constants_1.JIRA_DOMAIN}/rest/api/3/${endpoint}`;
         const response = await (0, node_fetch_1.default)(url, {
             method,
             headers: {

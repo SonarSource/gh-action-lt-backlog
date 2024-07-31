@@ -47,7 +47,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         return pr.body?.match(Constants_1.JIRA_ISSUE_PATTERN) || [];
     }
     issueLink(issue) {
-        return `[${issue}](${this.jira.domain}/browse/${issue})`;
+        return `[${issue}](${Constants_1.JIRA_DOMAIN}/browse/${issue})`;
     }
 }
 const action = new PullRequestCreated();

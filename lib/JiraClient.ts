@@ -1,13 +1,8 @@
 import fetch from 'node-fetch';
-
-const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
+import { JIRA_DOMAIN } from './Constants';
 
 export class JiraClient {
     private readonly token: string;
-
-    get domain(): string {
-        return JIRA_DOMAIN;
-    }
 
     constructor(user: string, token: string) {
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
