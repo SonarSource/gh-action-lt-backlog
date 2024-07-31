@@ -1,0 +1,15 @@
+name: 'Move card when requesting review and assign it to the reviewer'
+description: 'Move fixed Jira tickets using the "Request Review" transition and assign them to the reviewer when requestiong a review on a pull request.'
+inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
+  jira-user:
+    description: 'Jira auth User'
+    required: true
+  jira-token:
+    description: 'Jira auth Token'
+    required: true
+runs:
+  using: 'node20'
+  main: '../dist/RequestReview/RequestReview.js'

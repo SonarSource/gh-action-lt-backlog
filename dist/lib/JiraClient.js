@@ -44,11 +44,40 @@ class JiraClient {
         await this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transition.id } });
         console.log(`${issueId}: Transition '${transition.name}' successfully excecuted.`);
     }
+    async assignIssue(issueId, userEmail) {
+        const accountId = await this.findAccountId(userEmail);
+        if (accountId != null) {
+            console.log(`${issueId}: Assigning to ${accountId}`);
+            await this.sendJiraPut(`issue/${issueId}/assignee`, { accountId });
+        }
+    }
+    async findAccountId(email) {
+        const logUser = email.substring(0, email.indexOf('@')).replace('.', ' '); // Do not leak email addresses to logs
+        console.log(`Searching for user: ${logUser}`);
+        let accounts = (await this.sendJiraGet(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
+        accounts = accounts.filter((x) => x.emailAddress === email); // Just in case the address is part of the name, or other unexpected field
+        switch (accounts.length) {
+            case 0:
+                console.log(`Could not find user ${logUser} in Jira`);
+                return null;
+            case 1:
+                console.log(`Found single account ${accounts[0].accountId} ${accounts[0].displayName}`);
+                return accounts[0].accountId;
+            default:
+                console.log(`Found ${accounts.length} accounts, using ${accounts[0].accountId} ${accounts[0].displayName}`);
+                return accounts[0].accountId;
+        }
+        ;
+    }
+    ;
     async sendJiraGet(endpoint) {
         return this.sendJiraRequest("GET", endpoint);
     }
     async sendJiraPost(endpoint, body) {
         return this.sendJiraRequest("POST", endpoint, body);
+    }
+    async sendJiraPut(endpoint, body) {
+        return this.sendJiraRequest("PUT", endpoint, body);
     }
     async sendJiraRequest(method, endpoint, body) {
         const url = `${Constants_1.JIRA_DOMAIN}/rest/api/3/${endpoint}`;

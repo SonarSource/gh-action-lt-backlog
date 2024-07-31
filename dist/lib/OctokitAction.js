@@ -66,6 +66,29 @@ class OctokitAction extends Action_1.Action {
             this.log(`Failed to update PR #${prNumber}: ${error}`);
         }
     }
+    async findEmail(login) {
+        const identities = await this.findExternalIdentities(login);
+        if (identities.length === 0) {
+            this.log(`No SAML identity found for ${login}`);
+            return null;
+        }
+        return identities[0].samlIdentity.nameId;
+    }
+    async findExternalIdentities(login) {
+        const { organization: { samlIdentityProvider: { externalIdentities: { nodes }, }, }, } = await this.sendGraphQL(`
+          query {
+              organization(login: "${this.repo.owner}") {
+                  samlIdentityProvider {
+                      externalIdentities(first: 10, login: "${login}") {
+                          nodes {
+                              samlIdentity { nameId }
+                          }
+                      }
+                  }
+              }
+          }`);
+        return nodes;
+    }
     async sendSlackMessage(text) {
         const channel = this.getInput("slack-channel");
         if (channel) {
