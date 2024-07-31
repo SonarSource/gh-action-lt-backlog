@@ -16,6 +16,8 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
             if (issueKey != null) {
                 await this.updatePullRequestTitle(this.payload.pull_request.number, `${issueKey} ${pr.title}`);
                 await this.updatePullRequestDescription(this.payload.pull_request.number, `${this.issueLink(issueKey)}\n\n${pr.body || ''}`);
+                await this.jira.moveIssue(issueKey, 'Commit'); // OPEN  -> TO DO
+                await this.jira.moveIssue(issueKey, 'Start'); // TO DO -> IN PROGRESS
             }
         }
         else {
