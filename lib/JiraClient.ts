@@ -5,20 +5,28 @@ const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net';
 export class JiraClient {
     private readonly token: string;
 
-    constructor(user: string, token: string) { 
+    constructor(user: string, token: string) {
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
     }
 
-    public async createIssue(projectKey: string, issueTypeId: number, summary: string): Promise<string> {
-        console.log(`Creating issue in project '${projectKey}' with summary: ${summary}`);
-        const response = await this.sendJiraPost('issue', {
+    public async createIssue(projectKey: string, issueType: string, summary: string, additionalFields?: any): Promise<string> {
+        const request = {
             fields: {
                 project: { key: projectKey },
-                issuetype: { id: issueTypeId },
-                summary
-            }
-        });
+                issuetype: { name: issueType },
+                summary,
+                ...additionalFields
+            },
+        }
+        console.log(`Creating issue in project '${projectKey}'`);
+        console.log(JSON.stringify(request, null, 2));
+        const response = await this.sendJiraPost('issue', request);
         return response?.key;
+    }
+
+    public getIssue(issueKey: string): Promise<any> {
+        console.log(`Get issue '${issueKey}'`);
+        return this.sendJiraGet(`issue/${issueKey}`);
     }
 
     public async moveIssue(issueId: string, transitionName: string): Promise<void> {
@@ -39,7 +47,7 @@ export class JiraClient {
 
     private async transitionIssue(issueId: string, transition: any): Promise<void> {
         console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
-        this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transition.id } });
+        await this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transition.id } });
         console.log(`${issueId}: Transition '${transition.name}' successfully excecuted.`);
     }
 

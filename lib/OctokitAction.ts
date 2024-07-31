@@ -18,8 +18,8 @@ export abstract class OctokitAction extends Action {
 
   constructor() {
     super();
-    this.jira = new JiraClient(core.getInput('jira-user'), core.getInput('jira-token'));
-    this.octokit = github.getOctokit(core.getInput('github-token'));
+    this.jira = new JiraClient(this.getInput('jira-user'), this.getInput('jira-token'));
+    this.octokit = github.getOctokit(this.getInput('github-token'));
     this.rest = this.octokit.rest;
   }
 
