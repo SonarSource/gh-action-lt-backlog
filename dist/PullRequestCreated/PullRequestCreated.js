@@ -6,15 +6,12 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
     async execute() {
         const pr = await this.getPullRequest(this.payload.pull_request.number);
         if (this.shouldCreateIssue(pr)) {
-            const issueParameter = await this.newIssueParameters(pr);
+            const parameters = await this.newIssueParameters(pr);
             const projectKey = this.getInput('jira-project');
-            const issueKey = await this.jira.createIssue(projectKey, issueParameter.type, pr.title, { parent: { key: issueParameter.parent } });
+            const issueKey = await this.jira.createIssue(projectKey, parameters.type, pr.title, { parent: { key: parameters.parent } });
             if (issueKey != null) {
                 await this.updatePullRequestTitle(this.payload.pull_request.number, `${issueKey} ${pr.title}`);
                 await this.updatePullRequestDescription(this.payload.pull_request.number, `${issueKey}\n\n${pr.body || ''}`);
-            }
-            else {
-                console.log('Unable to update PR title and description');
             }
         }
     }
