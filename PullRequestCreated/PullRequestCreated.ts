@@ -75,7 +75,7 @@ class PullRequestCreated extends OctokitAction {
     }
   }
 
-  private async firstNonSubTask(issues: Set<string>): Promise<any | null> {
+  private async firstNonSubTask(issues: Set<string>): Promise<any> {
     for (const issueKey of issues) {
       const issue = await this.jira.getIssue(issueKey);
       if (issue?.fields.issuetype.name !== 'Sub-task') {
