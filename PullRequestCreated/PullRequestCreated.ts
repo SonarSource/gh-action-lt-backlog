@@ -18,7 +18,7 @@ class PullRequestCreated extends OctokitAction {
     if (linkedIssues == null) {
       const parameters = await this.newIssueParameters(pr);
       const projectKey = this.getInput('jira-project');
-      const issueKey = await this.jira.createIssue(projectKey, pr.title, this.additionalFields(parameters));
+      const issueKey = await this.jira.createIssue(projectKey, pr.title, { ...this.parseAdditionalFields(), ...parameters });
       if (issueKey != null) {
         newTitle = `${issueKey} ${newTitle}`;
         await this.updatePullRequestDescription(pr.number, `${this.issueLink(issueKey)}\n\n${pr.body || ''}`);
@@ -40,10 +40,6 @@ class PullRequestCreated extends OctokitAction {
     if (pr.title !== newTitle) {
       await this.updatePullRequestTitle(pr.number, newTitle);
     }
-  }
-
-  private additionalFields(parameters: IssueParameters): any {
-    return { ...this.parseAdditionalFields(), ...parameters }
   }
 
   private parseAdditionalFields(): any {

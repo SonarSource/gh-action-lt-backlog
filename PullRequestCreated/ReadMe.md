@@ -7,9 +7,8 @@ This action will take the first non-`Sub-task` ticket and use it as a parent for
 - if the parent is not an `Epic`, the created ticket will be a `Sub-task`
 - if there is no parent, the created ticket will be a `Task`
 
-This action will also update the PR title and description to mention the right Jira tickets.
-The action will link all mentioned tickets in the title into the description.
-When creating a ticket, the action will add it to the PR title.
+When creating a new Jira issue, the action will add the new issue ID to the PR title.
+The action will update the PR description with links to all mentioned Jira tickets for easy navigation.
 
 ## Inputs
 
