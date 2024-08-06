@@ -90,13 +90,7 @@ export abstract class OctokitAction extends Action {
   }
 
   private async findExternalIdentities(login: string): Promise<any[]> {
-    const {
-      organization: {
-        samlIdentityProvider: {
-          externalIdentities: { nodes },
-        },
-      },
-    }: GraphQlQueryResponseData = await this.sendGraphQL(`
+    const data: GraphQlQueryResponseData = await this.sendGraphQL(`
           query {
               organization(login: "${this.repo.owner}") {
                   samlIdentityProvider {
@@ -108,7 +102,7 @@ export abstract class OctokitAction extends Action {
                   }
               }
           }`);
-    return nodes;
+    return data?.organization?.samlIdentityProvider?.externalIdentities?.nodes ?? [];
   }
 
   protected async sendSlackMessage(text: string): Promise<void> {
