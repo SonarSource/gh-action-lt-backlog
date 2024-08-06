@@ -13,6 +13,9 @@ inputs:
   jira-project:
     description: 'Jira project key'
     required: true
+  additional-fields:
+    description: 'Additional fields to be added to the Jira issue'
+    required: false
 runs:
   using: 'node20'
   main: '../dist/PullRequestCreated/PullRequestCreated.js'

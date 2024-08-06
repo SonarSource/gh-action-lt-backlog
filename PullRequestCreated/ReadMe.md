@@ -7,6 +7,9 @@ This action will take the first non-`Sub-task` ticket and use it as a parent for
 - if the parent is not an `Epic`, the created ticket will be a `Sub-task`
 - if there is no parent, the created ticket will be a `Task`
 
+When creating a new Jira issue, the action will add the new issue ID to the PR title.
+The action will update the PR description with links to all mentioned Jira tickets for easy navigation.
+
 ## Inputs
 
 ### `github-token`
@@ -24,6 +27,16 @@ Token to access the Jira API.
 ### `jira-project`
 
 Jira project key that is used to create new issues.
+
+### `additional-fields`
+
+Additional fields to set when creating the Jira issue. 
+
+```yaml
+additional-fields: '{ "priority": { "name": "Major" }'
+```
+
+It overrides fields set by the action.
 
 ## Outputs
 

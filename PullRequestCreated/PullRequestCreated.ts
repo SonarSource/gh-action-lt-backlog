@@ -3,8 +3,8 @@ import { PullRequest } from '../lib/OctokitTypes';
 import { JIRA_DOMAIN, JIRA_ISSUE_PATTERN } from '../lib/Constants';
 
 interface IssueParameters {
-  type: string;
-  parent?: string;
+  issuetype: { name: string };
+  parent?: { key: string };
 }
 
 class PullRequestCreated extends OctokitAction {
@@ -18,7 +18,7 @@ class PullRequestCreated extends OctokitAction {
     if (linkedIssues == null) {
       const parameters = await this.newIssueParameters(pr);
       const projectKey = this.getInput('jira-project');
-      const issueKey = await this.jira.createIssue(projectKey, parameters.type, pr.title, { parent: { key: parameters.parent } });
+      const issueKey = await this.jira.createIssue(projectKey, pr.title, { ...this.parseAdditionalFields(), ...parameters });
       if (issueKey != null) {
         newTitle = `${issueKey} ${newTitle}`;
         await this.updatePullRequestDescription(pr.number, `${this.issueLink(issueKey)}\n\n${pr.body || ''}`);
@@ -42,6 +42,18 @@ class PullRequestCreated extends OctokitAction {
     }
   }
 
+  private parseAdditionalFields(): any {
+    const inputAdditionFields = this.getInput('additional-fields');
+    if (inputAdditionFields) {
+      try {
+        return JSON.parse(inputAdditionFields);
+      } catch (error) {
+        console.log(`Unable to parse additional-fields: ${inputAdditionFields}`, error);
+      }
+    }
+    return {};
+  }
+
   private async newIssueParameters(pr: PullRequest): Promise<IssueParameters> {
     const mentionedIssues = this.findMentionedIssues(pr);
     console.log('Looking for a non-Sub-task ticket');
@@ -49,17 +61,17 @@ class PullRequestCreated extends OctokitAction {
     console.log(`Parent issue: ${parent?.key} (${parent?.fields.issuetype.name})`);
     switch (parent?.fields.issuetype.name) {
       case 'Epic':
-        return { type: 'Task', parent: parent.key };
+        return { issuetype: { name: 'Task' }, parent: { key: parent.key } };
       case 'Sub-task':
       case undefined:
       case null:
-        return { type: 'Task' };
+        return { issuetype: { name: 'Task' } };
       default:
-        return { type: 'Sub-task', parent: parent.key };
+        return { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } };
     }
   }
 
-  private async firstNonSubTask(issues: Set<string>): Promise<any | null> {
+  private async firstNonSubTask(issues: Set<string>): Promise<any> {
     for (const issueKey of issues) {
       const issue = await this.jira.getIssue(issueKey);
       if (issue?.fields.issuetype.name !== 'Sub-task') {
@@ -70,7 +82,7 @@ class PullRequestCreated extends OctokitAction {
   }
 
   private findMentionedIssues(pr: PullRequest): Set<string> {
-    const mentionedIssues =  pr.body?.match(JIRA_ISSUE_PATTERN) || [];
+    const mentionedIssues = pr.body?.match(JIRA_ISSUE_PATTERN) || [];
     console.log(`Found mentioned issues: ${mentionedIssues} (prior to distinct)`);
     return new Set(mentionedIssues);
   }

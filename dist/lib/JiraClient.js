@@ -7,11 +7,10 @@ class JiraClient {
     constructor(user, token) {
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
     }
-    async createIssue(projectKey, issueType, summary, additionalFields) {
+    async createIssue(projectKey, summary, additionalFields) {
         const request = {
             fields: {
                 project: { key: projectKey },
-                issuetype: { name: issueType },
                 summary,
                 ...additionalFields
             },

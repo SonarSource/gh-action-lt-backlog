@@ -13,7 +13,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         if (linkedIssues == null) {
             const parameters = await this.newIssueParameters(pr);
             const projectKey = this.getInput('jira-project');
-            const issueKey = await this.jira.createIssue(projectKey, parameters.type, pr.title, { parent: { key: parameters.parent } });
+            const issueKey = await this.jira.createIssue(projectKey, pr.title, { ...this.parseAdditionalFields(), ...parameters });
             if (issueKey != null) {
                 newTitle = `${issueKey} ${newTitle}`;
                 await this.updatePullRequestDescription(pr.number, `${this.issueLink(issueKey)}\n\n${pr.body || ''}`);
@@ -37,6 +37,18 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
             await this.updatePullRequestTitle(pr.number, newTitle);
         }
     }
+    parseAdditionalFields() {
+        const inputAdditionFields = this.getInput('additional-fields');
+        if (inputAdditionFields) {
+            try {
+                return JSON.parse(inputAdditionFields);
+            }
+            catch (error) {
+                console.log(`Unable to parse additional-fields: ${inputAdditionFields}`, error);
+            }
+        }
+        return {};
+    }
     async newIssueParameters(pr) {
         const mentionedIssues = this.findMentionedIssues(pr);
         console.log('Looking for a non-Sub-task ticket');
@@ -44,13 +56,13 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         console.log(`Parent issue: ${parent?.key} (${parent?.fields.issuetype.name})`);
         switch (parent?.fields.issuetype.name) {
             case 'Epic':
-                return { type: 'Task', parent: parent.key };
+                return { issuetype: { name: 'Task' }, parent: { key: parent.key } };
             case 'Sub-task':
             case undefined:
             case null:
-                return { type: 'Task' };
+                return { issuetype: { name: 'Task' } };
             default:
-                return { type: 'Sub-task', parent: parent.key };
+                return { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } };
         }
     }
     async firstNonSubTask(issues) {
