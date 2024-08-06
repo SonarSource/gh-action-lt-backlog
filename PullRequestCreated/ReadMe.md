@@ -48,6 +48,9 @@ jobs:
   PullRequestCreated_job:
     name: Pull Request Created
     runs-on: ubuntu-latest
+    # For external PR, ticket should be created manually
+    if: |
+        github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - id: secrets
         uses: SonarSource/vault-action-wrapper@v3
@@ -56,7 +59,7 @@ jobs:
             operations/team/re/kv/data/github/github-jira-integration token | GITHUB_TOKEN;
             development/kv/data/jira user | JIRA_USER;
             development/kv/data/jira token | JIRA_TOKEN;
-    - uses: sonarsource/gh-action-lt-backlog/PullRequestCreated@v2
+      - uses: sonarsource/gh-action-lt-backlog/PullRequestCreated@v2
         with:
           github-token: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
           jira-user:    ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
