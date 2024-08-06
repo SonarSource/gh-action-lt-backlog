@@ -41,6 +41,9 @@ jobs:
   RequestReview_job:
     name: Request review
     runs-on: ubuntu-latest
+    # For external PR, ticket should be moved manually
+    if: |
+        github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       id-token: write
     steps:
