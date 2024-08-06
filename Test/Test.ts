@@ -15,9 +15,9 @@ class Test extends OctokitAction {
 
 
 
-    //this.log("findingEmail");
-    //const userEmail = await this.findEmail(this.getInput('login'));
-    //this.log(`Result: ${userEmail}`);
+    this.log("findingEmail");
+    const userEmail = await this.findEmail(this.getInput('login'));
+    this.log(`Result: ${userEmail}`);
   }
 }
 

@@ -12,9 +12,9 @@ class Test extends OctokitAction_1.OctokitAction {
         //var me = await this.rest.users.getAuthenticated();
         //this.log("Received getAuthenticated");
         //this.logSerialized(me);
-        //this.log("findingEmail");
-        //const userEmail = await this.findEmail(this.getInput('login'));
-        //this.log(`Result: ${userEmail}`);
+        this.log("findingEmail");
+        const userEmail = await this.findEmail(this.getInput('login'));
+        this.log(`Result: ${userEmail}`);
     }
 }
 const action = new Test();
