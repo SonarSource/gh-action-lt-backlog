@@ -24,5 +24,5 @@ jobs:
     name: Log payload
     runs-on: ubuntu-latest
     steps:
-      - uses: sonarsource/gh-action-lt-backlog/LogPayload@v1
+      - uses: sonarsource/gh-action-lt-backlog/LogPayload@v2
 ```

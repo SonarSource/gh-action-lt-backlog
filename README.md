@@ -6,35 +6,25 @@
 
 Master contains current development work and should not be used by production templates.
 
-Reviewed changes should be tested on `master` branch before their release to a versioned branche.
+Reviewed changes should be tested on `master` branch before their release to a versioned branch.
 
 ### `v1`, `v2`, ... `vn`
 
-Versioned release branches. Always use latest. Extensions are allowed, breaking changes requires creation of a new version branch.
+Versioned release branches. Always use the latest. Extensions are allowed; breaking changes requires creating a new version branch.
 
 All actions should be consumed from these branches.
 
 ## Actions
 
-[AssignCardToSender](AssignCardToSender) - Assign Kanban card to sender of the event, mainly when moving card from `To do` column.
-
-[CopyLabelToPR](CopyLabelToPR) - Copy configured labels from all mentioned issues to PR.
-
-[CreateCardForIssue](CreateCardForIssue) - Create card for issue, mainly when milestoned.
-
-[CreateCardForIssueFromLabel](CreateCardForIssueFromLabel) - Create card for issue in a project column determined by the issue label. Mainly to organize backlog project.
-
-[CreateCardForStandalonePR](CreateCardForStandalonePR) - Create card for Standalone PR in `In progress` column.
-
-[CreateNote](CreateNote) - Create a card with a note in the configured Kanban column.
-
-[CreateRspecIssue](CreateRspecIssue) - Create issue to update RSPEC after milestone is created.
-
 [LogPayload](LogPayload) - Log payload to console
 
-[MoveCardAfterReview](MoveCardAfterReview) - Move card back to `In Progress` or to `Review approved` column after review.
+[PullRequestClosed](PullRequestClosed) - Move card after merging a pull request
 
-[MoveCardToReview](MoveCardToReview) - Move card to `Review in progress` when PR author asks for a review.
+[PullRequestCreated](PullRequestCreated) - Create Jira Issue for PR without issue reference
+
+[RequestReview](RequestReview) - Move card when requesting review and assign it to the reviewer
+
+[SubmitReview](SubmitReview) - Move card after submitting a review
 
 [ToggleLockBranch](ToggleLockBranch) - Lock or Unlock branch to prevent merge of PRs.
 
