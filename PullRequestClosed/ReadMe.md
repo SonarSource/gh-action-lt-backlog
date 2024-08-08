@@ -1,4 +1,4 @@
-# SubmitReview
+# PullRequestClosed
 
 Move fixed Jira tickets using the "Merge into branch" or "Merge into master" transition after merging the pull request.
 
@@ -27,15 +27,15 @@ None
 ## Example usage
 
 ```yaml
-name: Close Pull Request
+name: Pull Request Closed
 
 on:
   pull_request:
     types: [closed]
 
 jobs:
-  MergePullRequest_job:
-    name: Submit Review
+  PullRequestMerged_job:
+    name: Pull Request Merged
     runs-on: ubuntu-latest
     # For external PR, ticket should be moved manually
     if: |
@@ -51,6 +51,7 @@ jobs:
       - uses: sonarsource/gh-action-lt-backlog/PullRequestClosed@v2
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          jira-user: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
+          jira-user:  ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
           jira-token: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
+
 ```

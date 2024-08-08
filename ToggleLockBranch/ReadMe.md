@@ -71,4 +71,5 @@ jobs:
           slack-token: ${{ fromJSON(steps.secrets.outputs.vault).slack_api_token }} # Optional, needed only when slack-channel is set
           branch-pattern: "master"              # Optional
           slack-channel: public-channel-name    # Optional
+
 ```

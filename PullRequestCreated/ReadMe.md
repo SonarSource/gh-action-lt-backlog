@@ -64,6 +64,8 @@ jobs:
     # For external PR, ticket should be created manually
     if: |
         github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      id-token: write
     steps:
       - id: secrets
         uses: SonarSource/vault-action-wrapper@v3
@@ -78,4 +80,5 @@ jobs:
           jira-user:    ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
           jira-token:   ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
           jira-project: EXAMPLE
+
 ```
