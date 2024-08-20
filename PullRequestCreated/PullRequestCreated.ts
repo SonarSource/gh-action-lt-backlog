@@ -58,7 +58,7 @@ class PullRequestCreated extends OctokitAction {
     const mentionedIssues = this.findMentionedIssues(pr);
     console.log('Looking for a non-Sub-task ticket');
     const parent = await this.firstNonSubTask(mentionedIssues);
-    console.log(`Parent issue: ${parent?.key} (${parent?.fields.issuetype.name})`);
+    console.log(parent ? `Parent ticket: ${parent?.key} (${parent?.fields.issuetype.name})` : 'No parent ticket');
     switch (parent?.fields.issuetype.name) {
       case 'Epic':
         return { issuetype: { name: 'Task' }, parent: { key: parent.key } };
@@ -83,7 +83,7 @@ class PullRequestCreated extends OctokitAction {
 
   private findMentionedIssues(pr: PullRequest): Set<string> {
     const mentionedIssues = pr.body?.match(JIRA_ISSUE_PATTERN) || [];
-    console.log(`Found mentioned issues: ${mentionedIssues} (prior to distinct)`);
+    console.log(mentionedIssues.length > 0 ? `Found mentioned issues: ${mentionedIssues} (prior to distinct)` : 'No ticket mentioned');
     return new Set(mentionedIssues);
   }
 
