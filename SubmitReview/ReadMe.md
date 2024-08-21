@@ -38,6 +38,8 @@ jobs:
   SubmitReview_job:
     name: Submit Review
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     # For external PR, ticket should be moved manually
     if: |
         github.event.pull_request.head.repo.full_name == github.repository

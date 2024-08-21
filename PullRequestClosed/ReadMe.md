@@ -37,6 +37,8 @@ jobs:
   PullRequestMerged_job:
     name: Pull Request Merged
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     # For external PR, ticket should be moved manually
     if: |
         github.event.pull_request.head.repo.full_name == github.repository
