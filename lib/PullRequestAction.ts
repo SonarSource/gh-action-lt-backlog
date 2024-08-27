@@ -10,7 +10,12 @@ export abstract class PullRequestAction extends OctokitAction {
       console.warn('No Jira issue found in the PR title.');
     } else {
       for (const issueId of issueIds) {
-        await this.processJiraIssue(issueId);
+        if (issueId.startsWith('BUILD-')) {
+          this.log(`Skipping $(issueId)`);
+        }
+        else {
+          await this.processJiraIssue(issueId);
+        }
       }
     }
   }
