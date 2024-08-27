@@ -11,7 +11,12 @@ class PullRequestAction extends OctokitAction_1.OctokitAction {
         }
         else {
             for (const issueId of issueIds) {
-                await this.processJiraIssue(issueId);
+                if (issueId.startsWith('BUILD-')) {
+                    this.log(`Skipping $(issueId)`);
+                }
+                else {
+                    await this.processJiraIssue(issueId);
+                }
             }
         }
     }
