@@ -11,7 +11,7 @@ export abstract class PullRequestAction extends OctokitAction {
     } else {
       for (const issueId of issueIds) {
         if (issueId.startsWith('BUILD-')) {
-          this.log(`Skipping $(issueId)`);
+          this.log(`Skipping ${issueId}`);
         }
         else {
           await this.processJiraIssue(issueId);
