@@ -29,24 +29,22 @@ export class JiraClient {
 
   public async moveIssue(issueId: string, transitionName: string): Promise<void> {
     const transition = await this.findTransition(issueId, transitionName);
-    if (transition != null) {
+    if (transition == null) {
+      console.log(`${issueId}: Could not find the transition '${transitionName}'`);
+    }
+    else {
       await this.transitionIssue(issueId, transition);
     }
   }
 
-  private async findTransition(issueId: string, transitionName: string): Promise<any> {
+  public async findTransition(issueId: string, transitionName: string): Promise<any> {
     const transitions = (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions ?? [];
-    const transition = transitions.find((x: any) => x.name === transitionName);
-    if (transition == null) {
-      console.log(`${issueId}: Could not find the transition '${transitionName}'`);
-    }
-    return transition;
+    return transitions.find((x: any) => x.name === transitionName);
   }
 
-  private async transitionIssue(issueId: string, transition: any): Promise<void> {
+  public async transitionIssue(issueId: string, transition: any): Promise<void> {
     console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
     await this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transition.id } });
-    console.log(`${issueId}: Transition '${transition.name}' successfully excecuted.`);
   }
 
   public async assignIssue(issueId: string, userEmail: string): Promise<void> {
