@@ -1,8 +1,10 @@
 # PullRequestClosed
 
-Move fixed Jira tickets using the "Merge into branch" or "Merge into master" transition after merging the pull request.
+Move fixed Jira tickets using the "Merge into branch", "Merge into master", or "Merge" transition after merging the pull request.
 
 If the pull request has been merged to a release branch like `master`, `main`, or `branch-*`, the `Merge into master` transition will be used. It would typically move a ticket from `APPROVED` to `CLOSED`. For any other target branch, a `Merge into branch` transition will be used.
+
+If `Merge into branch` or `Merge into master` transitions are not available, the action will attempt to use the `Merge` transition.
 
 This action will attempt to move all tickets mentionned in the pull request title.
 

@@ -26,22 +26,20 @@ class JiraClient {
     }
     async moveIssue(issueId, transitionName) {
         const transition = await this.findTransition(issueId, transitionName);
-        if (transition != null) {
+        if (transition == null) {
+            console.log(`${issueId}: Could not find the transition '${transitionName}'`);
+        }
+        else {
             await this.transitionIssue(issueId, transition);
         }
     }
     async findTransition(issueId, transitionName) {
         const transitions = (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions ?? [];
-        const transition = transitions.find((x) => x.name === transitionName);
-        if (transition == null) {
-            console.log(`${issueId}: Could not find the transition '${transitionName}'`);
-        }
-        return transition;
+        return transitions.find((x) => x.name === transitionName);
     }
     async transitionIssue(issueId, transition) {
         console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
         await this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transition.id } });
-        console.log(`${issueId}: Transition '${transition.name}' successfully excecuted.`);
     }
     async assignIssue(issueId, userEmail) {
         const accountId = await this.findAccountId(userEmail);
