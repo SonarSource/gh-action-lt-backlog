@@ -16,8 +16,8 @@ class PullRequestCreated extends OctokitAction {
     let newTitle = pr.title.replace(/\s\s+/g, " ").trim();  // Mainly remove triple space between issue ID and title when copying from Jira
     const linkedIssues = pr.title?.match(JIRA_ISSUE_PATTERN) || null;
     if (linkedIssues == null) {
-      const parameters = await this.newIssueParameters(pr);
       const projectKey = this.getInput('jira-project');
+      const parameters = await this.newIssueParameters(projectKey, pr);
       const issueKey = await this.jira.createIssue(projectKey, pr.title, { ...this.parseAdditionalFields(), ...parameters });
       if (issueKey != null) {
         newTitle = `${issueKey} ${newTitle}`;
@@ -54,7 +54,7 @@ class PullRequestCreated extends OctokitAction {
     return {};
   }
 
-  private async newIssueParameters(pr: PullRequest): Promise<IssueParameters> {
+  private async newIssueParameters(projectKey: string, pr: PullRequest): Promise<IssueParameters> {
     const mentionedIssues = this.findMentionedIssues(pr);
     console.log('Looking for a non-Sub-task ticket');
     const parent = await this.firstNonSubTask(mentionedIssues);
@@ -67,7 +67,9 @@ class PullRequestCreated extends OctokitAction {
       case null:
         return { issuetype: { name: 'Task' } };
       default:
-        return { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } };
+          return parent.fields.project.key === projectKey   // Sub-task must be created in the same project
+            ? { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } }
+            : { issuetype: { name: 'Task' } };
     }
   }
 
@@ -83,7 +85,7 @@ class PullRequestCreated extends OctokitAction {
 
   private findMentionedIssues(pr: PullRequest): Set<string> {
     const mentionedIssues = pr.body?.match(JIRA_ISSUE_PATTERN) || [];
-    console.log(mentionedIssues.length > 0 ? `Found mentioned issues: ${mentionedIssues} (prior to distinct)` : 'No mentioned issues found');
+    console.log(mentionedIssues.length > 0 ? `Found mentioned issues: ${mentionedIssues}` : 'No mentioned issues found');
     return new Set(mentionedIssues);
   }
 

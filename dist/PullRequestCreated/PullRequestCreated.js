@@ -11,8 +11,8 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         let newTitle = pr.title.replace(/\s\s+/g, " ").trim(); // Mainly remove triple space between issue ID and title when copying from Jira
         const linkedIssues = pr.title?.match(Constants_1.JIRA_ISSUE_PATTERN) || null;
         if (linkedIssues == null) {
-            const parameters = await this.newIssueParameters(pr);
             const projectKey = this.getInput('jira-project');
+            const parameters = await this.newIssueParameters(projectKey, pr);
             const issueKey = await this.jira.createIssue(projectKey, pr.title, { ...this.parseAdditionalFields(), ...parameters });
             if (issueKey != null) {
                 newTitle = `${issueKey} ${newTitle}`;
@@ -49,7 +49,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         }
         return {};
     }
-    async newIssueParameters(pr) {
+    async newIssueParameters(projectKey, pr) {
         const mentionedIssues = this.findMentionedIssues(pr);
         console.log('Looking for a non-Sub-task ticket');
         const parent = await this.firstNonSubTask(mentionedIssues);
@@ -62,7 +62,9 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
             case null:
                 return { issuetype: { name: 'Task' } };
             default:
-                return { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } };
+                return parent.fields.project.key === projectKey // Sub-task must be created in the same project
+                    ? { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } }
+                    : { issuetype: { name: 'Task' } };
         }
     }
     async firstNonSubTask(issues) {
@@ -76,7 +78,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
     }
     findMentionedIssues(pr) {
         const mentionedIssues = pr.body?.match(Constants_1.JIRA_ISSUE_PATTERN) || [];
-        console.log(mentionedIssues.length > 0 ? `Found mentioned issues: ${mentionedIssues} (prior to distinct)` : 'No mentioned issues found');
+        console.log(mentionedIssues.length > 0 ? `Found mentioned issues: ${mentionedIssues}` : 'No mentioned issues found');
         return new Set(mentionedIssues);
     }
     issueLink(issue) {
