@@ -24,9 +24,7 @@ None
 
 ## Prerequisites
 
-Send email to REs - ask to add a `operations/team/re/kv/data/github/github-jira-integration` token to the Vault configuration of your repository - for each repository where you need to use this. [Example](https://github.com/SonarSource/re-terraform-aws-vault/pull/1200/files)
-
-Note: The current token name is a temporary solution and will be changed in the future.
+Send email to DevInfra Squad - ask to add a `jira` suffix token to the Vault configuration of your repository - for each repository where you need to use this. Example: [BUILD-6352](https://sonarsource.atlassian.net/browse/BUILD-6352)
 
 ## Usage examples
 
@@ -51,7 +49,7 @@ jobs:
         uses: SonarSource/vault-action-wrapper@v3
         with:
           secrets: |
-            operations/team/re/kv/data/github/github-jira-integration token | GITHUB_TOKEN;
+            development/github/token/{REPO_OWNER_NAME_DASH}-jira token | GITHUB_TOKEN;
             development/kv/data/jira user | JIRA_USER;
             development/kv/data/jira token | JIRA_TOKEN;
       - uses: sonarsource/gh-action-lt-backlog/RequestReview@v2
