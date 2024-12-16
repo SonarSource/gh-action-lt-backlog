@@ -9,6 +9,10 @@ interface IssueParameters {
 
 class PullRequestCreated extends OctokitAction {
   protected async execute(): Promise<void> {
+    if (/DO NOT MERGE/i.test(this.payload.pull_request.title)) {
+      this.log("'DO NOT MERGE' found in the PR title, skipping the action.");
+      return;
+    }
     const pr = await this.getPullRequest(this.payload.pull_request.number);
     if (pr == null) {
       return;
@@ -67,9 +71,9 @@ class PullRequestCreated extends OctokitAction {
       case null:
         return { issuetype: { name: 'Task' } };
       default:
-          return parent.fields.project.key === projectKey   // Sub-task must be created in the same project
-            ? { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } }
-            : { issuetype: { name: 'Task' } };
+        return parent.fields.project.key === projectKey   // Sub-task must be created in the same project
+          ? { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } }
+          : { issuetype: { name: 'Task' } };
     }
   }
 
