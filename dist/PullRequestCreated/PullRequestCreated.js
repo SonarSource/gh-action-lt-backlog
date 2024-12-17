@@ -4,6 +4,10 @@ const OctokitAction_1 = require("../lib/OctokitAction");
 const Constants_1 = require("../lib/Constants");
 class PullRequestCreated extends OctokitAction_1.OctokitAction {
     async execute() {
+        if (/DO NOT MERGE/i.test(this.payload.pull_request.title)) {
+            this.log("'DO NOT MERGE' found in the PR title, skipping the action.");
+            return;
+        }
         const pr = await this.getPullRequest(this.payload.pull_request.number);
         if (pr == null) {
             return;

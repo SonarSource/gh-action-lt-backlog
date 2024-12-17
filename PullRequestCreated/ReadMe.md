@@ -10,6 +10,8 @@ This action will take the first non-`Sub-task` ticket and use it as a parent for
 When creating a new Jira issue, the action will add the new issue ID to the PR title.
 The action will update the PR description with links to all mentioned Jira tickets for easy navigation.
 
+This action does nothing if the PR title contains `DO NOT MERGE` phrase.
+
 ## Inputs
 
 ### `github-token`
