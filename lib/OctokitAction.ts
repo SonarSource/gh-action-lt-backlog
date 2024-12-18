@@ -154,4 +154,14 @@ export abstract class OctokitAction extends Action {
       return null;
     }
   }
+
+  protected async processRequestReview(issueId: string, requested_reviewer: any): Promise<void> {
+    await this.jira.moveIssue(issueId, 'Request Review');
+    if (requested_reviewer) {  
+      const userEmail = await this.findEmail(requested_reviewer.login);
+      if (userEmail != null) {
+        await this.jira.assignIssue(issueId, userEmail);
+      }
+    }
+  }
 }
