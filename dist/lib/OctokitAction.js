@@ -67,6 +67,7 @@ class OctokitAction extends Action_1.Action {
         }
     }
     async findEmail(login) {
+        this.log(`Searching for SAML identity of ${login}`);
         const identities = await this.findExternalIdentities(login);
         if (identities.length === 0) {
             this.log(`No SAML identity found for ${login}`);
