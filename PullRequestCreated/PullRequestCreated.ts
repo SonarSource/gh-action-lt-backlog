@@ -21,8 +21,9 @@ class PullRequestCreated extends OctokitAction {
     const linkedIssues = pr.title?.match(JIRA_ISSUE_PATTERN) || null;
     if (linkedIssues == null) {
       const projectKey = this.getInput('jira-project');
-      const parameters = await this.newIssueParameters(projectKey, pr);
-      const issueKey = await this.jira.createIssue(projectKey, pr.title, { ...this.parseAdditionalFields(), ...parameters });
+      const additionalFields = this.parseAdditionalFields();
+      const parameters = await this.newIssueParameters(projectKey, pr, additionalFields.issuetype?.name ?? 'Task'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
+      const issueKey = await this.jira.createIssue(projectKey, pr.title, { ...additionalFields, ...parameters });
       if (issueKey == null) {
         this.setFailed('Failed to create a new issue in Jira');
       } else {
@@ -63,22 +64,22 @@ class PullRequestCreated extends OctokitAction {
     return {};
   }
 
-  private async newIssueParameters(projectKey: string, pr: PullRequest): Promise<IssueParameters> {
+  private async newIssueParameters(projectKey: string, pr: PullRequest, issueType: string): Promise<IssueParameters> {
     const mentionedIssues = this.findMentionedIssues(pr);
     console.log('Looking for a non-Sub-task ticket');
     const parent = await this.firstNonSubTask(mentionedIssues);
     console.log(parent ? `Parent issue: ${parent?.key} (${parent?.fields.issuetype.name})` : 'No parent issue found');
     switch (parent?.fields.issuetype.name) {
       case 'Epic':
-        return { issuetype: { name: 'Task' }, parent: { key: parent.key } };
+        return { issuetype: { name: issueType }, parent: { key: parent.key } };
       case 'Sub-task':
       case undefined:
       case null:
-        return { issuetype: { name: 'Task' } };
+        return { issuetype: { name: issueType } };
       default:
         return parent.fields.project.key === projectKey   // Sub-task must be created in the same project
           ? { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } }
-          : { issuetype: { name: 'Task' } };
+          : { issuetype: { name: issueType } };
     }
   }
 
