@@ -103,7 +103,10 @@ export class JiraClient {
       return data
     } else {
       console.log(`${response.status} (${response.statusText}): ${data?.errorMessages.join('. ') ?? 'Unknown error'}`);
-      return null
+      if (data != null) {
+        console.log(JSON.stringify(data, null, 2));
+      }
+      return null;
     }
   }
 }
