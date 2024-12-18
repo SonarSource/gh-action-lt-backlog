@@ -24892,12 +24892,12 @@ var TEAM_REVIEW_PREFIX = "Team Review Jira issue ID: ";
 var JIRA_ISSUE_KEY = String.raw`\b(?!USER-)[A-Z][A-Z0-9]*-\d+`;
 var JIRA_ISSUE_PATTERN = new RegExp(JIRA_ISSUE_KEY, "g");
 var JIRA_TITLE_ISSUES_PATTERN = new RegExp(String.raw`^(?:${JIRA_ISSUE_KEY}\b|[^A-Za-z]|\b[Aa]nd\b)*`);
-var JIRA_DOMAIN = "https://sonarsource.atlassian.net";
+var JIRA_DOMAIN = "https://sonarsource-sandbox-608.atlassian.net";
 var JIRA_NIGEL_ACCOUNT_ID = "712020:9c105dc5-0493-4d71-83a6-ed21c4ba03c0";
 var JIRA_TECH_USER_GITHUB_ACCOUNT_ID = "712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4";
 var JIRA_TECH_USER_RELEASE_ENGINEERS_ACCOUNT_ID = "62d146be6eba7198372287a4";
 var JIRA_BOT_ACCOUNT_IDS = [JIRA_NIGEL_ACCOUNT_ID, JIRA_TECH_USER_GITHUB_ACCOUNT_ID, JIRA_TECH_USER_RELEASE_ENGINEERS_ACCOUNT_ID];
-var JIRA_SITE_ID = "d2e970e4-8820-420f-8908-e27ca87a64b8";
+var JIRA_SITE_ID = "5ea71b8c-f3d5-4b61-b038-001c50df1666";
 var JIRA_ORGANIZATION_ID = "78eed3e4-84ad-4374-b777-a3b4ba5d9516";
 
 // lib/MarkdownParser.ts
@@ -25509,29 +25509,7 @@ var OctokitAction = class extends Action {
     }
   }
   async findEmails(login) {
-    if (login.endsWith("[bot]")) {
-      this.log(`Skipping email search for bot: ${login}`);
-      return [];
-    }
-    this.log(`Searching for email of ${login}`);
-    try {
-      const { user: { organizationVerifiedDomainEmails: emails } } = await this.sendGraphQL(`
-        query {
-          user(login: "${login}") {
-            organizationVerifiedDomainEmails(login: "${this.repo.owner}")
-          }
-        }`);
-      this.log(`Found ${emails.length} email(s) for ${login}`);
-      const sonar = emails.filter((x) => x.toLowerCase().includes("@sonar"));
-      const other = emails.filter((x) => !x.toLowerCase().includes("@sonar"));
-      return [...sonar, ...other];
-    } catch (error2) {
-      if (error2 instanceof GraphqlResponseError && error2.errors?.length === 1 && error2.errors[0].type === "NOT_FOUND") {
-        this.log(`No email found for ${login}: ${error2.errors[0].message}`);
-        return [];
-      }
-      throw error2;
-    }
+    return ["pavel.mikula@sonarsource.com"];
   }
   async findRootlyOnCallEmails(scheduleId) {
     if (!scheduleId) {
