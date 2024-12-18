@@ -42,6 +42,10 @@ export abstract class Action {
     return { ...this.repo, ...other };
   }
 
+  protected setFailed(message: string) {
+    core.setFailed(`Action failed: ${message}`);
+  }
+
   private serializeToString(value: any): string {
     return JSON.stringify(value, undefined, 2);
   }

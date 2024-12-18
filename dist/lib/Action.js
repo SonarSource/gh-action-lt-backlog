@@ -27,6 +27,9 @@ class Action {
     addRepo(other) {
         return { ...this.repo, ...other };
     }
+    setFailed(message) {
+        core.setFailed(`Action failed: ${message}`);
+    }
     serializeToString(value) {
         return JSON.stringify(value, undefined, 2);
     }

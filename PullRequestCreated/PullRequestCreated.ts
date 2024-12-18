@@ -23,7 +23,9 @@ class PullRequestCreated extends OctokitAction {
       const projectKey = this.getInput('jira-project');
       const parameters = await this.newIssueParameters(projectKey, pr);
       const issueKey = await this.jira.createIssue(projectKey, pr.title, { ...this.parseAdditionalFields(), ...parameters });
-      if (issueKey != null) {
+      if (issueKey == null) {
+        this.setFailed('Failed to create a new issue in Jira');
+      } else {
         newTitle = `${issueKey} ${newTitle}`;
         await this.updatePullRequestDescription(pr.number, `${this.issueLink(issueKey)}\n\n${pr.body || ''}`);
         await this.jira.moveIssue(issueKey, 'Commit');  // OPEN  -> TO DO
