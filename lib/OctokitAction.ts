@@ -144,23 +144,10 @@ export abstract class OctokitAction extends Action {
   }
 
   protected async findEmail(login: string): Promise<string | null> {
-    this.log(`Searching for email of ${login}`);
-    try {
-      const { user: { organizationVerifiedDomainEmails: emails } } = await this.sendGraphQL<VerifiedEmailsResponse>(`
-        query {
-          user(login: "${login}") {
-            organizationVerifiedDomainEmails(login: "${this.repo.owner}")
-          }
-        }`);
-      this.log(`Found ${emails.length} email(s) for ${login}`);
-      return emails.find(x => x.toLowerCase().includes('@sonar')) ?? emails[0] ?? null;
-    } catch (error) {
-      if (error instanceof GraphqlResponseError && error.errors?.length === 1 && error.errors[0].type === 'NOT_FOUND') {
-        this.log(`No email found for ${login}: ${error.errors[0].message}`);
-        return null;
-      }
-      throw error;
-    }
+
+      // FIXME: DEBUG only
+      return 'pavel.mikula@sonarsource.com';
+
   }
 
   protected async sendSlackMessage(text: string): Promise<void> {
