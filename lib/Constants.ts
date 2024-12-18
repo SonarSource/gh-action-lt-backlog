@@ -23,7 +23,7 @@ export const TEAM_REVIEW_PREFIX: string = 'Team Review Jira issue ID: ';
 const JIRA_ISSUE_KEY: string = String.raw`\b(?!USER-)[A-Z][A-Z0-9]*-\d+`;
 export const JIRA_ISSUE_PATTERN: RegExp = new RegExp(JIRA_ISSUE_KEY, 'g');
 export const JIRA_TITLE_ISSUES_PATTERN: RegExp = new RegExp(String.raw`^(?:${JIRA_ISSUE_KEY}\b|[^A-Za-z]|\b[Aa]nd\b)*`); // Allow only titles starting with tickets, tolerating "and" and non-letter characters
-export const JIRA_DOMAIN = 'https://sonarsource.atlassian.net';
+export const JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net'; // FIXME: Debug value on a Dev branch. This should NOT make it to a PR nor master
 export const JIRA_NIGEL_ACCOUNT_ID = '712020:9c105dc5-0493-4d71-83a6-ed21c4ba03c0';
 export const JIRA_TECH_USER_GITHUB_ACCOUNT_ID = '712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4';
 export const JIRA_TECH_USER_RELEASE_ENGINEERS_ACCOUNT_ID = '62d146be6eba7198372287a4';
@@ -33,5 +33,5 @@ export const JIRA_BOT_ACCOUNT_IDS: readonly string[] = [JIRA_NIGEL_ACCOUNT_ID, J
 // To avoid consistency of having a single name for the same thing everywhere, wise developers of Patlassian* named the redundant `siteId` form teamSearchV2 a `cloudId` here.
 // * https://en.wikipedia.org/wiki/Pat_%26_Mat#Names
 // query MandatoryButUselessQueryName { tenantContexts ( hostNames: [ "sonarsource.atlassian.net" ] ) { cloudId orgId } }
-export const JIRA_SITE_ID = 'd2e970e4-8820-420f-8908-e27ca87a64b8';
+export const JIRA_SITE_ID = '5ea71b8c-f3d5-4b61-b038-001c50df1666'; // FIXME: Debug value on a Dev branch for sandbox. This should NOT make it to a PR nor master
 export const JIRA_ORGANIZATION_ID = '78eed3e4-84ad-4374-b777-a3b4ba5d9516';
