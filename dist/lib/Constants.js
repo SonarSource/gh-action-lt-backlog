@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JIRA_ORGANIZATION_ID = exports.JIRA_SITE_ID = exports.JIRA_DOMAIN = exports.JIRA_ISSUE_PATTERN = void 0;
 exports.JIRA_ISSUE_PATTERN = /[A-Z][A-Z0-9]*-\d+/g;
-exports.JIRA_DOMAIN = 'https://sonarsource.atlassian.net';
+exports.JIRA_DOMAIN = 'https://sonarsource-sandbox-608.atlassian.net'; // FIXME: Debug value on a Dev branch. This should NOT make it to a PR nor master
 // To find values for these constants, you can use the following query, update Jira domain, and post it here: https://developer.atlassian.com/platform/teams/graphql/explorer/
 // To avoid consistency of having a single name for the same thing everywhere, wise developers of Patlassian* named the redundant `siteId` form teamSearchV2 a `cloudId` here.
 // * https://en.wikipedia.org/wiki/Pat_%26_Mat#Names
