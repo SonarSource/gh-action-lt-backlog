@@ -81,6 +81,7 @@ export abstract class OctokitAction extends Action {
   }
 
   protected async findEmail(login: string): Promise<string> {
+    this.log(`Searching for SAML identity of ${login}`);
     const identities = await this.findExternalIdentities(login);
     if (identities.length === 0) {
       this.log(`No SAML identity found for ${login}`);
@@ -92,9 +93,7 @@ export abstract class OctokitAction extends Action {
   private async findExternalIdentities(login: string): Promise<any[]> {
     const {
       organization: {
-        samlIdentityProvider: {
-          externalIdentities: { nodes },
-        },
+        samlIdentityProvider,
       },
     }: GraphQlQueryResponseData = await this.sendGraphQL(`
           query {
@@ -108,7 +107,12 @@ export abstract class OctokitAction extends Action {
                   }
               }
           }`);
-    return nodes;
+    if (samlIdentityProvider?.externalIdentities) { 
+      return samlIdentityProvider.externalIdentities.nodes;
+    } else {
+      this.log('ERROR: Provided GitHub token does not have permissions to query organization/samlIdentityProvider/externalIdentities.');
+      return [];
+    }
   }
 
   protected async sendSlackMessage(text: string): Promise<void> {
