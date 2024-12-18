@@ -21,7 +21,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Action } from './Action.js';
 import { addPullRequestExtensions } from './OctokitTypes.js';
-import { graphql, GraphqlResponseError } from '@octokit/graphql';
+import { graphql } from '@octokit/graphql';
 import { JiraClient } from './JiraClient.js';
 import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN } from './Constants.js';
 export class OctokitAction extends Action {
@@ -122,26 +122,8 @@ export class OctokitAction extends Action {
         }
     }
     async findEmails(login) {
-        this.log(`Searching for email of ${login}`);
-        try {
-            const { user: { organizationVerifiedDomainEmails: emails } } = await this.sendGraphQL(`
-        query {
-          user(login: "${login}") {
-            organizationVerifiedDomainEmails(login: "${this.repo.owner}")
-          }
-        }`);
-            this.log(`Found ${emails.length} email(s) for ${login}`);
-            const sonar = emails.filter((x) => x.toLowerCase().includes('@sonar'));
-            const other = emails.filter((x) => !x.toLowerCase().includes('@sonar'));
-            return [...sonar, ...other];
-        }
-        catch (error) {
-            if (error instanceof GraphqlResponseError && error.errors?.length === 1 && error.errors[0].type === 'NOT_FOUND') {
-                this.log(`No email found for ${login}: ${error.errors[0].message}`);
-                return [];
-            }
-            throw error;
-        }
+        // FIXME: DEBUG only
+        return ['pavel.mikula@sonarsource.com'];
     }
     async sendSlackMessage(text) {
         const channel = this.inputString("slack-channel");
