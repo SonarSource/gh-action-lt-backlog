@@ -136,6 +136,15 @@ class OctokitAction extends Action_1.Action {
             return null;
         }
     }
+    async processRequestReview(issueId, requested_reviewer) {
+        await this.jira.moveIssue(issueId, 'Request Review');
+        if (requested_reviewer) {
+            const userEmail = await this.findEmail(requested_reviewer.login);
+            if (userEmail != null) {
+                await this.jira.assignIssue(issueId, userEmail);
+            }
+        }
+    }
 }
 exports.OctokitAction = OctokitAction;
 //# sourceMappingURL=OctokitAction.js.map

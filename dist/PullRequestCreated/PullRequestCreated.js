@@ -27,8 +27,11 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
                 await this.jira.moveIssue(issueKey, 'Commit'); // OPEN  -> TO DO
                 await this.jira.moveIssue(issueKey, 'Start'); // TO DO -> IN PROGRESS
                 const userEmail = await this.findEmail(this.payload.sender.login);
-                if (userEmail != null) {
-                    await this.jira.assignIssue(issueKey, userEmail);
+                if (userEmail) {
+                    await this.jira.assignIssue(issueKey, userEmail); // Even if there's already a reviewer, we need this first to populate the lastAssignee field in Jira.
+                }
+                if (this.payload.pull_request.requested_reviewers.length > 0) { // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
+                    await this.processRequestReview(issueKey, this.payload.pull_request.requested_reviewers[0]);
                 }
             }
         }
