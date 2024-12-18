@@ -75,7 +75,7 @@ class OctokitAction extends Action_1.Action {
         return identities[0].samlIdentity.nameId;
     }
     async findExternalIdentities(login) {
-        const { organization: { samlIdentityProvider: { externalIdentities: { nodes }, }, }, } = await this.sendGraphQL(`
+        const { organization: { samlIdentityProvider, }, } = await this.sendGraphQL(`
           query {
               organization(login: "${this.repo.owner}") {
                   samlIdentityProvider {
@@ -87,7 +87,13 @@ class OctokitAction extends Action_1.Action {
                   }
               }
           }`);
-        return nodes;
+        if (samlIdentityProvider?.externalIdentities) {
+            return samlIdentityProvider.externalIdentities.nodes;
+        }
+        else {
+            this.log('ERROR: Provided GitHub token does not have permissions to query organization/samlIdentityProvider/externalIdentities.');
+            return [];
+        }
     }
     async sendSlackMessage(text) {
         const channel = this.getInput("slack-channel");
