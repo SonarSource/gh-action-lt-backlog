@@ -18,34 +18,38 @@ class PullRequestCreated extends OctokitAction {
       return;
     }
     let newTitle = pr.title.replace(/\s\s+/g, " ").trim();  // Mainly remove triple space between issue ID and title when copying from Jira
-    const linkedIssues = pr.title.match(JIRA_ISSUE_PATTERN);
+    const linkedIssues = JIRA_ISSUE_PATTERN.exec(pr.title);
     if (linkedIssues == null) {
-      const projectKey = this.getInput('jira-project');
-      const additionalFields = this.parseAdditionalFields();
-      const parameters = await this.newIssueParameters(projectKey, pr, additionalFields.issuetype?.name ?? 'Task'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
-      const issueKey = await this.jira.createIssue(projectKey, pr.title, { ...additionalFields, ...parameters });
-      if (issueKey == null) {
-        this.setFailed('Failed to create a new issue in Jira');
-      } else {
-        newTitle = `${issueKey} ${newTitle}`;
-        await this.updatePullRequestDescription(pr.number, `${this.issueLink(issueKey)}\n\n${pr.body || ''}`);
-        await this.jira.moveIssue(issueKey, 'Commit');  // OPEN  -> TO DO
-        await this.jira.moveIssue(issueKey, 'Start');   // TO DO -> IN PROGRESS
-        const userEmail = await this.findEmail(this.payload.sender.login);
-        if (userEmail) {
-          await this.jira.assignIssue(issueKey, userEmail);             // Even if there's already a reviewer, we need this first to populate the lastAssignee field in Jira.
-        }
-        if (this.payload.pull_request.requested_reviewers.length > 0) { // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
-          await this.processRequestReview(issueKey, this.payload.pull_request.requested_reviewers[0]);
-        }
-      }
+      newTitle = await this.processNewJiraIssue(pr, newTitle);
     } else {
-      console.log(`Adding the following ticket in description: ${linkedIssues}`);
-      await this.updatePullRequestDescription(pr.number, `${linkedIssues.map(x => this.issueLink(x)).join('\n')}\n\n${pr.body || ''}`);
+      await this.addLinkedIssuesToDescription(pr, linkedIssues);
     }
     if (pr.title !== newTitle) {
       await this.updatePullRequestTitle(pr.number, newTitle);
     }
+  }
+
+  private async processNewJiraIssue(pr: PullRequest, newTitle: string): Promise<string> {
+    const projectKey = this.getInput('jira-project');
+    const additionalFields = this.parseAdditionalFields();
+    const parameters = await this.newIssueParameters(projectKey, pr, additionalFields.issuetype?.name ?? 'Task'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
+    const issueId = await this.jira.createIssue(projectKey, pr.title, { ...additionalFields, ...parameters });
+    if (issueId == null) {
+      this.setFailed('Failed to create a new issue in Jira');
+    } else {
+      newTitle = `${issueId} ${newTitle}`;
+      await this.addLinkedIssuesToDescription(pr, [issueId]);
+      await this.jira.moveIssue(issueId, 'Commit');  // OPEN  -> TO DO
+      await this.jira.moveIssue(issueId, 'Start');   // TO DO -> IN PROGRESS
+      const userEmail = await this.findEmail(this.payload.sender.login);
+      if (userEmail) {
+        await this.jira.assignIssue(issueId, userEmail);             // Even if there's already a reviewer, we need this first to populate the lastAssignee field in Jira.
+      }
+      if (this.payload.pull_request.requested_reviewers.length > 0) { // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
+        await this.processRequestReview(issueId, this.payload.pull_request.requested_reviewers[0]);
+      }
+    }
+    return newTitle;
   }
 
   private parseAdditionalFields(): any {
@@ -79,6 +83,11 @@ class PullRequestCreated extends OctokitAction {
     }
   }
 
+  private async addLinkedIssuesToDescription(pr: PullRequest, linkedIssues: string[]): Promise<void> {
+    console.log(`Adding the following ticket in description: ${linkedIssues}`);
+    await this.updatePullRequestDescription(pr.number, `${linkedIssues.map(x => this.issueLink(x)).join('\n')}\n\n${pr.body || ''}`);
+  }
+
   private async firstNonSubTask(issues: Set<string>): Promise<any> {
     for (const issueKey of issues) {
       const issue = await this.jira.getIssue(issueKey);
@@ -90,7 +99,7 @@ class PullRequestCreated extends OctokitAction {
   }
 
   private findMentionedIssues(pr: PullRequest): Set<string> {
-    const mentionedIssues = pr.body?.match(JIRA_ISSUE_PATTERN) || [];
+    const mentionedIssues = JIRA_ISSUE_PATTERN.exec(pr.body) || [];
     console.log(mentionedIssues.length > 0 ? `Found mentioned issues: ${mentionedIssues}` : 'No mentioned issues found');
     return new Set(mentionedIssues);
   }

@@ -22,6 +22,6 @@ export abstract class PullRequestAction extends OctokitAction {
 
   private async fixedJiraIssues(): Promise<string[]> {
     const pr = await this.getPullRequest(this.payload.pull_request.number);
-    return pr?.title.match(JIRA_ISSUE_PATTERN) || [];
+    return JIRA_ISSUE_PATTERN.exec(pr?.title) || [];
   }
 }
