@@ -30,13 +30,8 @@ class PullRequestCreated extends OctokitAction {
   }
 
   private async processNewJiraIssue(pr: PullRequest, newTitle: string): Promise<string> {
-    const projectKey = this.getInput('jira-project');
-    const additionalFields = this.parseAdditionalFields();
-    const parameters = await this.newIssueParameters(projectKey, pr, additionalFields.issuetype?.name ?? 'Task'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
-    const issueId = await this.jira.createIssue(projectKey, pr.title, { ...additionalFields, ...parameters });
-    if (issueId == null) {
-      this.setFailed('Failed to create a new issue in Jira');
-    } else {
+    const issueId = await this.createJiraIssue(pr);
+    if (issueId) {
       newTitle = `${issueId} ${newTitle}`;
       await this.addLinkedIssuesToDescription(pr, [issueId]);
       await this.jira.moveIssue(issueId, 'Commit');  // OPEN  -> TO DO
@@ -52,6 +47,35 @@ class PullRequestCreated extends OctokitAction {
     return newTitle;
   }
 
+  private async createJiraIssue(pr: PullRequest): Promise<string> {
+    const additionalFields = this.parseAdditionalFields();
+    const parent = await this.findNonSubTaskParent(this.findMentionedIssues(pr));
+    const projectKey = this.projectKey(parent);
+    if (projectKey) {
+      const parameters = await this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
+      const issueId = await this.jira.createIssue(projectKey, pr.title, { ...additionalFields, ...parameters });
+      if (issueId == null) {
+        this.setFailed('Failed to create a new issue in Jira');
+      }
+      return issueId;
+    } else {
+      this.log('No suitable project key found, issue will not be created');
+      return null;
+    }
+  }
+
+  private projectKey(parent: any): string {
+    const projectKey = this.getInput('jira-project');
+    // If projectKey is not defined (like in rspec), we want only to create only Sub-tasks in other tasks (not Epics).
+    if (projectKey) {
+      return projectKey;
+    } else if (parent && !["Epic", "Sub-task"].includes(parent.fields.issuetype.name)) {
+      return parent.fields.project.key;
+    } else {
+      return null;
+    }
+  }
+
   private parseAdditionalFields(): any {
     const inputAdditionFields = this.getInput('additional-fields');
     if (inputAdditionFields) {
@@ -64,11 +88,7 @@ class PullRequestCreated extends OctokitAction {
     return {};
   }
 
-  private async newIssueParameters(projectKey: string, pr: PullRequest, issueType: string): Promise<IssueParameters> {
-    const mentionedIssues = this.findMentionedIssues(pr);
-    console.log('Looking for a non-Sub-task ticket');
-    const parent = await this.firstNonSubTask(mentionedIssues);
-    console.log(parent ? `Parent issue: ${parent?.key} (${parent?.fields.issuetype.name})` : 'No parent issue found');
+  private async newIssueParameters(projectKey: string, parent: any, issueType: string): Promise<IssueParameters> {
     switch (parent?.fields.issuetype.name) {
       case 'Epic':
         return { issuetype: { name: issueType }, parent: { key: parent.key } };
@@ -88,13 +108,16 @@ class PullRequestCreated extends OctokitAction {
     await this.updatePullRequestDescription(pr.number, `${linkedIssues.map(x => this.issueLink(x)).join('\n')}\n\n${pr.body || ''}`);
   }
 
-  private async firstNonSubTask(issues: Set<string>): Promise<any> {
+  private async findNonSubTaskParent(issues: Set<string>): Promise<any> {
+    console.log('Looking for a non-Sub-task ticket');
     for (const issueKey of issues) {
       const issue = await this.jira.getIssue(issueKey);
       if (issue?.fields.issuetype.name !== 'Sub-task') {
+        console.log(`Parent issue: ${issue.key} ${issue.fields.issuetype.name}`);
         return issue;
       }
     }
+    console.log('No parent issue found');
     return null;
   }
 
