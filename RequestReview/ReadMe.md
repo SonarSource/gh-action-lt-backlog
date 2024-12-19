@@ -24,7 +24,7 @@ None
 
 ## Prerequisites
 
-Send email to DevInfra Squad - ask to add a `jira` suffix token to the Vault configuration of your repository - for each repository where you need to use this. Example: [BUILD-6352](https://sonarsource.atlassian.net/browse/BUILD-6352)
+Ask DevInfra Squad to "Add Jira GitHub tokens" to the Vault configuration of your repository. Example: [EREQ-92](https://sonarsource.atlassian.net/browse/EREQ-92)
 
 ## Usage examples
 
