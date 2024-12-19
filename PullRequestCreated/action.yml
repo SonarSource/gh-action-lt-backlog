@@ -12,7 +12,7 @@ inputs:
     required: true
   jira-project:
     description: 'Jira project key'
-    required: true
+    required: false
   additional-fields:
     description: 'Additional fields to be added to the Jira issue'
     required: false
