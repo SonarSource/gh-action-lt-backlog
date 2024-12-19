@@ -30,7 +30,7 @@ Token to access the Jira API.
 
 ### `jira-project`
 
-Jira project key that is used to create new issues.
+Jira project key that is used to create new issues. If key is not specified, the action will not create tasks. It will only create a sub-task, if a parent issue is mentioned in the description.
 
 ### `additional-fields`
 
