@@ -18,7 +18,7 @@ class PullRequestCreated extends OctokitAction {
       return;
     }
     let newTitle = pr.title.replace(/\s\s+/g, " ").trim();  // Mainly remove triple space between issue ID and title when copying from Jira
-    const linkedIssues = pr.title?.match(JIRA_ISSUE_PATTERN) || null;
+    const linkedIssues = pr.title.match(JIRA_ISSUE_PATTERN);
     if (linkedIssues == null) {
       const projectKey = this.getInput('jira-project');
       const additionalFields = this.parseAdditionalFields();
@@ -40,12 +40,8 @@ class PullRequestCreated extends OctokitAction {
         }
       }
     } else {
-      const mentionedIssues = this.findMentionedIssues(pr);
-      const notMentionedIssues = linkedIssues.filter(x => !mentionedIssues.has(x));
-      console.log(`Adding the following ticket in description: ${notMentionedIssues}`);
-      if (notMentionedIssues.length > 0) {
-        await this.updatePullRequestDescription(pr.number, `${notMentionedIssues.map(x => this.issueLink(x)).join('\n')}\n\n${pr.body || ''}`);
-      }
+      console.log(`Adding the following ticket in description: ${linkedIssues}`);
+      await this.updatePullRequestDescription(pr.number, `${linkedIssues.map(x => this.issueLink(x)).join('\n')}\n\n${pr.body || ''}`);
     }
     if (pr.title !== newTitle) {
       await this.updatePullRequestTitle(pr.number, newTitle);
