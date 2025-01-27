@@ -2,11 +2,13 @@
 
 Move fixed Jira tickets using the "Merge into branch", "Merge into master", or "Merge" transition after merging the pull request.
 
-If the pull request has been merged to a release branch like `master`, `main`, or `branch-*`, the `Merge into master` transition will be used. It would typically move a ticket from `APPROVED` to `CLOSED`. For any other target branch, a `Merge into branch` transition will be used.
+If the pull request has been merged to a release branch like `master`, `main`, or `branch-*`, the `Merge into master` transition will be used. It would typically move a ticket from `APPROVED` to `DONE`. For any other target branch, a `Merge into branch` transition will be used.
 
 If `Merge into branch` or `Merge into master` transitions are not available, the action will attempt to use the `Merge` transition.
 
-This action will attempt to move all tickets mentionned in the pull request title.
+If the PR is closed without being merged, then the action will try to use `Cancel issue` transition for issues created by `Jira Tech User GitHub` via `PullRequestCreated` automation. It will not close any other issues.
+
+This action will attempt to move all tickets mentioned in the pull request title.
 
 ## Inputs
 
@@ -40,8 +42,8 @@ on:
     types: [closed]
 
 jobs:
-  PullRequestMerged_job:
-    name: Pull Request Merged
+  PullRequestClosed_job:
+    name: Pull Request Closed
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -49,7 +51,6 @@ jobs:
     # For external PR, ticket should be moved manually
     if: |
         github.event.pull_request.head.repo.full_name == github.repository
-        && github.event.pull_request.merged
     steps:
       - id: secrets
         uses: SonarSource/vault-action-wrapper@v3
