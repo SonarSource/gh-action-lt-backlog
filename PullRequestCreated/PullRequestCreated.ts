@@ -18,7 +18,7 @@ class PullRequestCreated extends OctokitAction {
       return;
     }
     let newTitle = pr.title.replace(/\s\s+/g, " ").trim();  // Mainly remove triple space between issue ID and title when copying from Jira
-    const linkedIssues = JIRA_ISSUE_PATTERN.exec(pr.title);
+    const linkedIssues = pr.title.match(JIRA_ISSUE_PATTERN);
     if (linkedIssues == null) {
       newTitle = await this.processNewJiraIssue(pr, newTitle);
     } else {
@@ -122,7 +122,7 @@ class PullRequestCreated extends OctokitAction {
   }
 
   private findMentionedIssues(pr: PullRequest): Set<string> {
-    const mentionedIssues = JIRA_ISSUE_PATTERN.exec(pr.body) || [];
+    const mentionedIssues = pr.body.match(JIRA_ISSUE_PATTERN) || [];
     console.log(mentionedIssues.length > 0 ? `Found mentioned issues: ${mentionedIssues}` : 'No mentioned issues found');
     return new Set(mentionedIssues);
   }
