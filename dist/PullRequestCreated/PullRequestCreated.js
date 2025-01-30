@@ -114,7 +114,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         return null;
     }
     findMentionedIssues(pr) {
-        const mentionedIssues = pr.body.match(Constants_1.JIRA_ISSUE_PATTERN) || [];
+        const mentionedIssues = pr.body?.match(Constants_1.JIRA_ISSUE_PATTERN) || [];
         console.log(mentionedIssues.length > 0 ? `Found mentioned issues: ${mentionedIssues}` : 'No mentioned issues found');
         return new Set(mentionedIssues);
     }
