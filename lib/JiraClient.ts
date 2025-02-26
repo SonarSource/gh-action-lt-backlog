@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { JIRA_DOMAIN } from './Constants';
+import { JIRA_SITE_ID, JIRA_DOMAIN, JIRA_ORGANIZATION_ID } from './Constants';
 
 export class JiraClient {
   private readonly token: string;
@@ -25,6 +25,11 @@ export class JiraClient {
   public getIssue(issueKey: string): Promise<any> {
     console.log(`Get issue '${issueKey}'`);
     return this.sendRestGet(`issue/${issueKey}`);
+  }
+
+  public getProject(projectKey: string): Promise<any> {
+    console.log(`Get project '${projectKey}'`);
+    return this.sendRestGet(`project/${projectKey}`);
   }
 
   public async moveIssue(issueId: string, transitionName: string, fields: any = null): Promise<void> {
@@ -68,18 +73,47 @@ export class JiraClient {
     console.log(`Searching for user: ${logUser}`);
     let accounts: any[] = (await this.sendRestGet(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
     accounts = accounts.filter((x: any) => x.emailAddress === email); // Just in case the address is part of the name, or other unexpected field
-    switch (accounts.length) {
-      case 0:
-        console.log(`Could not find user ${logUser} in Jira`);
-        return null;
-      case 1:
-        console.log(`Found single account ${accounts[0].accountId} ${accounts[0].displayName}`);
-        return accounts[0].accountId;
-      default:
-        console.log(`Found ${accounts.length} accounts, using ${accounts[0].accountId} ${accounts[0].displayName}`);
-        return accounts[0].accountId;
-    };
+    if (accounts.length === 0) {
+      console.log(`Could not find user ${logUser} in Jira`);
+      return null;
+    }
+    else {
+      console.log(`Found ${accounts.length} account(s), using ${accounts[0].accountId} ${accounts[0].displayName}`);
+      return accounts[0].accountId;
+    }
   };
+
+  public async findTeamId(accountId: string): Promise<string> {
+    console.log(`Searching for teams of account ${accountId}`);
+    const { data: { team: { teamSearchV2: { nodes } } } } = await this.sendGraphQL(`
+      query MandatoryButUselessQueryName {
+        team {
+          teamSearchV2 (
+            siteId: "${JIRA_SITE_ID}",
+            organizationId: "ari:cloud:platform::org/${JIRA_ORGANIZATION_ID}",
+    	      filter: { membership: { memberIds: "${accountId}" } }
+          )
+          {
+            nodes {
+              team { id displayName }
+            }
+          }
+        }
+      }`);
+    if (nodes.length === 0) {
+      console.log(`Could not find team for account ${accountId} in Jira`);
+      return null;
+    }
+    else {
+      const id = nodes[0].team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
+      console.log(`Found ${nodes.length} team(s), using ${id} ${nodes[0].team.displayName}`);
+      return id;
+    }
+  }
+
+  private async sendGraphQL(query: any): Promise<any> {
+    return this.sendRequest("POST", "gateway/api/graphql", { query });
+  }
 
   private async sendRestGet(endpoint: string): Promise<any> {
     return this.sendRequest("GET", `rest/api/3/${endpoint}`);
