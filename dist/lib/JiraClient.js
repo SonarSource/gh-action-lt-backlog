@@ -17,12 +17,12 @@ class JiraClient {
         };
         console.log(`Creating issue in project '${projectKey}'`);
         console.log(JSON.stringify(request, null, 2));
-        const response = await this.sendJiraPost('issue', request);
+        const response = await this.sendRestPost('issue', request);
         return response?.key;
     }
     getIssue(issueKey) {
         console.log(`Get issue '${issueKey}'`);
-        return this.sendJiraGet(`issue/${issueKey}`);
+        return this.sendRestGet(`issue/${issueKey}`);
     }
     async moveIssue(issueId, transitionName, fields = null) {
         const transition = await this.findTransition(issueId, transitionName);
@@ -34,24 +34,31 @@ class JiraClient {
         }
     }
     async findTransition(issueId, transitionName) {
-        const transitions = (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions ?? [];
+        const transitions = (await this.sendRestGet(`issue/${issueId}/transitions`))?.transitions ?? [];
         return transitions.find((x) => x.name === transitionName);
     }
     async transitionIssue(issueId, transition, fields = null) {
         console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
-        await this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transition.id }, fields });
+        await this.sendRestPost(`issue/${issueId}/transitions`, { transition: { id: transition.id }, fields });
     }
-    async assignIssue(issueId, userEmail) {
+    async assignIssueToEmail(issueId, userEmail) {
         const accountId = await this.findAccountId(userEmail);
         if (accountId != null) {
-            console.log(`${issueId}: Assigning to ${accountId}`);
-            await this.sendJiraPut(`issue/${issueId}/assignee`, { accountId });
+            await this.assignIssueToAccount(issueId, accountId);
         }
     }
+    async assignIssueToAccount(issueId, accountId) {
+        console.log(`${issueId}: Assigning to ${accountId}`);
+        await this.sendRestPut(`issue/${issueId}/assignee`, { accountId });
+    }
     async findAccountId(email) {
+        if (email == null) {
+            console.log('Could not find accountId, email is null');
+            return null;
+        }
         const logUser = email.substring(0, email.indexOf('@')).replace('.', ' '); // Do not leak email addresses to logs
         console.log(`Searching for user: ${logUser}`);
-        let accounts = (await this.sendJiraGet(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
+        let accounts = (await this.sendRestGet(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
         accounts = accounts.filter((x) => x.emailAddress === email); // Just in case the address is part of the name, or other unexpected field
         switch (accounts.length) {
             case 0:
@@ -67,17 +74,17 @@ class JiraClient {
         ;
     }
     ;
-    async sendJiraGet(endpoint) {
-        return this.sendJiraRequest("GET", endpoint);
+    async sendRestGet(endpoint) {
+        return this.sendRequest("GET", `rest/api/3/${endpoint}`);
     }
-    async sendJiraPost(endpoint, body) {
-        return this.sendJiraRequest("POST", endpoint, body);
+    async sendRestPost(endpoint, body) {
+        return this.sendRequest("POST", `rest/api/3/${endpoint}`, body);
     }
-    async sendJiraPut(endpoint, body) {
-        return this.sendJiraRequest("PUT", endpoint, body);
+    async sendRestPut(endpoint, body) {
+        return this.sendRequest("PUT", `rest/api/3/${endpoint}`, body);
     }
-    async sendJiraRequest(method, endpoint, body) {
-        const url = `${Constants_1.JIRA_DOMAIN}/rest/api/3/${endpoint}`;
+    async sendRequest(method, path, body) {
+        const url = `${Constants_1.JIRA_DOMAIN}/${path}`;
         const response = await (0, node_fetch_1.default)(url, {
             method,
             headers: {

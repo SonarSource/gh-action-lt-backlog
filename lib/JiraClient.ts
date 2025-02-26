@@ -18,13 +18,13 @@ export class JiraClient {
     }
     console.log(`Creating issue in project '${projectKey}'`);
     console.log(JSON.stringify(request, null, 2));
-    const response = await this.sendJiraPost('issue', request);
+    const response = await this.sendRestPost('issue', request);
     return response?.key;
   }
 
   public getIssue(issueKey: string): Promise<any> {
     console.log(`Get issue '${issueKey}'`);
-    return this.sendJiraGet(`issue/${issueKey}`);
+    return this.sendRestGet(`issue/${issueKey}`);
   }
 
   public async moveIssue(issueId: string, transitionName: string, fields: any = null): Promise<void> {
@@ -38,30 +38,37 @@ export class JiraClient {
   }
 
   public async findTransition(issueId: string, transitionName: string): Promise<any> {
-    const transitions = (await this.sendJiraGet(`issue/${issueId}/transitions`))?.transitions ?? [];
+    const transitions = (await this.sendRestGet(`issue/${issueId}/transitions`))?.transitions ?? [];
     return transitions.find((x: any) => x.name === transitionName);
   }
 
-  public async transitionIssue(issueId: string, transition: any, fields:any = null): Promise<void> {
+  public async transitionIssue(issueId: string, transition: any, fields: any = null): Promise<void> {
     console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
-    await this.sendJiraPost(`issue/${issueId}/transitions`, { transition: { id: transition.id }, fields });
+    await this.sendRestPost(`issue/${issueId}/transitions`, { transition: { id: transition.id }, fields });
   }
 
-  public async assignIssue(issueId: string, userEmail: string): Promise<void> {
+  public async assignIssueToEmail(issueId: string, userEmail: string): Promise<void> {
     const accountId = await this.findAccountId(userEmail);
     if (accountId != null) {
-      console.log(`${issueId}: Assigning to ${accountId}`);
-      await this.sendJiraPut(`issue/${issueId}/assignee`, { accountId });
+      await this.assignIssueToAccount(issueId, accountId);
     }
   }
 
-  private async findAccountId(email: string): Promise<string> {
+  public async assignIssueToAccount(issueId: string, accountId: string): Promise<void> {
+    console.log(`${issueId}: Assigning to ${accountId}`);
+    await this.sendRestPut(`issue/${issueId}/assignee`, { accountId });
+  }
+
+  public async findAccountId(email: string): Promise<string> {
+    if (email == null) {
+      console.log('Could not find accountId, email is null');
+      return null;
+    }
     const logUser = email.substring(0, email.indexOf('@')).replace('.', ' '); // Do not leak email addresses to logs
     console.log(`Searching for user: ${logUser}`);
-    let accounts: any[] = (await this.sendJiraGet(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
+    let accounts: any[] = (await this.sendRestGet(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
     accounts = accounts.filter((x: any) => x.emailAddress === email); // Just in case the address is part of the name, or other unexpected field
-    switch (accounts.length)
-    {
+    switch (accounts.length) {
       case 0:
         console.log(`Could not find user ${logUser} in Jira`);
         return null;
@@ -74,20 +81,20 @@ export class JiraClient {
     };
   };
 
-  private async sendJiraGet(endpoint: string): Promise<any> {
-    return this.sendJiraRequest("GET", endpoint);
+  private async sendRestGet(endpoint: string): Promise<any> {
+    return this.sendRequest("GET", `rest/api/3/${endpoint}`);
   }
 
-  private async sendJiraPost(endpoint: string, body: any): Promise<any> {
-    return this.sendJiraRequest("POST", endpoint, body);
+  private async sendRestPost(endpoint: string, body: any): Promise<any> {
+    return this.sendRequest("POST", `rest/api/3/${endpoint}`, body);
   }
 
-  private async sendJiraPut(endpoint: string, body: any): Promise<any> {
-    return this.sendJiraRequest("PUT", endpoint, body);
+  private async sendRestPut(endpoint: string, body: any): Promise<any> {
+    return this.sendRequest("PUT", `rest/api/3/${endpoint}`, body);
   }
 
-  private async sendJiraRequest(method: "GET" | "POST" | "PUT", endpoint: string, body?: any): Promise<any> {
-    const url = `${JIRA_DOMAIN}/rest/api/3/${endpoint}`;
+  private async sendRequest(method: "GET" | "POST" | "PUT", path: string, body?: any): Promise<any> {
+    const url = `${JIRA_DOMAIN}/${path}`;
     const response = await fetch(url, {
       method,
       headers: {
