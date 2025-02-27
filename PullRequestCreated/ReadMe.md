@@ -12,6 +12,8 @@ The action will update the PR description with links to all mentioned Jira ticke
 
 Action uses `Commit` and `Start` transitions to update the issue and assigns it to the author. It also uses `Request Review` transition in case there's a reviewer already selected during the PR creation.
 
+Action assigns a Team field based on the PR author's Team, or Project Lead for authors without Jira account (bots).
+
 This action does nothing if the PR title contains `DO NOT MERGE` phrase.
 
 ## Inputs

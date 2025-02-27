@@ -12,11 +12,11 @@ class NewIssueData {
         const parent = await this.findNonSubTaskParent(jira, this.findMentionedIssues(pr));
         const projectKey = this.computeProjectKey(inputJiraProject, parent);
         const accountId = await jira.findAccountId(userEmail);
-        // ToDo: teamId = f(accountId, project(projectKey).lead)
+        const teamId = await this.findTeamId(jira, accountId, projectKey); // Can be null for bots when project lead is not member of any team. Jira request will fail if the field is mandatory for the project.
         // ToDo: boardId = f(teamId)
         // ToDo: sprintId = f(boardId)
         let additionalFields = this.parseAdditionalFields(inputAdditionFields);
-        const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
+        const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task', teamId); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
         additionalFields = { ...additionalFields, ...parameters };
         return new NewIssueData(projectKey, accountId, additionalFields);
     }
@@ -43,18 +43,18 @@ class NewIssueData {
         }
         return {};
     }
-    static newIssueParameters(projectKey, parent, issueType) {
+    static newIssueParameters(projectKey, parent, issueType, teamId) {
         switch (parent?.fields.issuetype.name) {
             case 'Epic':
-                return { issuetype: { name: issueType }, parent: { key: parent.key } };
+                return { issuetype: { name: issueType }, parent: { key: parent.key }, customfield_10001: teamId };
             case 'Sub-task':
             case undefined:
             case null:
-                return { issuetype: { name: issueType } };
+                return { issuetype: { name: issueType }, customfield_10001: teamId };
             default:
                 return parent.fields.project.key === projectKey // Sub-task must be created in the same project
-                    ? { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } }
-                    : { issuetype: { name: issueType } };
+                    ? { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } } // Team cannot be set on Sub-Task
+                    : { issuetype: { name: issueType }, customfield_10001: teamId };
         }
     }
     static async findNonSubTaskParent(jira, issues) {
@@ -73,6 +73,17 @@ class NewIssueData {
         const mentionedIssues = pr.body?.match(Constants_1.JIRA_ISSUE_PATTERN) || [];
         console.log(mentionedIssues.length > 0 ? `Found mentioned issues: ${mentionedIssues}` : 'No mentioned issues found');
         return new Set(mentionedIssues);
+    }
+    static async findTeamId(jira, userAccountId, projectKey) {
+        if (userAccountId != null) {
+            const teamId = await jira.findTeamId(userAccountId);
+            if (teamId != null) {
+                return teamId;
+            }
+        }
+        const { lead: { accountId: leadAccountId, displayName } } = await jira.getProject(projectKey);
+        console.log(`No team found for current user, using ${projectKey} lead ${displayName}`);
+        return jira.findTeamId(leadAccountId);
     }
 }
 exports.NewIssueData = NewIssueData;

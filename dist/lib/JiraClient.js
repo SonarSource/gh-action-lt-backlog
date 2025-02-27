@@ -24,6 +24,10 @@ class JiraClient {
         console.log(`Get issue '${issueKey}'`);
         return this.sendRestGet(`issue/${issueKey}`);
     }
+    getProject(projectKey) {
+        console.log(`Get project '${projectKey}'`);
+        return this.sendRestGet(`project/${projectKey}`);
+    }
     async moveIssue(issueId, transitionName, fields = null) {
         const transition = await this.findTransition(issueId, transitionName);
         if (transition == null) {
@@ -60,20 +64,46 @@ class JiraClient {
         console.log(`Searching for user: ${logUser}`);
         let accounts = (await this.sendRestGet(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
         accounts = accounts.filter((x) => x.emailAddress === email); // Just in case the address is part of the name, or other unexpected field
-        switch (accounts.length) {
-            case 0:
-                console.log(`Could not find user ${logUser} in Jira`);
-                return null;
-            case 1:
-                console.log(`Found single account ${accounts[0].accountId} ${accounts[0].displayName}`);
-                return accounts[0].accountId;
-            default:
-                console.log(`Found ${accounts.length} accounts, using ${accounts[0].accountId} ${accounts[0].displayName}`);
-                return accounts[0].accountId;
+        if (accounts.length === 0) {
+            console.log(`Could not find user ${logUser} in Jira`);
+            return null;
         }
-        ;
+        else {
+            console.log(`Found ${accounts.length} account(s), using ${accounts[0].accountId} ${accounts[0].displayName}`);
+            return accounts[0].accountId;
+        }
     }
     ;
+    async findTeamId(accountId) {
+        console.log(`Searching for teams of account ${accountId}`);
+        const { data: { team: { teamSearchV2: { nodes } } } } = await this.sendGraphQL(`
+      query MandatoryButUselessQueryName {
+        team {
+          teamSearchV2 (
+            siteId: "${Constants_1.JIRA_SITE_ID}",
+            organizationId: "ari:cloud:platform::org/${Constants_1.JIRA_ORGANIZATION_ID}",
+    	      filter: { membership: { memberIds: "${accountId}" } }
+          )
+          {
+            nodes {
+              team { id displayName }
+            }
+          }
+        }
+      }`);
+        if (nodes.length === 0) {
+            console.log(`Could not find team for account ${accountId} in Jira`);
+            return null;
+        }
+        else {
+            const id = nodes[0].team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
+            console.log(`Found ${nodes.length} team(s), using ${id} ${nodes[0].team.displayName}`);
+            return id;
+        }
+    }
+    async sendGraphQL(query) {
+        return this.sendRequest("POST", "gateway/api/graphql", { query });
+    }
     async sendRestGet(endpoint) {
         return this.sendRequest("GET", `rest/api/3/${endpoint}`);
     }
