@@ -141,7 +141,7 @@ class OctokitAction extends Action_1.Action {
         if (requested_reviewer) {
             const userEmail = await this.findEmail(requested_reviewer.login);
             if (userEmail != null) {
-                await this.jira.assignIssue(issueId, userEmail);
+                await this.jira.assignIssueToEmail(issueId, userEmail);
             }
         }
     }
