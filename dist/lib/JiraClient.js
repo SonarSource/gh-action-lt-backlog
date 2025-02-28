@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.JiraClient = void 0;
 const node_fetch_1 = require("node-fetch");
 const Constants_1 = require("./Constants");
+const Configuration_1 = require("./Configuration");
 class JiraClient {
     constructor(user, token) {
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
@@ -82,7 +83,7 @@ class JiraClient {
           teamSearchV2 (
             siteId: "${Constants_1.JIRA_SITE_ID}",
             organizationId: "ari:cloud:platform::org/${Constants_1.JIRA_ORGANIZATION_ID}",
-    	      filter: { membership: { memberIds: "${accountId}" } }
+            filter: { membership: { memberIds: "${accountId}" } }
           )
           {
             nodes {
@@ -96,8 +97,9 @@ class JiraClient {
             return null;
         }
         else {
-            const id = nodes[0].team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
-            console.log(`Found ${nodes.length} team(s), using ${id} ${nodes[0].team.displayName}`);
+            const match = nodes.find((x) => Configuration_1.Config.findTeam(x.team.displayName) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
+            const id = match.team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
+            console.log(`Found ${nodes.length} team(s), using ${id} ${match.team.displayName}`);
             return id;
         }
     }
