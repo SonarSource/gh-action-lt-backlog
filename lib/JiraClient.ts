@@ -1,5 +1,15 @@
 import fetch from 'node-fetch';
 import { JIRA_SITE_ID, JIRA_DOMAIN, JIRA_ORGANIZATION_ID } from './Constants';
+import { Config } from './Configuration';
+
+interface TeamSearchV2Detail {
+  id: string;
+  displayName: string;
+}
+
+interface TeamSearchV2 {
+  team: TeamSearchV2Detail
+}
 
 export class JiraClient {
   private readonly token: string;
@@ -85,13 +95,13 @@ export class JiraClient {
 
   public async findTeamId(accountId: string): Promise<string> {
     console.log(`Searching for teams of account ${accountId}`);
-    const { data: { team: { teamSearchV2: { nodes } } } } = await this.sendGraphQL(`
+    const { data: { team: { teamSearchV2: { nodes } } } }: { data: { team: { teamSearchV2: { nodes: TeamSearchV2[] } } } } = await this.sendGraphQL(`
       query MandatoryButUselessQueryName {
         team {
           teamSearchV2 (
             siteId: "${JIRA_SITE_ID}",
             organizationId: "ari:cloud:platform::org/${JIRA_ORGANIZATION_ID}",
-    	      filter: { membership: { memberIds: "${accountId}" } }
+            filter: { membership: { memberIds: "${accountId}" } }
           )
           {
             nodes {
@@ -105,8 +115,9 @@ export class JiraClient {
       return null;
     }
     else {
-      const id = nodes[0].team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
-      console.log(`Found ${nodes.length} team(s), using ${id} ${nodes[0].team.displayName}`);
+      const match = nodes.find((x: TeamSearchV2) => Config.findTeam(x.team.displayName) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
+      const id = match.team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
+      console.log(`Found ${nodes.length} team(s), using ${id} ${match.team.displayName}`);
       return id;
     }
   }
