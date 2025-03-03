@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Config = void 0;
 const TeamConfiguration_1 = require("../Data/TeamConfiguration");
 class Configuration {
+    teams = {};
     constructor() {
-        this.teams = {};
         for (const team of TeamConfiguration_1.TeamConfigurationData) {
             this.teams[team.name] = team;
         }

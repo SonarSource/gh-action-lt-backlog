@@ -4,6 +4,9 @@ exports.Action = void 0;
 const core = require("@actions/core");
 const github = require("@actions/github");
 class Action {
+    repo;
+    context;
+    payload;
     constructor() {
         this.context = github.context;
         this.repo = github.context.repo;

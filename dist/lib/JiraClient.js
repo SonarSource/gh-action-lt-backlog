@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JiraClient = void 0;
-const node_fetch_1 = require("node-fetch");
 const Constants_1 = require("./Constants");
 const Configuration_1 = require("./Configuration");
 class JiraClient {
+    token;
     constructor(user, token) {
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
     }
@@ -188,7 +188,7 @@ class JiraClient {
     }
     async sendRequest(method, path, body) {
         const url = `${Constants_1.JIRA_DOMAIN}/${path}`;
-        const response = await (0, node_fetch_1.default)(url, {
+        const response = await fetch(url, {
             method,
             headers: {
                 'Authorization': `Basic ${this.token}`,
