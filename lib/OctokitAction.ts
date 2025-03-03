@@ -5,9 +5,9 @@ import { GitHub } from '@actions/github/lib/utils';
 import { Action } from './Action';
 import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types';
 import { PullRequest } from './OctokitTypes';
-import fetch from 'node-fetch';
 import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
 import { JiraClient } from './JiraClient';
+
 
 
 export abstract class OctokitAction extends Action {
@@ -107,7 +107,7 @@ export abstract class OctokitAction extends Action {
                   }
               }
           }`);
-    if (samlIdentityProvider?.externalIdentities) { 
+    if (samlIdentityProvider?.externalIdentities) {
       return samlIdentityProvider.externalIdentities.nodes;
     } else {
       this.log('ERROR: Provided GitHub token does not have permissions to query organization/samlIdentityProvider/externalIdentities.');
@@ -157,7 +157,7 @@ export abstract class OctokitAction extends Action {
 
   protected async processRequestReview(issueId: string, requested_reviewer: any): Promise<void> {
     await this.jira.moveIssue(issueId, 'Request Review');
-    if (requested_reviewer) {  
+    if (requested_reviewer) {
       const userEmail = await this.findEmail(requested_reviewer.login);
       if (userEmail != null) {
         await this.jira.assignIssueToEmail(issueId, userEmail);
