@@ -4,10 +4,13 @@ exports.OctokitAction = void 0;
 const core = require("@actions/core");
 const github = require("@actions/github");
 const Action_1 = require("./Action");
-const node_fetch_1 = require("node-fetch");
 const graphql_1 = require("@octokit/graphql");
 const JiraClient_1 = require("./JiraClient");
 class OctokitAction extends Action_1.Action {
+    rest;
+    octokit;
+    jira;
+    graphqlWithAuth;
     constructor() {
         super();
         this.jira = new JiraClient_1.JiraClient(this.getInput('jira-user'), this.getInput('jira-token'));
@@ -114,7 +117,7 @@ class OctokitAction extends Action_1.Action {
         try {
             const body = JSON.stringify(jsonRequest);
             this.log(`Sending slack POST: ${body}`);
-            const response = await (0, node_fetch_1.default)(url, {
+            const response = await fetch(url, {
                 method: "POST",
                 body,
                 headers: { "Content-Type": "application/json; charset=utf-8", authorization: `Bearer ${token}` }
