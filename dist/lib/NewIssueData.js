@@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NewIssueData = void 0;
 const Constants_1 = require("./Constants");
 class NewIssueData {
+    projectKey;
+    accountId;
+    additionalFields;
     constructor(projectKey, accountId, additionalFields) {
         this.projectKey = projectKey;
         this.accountId = accountId;
