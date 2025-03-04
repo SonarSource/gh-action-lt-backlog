@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import { JIRA_SITE_ID, JIRA_DOMAIN, JIRA_ORGANIZATION_ID } from './Constants';
 import { Config } from './Configuration';
+import { Team } from './Team';
 
 interface TeamSearchV2Detail {
   id: string;
@@ -8,7 +9,14 @@ interface TeamSearchV2Detail {
 }
 
 interface TeamSearchV2 {
-  team: TeamSearchV2Detail
+  team: TeamSearchV2Detail;
+}
+
+interface Sprint {
+  id: number;
+  name: string;
+  originBoardId: number;
+  endDate: Date;
 }
 
 export class JiraClient {
@@ -28,18 +36,18 @@ export class JiraClient {
     }
     console.log(`Creating issue in project '${projectKey}'`);
     console.log(JSON.stringify(request, null, 2));
-    const response = await this.sendRestPost('issue', request);
+    const response = await this.sendRestPostApi('issue', request);
     return response?.key;
   }
 
   public getIssue(issueKey: string): Promise<any> {
     console.log(`Get issue '${issueKey}'`);
-    return this.sendRestGet(`issue/${issueKey}`);
+    return this.sendRestGetApi(`issue/${issueKey}`);
   }
 
   public getProject(projectKey: string): Promise<any> {
     console.log(`Get project '${projectKey}'`);
-    return this.sendRestGet(`project/${projectKey}`);
+    return this.sendRestGetApi(`project/${projectKey}`);
   }
 
   public async moveIssue(issueId: string, transitionName: string, fields: any = null): Promise<void> {
@@ -53,13 +61,13 @@ export class JiraClient {
   }
 
   public async findTransition(issueId: string, transitionName: string): Promise<any> {
-    const transitions = (await this.sendRestGet(`issue/${issueId}/transitions`))?.transitions ?? [];
+    const transitions = (await this.sendRestGetApi(`issue/${issueId}/transitions`))?.transitions ?? [];
     return transitions.find((x: any) => x.name === transitionName);
   }
 
   public async transitionIssue(issueId: string, transition: any, fields: any = null): Promise<void> {
     console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
-    await this.sendRestPost(`issue/${issueId}/transitions`, { transition: { id: transition.id }, fields });
+    await this.sendRestPostApi(`issue/${issueId}/transitions`, { transition: { id: transition.id }, fields });
   }
 
   public async assignIssueToEmail(issueId: string, userEmail: string): Promise<void> {
@@ -71,7 +79,7 @@ export class JiraClient {
 
   public async assignIssueToAccount(issueId: string, accountId: string): Promise<void> {
     console.log(`${issueId}: Assigning to ${accountId}`);
-    await this.sendRestPut(`issue/${issueId}/assignee`, { accountId });
+    await this.sendRestPutApi(`issue/${issueId}/assignee`, { accountId });
   }
 
   public async findAccountId(email: string): Promise<string> {
@@ -81,7 +89,7 @@ export class JiraClient {
     }
     const logUser = email.substring(0, email.indexOf('@')).replace('.', ' '); // Do not leak email addresses to logs
     console.log(`Searching for user: ${logUser}`);
-    let accounts: any[] = (await this.sendRestGet(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
+    let accounts: any[] = (await this.sendRestGetApi(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
     accounts = accounts.filter((x: any) => x.emailAddress === email); // Just in case the address is part of the name, or other unexpected field
     if (accounts.length === 0) {
       console.log(`Could not find user ${logUser} in Jira`);
@@ -93,7 +101,23 @@ export class JiraClient {
     }
   };
 
-  public async findTeamId(accountId: string): Promise<string> {
+  public async findSprintId(boardId: number): Promise<number> {
+    console.log(`Searching for active sprint in board ${boardId}`);
+    let { values }: { values: Sprint[] } = await this.sendRestGetAgile(`board/${boardId}/sprint?state=active`);
+    values = values.filter((x: Sprint) => x.originBoardId === boardId); // Board filter can contain sprints from other boards
+    if (values.length === 0) {
+      console.log(`Could not find active sprint in board ${boardId}`);
+      return null;
+    }
+    else {
+      const originalLength = values.length; // .pop() below removes an item from the array
+      const sprint = values.sort((a, b) => a.endDate.getTime() - b.endDate.getTime()).pop();  // There should be exactly one. If not, use the one ending later in case previous iteration was not closed yet.
+      console.log(`Found ${originalLength} active sprint(s), using ${sprint.id} ${sprint.name}`);
+      return sprint.id;
+    }
+  }
+
+  public async findTeam(accountId: string): Promise<Team> {
     console.log(`Searching for teams of account ${accountId}`);
     const { data: { team: { teamSearchV2: { nodes } } } }: { data: { team: { teamSearchV2: { nodes: TeamSearchV2[] } } } } = await this.sendGraphQL(`
       query MandatoryButUselessQueryName {
@@ -118,7 +142,7 @@ export class JiraClient {
       const match = nodes.find((x: TeamSearchV2) => Config.findTeam(x.team.displayName) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
       const id = match.team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
       console.log(`Found ${nodes.length} team(s), using ${id} ${match.team.displayName}`);
-      return id;
+      return { id, name: match.team.displayName };
     }
   }
 
@@ -126,15 +150,19 @@ export class JiraClient {
     return this.sendRequest("POST", "gateway/api/graphql", { query });
   }
 
-  private async sendRestGet(endpoint: string): Promise<any> {
+  private async sendRestGetApi(endpoint: string): Promise<any> {
     return this.sendRequest("GET", `rest/api/3/${endpoint}`);
   }
 
-  private async sendRestPost(endpoint: string, body: any): Promise<any> {
+  private async sendRestGetAgile(endpoint: string): Promise<any> {
+    return this.sendRequest("GET", `rest/agile/1.0/${endpoint}`);
+  }
+
+  private async sendRestPostApi(endpoint: string, body: any): Promise<any> {
     return this.sendRequest("POST", `rest/api/3/${endpoint}`, body);
   }
 
-  private async sendRestPut(endpoint: string, body: any): Promise<any> {
+  private async sendRestPutApi(endpoint: string, body: any): Promise<any> {
     return this.sendRequest("PUT", `rest/api/3/${endpoint}`, body);
   }
 

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NewIssueData = void 0;
+const Configuration_1 = require("./Configuration");
 const Constants_1 = require("./Constants");
 class NewIssueData {
     constructor(projectKey, accountId, additionalFields) {
@@ -12,11 +13,11 @@ class NewIssueData {
         const parent = await this.findNonSubTaskParent(jira, this.findMentionedIssues(pr));
         const projectKey = this.computeProjectKey(inputJiraProject, parent);
         const accountId = await jira.findAccountId(userEmail);
-        const teamId = await this.findTeamId(jira, accountId, projectKey); // Can be null for bots when project lead is not member of any team. Jira request will fail if the field is mandatory for the project.
-        // ToDo: boardId = f(teamId)
-        // ToDo: sprintId = f(boardId)
+        const team = await this.findTeam(jira, accountId, projectKey); // Can be null for bots when project lead is not member of any team. Jira request will fail if the field is mandatory for the project.
+        const sprintId = await this.findSprintId(jira, team.name);
         let additionalFields = this.parseAdditionalFields(inputAdditionFields);
-        const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task', teamId); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
+        const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task', team.id); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
+        parameters.customfield_10020 = sprintId;
         additionalFields = { ...additionalFields, ...parameters };
         return new NewIssueData(projectKey, accountId, additionalFields);
     }
@@ -74,16 +75,26 @@ class NewIssueData {
         console.log(mentionedIssues.length > 0 ? `Found mentioned issues: ${mentionedIssues}` : 'No mentioned issues found');
         return new Set(mentionedIssues);
     }
-    static async findTeamId(jira, userAccountId, projectKey) {
+    static async findTeam(jira, userAccountId, projectKey) {
         if (userAccountId != null) {
-            const teamId = await jira.findTeamId(userAccountId);
-            if (teamId != null) {
-                return teamId;
+            const team = await jira.findTeam(userAccountId);
+            if (team != null) {
+                return team;
             }
         }
         const { lead: { accountId: leadAccountId, displayName } } = await jira.getProject(projectKey);
         console.log(`No team found for current user, using ${projectKey} lead ${displayName}`);
-        return jira.findTeamId(leadAccountId);
+        return jira.findTeam(leadAccountId);
+    }
+    static async findSprintId(jira, teamName) {
+        const team = Configuration_1.Config.findTeam(teamName);
+        if (team?.boardId) {
+            return jira.findSprintId(team.boardId);
+        }
+        else {
+            console.log(`No boardId is configured for team ${teamName}`);
+            return null;
+        }
     }
 }
 exports.NewIssueData = NewIssueData;
