@@ -22,7 +22,6 @@ exports.TeamConfigurationData = [
     { name: "IDE Experience Squad", boardId: 1527 },
     { name: "Identity Squad", boardId: 1448 },
     { name: "Integration Squad", boardId: 1438 },
-    { name: "JS Squad", boardId: 1672 },
     { name: "JVM Squad", boardId: 1671 },
     { name: "Mobile Security", boardId: 1608 },
     { name: "On-Prem squad", boardId: 1548 },
@@ -32,6 +31,7 @@ exports.TeamConfigurationData = [
     { name: "Security Engine", boardId: 371 },
     { name: "SDLC Data Squad", boardId: 2034 },
     { name: "Taint Analysis", boardId: 371 },
+    { name: "Web Squad", boardId: 1672 },
     { name: "Workflow & Standards Squad", boardId: 1550 },
 ];
 //# sourceMappingURL=TeamConfiguration.js.map

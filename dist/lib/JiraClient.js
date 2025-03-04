@@ -18,16 +18,16 @@ class JiraClient {
         };
         console.log(`Creating issue in project '${projectKey}'`);
         console.log(JSON.stringify(request, null, 2));
-        const response = await this.sendRestPost('issue', request);
+        const response = await this.sendRestPostApi('issue', request);
         return response?.key;
     }
     getIssue(issueKey) {
         console.log(`Get issue '${issueKey}'`);
-        return this.sendRestGet(`issue/${issueKey}`);
+        return this.sendRestGetApi(`issue/${issueKey}`);
     }
     getProject(projectKey) {
         console.log(`Get project '${projectKey}'`);
-        return this.sendRestGet(`project/${projectKey}`);
+        return this.sendRestGetApi(`project/${projectKey}`);
     }
     async moveIssue(issueId, transitionName, fields = null) {
         const transition = await this.findTransition(issueId, transitionName);
@@ -39,12 +39,12 @@ class JiraClient {
         }
     }
     async findTransition(issueId, transitionName) {
-        const transitions = (await this.sendRestGet(`issue/${issueId}/transitions`))?.transitions ?? [];
+        const transitions = (await this.sendRestGetApi(`issue/${issueId}/transitions`))?.transitions ?? [];
         return transitions.find((x) => x.name === transitionName);
     }
     async transitionIssue(issueId, transition, fields = null) {
         console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
-        await this.sendRestPost(`issue/${issueId}/transitions`, { transition: { id: transition.id }, fields });
+        await this.sendRestPostApi(`issue/${issueId}/transitions`, { transition: { id: transition.id }, fields });
     }
     async assignIssueToEmail(issueId, userEmail) {
         const accountId = await this.findAccountId(userEmail);
@@ -54,7 +54,7 @@ class JiraClient {
     }
     async assignIssueToAccount(issueId, accountId) {
         console.log(`${issueId}: Assigning to ${accountId}`);
-        await this.sendRestPut(`issue/${issueId}/assignee`, { accountId });
+        await this.sendRestPutApi(`issue/${issueId}/assignee`, { accountId });
     }
     async findAccountId(email) {
         if (email == null) {
@@ -63,7 +63,7 @@ class JiraClient {
         }
         const logUser = email.substring(0, email.indexOf('@')).replace('.', ' '); // Do not leak email addresses to logs
         console.log(`Searching for user: ${logUser}`);
-        let accounts = (await this.sendRestGet(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
+        let accounts = (await this.sendRestGetApi(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
         accounts = accounts.filter((x) => x.emailAddress === email); // Just in case the address is part of the name, or other unexpected field
         if (accounts.length === 0) {
             console.log(`Could not find user ${logUser} in Jira`);
@@ -75,7 +75,22 @@ class JiraClient {
         }
     }
     ;
-    async findTeamId(accountId) {
+    async findSprintId(boardId) {
+        console.log(`Searching for active sprint in board ${boardId}`);
+        let { values } = await this.sendRestGetAgile(`board/${boardId}/sprint?state=active`);
+        values = values.filter((x) => x.originBoardId === boardId); // Board filter can contain sprints from other boards
+        if (values.length === 0) {
+            console.log(`Could not find active sprint in board ${boardId}`);
+            return null;
+        }
+        else {
+            const originalLength = values.length; // .pop() below removes an item from the array
+            const sprint = values.sort((a, b) => a.endDate.getTime() - b.endDate.getTime()).pop(); // There should be exactly one. If not, use the one ending later in case previous iteration was not closed yet.
+            console.log(`Found ${originalLength} active sprint(s), using ${sprint.id} ${sprint.name}`);
+            return sprint.id;
+        }
+    }
+    async findTeam(accountId) {
         console.log(`Searching for teams of account ${accountId}`);
         const { data: { team: { teamSearchV2: { nodes } } } } = await this.sendGraphQL(`
       query MandatoryButUselessQueryName {
@@ -100,19 +115,22 @@ class JiraClient {
             const match = nodes.find((x) => Configuration_1.Config.findTeam(x.team.displayName) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
             const id = match.team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
             console.log(`Found ${nodes.length} team(s), using ${id} ${match.team.displayName}`);
-            return id;
+            return { id, name: match.team.displayName };
         }
     }
     async sendGraphQL(query) {
         return this.sendRequest("POST", "gateway/api/graphql", { query });
     }
-    async sendRestGet(endpoint) {
+    async sendRestGetApi(endpoint) {
         return this.sendRequest("GET", `rest/api/3/${endpoint}`);
     }
-    async sendRestPost(endpoint, body) {
+    async sendRestGetAgile(endpoint) {
+        return this.sendRequest("GET", `rest/agile/1.0/${endpoint}`);
+    }
+    async sendRestPostApi(endpoint, body) {
         return this.sendRequest("POST", `rest/api/3/${endpoint}`, body);
     }
-    async sendRestPut(endpoint, body) {
+    async sendRestPutApi(endpoint, body) {
         return this.sendRequest("PUT", `rest/api/3/${endpoint}`, body);
     }
     async sendRequest(method, path, body) {
