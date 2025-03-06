@@ -40,14 +40,9 @@ export class NewIssueData {
   }
 
   private static computeProjectKey(inputJiraProject: string, parent: any): string {
-    // If projectKey is not defined (like in rspec), we want only to create only Sub-tasks in other tasks (not Epics).
-    if (inputJiraProject) {
-      return inputJiraProject;
-    } else if (parent && !["Epic", "Sub-task"].includes(parent.fields.issuetype.name)) {
-      return parent.fields.project.key;
-    } else {
-      return null;
-    }
+    return parent && !["Epic", "Sub-task"].includes(parent.fields.issuetype.name)
+      ? parent.fields.project.key // If someone takes the explicit effort of specifying "Part of XYZ-123", it should take precedence.
+      : inputJiraProject;         // Can be null. Like in rspec where we want only to create Sub-tasks in other tasks (not Epics).
   }
 
   private static parseAdditionalFields(inputAdditionFields: string): any {
