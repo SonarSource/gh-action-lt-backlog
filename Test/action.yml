@@ -1,6 +1,9 @@
 name: 'Test'
 description: 'Test'
 inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
   jira-user:
     description: 'Jira auth user'
     required: true
