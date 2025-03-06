@@ -1,0 +1,12 @@
+name: 'Test'
+description: 'Test'
+inputs:
+  jira-user:
+    description: 'Jira auth user'
+    required: true
+  jira-token:
+    description: 'Jira auth Token'
+    required: true
+runs:
+  using: 'node20'
+  main: '../dist/Test/Test.js'
