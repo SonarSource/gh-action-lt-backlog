@@ -85,7 +85,7 @@ class JiraClient {
         }
         else {
             const originalLength = values.length; // .pop() below removes an item from the array
-            const sprint = values.sort((a, b) => a.endDate.getTime() - b.endDate.getTime()).pop(); // There should be exactly one. If not, use the one ending later in case previous iteration was not closed yet.
+            const sprint = values.sort((a, b) => a.endDate.localeCompare(b.endDate)).pop(); // There should be exactly one. If not, use the one ending later in case previous iteration was not closed yet.
             console.log(`Found ${originalLength} active sprint(s), using ${sprint.id} ${sprint.name}`);
             return sprint.id;
         }
