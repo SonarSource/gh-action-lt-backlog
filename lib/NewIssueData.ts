@@ -29,8 +29,11 @@ export class NewIssueData {
     const team = await this.findTeam(jira, accountId, projectKey);  // Can be null for bots when project lead is not member of any team. Jira request will fail if the field is mandatory for the project.
     const sprintId = await this.findSprintId(jira, team.name);
     let additionalFields = this.parseAdditionalFields(inputAdditionFields);
-    const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task', team.id); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
-    parameters.customfield_10020 = sprintId;
+    const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
+    if (parameters.issuetype.name !== 'Sub-task') { // These fields cannot be set on Sub-task. Their values are inherited from the parent issue.
+      parameters.customfield_10001 = team.id;
+      parameters.customfield_10020 = sprintId;
+    }
     additionalFields = { ...additionalFields, ...parameters };
     return new NewIssueData(projectKey, accountId, additionalFields);
   }
@@ -57,18 +60,18 @@ export class NewIssueData {
     return {};
   }
 
-  private static newIssueParameters(projectKey: string, parent: any, issueType: string, teamId: string): IssueParameters {
+  private static newIssueParameters(projectKey: string, parent: any, issueType: string): IssueParameters {
     switch (parent?.fields.issuetype.name) {
       case 'Epic':
-        return { issuetype: { name: issueType }, parent: { key: parent.key }, customfield_10001: teamId };
+        return { issuetype: { name: issueType }, parent: { key: parent.key } };
       case 'Sub-task':
       case undefined:
       case null:
-        return { issuetype: { name: issueType }, customfield_10001: teamId };
+        return { issuetype: { name: issueType } };
       default:
         return parent.fields.project.key === projectKey   // Sub-task must be created in the same project
           ? { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } }  // Team cannot be set on Sub-Task
-          : { issuetype: { name: issueType }, customfield_10001: teamId };
+          : { issuetype: { name: issueType } };
     }
   }
 
@@ -104,7 +107,7 @@ export class NewIssueData {
   }
 
   private static async findSprintId(jira: JiraClient, teamName: string): Promise<number> {
-    const team = Config.findTeam(teamName); 
+    const team = Config.findTeam(teamName);
     if (team?.boardId) {
       return jira.findSprintId(team.boardId);
     }
