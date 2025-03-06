@@ -10,7 +10,7 @@ class Configuration {
         }
     }
     findTeam(name) {
-        return name == null ? null : this.teams[name];
+        return this.teams[name];
     }
 }
 exports.Config = new Configuration();
