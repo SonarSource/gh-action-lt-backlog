@@ -58,13 +58,19 @@ Ask DevInfra Squad to "Add Jira GitHub tokens" to the Vault configuration of you
 
 ## Troubleshooting
 
-1) Issue creation fails
+1. Issue creation fails
 
     > Field 'customfield_...' cannot be set. It is not on the appropriate screen, or unknown.
 
     Ask Jira Admin to update Issue creation screen for your project and Task issue type. It is missing Team or Sprint field.
 
-2. Issue is assigned to a wrong Team
+1. Search for active sprint fails
+
+    > The requested board cannot be viewed because it either does not exist or you do not have permission to view it.
+
+    Go to the filter of your board and add "My organization" to the "Viewers" permission list.
+
+1. Issue is assigned to a wrong Team
 
     Check your team membership in Jira and remove yourself from irrelevant teams.
     
@@ -72,7 +78,7 @@ Ask DevInfra Squad to "Add Jira GitHub tokens" to the Vault configuration of you
     
     Check if the Team name is specified correctly.
     
-3. Issue is not assigned to a sprint
+1. Issue is not assigned to a sprint
 
     Check the action log to see if it managed to identify Team, Board and Sprint. 
     
