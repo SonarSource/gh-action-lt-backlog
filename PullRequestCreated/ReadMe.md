@@ -56,8 +56,6 @@ Ask DevInfra Squad to "Add Jira GitHub tokens" to the Vault configuration of you
 
 ## Troubleshooting
 
-## Troubleshooting
-
 1. Issue creation fails
 
     > Field 'customfield_...' cannot be set. It is not on the appropriate screen, or unknown.
