@@ -57,7 +57,7 @@ class NewIssueData {
                 return { issuetype: { name: issueType } };
             default:
                 return parent.fields.project.key === projectKey // Sub-task must be created in the same project
-                    ? { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } } // Team cannot be set on Sub-Task
+                    ? { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } }
                     : { issuetype: { name: issueType } };
         }
     }
