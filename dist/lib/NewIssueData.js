@@ -17,7 +17,7 @@ class NewIssueData {
         const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
         if (parameters.issuetype.name !== 'Sub-task') { // These fields cannot be set on Sub-task. Their values are inherited from the parent issue.
             const team = await this.findTeam(jira, accountId, projectKey); // Can be null for bots when project lead is not member of any team. Jira request will fail if the field is mandatory for the project.
-            const sprintId = await this.findSprintId(jira, team.name);
+            const sprintId = await this.findSprintId(jira, team?.name);
             parameters.customfield_10001 = team.id;
             parameters.customfield_10020 = sprintId;
         }
@@ -89,6 +89,9 @@ class NewIssueData {
         return jira.findTeam(leadAccountId);
     }
     static async findSprintId(jira, teamName) {
+        if (teamName == null) {
+            return null;
+        }
         const team = Configuration_1.Config.findTeam(teamName);
         if (team?.boardId) {
             return jira.findSprintId(team.boardId);
