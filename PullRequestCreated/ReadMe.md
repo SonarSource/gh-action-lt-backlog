@@ -84,6 +84,8 @@ Ask DevInfra Squad to "Add Jira GitHub tokens" to the Vault configuration of you
 
 ## Example usage
 
+:warning: Use `runs-on: sonar-runner` in private repos.
+
 ```yaml
 name: Pull Request Created
 

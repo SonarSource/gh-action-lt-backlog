@@ -31,6 +31,8 @@ Ask Engineering Experience Squad to "Add Jira GitHub tokens" to the Vault config
 
 ## Example usage
 
+:warning: Use `runs-on: sonar-runner` in private repos.
+
 ```yaml
 name: Submit Review
 
