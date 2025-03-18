@@ -12,6 +12,8 @@ None
 
 ## Example usage
 
+:warning: Use `runs-on: sonar-runner` in private repos.
+
 ```yaml
 name: Log Payload
 

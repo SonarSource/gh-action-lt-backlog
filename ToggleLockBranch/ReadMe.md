@@ -48,6 +48,8 @@ A branch protection rule for the configured `branch-pattern` has to exist before
 
 ## Example usage
 
+:warning: Use `runs-on: sonar-runner` in private repos.
+
 ```yaml
 name: Toggle lock branch
 
