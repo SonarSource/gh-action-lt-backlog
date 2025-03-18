@@ -11,6 +11,7 @@ export const TeamConfigurationData: TeamConfiguration[] = [
   { name: "Architecture Squad", boardId: 1561 },
   { name: "Analysis Processing Squad", boardId: 1443 },
   { name: "Billing-Squad", boardId: 1536 },
+  { name: "BizTech - Back Office", boardId: 1464 },
   { name: "CFamily Squad", boardId: 173 },
   { name: "Cloud Platform", boardId: 1442 },
   { name: "Cloud Security", boardId: 1462 },
