@@ -107,7 +107,7 @@ export abstract class OctokitAction extends Action {
                   }
               }
           }`);
-    if (samlIdentityProvider?.externalIdentities) { 
+    if (samlIdentityProvider?.externalIdentities) {
       return samlIdentityProvider.externalIdentities.nodes;
     } else {
       this.log('ERROR: Provided GitHub token does not have permissions to query organization/samlIdentityProvider/externalIdentities.');
@@ -156,11 +156,15 @@ export abstract class OctokitAction extends Action {
   }
 
   protected async processRequestReview(issueId: string, requested_reviewer: any): Promise<void> {
-    await this.jira.moveIssue(issueId, 'Request Review');
-    if (requested_reviewer) {  
-      const userEmail = await this.findEmail(requested_reviewer.login);
-      if (userEmail != null) {
-        await this.jira.assignIssueToEmail(issueId, userEmail);
+    if (requested_reviewer.type === "Bot") {
+      this.log(`Skipping request review from bot: ${requested_reviewer.login}`);
+    } else {
+      await this.jira.moveIssue(issueId, 'Request Review');
+      if (requested_reviewer) {
+        const userEmail = await this.findEmail(requested_reviewer.login);
+        if (userEmail != null) {
+          await this.jira.assignIssueToEmail(issueId, userEmail);
+        }
       }
     }
   }

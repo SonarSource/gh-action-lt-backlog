@@ -137,11 +137,16 @@ class OctokitAction extends Action_1.Action {
         }
     }
     async processRequestReview(issueId, requested_reviewer) {
-        await this.jira.moveIssue(issueId, 'Request Review');
-        if (requested_reviewer) {
-            const userEmail = await this.findEmail(requested_reviewer.login);
-            if (userEmail != null) {
-                await this.jira.assignIssueToEmail(issueId, userEmail);
+        if (requested_reviewer.type === "Bot") {
+            this.log(`Skipping request review from bot: ${requested_reviewer.login}`);
+        }
+        else {
+            await this.jira.moveIssue(issueId, 'Request Review');
+            if (requested_reviewer) {
+                const userEmail = await this.findEmail(requested_reviewer.login);
+                if (userEmail != null) {
+                    await this.jira.assignIssueToEmail(issueId, userEmail);
+                }
             }
         }
     }
