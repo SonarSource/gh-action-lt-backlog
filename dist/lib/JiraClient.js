@@ -17,7 +17,6 @@ class JiraClient {
             },
         };
         console.log(`Creating issue in project '${projectKey}'`);
-        console.log(JSON.stringify(request, null, 2));
         const response = await this.sendRestPostApi('issue', request);
         return response?.key;
     }
@@ -55,6 +54,17 @@ class JiraClient {
     async assignIssueToAccount(issueId, accountId) {
         console.log(`${issueId}: Assigning to ${accountId}`);
         await this.sendRestPutApi(`issue/${issueId}/assignee`, { accountId });
+    }
+    async addIssueComponent(issueId, name) {
+        console.log(`${issueId}: Adding component ${name}`);
+        const request = {
+            update: {
+                components: [{
+                        add: { name } // Nothing will happen if it already exists
+                    }]
+            }
+        };
+        return await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request) != null;
     }
     async findAccountId(email) {
         if (email == null) {
@@ -118,6 +128,18 @@ class JiraClient {
             return { id, name: match.team.displayName };
         }
     }
+    async createComponent(projectKey, name) {
+        console.log(`Searching for component '${name}' in project ${projectKey}`);
+        const { total } = await this.sendRestGetApi(`project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`);
+        if (total === 0) {
+            console.log(`Component not found. Creating a new one.`);
+            return await this.sendRestPostApi('component', { project: projectKey, name }) != null;
+        }
+        else {
+            console.log(`Found '${total}' result(s)`);
+            return true;
+        }
+    }
     async sendGraphQL(query) {
         return this.sendRequest("POST", "gateway/api/graphql", { query });
     }
@@ -134,6 +156,9 @@ class JiraClient {
         return this.sendRequest("PUT", `rest/api/3/${endpoint}`, body);
     }
     async sendRequest(method, path, body) {
+        if (body) {
+            console.log(JSON.stringify(body, null, 2));
+        }
         const url = `${Constants_1.JIRA_DOMAIN}/${path}`;
         const response = await (0, node_fetch_1.default)(url, {
             method,
@@ -145,7 +170,7 @@ class JiraClient {
             body: body ? JSON.stringify(body) : undefined,
         });
         const responseContent = await response.text();
-        const data = responseContent.length > 0 ? JSON.parse(responseContent) : null;
+        const data = responseContent.length > 0 ? JSON.parse(responseContent) : {};
         if (response.ok) {
             return data;
         }
