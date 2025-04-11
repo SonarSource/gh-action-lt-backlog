@@ -35,10 +35,10 @@ class PullRequestCreated extends OctokitAction {
       else {
         newTitle = `${issueId} ${newTitle}`;
         await this.addLinkedIssuesToDescription(pr, [issueId]);
-        await this.jira.moveIssue(issueId, 'Commit');  // OPEN  -> TO DO
-        await this.jira.moveIssue(issueId, 'Start');   // TO DO -> IN PROGRESS
+        await this.jira.moveIssue(issueId, 'Commit');   // OPEN  -> TO DO
         if (data.accountId != null) {
-          await this.jira.assignIssueToAccount(issueId, data.accountId);             // Even if there's already a reviewer, we need this first to populate the lastAssignee field in Jira.
+          await this.jira.moveIssue(issueId, 'Start');  // TO DO -> IN PROGRESS only for real accounts, no bots GHA-8
+          await this.jira.assignIssueToAccount(issueId, data.accountId);  // Even if there's already a reviewer, we need this first to populate the lastAssignee field in Jira.
         }
         if (this.payload.pull_request.requested_reviewers.length > 0) { // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
           await this.processRequestReview(issueId, this.payload.pull_request.requested_reviewers[0]);
