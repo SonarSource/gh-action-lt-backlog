@@ -12,18 +12,24 @@ class NewIssueData {
     static async create(jira, pr, inputJiraProject, inputAdditionFields, userEmail) {
         const parent = await this.findNonSubTaskParent(jira, this.findMentionedIssues(pr));
         const projectKey = this.computeProjectKey(inputJiraProject, parent);
-        const accountId = await jira.findAccountId(userEmail);
-        const additionalFields = this.parseAdditionalFields(inputAdditionFields);
-        const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
-        if (parameters.issuetype.name !== 'Sub-task') { // These fields cannot be set on Sub-task. Their values are inherited from the parent issue.
-            const team = await this.findTeam(jira, accountId, projectKey); // Can be null for bots when project lead is not member of any team. Jira request will fail if the field is mandatory for the project.
-            if (team != null) {
-                const sprintId = await this.findSprintId(jira, team.name);
-                parameters.customfield_10001 = team.id;
-                parameters.customfield_10020 = sprintId;
+        if (projectKey) {
+            const accountId = await jira.findAccountId(userEmail);
+            const additionalFields = this.parseAdditionalFields(inputAdditionFields);
+            const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
+            if (parameters.issuetype.name !== 'Sub-task') { // These fields cannot be set on Sub-task. Their values are inherited from the parent issue.
+                const team = await this.findTeam(jira, accountId, projectKey); // Can be null for bots when project lead is not member of any team. Jira request will fail if the field is mandatory for the project.
+                if (team != null) {
+                    const sprintId = await this.findSprintId(jira, team.name);
+                    parameters.customfield_10001 = team.id;
+                    parameters.customfield_10020 = sprintId;
+                }
             }
+            return new NewIssueData(projectKey, accountId, { ...additionalFields, ...parameters });
         }
-        return new NewIssueData(projectKey, accountId, { ...additionalFields, ...parameters });
+        else {
+            console.log('No suitable project key found, issue will not be created');
+            return null;
+        }
     }
     static computeProjectKey(inputJiraProject, parent) {
         return parent && !["Epic", "Sub-task"].includes(parent.fields.issuetype.name)

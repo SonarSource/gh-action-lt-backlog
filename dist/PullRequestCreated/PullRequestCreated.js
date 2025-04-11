@@ -27,7 +27,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
     }
     async processNewJiraIssue(pr, newTitle) {
         const data = await NewIssueData_1.NewIssueData.create(this.jira, pr, this.getInput('jira-project'), this.getInput('additional-fields'), await this.findEmail(this.payload.sender.login));
-        if (data.projectKey) {
+        if (data) {
             const issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
             ;
             if (issueId == null) {
@@ -45,9 +45,6 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
                     await this.processRequestReview(issueId, this.payload.pull_request.requested_reviewers[0]);
                 }
             }
-        }
-        else {
-            this.log('No suitable project key found, issue will not be created');
         }
         return newTitle;
     }
