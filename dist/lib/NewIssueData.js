@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NewIssueData = void 0;
+const TeamConfiguration_1 = require("../Data/TeamConfiguration");
 const Configuration_1 = require("./Configuration");
 const Constants_1 = require("./Constants");
 class NewIssueData {
@@ -32,14 +33,14 @@ class NewIssueData {
         }
     }
     static async createForEngExp(jira, pr, userEmail) {
-        const projectKey = 'PREQ'; // ToDo: GHA-13 Detect project key
         const accountId = await jira.findAccountId(userEmail);
+        const projectKey = await this.computeProjectKeyForEngExp(jira, pr, accountId);
         const parameters = this.newIssueParameters(projectKey, null, 'Task');
-        const sprintId = await this.findSprintId(jira, 'Engineering Experience Squad');
+        const sprintId = await this.findSprintId(jira, TeamConfiguration_1.EngineeringExperienceSquad.name);
         if (accountId) {
             parameters.reporter = { id: accountId };
         }
-        parameters.customfield_10001 = 'eb40f25e-3596-4541-b661-cf83e7bc4fa6';
+        parameters.customfield_10001 = TeamConfiguration_1.EngineeringExperienceSquad.id;
         parameters.customfield_10020 = sprintId;
         parameters.labels = pr.user.login === 'renovate[bot]'
             ? ['dvi-created-by-automation', 'dvi-renovate']
@@ -50,6 +51,18 @@ class NewIssueData {
         return parent && !["Epic", "Sub-task"].includes(parent.fields.issuetype.name)
             ? parent.fields.project.key // If someone takes the explicit effort of specifying "Part of XYZ-123", it should take precedence.
             : inputJiraProject; // Can be null. Like in rspec where we want only to create Sub-tasks in other tasks (not Epics).
+    }
+    static async computeProjectKeyForEngExp(jira, pr, accountId) {
+        if (pr.base.repo.name === 'parent-oss') {
+            return 'PARENTOSS';
+        }
+        else if (accountId) {
+            const team = await jira.findTeam(accountId);
+            return team?.name === TeamConfiguration_1.EngineeringExperienceSquad.name ? 'BUILD' : 'PREQ';
+        }
+        else { // renovate and similar bots
+            return 'BUILD';
+        }
     }
     static parseAdditionalFields(inputAdditionFields) {
         if (inputAdditionFields) {

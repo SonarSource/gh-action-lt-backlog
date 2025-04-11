@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TeamConfigurationData = void 0;
+exports.TeamConfigurationData = exports.EngineeringExperienceSquad = void 0;
+exports.EngineeringExperienceSquad = { id: "eb40f25e-3596-4541-b661-cf83e7bc4fa6", name: "Engineering Experience Squad" };
 // If a new Jira issue is created for a standalone PR, it will be assigned to a sprint from a board defined by this file.
 // If a new team or default board is created, this file should be updated accordingly.
 exports.TeamConfigurationData = [
@@ -18,7 +19,7 @@ exports.TeamConfigurationData = [
     { name: "Dashboard & Reporting Squad", boardId: 1555 },
     { name: "Data", boardId: 1466 },
     { name: "DBD Squad", boardId: 1638 },
-    { name: "Engineering Experience Squad", boardId: 1551 },
+    { name: exports.EngineeringExperienceSquad.name, boardId: 1551 },
     { name: "Front-End Engineering", boardId: 1444 },
     { name: "IDE Experience Squad", boardId: 1527 },
     { name: "Identity Squad", boardId: 1448 },
