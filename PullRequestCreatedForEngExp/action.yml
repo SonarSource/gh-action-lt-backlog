@@ -1,0 +1,15 @@
+name: 'Create Jira Issue for PR without issue reference for Engineering Experience Squad'
+description: 'Create Jira Issue for PR that does not reference any Jira issue in its title'
+inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
+  jira-user:
+    description: 'Jira auth user'
+    required: true
+  jira-token:
+    description: 'Jira auth Token'
+    required: true
+runs:
+  using: 'node20'
+  main: '../dist/PullRequestCreatedForEngExp/PullRequestCreatedForEngExp.js'
