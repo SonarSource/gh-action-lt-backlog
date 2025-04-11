@@ -6,7 +6,9 @@ import { Team } from "./Team";
 
 interface IssueParameters {
   issuetype: { name: string };
+  labels?: string[];
   parent?: { key: string };
+  reporter?: { id: string };
   customfield_10001?: string; // This is how Pattlasian* named teamId in Jira
   customfield_10020?: number; // How would you name a sprintId? Oh, I know...
 }
@@ -42,6 +44,22 @@ export class NewIssueData {
       console.log('No suitable project key found, issue will not be created');
       return null;
     }
+  }
+
+  public static async createForEngExp(jira: JiraClient, pr: PullRequest, userEmail: string): Promise<NewIssueData> {
+    const projectKey = 'PREQ'; // ToDo: GHA-13 Detect project key
+    const accountId = await jira.findAccountId(userEmail);
+    const parameters = this.newIssueParameters(projectKey, null, 'Task');
+    const sprintId = await this.findSprintId(jira, 'Engineering Experience Squad');
+    if (accountId) {
+      parameters.reporter = { id: accountId };
+    }
+    parameters.customfield_10001 = 'eb40f25e-3596-4541-b661-cf83e7bc4fa6';
+    parameters.customfield_10020 = sprintId;
+    parameters.labels = pr.user.login === 'renovate[bot]'
+      ? ['dvi-created-by-automation', 'dvi-renovate']
+      : ['dvi-created-by-automation'];
+    return new NewIssueData(projectKey, accountId, parameters);
   }
 
   private static computeProjectKey(inputJiraProject: string, parent: any): string {

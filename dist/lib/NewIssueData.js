@@ -31,6 +31,21 @@ class NewIssueData {
             return null;
         }
     }
+    static async createForEngExp(jira, pr, userEmail) {
+        const projectKey = 'PREQ'; // ToDo: GHA-13 Detect project key
+        const accountId = await jira.findAccountId(userEmail);
+        const parameters = this.newIssueParameters(projectKey, null, 'Task');
+        const sprintId = await this.findSprintId(jira, 'Engineering Experience Squad');
+        if (accountId) {
+            parameters.reporter = { id: accountId };
+        }
+        parameters.customfield_10001 = 'eb40f25e-3596-4541-b661-cf83e7bc4fa6';
+        parameters.customfield_10020 = sprintId;
+        parameters.labels = pr.user.login === 'renovate[bot]'
+            ? ['dvi-created-by-automation', 'dvi-renovate']
+            : ['dvi-created-by-automation'];
+        return new NewIssueData(projectKey, accountId, parameters);
+    }
     static computeProjectKey(inputJiraProject, parent) {
         return parent && !["Epic", "Sub-task"].includes(parent.fields.issuetype.name)
             ? parent.fields.project.key // If someone takes the explicit effort of specifying "Part of XYZ-123", it should take precedence.

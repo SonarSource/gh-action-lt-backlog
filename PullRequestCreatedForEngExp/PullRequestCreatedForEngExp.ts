@@ -1,6 +1,6 @@
 import { OctokitAction } from '../lib/OctokitAction';
 import { PullRequest } from '../lib/OctokitTypes';
-import { JIRA_DOMAIN, JIRA_ISSUE_PATTERN } from '../lib/Constants';
+import { JIRA_ISSUE_PATTERN } from '../lib/Constants';
 import { NewIssueData } from '../lib/NewIssueData';
 
 class PullRequestCreatedForEngExp extends OctokitAction {
@@ -25,18 +25,29 @@ class PullRequestCreatedForEngExp extends OctokitAction {
   }
 
   private async processNewJiraIssue(pr: PullRequest): Promise<string> {
-    // FIXME: Implement
-    return null;
+    const data = await NewIssueData.createForEngExp(this.jira, pr, await this.findEmail(this.payload.sender.login));
+    const issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
+    if (issueId == null) {
+      this.setFailed('Failed to create a new issue in Jira');
+    } else {
+      await this.jira.moveIssue(issueId, 'Commit');             // OPEN  -> TO DO
+      if (data.accountId != null) {
+        await this.jira.moveIssue(issueId, 'Start Progress');   // TO DO -> IN PROGRESS only for real accounts, no bots GHA-8
+        await this.jira.assignIssueToAccount(issueId, data.accountId);
+      }
+      // ToDo: GHA-14 Process reviewers
+    }
+    return issueId;
   }
 
   private async createJiraComponent(projectKey: string, component: string): Promise<void> {
-    //FIXME: If not exist, add component
+    //FIXME: GHA-12 If not exist, add component, move to JiraClient?
   }
 
   private async updateJiraComponent(issueId: string): Promise<void> {
     const component = this.repo.repo;
     await this.createJiraComponent(issueId.split('-')[0], component);
-    //FIXME: Add component
+    //FIXME: GHA-12 Add component
   }
 }
 

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const OctokitAction_1 = require("../lib/OctokitAction");
 const Constants_1 = require("../lib/Constants");
+const NewIssueData_1 = require("../lib/NewIssueData");
 class PullRequestCreatedForEngExp extends OctokitAction_1.OctokitAction {
     async execute() {
         if (/DO NOT MERGE/i.test(this.payload.pull_request.title)) {
@@ -23,16 +24,28 @@ class PullRequestCreatedForEngExp extends OctokitAction_1.OctokitAction {
         }
     }
     async processNewJiraIssue(pr) {
-        // FIXME: Implement
-        return null;
+        const data = await NewIssueData_1.NewIssueData.createForEngExp(this.jira, pr, await this.findEmail(this.payload.sender.login));
+        const issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
+        if (issueId == null) {
+            this.setFailed('Failed to create a new issue in Jira');
+        }
+        else {
+            await this.jira.moveIssue(issueId, 'Commit'); // OPEN  -> TO DO
+            if (data.accountId != null) {
+                await this.jira.moveIssue(issueId, 'Start Progress'); // TO DO -> IN PROGRESS only for real accounts, no bots GHA-8
+                await this.jira.assignIssueToAccount(issueId, data.accountId);
+            }
+            // ToDo: GHA-14 Process reviewers
+        }
+        return issueId;
     }
     async createJiraComponent(projectKey, component) {
-        //FIXME: If not exist, add component
+        //FIXME: GHA-12 If not exist, add component, move to JiraClient?
     }
     async updateJiraComponent(issueId) {
         const component = this.repo.repo;
         await this.createJiraComponent(issueId.split('-')[0], component);
-        //FIXME: Add component
+        //FIXME: GHA-12 Add component
     }
 }
 const action = new PullRequestCreatedForEngExp();
