@@ -55,6 +55,20 @@ class JiraClient {
         console.log(`${issueId}: Assigning to ${accountId}`);
         await this.sendRestPutApi(`issue/${issueId}/assignee`, { accountId });
     }
+    async addReviewer(issueId, userEmail) {
+        const accountId = await this.findAccountId(userEmail);
+        if (accountId != null) {
+            console.log(`${issueId}: Adding reviewer ${accountId}`);
+            const request = {
+                update: {
+                    customfield_11227: [{
+                            add: { accountId } // Nothing will happen if it already exists
+                        }]
+                }
+            };
+            await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request);
+        }
+    }
     async addIssueComponent(issueId, name) {
         console.log(`${issueId}: Adding component ${name}`);
         const request = {

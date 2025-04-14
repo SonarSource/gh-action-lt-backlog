@@ -1,8 +1,8 @@
 # RequestReview
 
-Move fixed Jira tickets using the 'Request Review' transition and assign them to the reviewer when requestiong a review on a pull request.
+Move fixed Jira tickets using the 'Request Review' transition and assign them to the reviewer when requesting a review on a pull request.
 
-This action would typically move a ticket from `IN PROGRESS` to `IN REVIEW`. It will attempt to move all tickets mentionned in the pull request title.
+This action would typically move a ticket from `IN PROGRESS` to `IN REVIEW`. It will attempt to move all tickets mentioned in the pull request title.
 
 ## Inputs
 
@@ -17,6 +17,12 @@ User to access the Jira API.
 ### `jira-token`
 
 Token to access the Jira API.
+
+### `is-infra`
+
+Set to `true` only for repositories owned by Engineering Experience Squad. Do not use it anywhere else.
+
+This parameter will not change assignee, but will fill Reviewers field instead.
 
 ## Outputs
 
