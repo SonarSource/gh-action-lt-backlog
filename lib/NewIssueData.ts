@@ -1,3 +1,4 @@
+import { EngineeringExperienceSquad } from "../Data/TeamConfiguration";
 import { Config } from "./Configuration";
 import { JIRA_ISSUE_PATTERN } from "./Constants";
 import { JiraClient } from "./JiraClient";
@@ -47,14 +48,14 @@ export class NewIssueData {
   }
 
   public static async createForEngExp(jira: JiraClient, pr: PullRequest, userEmail: string): Promise<NewIssueData> {
-    const projectKey = 'PREQ'; // ToDo: GHA-13 Detect project key
     const accountId = await jira.findAccountId(userEmail);
+    const projectKey = await this.computeProjectKeyForEngExp(jira, pr, accountId);
     const parameters = this.newIssueParameters(projectKey, null, 'Task');
-    const sprintId = await this.findSprintId(jira, 'Engineering Experience Squad');
+    const sprintId = await this.findSprintId(jira, EngineeringExperienceSquad.name);
     if (accountId) {
       parameters.reporter = { id: accountId };
     }
-    parameters.customfield_10001 = 'eb40f25e-3596-4541-b661-cf83e7bc4fa6';
+    parameters.customfield_10001 = EngineeringExperienceSquad.id;
     parameters.customfield_10020 = sprintId;
     parameters.labels = pr.user.login === 'renovate[bot]'
       ? ['dvi-created-by-automation', 'dvi-renovate']
@@ -66,6 +67,17 @@ export class NewIssueData {
     return parent && !["Epic", "Sub-task"].includes(parent.fields.issuetype.name)
       ? parent.fields.project.key // If someone takes the explicit effort of specifying "Part of XYZ-123", it should take precedence.
       : inputJiraProject;         // Can be null. Like in rspec where we want only to create Sub-tasks in other tasks (not Epics).
+  }
+
+  private static async computeProjectKeyForEngExp(jira: JiraClient, pr: PullRequest, accountId: string): Promise<string> {
+    if (pr.base.repo.name === 'parent-oss') {
+      return 'PARENTOSS';
+    } else if (accountId) { 
+      const team = await jira.findTeam(accountId);
+      return team?.name === EngineeringExperienceSquad.name ? 'BUILD' : 'PREQ';
+    } else {  // renovate and similar bots
+      return 'BUILD';
+    }
   }
 
   private static parseAdditionalFields(inputAdditionFields: string): any {
