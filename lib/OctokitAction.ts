@@ -163,7 +163,11 @@ export abstract class OctokitAction extends Action {
       if (requested_reviewer) {
         const userEmail = await this.findEmail(requested_reviewer.login);
         if (userEmail != null) {
-          await this.jira.assignIssueToEmail(issueId, userEmail);
+          if (this.getInputBoolean("is-infra")) { 
+            await this.jira.addReviewer(issueId, userEmail);
+          } else {
+            await this.jira.assignIssueToEmail(issueId, userEmail);
+          }
         }
       }
     }

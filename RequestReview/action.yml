@@ -1,5 +1,5 @@
 name: 'Move card when requesting review and assign it to the reviewer'
-description: 'Move fixed Jira tickets using the "Request Review" transition and assign them to the reviewer when requestiong a review on a pull request.'
+description: 'Move fixed Jira tickets using the "Request Review" transition and assign them to the reviewer when requesting a review on a pull request.'
 inputs:
   github-token:
     description: 'GitHub auth Token'

@@ -35,7 +35,9 @@ class PullRequestCreatedForEngExp extends OctokitAction_1.OctokitAction {
                 await this.jira.moveIssue(issueId, 'Start Progress'); // TO DO -> IN PROGRESS only for real accounts, no bots GHA-8
                 await this.jira.assignIssueToAccount(issueId, data.accountId);
             }
-            // ToDo: GHA-14 Process reviewers
+            if (this.payload.pull_request.requested_reviewers.length > 0) { // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
+                await this.processRequestReview(issueId, this.payload.pull_request.requested_reviewers[0]);
+            }
         }
         return issueId;
     }

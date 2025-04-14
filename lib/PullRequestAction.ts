@@ -10,7 +10,7 @@ export abstract class PullRequestAction extends OctokitAction {
       console.warn('No Jira issue found in the PR title.');
     } else {
       for (const issueId of issueIds) {
-        if (issueId.startsWith('BUILD-') || issueId.startsWith('PREQ-')) {  // Do not interfere with Engineering Experience Squad projects
+        if ((issueId.startsWith('BUILD-') || issueId.startsWith('PREQ-')) && !this.getInputBoolean('is-infra')) {
           this.log(`Skipping ${issueId}`);
         }
         else {
