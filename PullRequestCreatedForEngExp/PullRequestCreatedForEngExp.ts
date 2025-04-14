@@ -40,14 +40,14 @@ class PullRequestCreatedForEngExp extends OctokitAction {
     return issueId;
   }
 
-  private async createJiraComponent(projectKey: string, component: string): Promise<void> {
-    //FIXME: GHA-12 If not exist, add component, move to JiraClient?
-  }
-
   private async updateJiraComponent(issueId: string): Promise<void> {
     const component = this.repo.repo;
-    await this.createJiraComponent(issueId.split('-')[0], component);
-    //FIXME: GHA-12 Add component
+    if (!await this.jira.createComponent(issueId.split('-')[0], component)) {   // Same PR can have multiple issues from different projects
+      this.setFailed('Failed to create component');
+    }
+    if (!await this.jira.addIssueComponent(issueId, component)) {
+      this.setFailed('Failed to add component');
+    }
   }
 }
 
