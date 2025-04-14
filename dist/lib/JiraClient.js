@@ -58,10 +58,24 @@ class JiraClient {
     async addReviewer(issueId, userEmail) {
         const accountId = await this.findAccountId(userEmail);
         if (accountId != null) {
-            console.log(`${issueId}: Adding reviewer ${accountId}`);
+            console.log(`${issueId}: Adding Reviewer ${accountId}`);
             const request = {
                 update: {
                     customfield_11227: [{
+                            add: { accountId } // Nothing will happen if it already exists
+                        }]
+                }
+            };
+            await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request);
+        }
+    }
+    async addReviewedBy(issueId, userEmail) {
+        const accountId = await this.findAccountId(userEmail);
+        if (accountId != null) {
+            console.log(`${issueId}: Adding Reviewed by ${accountId}`);
+            const request = {
+                update: {
+                    customfield_11228: [{
                             add: { accountId } // Nothing will happen if it already exists
                         }]
                 }

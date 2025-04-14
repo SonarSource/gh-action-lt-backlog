@@ -21,6 +21,12 @@ User to access the Jira API.
 
 Token to access the Jira API.
 
+### `is-infra`
+
+Set to `true` only for repositories owned by Engineering Experience Squad. Do not use it anywhere else.
+
+This parameter will not do any transition for approvals, and will fill `Reviewed by` field.
+
 ## Outputs
 
 None
