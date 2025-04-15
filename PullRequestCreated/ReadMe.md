@@ -46,6 +46,14 @@ additional-fields: '{ "components": [ { "name": "Something" } ], "labels": ["Som
 
 It overrides fields set by the action.
 
+### `is-infra`
+
+Set to `true` only for repositories owned by Engineering Experience Squad. Do not use it anywhere else.
+
+This parameter changes project selection rules, adds implicit labels, components and does not modify the description.
+
+When set, do not set `jira-project` nor `additional-fields` parameters.
+
 ## Outputs
 
 None

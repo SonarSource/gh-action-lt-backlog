@@ -19,11 +19,19 @@ class PullRequestCreated extends OctokitAction {
     } else if (pr.title !== this.cleanupWhitespace(pr.title)) { // New issues do this when persisting issue ID
       await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
     }
-    await this.addLinkedIssuesToDescription(pr, linkedIssues);
+    if (this.getInputBoolean('is-infra')) {
+      for (const issue of linkedIssues) {
+        await this.updateJiraComponent(issue);
+      }
+    } else {
+      await this.addLinkedIssuesToDescription(pr, linkedIssues);
+    }
   }
 
   private async processNewJiraIssue(pr: PullRequest): Promise<string> {
-    const data = await NewIssueData.create(this.jira, pr, this.getInput('jira-project'), this.getInput('additional-fields'), await this.findEmail(this.payload.sender.login));
+    const data = this.getInputBoolean('is-infra')
+      ? await NewIssueData.createForEngExp(this.jira, pr, await this.findEmail(this.payload.sender.login))
+      : await NewIssueData.create(this.jira, pr, this.getInput('jira-project'), this.getInput('additional-fields'), await this.findEmail(this.payload.sender.login));
     if (data) {
       const issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
       if (issueId == null) {
@@ -62,6 +70,16 @@ class PullRequestCreated extends OctokitAction {
 
   private issueLink(issue: string): string {
     return `[${issue}](${JIRA_DOMAIN}/browse/${issue})`;
+  }
+
+  private async updateJiraComponent(issueId: string): Promise<void> {
+    const component = this.repo.repo;
+    if (!await this.jira.createComponent(issueId.split('-')[0], component)) {   // Same PR can have multiple issues from different projects
+      this.setFailed('Failed to create component');
+    }
+    if (!await this.jira.addIssueComponent(issueId, component)) {
+      this.setFailed('Failed to add component');
+    }
   }
 }
 
