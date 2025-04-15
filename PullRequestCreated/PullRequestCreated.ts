@@ -28,7 +28,10 @@ class PullRequestCreated extends OctokitAction {
     }
     let linkedIssues = pr.title.match(JIRA_ISSUE_PATTERN);
     if (linkedIssues == null) {
-      linkedIssues = [await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields)];
+      const issueId = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields);
+      if (issueId) {
+        linkedIssues = [issueId];
+      }
     } else if (pr.title !== this.cleanupWhitespace(pr.title)) { // New issues do this when persisting issue ID
       await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
     }
