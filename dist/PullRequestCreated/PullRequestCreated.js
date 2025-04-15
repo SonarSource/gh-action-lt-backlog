@@ -5,6 +5,19 @@ const Constants_1 = require("../lib/Constants");
 const NewIssueData_1 = require("../lib/NewIssueData");
 class PullRequestCreated extends OctokitAction_1.OctokitAction {
     async execute() {
+        const inputJiraProject = this.getInput('jira-project');
+        const inputAdditionalFields = this.getInput('additional-fields');
+        const inputIsInfra = this.getInputBoolean('is-infra');
+        if (inputIsInfra) {
+            if (inputJiraProject) {
+                this.setFailed('jira-project input is not supported when is-infra is set.');
+                return;
+            }
+            if (inputAdditionalFields) {
+                this.setFailed('additional-fields input is not supported when is-infra is set.');
+                return;
+            }
+        }
         if (/DO NOT MERGE/i.test(this.payload.pull_request.title)) {
             this.log("'DO NOT MERGE' found in the PR title, skipping the action.");
             return;
@@ -15,12 +28,12 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         }
         let linkedIssues = pr.title.match(Constants_1.JIRA_ISSUE_PATTERN);
         if (linkedIssues == null) {
-            linkedIssues = [await this.processNewJiraIssue(pr)];
+            linkedIssues = [await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields)];
         }
         else if (pr.title !== this.cleanupWhitespace(pr.title)) { // New issues do this when persisting issue ID
             await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
         }
-        if (this.getInputBoolean('is-infra')) {
+        if (inputIsInfra) {
             for (const issue of linkedIssues) {
                 await this.updateJiraComponent(issue);
             }
@@ -29,10 +42,10 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
             await this.addLinkedIssuesToDescription(pr, linkedIssues);
         }
     }
-    async processNewJiraIssue(pr) {
+    async processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields) {
         const data = this.getInputBoolean('is-infra')
             ? await NewIssueData_1.NewIssueData.createForEngExp(this.jira, pr, await this.findEmail(this.payload.sender.login))
-            : await NewIssueData_1.NewIssueData.create(this.jira, pr, this.getInput('jira-project'), this.getInput('additional-fields'), await this.findEmail(this.payload.sender.login));
+            : await NewIssueData_1.NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, await this.findEmail(this.payload.sender.login));
         if (data) {
             const issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
             if (issueId == null) {
