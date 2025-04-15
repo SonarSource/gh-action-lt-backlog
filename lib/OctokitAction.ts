@@ -156,7 +156,7 @@ export abstract class OctokitAction extends Action {
   }
 
   protected async processRequestReview(issueId: string, requested_reviewer: any): Promise<void> {
-    if (requested_reviewer.type === "Bot") {
+    if (requested_reviewer?.type === "Bot") {
       this.log(`Skipping request review from bot: ${requested_reviewer.login}`);
     } else {
       await this.jira.moveIssue(issueId, 'Request Review');
