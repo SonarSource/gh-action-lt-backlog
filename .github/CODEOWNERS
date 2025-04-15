@@ -1,1 +1,5 @@
 .github/CODEOWNERS @SonarSource/quality-dotnet-squad
+
+# Force review from code owners on every file - required by GitHub Action Secure Configuration Policy
+# https://xtranet-sonarsource.atlassian.net/wiki/spaces/IS/pages/3990552676/GitHub+Action+Secure+Configuration+Policy
+* @SonarSource/quality-dotnet-squad
