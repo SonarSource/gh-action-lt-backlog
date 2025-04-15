@@ -24,6 +24,12 @@ User to access the Jira API.
 
 Token to access the Jira API.
 
+### `is-infra`
+
+Set to `true` only for repositories owned by Engineering Experience Squad. Do not use it anywhere else.
+
+This parameter will resolve only issues created by automation, or bots.
+
 ## Outputs
 
 None

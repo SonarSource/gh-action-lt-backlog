@@ -2,7 +2,14 @@ import { PullRequestAction } from '../lib/PullRequestAction';
 
 class PullRequestClosed extends PullRequestAction {
   protected async processJiraIssue(issueId: string): Promise<void> {
-    if (this.payload.pull_request.merged) {
+    if (this.getInputBoolean('is-infra')) { // Can't auto-close auto-created issues, the reporter is set to the actual user
+      const pr = await this.getPullRequest(this.payload.pull_request.number);
+      if (pr.user.type === "Bot") {
+        await this.jira.moveIssue(issueId, 'Resolve issue', { resolution: { id: this.resolutionId() } });
+      } else {
+        this.log(`Skipping issue resolution for non-Bot PR`);
+      }
+    } else if (this.payload.pull_request.merged) {
       await this.processMerge(issueId);
     }
     else {
@@ -23,7 +30,7 @@ class PullRequestClosed extends PullRequestAction {
     const issue = await this.jira.getIssue(issueId);
     const creator = issue?.fields.creator.displayName;
     if (creator === "Jira Tech User GitHub") {
-      await this.jira.moveIssue(issueId, 'Cancel Issue', { resolution: { id: '10001' } });  // 10001 "Won't do"
+      await this.jira.moveIssue(issueId, 'Cancel Issue', { resolution: { id: this.resolutionId() } });
     } else {
       this.log(`Skipping issue cancellation for creator ${creator}`);
     }
@@ -31,6 +38,12 @@ class PullRequestClosed extends PullRequestAction {
 
   private isReleaseBranch(ref: string): boolean {
     return ref === 'master' || ref === 'main' || ref.startsWith('branch-');
+  }
+
+  private resolutionId(): string {
+    return this.payload.pull_request.merged
+      ? '10000'   // "Done"
+      : '10001';  // "Won't do"
   }
 }
 
