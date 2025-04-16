@@ -199,7 +199,8 @@ export class JiraClient {
     }
   }
 
-  private async sendGraphQL(query: any): Promise<any> {
+  private async sendGraphQL(query: string): Promise<any> {
+    console.log(query); // Log only the GraphQL query, without the surrounding { "query": ... }
     return this.sendRequest("POST", "gateway/api/graphql", { query });
   }
 
@@ -212,17 +213,16 @@ export class JiraClient {
   }
 
   private async sendRestPostApi(endpoint: string, body: any): Promise<any> {
+    console.log(JSON.stringify(body, null, 2));
     return this.sendRequest("POST", `rest/api/3/${endpoint}`, body);
   }
 
   private async sendRestPutApi(endpoint: string, body: any): Promise<any> {
+    console.log(JSON.stringify(body, null, 2));
     return this.sendRequest("PUT", `rest/api/3/${endpoint}`, body);
   }
 
   private async sendRequest(method: "GET" | "POST" | "PUT", path: string, body?: any): Promise<any> {
-    if (body) {
-      console.log(JSON.stringify(body, null, 2));
-    }
     const url = `${JIRA_DOMAIN}/${path}`;
     const response = await fetch(url, {
       method,
