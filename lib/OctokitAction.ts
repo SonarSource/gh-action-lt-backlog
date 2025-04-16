@@ -4,10 +4,11 @@ import * as graphqlTypes from '@octokit/graphql/dist-types/types';
 import { GitHub } from '@actions/github/lib/utils';
 import { Action } from './Action';
 import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types';
-import { PullRequest } from './OctokitTypes';
+import { PullRequest, isRenovate, IssueComment } from './OctokitTypes';
 import fetch from 'node-fetch';
 import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
 import { JiraClient } from './JiraClient';
+import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX } from './Constants';
 
 
 export abstract class OctokitAction extends Action {
@@ -64,8 +65,19 @@ export abstract class OctokitAction extends Action {
     }
   }
 
+  protected async findFixedIssues(pr: PullRequest): Promise<string[]> {
+    const text = isRenovate(pr) // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
+      ? (await this.listComments(pr.number)).filter(x => x.body?.startsWith(RENOVATE_PREFIX)).pop()?.body
+      : pr.title;
+    return text.match(JIRA_ISSUE_PATTERN);
+  }
+
   protected async addComment(issue_number: number, body: string): Promise<void> {
     await this.rest.issues.createComment(this.addRepo({ issue_number, body }));
+  }
+
+  protected async listComments(issue_number: number): Promise<IssueComment[]> {
+    return (await this.rest.issues.listComments(this.addRepo({ issue_number }))).data;
   }
 
   protected updatePullRequestTitle(prNumber: number, title: string): Promise<void> {
@@ -173,7 +185,7 @@ export abstract class OctokitAction extends Action {
       if (requested_reviewer) {
         const userEmail = await this.findEmail(requested_reviewer.login);
         if (userEmail != null) {
-          if (this.isEngXpSquad) { 
+          if (this.isEngXpSquad) {
             await this.jira.addReviewer(issueId, userEmail);
           } else {
             await this.jira.assignIssueToEmail(issueId, userEmail);

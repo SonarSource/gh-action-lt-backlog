@@ -26,23 +26,23 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         if (pr == null) {
             return;
         }
-        let linkedIssues = pr.title.match(Constants_1.JIRA_ISSUE_PATTERN);
-        if (linkedIssues == null) {
+        let fixedIssues = await this.findFixedIssues(pr);
+        if (fixedIssues == null) {
             const issueId = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields);
             if (issueId) {
-                linkedIssues = [issueId];
+                fixedIssues = [issueId];
             }
         }
         else if (pr.title !== this.cleanupWhitespace(pr.title)) { // New issues do this when persisting issue ID
             await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
         }
         if (this.isEngXpSquad) {
-            for (const issue of linkedIssues) {
+            for (const issue of fixedIssues) {
                 await this.updateJiraComponent(issue);
             }
         }
         else {
-            await this.addLinkedIssuesToDescription(pr, linkedIssues);
+            await this.addLinkedIssuesToDescription(pr, fixedIssues);
         }
     }
     async processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields) {
@@ -73,8 +73,8 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         }
     }
     async persistIssueId(pr, issueId) {
-        if ((0, OctokitTypes_1.isRenovate)(pr)) {
-            await this.addComment(pr.number, `Renovate Jira issue ID: ${this.issueLink(issueId)}`);
+        if ((0, OctokitTypes_1.isRenovate)(pr)) { // Renovate overrides the PR title back to the original https://github.com/renovatebot/renovate/issues/26833
+            await this.addComment(pr.number, Constants_1.RENOVATE_PREFIX + this.issueLink(issueId)); // We'll store the ID in comment as a workaround
         }
         else {
             pr.title = this.cleanupWhitespace(`${issueId} ${pr.title}`);
