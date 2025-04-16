@@ -1,5 +1,5 @@
 import { OctokitAction } from '../lib/OctokitAction';
-import { PullRequest, isRenovate } from '../lib/OctokitTypes';
+import { PullRequest } from '../lib/OctokitTypes';
 import { JIRA_DOMAIN, RENOVATE_PREFIX } from '../lib/Constants';
 import { NewIssueData } from '../lib/NewIssueData';
 
@@ -70,7 +70,7 @@ class PullRequestCreated extends OctokitAction {
   }
 
   private async persistIssueId(pr: PullRequest, issueId: string): Promise<void> {
-    if (isRenovate(pr)) { // Renovate overrides the PR title back to the original https://github.com/renovatebot/renovate/issues/26833
+    if (pr.isRenovate()) {  // Renovate overrides the PR title back to the original https://github.com/renovatebot/renovate/issues/26833
       await this.addComment(pr.number, RENOVATE_PREFIX + this.issueLink(issueId));  // We'll store the ID in comment as a workaround
     } else {
       pr.title = this.cleanupWhitespace(`${issueId} ${pr.title}`);

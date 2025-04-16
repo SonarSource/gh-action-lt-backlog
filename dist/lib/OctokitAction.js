@@ -46,7 +46,7 @@ class OctokitAction extends Action_1.Action {
     async getPullRequest(pull_number) {
         try {
             this.log(`Getting PR #${pull_number}`);
-            return (await this.rest.pulls.get(this.addRepo({ pull_number }))).data;
+            return (0, OctokitTypes_1.addPullRequestExtensions)((await this.rest.pulls.get(this.addRepo({ pull_number }))).data);
         }
         catch (error) {
             this.log(`Pull Request #${pull_number} not found: ${error}`);
@@ -54,7 +54,7 @@ class OctokitAction extends Action_1.Action {
         }
     }
     async findFixedIssues(pr) {
-        const text = (0, OctokitTypes_1.isRenovate)(pr) // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
+        const text = pr.isRenovate() // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
             ? (await this.listComments(pr.number)).filter(x => x.body?.startsWith(Constants_1.RENOVATE_PREFIX)).pop()?.body
             : pr.title;
         return text.match(Constants_1.JIRA_ISSUE_PATTERN);

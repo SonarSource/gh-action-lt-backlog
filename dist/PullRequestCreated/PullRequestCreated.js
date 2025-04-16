@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const OctokitAction_1 = require("../lib/OctokitAction");
-const OctokitTypes_1 = require("../lib/OctokitTypes");
 const Constants_1 = require("../lib/Constants");
 const NewIssueData_1 = require("../lib/NewIssueData");
 class PullRequestCreated extends OctokitAction_1.OctokitAction {
@@ -73,7 +72,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         }
     }
     async persistIssueId(pr, issueId) {
-        if ((0, OctokitTypes_1.isRenovate)(pr)) { // Renovate overrides the PR title back to the original https://github.com/renovatebot/renovate/issues/26833
+        if (pr.isRenovate()) { // Renovate overrides the PR title back to the original https://github.com/renovatebot/renovate/issues/26833
             await this.addComment(pr.number, Constants_1.RENOVATE_PREFIX + this.issueLink(issueId)); // We'll store the ID in comment as a workaround
         }
         else {

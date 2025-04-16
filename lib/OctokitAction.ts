@@ -4,7 +4,7 @@ import * as graphqlTypes from '@octokit/graphql/dist-types/types';
 import { GitHub } from '@actions/github/lib/utils';
 import { Action } from './Action';
 import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types';
-import { PullRequest, isRenovate, IssueComment } from './OctokitTypes';
+import { PullRequest, IssueComment, addPullRequestExtensions } from './OctokitTypes';
 import fetch from 'node-fetch';
 import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
 import { JiraClient } from './JiraClient';
@@ -58,7 +58,7 @@ export abstract class OctokitAction extends Action {
   protected async getPullRequest(pull_number: number): Promise<PullRequest> {
     try {
       this.log(`Getting PR #${pull_number}`);
-      return (await this.rest.pulls.get(this.addRepo({ pull_number }))).data;
+      return addPullRequestExtensions((await this.rest.pulls.get(this.addRepo({ pull_number }))).data);
     } catch (error) {
       this.log(`Pull Request #${pull_number} not found: ${error}`);
       return null;
@@ -66,7 +66,7 @@ export abstract class OctokitAction extends Action {
   }
 
   protected async findFixedIssues(pr: PullRequest): Promise<string[]> {
-    const text = isRenovate(pr) // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
+    const text = pr.isRenovate() // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
       ? (await this.listComments(pr.number)).filter(x => x.body?.startsWith(RENOVATE_PREFIX)).pop()?.body
       : pr.title;
     return text.match(JIRA_ISSUE_PATTERN);

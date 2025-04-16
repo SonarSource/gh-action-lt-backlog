@@ -4,7 +4,6 @@ exports.NewIssueData = void 0;
 const TeamConfiguration_1 = require("../Data/TeamConfiguration");
 const Configuration_1 = require("./Configuration");
 const Constants_1 = require("./Constants");
-const OctokitTypes_1 = require("./OctokitTypes");
 class NewIssueData {
     constructor(projectKey, accountId, additionalFields) {
         this.projectKey = projectKey;
@@ -43,7 +42,7 @@ class NewIssueData {
         }
         parameters.customfield_10001 = TeamConfiguration_1.EngineeringExperienceSquad.id;
         parameters.customfield_10020 = sprintId;
-        parameters.labels = (0, OctokitTypes_1.isRenovate)(pr)
+        parameters.labels = pr.isRenovate()
             ? ['dvi-created-by-automation', 'dvi-renovate']
             : ['dvi-created-by-automation'];
         return new NewIssueData(projectKey, accountId, parameters);
