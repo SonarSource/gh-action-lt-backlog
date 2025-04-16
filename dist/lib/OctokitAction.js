@@ -4,9 +4,11 @@ exports.OctokitAction = void 0;
 const core = require("@actions/core");
 const github = require("@actions/github");
 const Action_1 = require("./Action");
+const OctokitTypes_1 = require("./OctokitTypes");
 const node_fetch_1 = require("node-fetch");
 const graphql_1 = require("@octokit/graphql");
 const JiraClient_1 = require("./JiraClient");
+const Constants_1 = require("./Constants");
 class OctokitAction extends Action_1.Action {
     constructor() {
         super();
@@ -44,12 +46,24 @@ class OctokitAction extends Action_1.Action {
     async getPullRequest(pull_number) {
         try {
             this.log(`Getting PR #${pull_number}`);
-            return (await this.rest.pulls.get(this.addRepo({ pull_number }))).data;
+            return (0, OctokitTypes_1.addPullRequestExtensions)((await this.rest.pulls.get(this.addRepo({ pull_number }))).data);
         }
         catch (error) {
             this.log(`Pull Request #${pull_number} not found: ${error}`);
             return null;
         }
+    }
+    async findFixedIssues(pr) {
+        const text = pr.isRenovate() // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
+            ? (await this.listComments(pr.number)).filter(x => x.body?.startsWith(Constants_1.RENOVATE_PREFIX)).pop()?.body
+            : pr.title;
+        return text.match(Constants_1.JIRA_ISSUE_PATTERN);
+    }
+    async addComment(issue_number, body) {
+        await this.rest.issues.createComment(this.addRepo({ issue_number, body }));
+    }
+    async listComments(issue_number) {
+        return (await this.rest.issues.listComments(this.addRepo({ issue_number }))).data;
     }
     updatePullRequestTitle(prNumber, title) {
         this.log(`Updating PR #${prNumber} title to: ${title}`);

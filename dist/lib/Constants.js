@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.JIRA_ORGANIZATION_ID = exports.JIRA_SITE_ID = exports.JIRA_DOMAIN = exports.JIRA_ISSUE_PATTERN = void 0;
+exports.JIRA_ORGANIZATION_ID = exports.JIRA_SITE_ID = exports.JIRA_DOMAIN = exports.JIRA_ISSUE_PATTERN = exports.RENOVATE_PREFIX = void 0;
+exports.RENOVATE_PREFIX = 'Renovate Jira issue ID: '; // Workaround for https://github.com/renovatebot/renovate/issues/26833
 exports.JIRA_ISSUE_PATTERN = /[A-Z][A-Z0-9]*-\d+/g;
 exports.JIRA_DOMAIN = 'https://sonarsource.atlassian.net';
 // To find values for these constants, you can use the following query, update Jira domain, and post it here: https://developer.atlassian.com/platform/teams/graphql/explorer/

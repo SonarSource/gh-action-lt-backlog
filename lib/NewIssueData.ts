@@ -57,7 +57,7 @@ export class NewIssueData {
     }
     parameters.customfield_10001 = EngineeringExperienceSquad.id;
     parameters.customfield_10020 = sprintId;
-    parameters.labels = pr.user.login === 'renovate[bot]'
+    parameters.labels = pr.isRenovate()
       ? ['dvi-created-by-automation', 'dvi-renovate']
       : ['dvi-created-by-automation'];
     return new NewIssueData(projectKey, accountId, parameters);

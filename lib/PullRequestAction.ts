@@ -1,4 +1,3 @@
-import { JIRA_ISSUE_PATTERN } from './Constants';
 import { OctokitAction } from './OctokitAction';
 
 export abstract class PullRequestAction extends OctokitAction {
@@ -23,6 +22,6 @@ export abstract class PullRequestAction extends OctokitAction {
 
   private async fixedJiraIssues(): Promise<string[]> {
     const pr = await this.getPullRequest(this.payload.pull_request.number);
-    return pr?.title.match(JIRA_ISSUE_PATTERN) || [];
+    return this.findFixedIssues(pr) || [];
   }
 }
