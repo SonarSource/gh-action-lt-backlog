@@ -1,6 +1,6 @@
 import { OctokitAction } from '../lib/OctokitAction';
 import { PullRequest } from '../lib/OctokitTypes';
-import { JIRA_DOMAIN, JIRA_ISSUE_PATTERN } from '../lib/Constants';
+import { JIRA_DOMAIN, RENOVATE_PREFIX } from '../lib/Constants';
 import { NewIssueData } from '../lib/NewIssueData';
 
 class PullRequestCreated extends OctokitAction {
@@ -25,21 +25,21 @@ class PullRequestCreated extends OctokitAction {
     if (pr == null) {
       return;
     }
-    let linkedIssues = pr.title.match(JIRA_ISSUE_PATTERN);
-    if (linkedIssues == null) {
+    let fixedIssues = await this.findFixedIssues(pr);
+    if (fixedIssues == null) {
       const issueId = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields);
       if (issueId) {
-        linkedIssues = [issueId];
+        fixedIssues = [issueId];
       }
     } else if (pr.title !== this.cleanupWhitespace(pr.title)) { // New issues do this when persisting issue ID
       await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
     }
     if (this.isEngXpSquad) {
-      for (const issue of linkedIssues) {
+      for (const issue of fixedIssues) {
         await this.updateJiraComponent(issue);
       }
     } else {
-      await this.addLinkedIssuesToDescription(pr, linkedIssues);
+      await this.addLinkedIssuesToDescription(pr, fixedIssues);
     }
   }
 
@@ -70,8 +70,12 @@ class PullRequestCreated extends OctokitAction {
   }
 
   private async persistIssueId(pr: PullRequest, issueId: string): Promise<void> {
-    pr.title = this.cleanupWhitespace(`${issueId} ${pr.title}`);
-    await this.updatePullRequestTitle(pr.number, pr.title);
+    if (pr.isRenovate()) {  // Renovate overrides the PR title back to the original https://github.com/renovatebot/renovate/issues/26833
+      await this.addComment(pr.number, RENOVATE_PREFIX + this.issueLink(issueId));  // We'll store the ID in comment as a workaround
+    } else {
+      pr.title = this.cleanupWhitespace(`${issueId} ${pr.title}`);
+      await this.updatePullRequestTitle(pr.number, pr.title);
+    }
   }
 
   private cleanupWhitespace(value: string): string {

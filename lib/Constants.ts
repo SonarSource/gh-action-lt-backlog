@@ -1,3 +1,4 @@
+export const RENOVATE_PREFIX: string = 'Renovate Jira issue ID: ';  // Workaround for https://github.com/renovatebot/renovate/issues/26833
 export const JIRA_ISSUE_PATTERN: RegExp = /[A-Z][A-Z0-9]*-\d+/g;
 export const JIRA_DOMAIN = 'https://sonarsource.atlassian.net';
 
