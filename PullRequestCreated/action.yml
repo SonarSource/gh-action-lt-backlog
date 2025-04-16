@@ -16,7 +16,7 @@ inputs:
   additional-fields:
     description: 'Additional fields to be added to the Jira issue'
     required: false
-  is-infra:
+  is-eng-xp-squad:
     description: 'Repo is owned by Engineering Experience Squad'
     required: false
     default: 'false'

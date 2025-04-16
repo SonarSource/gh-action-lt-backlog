@@ -4,7 +4,7 @@ class SubmitReview extends PullRequestAction {
 
   protected async processJiraIssue(issueId: string): Promise<void> {
     if (this.payload.review.state === 'approved') {
-      if (this.getInputBoolean('is-infra')) {
+      if (this.isEngXpSquad) {
         const userEmail = await this.findEmail(this.payload.sender.login);
         if (userEmail) {
           await this.jira.addReviewedBy(issueId, userEmail);

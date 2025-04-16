@@ -10,7 +10,7 @@ inputs:
   jira-token:
     description: 'Jira auth Token'
     required: true
-  is-infra:
+  is-eng-xp-squad:
     description: 'Repo is owned by Engineering Experience Squad'
     required: false
     default: 'false'

@@ -2,7 +2,7 @@ import { PullRequestAction } from '../lib/PullRequestAction';
 
 class PullRequestClosed extends PullRequestAction {
   protected async processJiraIssue(issueId: string): Promise<void> {
-    if (this.getInputBoolean('is-infra')) { // Can't auto-close auto-created issues, the reporter is set to the actual user
+    if (this.isEngXpSquad) { // Can't auto-close auto-created issues, the reporter is set to the actual user
       const pr = await this.getPullRequest(this.payload.pull_request.number);
       if (pr.user.type === "Bot") {
         await this.jira.moveIssue(issueId, 'Resolve issue', { resolution: { id: this.resolutionId() } });
