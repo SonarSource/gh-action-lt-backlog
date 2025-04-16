@@ -11,7 +11,7 @@ export abstract class PullRequestAction extends OctokitAction {
     } else {
       for (const issueId of issueIds) {
         // BUILD/PREQ tickets are processed only when they are from Engineering Experience Squad repos. They should be ignored in any other repo, not to interfere with their process.
-        if ((issueId.startsWith('BUILD-') || issueId.startsWith('PREQ-')) && !this.getInputBoolean('is-infra')) {
+        if ((issueId.startsWith('BUILD-') || issueId.startsWith('PREQ-')) && !this.isEngXpSquad) {
           this.log(`Skipping ${issueId}`);
         }
         else {

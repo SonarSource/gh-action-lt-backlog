@@ -14,6 +14,7 @@ export abstract class OctokitAction extends Action {
   public readonly rest: RestEndpointMethods;
   protected readonly octokit: InstanceType<typeof GitHub>;
   protected readonly jira: JiraClient;
+  protected readonly isEngXpSquad: boolean;
   private graphqlWithAuth: graphqlTypes.graphql;
 
   constructor() {
@@ -21,6 +22,7 @@ export abstract class OctokitAction extends Action {
     this.jira = new JiraClient(this.getInput('jira-user'), this.getInput('jira-token'));
     this.octokit = github.getOctokit(this.getInput('github-token'));
     this.rest = this.octokit.rest;
+    this.isEngXpSquad = this.getInputBoolean('is-eng-xp-squad');
   }
 
   public sendGraphQL(query: string): Promise<GraphQlQueryResponseData> {
@@ -163,7 +165,7 @@ export abstract class OctokitAction extends Action {
       if (requested_reviewer) {
         const userEmail = await this.findEmail(requested_reviewer.login);
         if (userEmail != null) {
-          if (this.getInputBoolean("is-infra")) { 
+          if (this.isEngXpSquad) { 
             await this.jira.addReviewer(issueId, userEmail);
           } else {
             await this.jira.assignIssueToEmail(issueId, userEmail);

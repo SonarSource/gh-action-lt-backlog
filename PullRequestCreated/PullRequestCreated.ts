@@ -7,14 +7,13 @@ class PullRequestCreated extends OctokitAction {
   protected async execute(): Promise<void> {
     const inputJiraProject = this.getInput('jira-project');
     const inputAdditionalFields = this.getInput('additional-fields');
-    const inputIsInfra = this.getInputBoolean('is-infra');
-    if (inputIsInfra) {
+    if (this.isEngXpSquad) {
       if (inputJiraProject) {
-        this.setFailed('jira-project input is not supported when is-infra is set.');
+        this.setFailed('jira-project input is not supported when is-eng-xp-squad is set.');
         return;
       }
       if (inputAdditionalFields) {
-        this.setFailed('additional-fields input is not supported when is-infra is set.');
+        this.setFailed('additional-fields input is not supported when is-eng-xp-squad is set.');
         return;
       }
     }
@@ -35,7 +34,7 @@ class PullRequestCreated extends OctokitAction {
     } else if (pr.title !== this.cleanupWhitespace(pr.title)) { // New issues do this when persisting issue ID
       await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
     }
-    if (inputIsInfra) {
+    if (this.isEngXpSquad) {
       for (const issue of linkedIssues) {
         await this.updateJiraComponent(issue);
       }
@@ -45,7 +44,7 @@ class PullRequestCreated extends OctokitAction {
   }
 
   private async processNewJiraIssue(pr: PullRequest, inputJiraProject: string, inputAdditionalFields: string): Promise<string> {
-    const data = this.getInputBoolean('is-infra')
+    const data = this.isEngXpSquad
       ? await NewIssueData.createForEngExp(this.jira, pr, await this.findEmail(this.payload.sender.login))
       : await NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, await this.findEmail(this.payload.sender.login));
     if (data) {
