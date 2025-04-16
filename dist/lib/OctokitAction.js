@@ -137,7 +137,7 @@ class OctokitAction extends Action_1.Action {
         }
     }
     async processRequestReview(issueId, requested_reviewer) {
-        if (requested_reviewer.type === "Bot") {
+        if (requested_reviewer?.type === "Bot") {
             this.log(`Skipping request review from bot: ${requested_reviewer.login}`);
         }
         else {
