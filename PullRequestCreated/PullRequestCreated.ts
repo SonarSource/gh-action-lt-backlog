@@ -1,5 +1,5 @@
 import { OctokitAction } from '../lib/OctokitAction';
-import { PullRequest } from '../lib/OctokitTypes';
+import { PullRequest, isRenovate } from '../lib/OctokitTypes';
 import { JIRA_DOMAIN, JIRA_ISSUE_PATTERN } from '../lib/Constants';
 import { NewIssueData } from '../lib/NewIssueData';
 
@@ -70,8 +70,12 @@ class PullRequestCreated extends OctokitAction {
   }
 
   private async persistIssueId(pr: PullRequest, issueId: string): Promise<void> {
-    pr.title = this.cleanupWhitespace(`${issueId} ${pr.title}`);
-    await this.updatePullRequestTitle(pr.number, pr.title);
+    if (isRenovate(pr)) {
+      await this.addComment(pr.number, `Renovate Jira issue ID: ${this.issueLink(issueId)}`);
+    } else {
+      pr.title = this.cleanupWhitespace(`${issueId} ${pr.title}`);
+      await this.updatePullRequestTitle(pr.number, pr.title);
+    }
   }
 
   private cleanupWhitespace(value: string): string {

@@ -51,6 +51,9 @@ class OctokitAction extends Action_1.Action {
             return null;
         }
     }
+    async addComment(issue_number, body) {
+        await this.rest.issues.createComment(this.addRepo({ issue_number, body }));
+    }
     updatePullRequestTitle(prNumber, title) {
         this.log(`Updating PR #${prNumber} title to: ${title}`);
         return this.updatePullRequest(prNumber, { title });

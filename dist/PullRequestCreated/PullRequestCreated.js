@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const OctokitAction_1 = require("../lib/OctokitAction");
+const OctokitTypes_1 = require("../lib/OctokitTypes");
 const Constants_1 = require("../lib/Constants");
 const NewIssueData_1 = require("../lib/NewIssueData");
 class PullRequestCreated extends OctokitAction_1.OctokitAction {
@@ -72,8 +73,13 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         }
     }
     async persistIssueId(pr, issueId) {
-        pr.title = this.cleanupWhitespace(`${issueId} ${pr.title}`);
-        await this.updatePullRequestTitle(pr.number, pr.title);
+        if ((0, OctokitTypes_1.isRenovate)(pr)) {
+            await this.addComment(pr.number, `Renovate Jira issue ID: ${this.issueLink(issueId)}`);
+        }
+        else {
+            pr.title = this.cleanupWhitespace(`${issueId} ${pr.title}`);
+            await this.updatePullRequestTitle(pr.number, pr.title);
+        }
     }
     cleanupWhitespace(value) {
         return value.replace(/\s\s+/g, " ").trim(); // Mainly remove triple space between issue ID and title when copying from Jira

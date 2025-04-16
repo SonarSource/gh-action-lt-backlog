@@ -64,6 +64,10 @@ export abstract class OctokitAction extends Action {
     }
   }
 
+  protected async addComment(issue_number: number, body: string): Promise<void> {
+    await this.rest.issues.createComment(this.addRepo({ issue_number, body }));
+  }
+
   protected updatePullRequestTitle(prNumber: number, title: string): Promise<void> {
     this.log(`Updating PR #${prNumber} title to: ${title}`);
     return this.updatePullRequest(prNumber, { title });

@@ -1,1 +1,1 @@
-{"version":3,"file":"OctokitTypes.js","sourceRoot":"","sources":["../../lib/OctokitTypes.ts"],"names":[],"mappings":""}
+{"version":3,"file":"OctokitTypes.js","sourceRoot":"","sources":["../../lib/OctokitTypes.ts"],"names":[],"mappings":";;;AAIA,SAAgB,UAAU,CAAC,EAAe;IACxC,OAAO,EAAE,CAAC,IAAI,CAAC,KAAK,KAAK,0BAA0B,CAAC,CAAE,sCAAsC;IAC5F,OAAO,EAAE,CAAC,IAAI,CAAC,KAAK,KAAK,eAAe,CAAC;AAC3C,CAAC;AAHD,gCAGC"}

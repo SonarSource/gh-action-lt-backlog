@@ -2,7 +2,7 @@ import { EngineeringExperienceSquad } from "../Data/TeamConfiguration";
 import { Config } from "./Configuration";
 import { JIRA_ISSUE_PATTERN } from "./Constants";
 import { JiraClient } from "./JiraClient";
-import { PullRequest } from "./OctokitTypes";
+import { PullRequest, isRenovate } from "./OctokitTypes";
 import { Team } from "./Team";
 
 interface IssueParameters {
@@ -57,7 +57,7 @@ export class NewIssueData {
     }
     parameters.customfield_10001 = EngineeringExperienceSquad.id;
     parameters.customfield_10020 = sprintId;
-    parameters.labels = pr.user.login === 'renovate[bot]'
+    parameters.labels = isRenovate(pr)
       ? ['dvi-created-by-automation', 'dvi-renovate']
       : ['dvi-created-by-automation'];
     return new NewIssueData(projectKey, accountId, parameters);

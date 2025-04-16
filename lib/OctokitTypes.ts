@@ -2,6 +2,7 @@ import { components } from '@octokit/openapi-types/types.d';
 
 export type PullRequest = components['schemas']['pull-request'];
 
-PullRequest.prototype.isRenovate = function (): boolean {
-  return this.user?.login === 'renovate[bot]';
-};
+export function isRenovate(pr: PullRequest): boolean {
+  return pr.user.login === "pavel-mikula-sonarsource";  // FIXME: REMOVE DEBUG, do not approve
+  return pr.user.login === "renovate[bot]";
+}
