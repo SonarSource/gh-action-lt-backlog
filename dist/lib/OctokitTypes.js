@@ -4,10 +4,8 @@ exports.addPullRequestExtensions = void 0;
 function addPullRequestExtensions(pr) {
     return {
         ...pr,
-        ...{
-            isRenovate: function () {
-                return this.user.login === "renovate[bot]";
-            }
+        isRenovate: function () {
+            return this.user.login === "renovate[bot]";
         }
     };
 }

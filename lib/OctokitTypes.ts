@@ -9,10 +9,8 @@ export type PullRequest = components['schemas']['pull-request'] & {
 export function addPullRequestExtensions(pr: components['schemas']['pull-request']): PullRequest {  // Adds implementation of declared extensions
   return {
     ...pr,
-    ... {
-      isRenovate: function (): boolean {
-        return this.user.login === "renovate[bot]";
-      }
+    isRenovate: function (): boolean {
+      return this.user.login === "renovate[bot]";
     }
   };
 }
