@@ -13,6 +13,7 @@ class OctokitAction extends Action_1.Action {
         this.jira = new JiraClient_1.JiraClient(this.getInput('jira-user'), this.getInput('jira-token'));
         this.octokit = github.getOctokit(this.getInput('github-token'));
         this.rest = this.octokit.rest;
+        this.isEngXpSquad = this.getInputBoolean('is-eng-xp-squad');
     }
     sendGraphQL(query) {
         if (!this.graphqlWithAuth) {
@@ -145,7 +146,7 @@ class OctokitAction extends Action_1.Action {
             if (requested_reviewer) {
                 const userEmail = await this.findEmail(requested_reviewer.login);
                 if (userEmail != null) {
-                    if (this.getInputBoolean("is-infra")) {
+                    if (this.isEngXpSquad) {
                         await this.jira.addReviewer(issueId, userEmail);
                     }
                     else {

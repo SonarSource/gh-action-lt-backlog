@@ -46,7 +46,7 @@ additional-fields: '{ "components": [ { "name": "Something" } ], "labels": ["Som
 
 It overrides fields set by the action.
 
-### `is-infra`
+### `is-eng-xp-squad`
 
 Set to `true` only for repositories owned by Engineering Experience Squad. Do not use it anywhere else.
 
