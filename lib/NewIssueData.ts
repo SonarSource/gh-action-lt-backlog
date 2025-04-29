@@ -112,7 +112,7 @@ export class NewIssueData {
     console.log('Looking for a non-Sub-task ticket');
     for (const issueKey of issues) {
       const issue = await jira.getIssue(issueKey);
-      if (issue?.fields.issuetype.name !== 'Sub-task') {
+      if (issue && issue.fields.issuetype.name !== 'Sub-task') {
         console.log(`Parent issue: ${issue.key} ${issue.fields.issuetype.name}`);
         return issue;
       }
