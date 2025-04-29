@@ -6,6 +6,9 @@ function addPullRequestExtensions(pr) {
         ...pr,
         isRenovate: function () {
             return this.user.login === "renovate[bot]";
+        },
+        isDependabot: function () {
+            return this.user.login === "dependabot[bot]";
         }
     };
 }

@@ -26,7 +26,9 @@ export class NewIssueData {
   }
 
   public static async create(jira: JiraClient, pr: PullRequest, inputJiraProject: string, inputAdditionFields: string, userEmail: string): Promise<NewIssueData> {
-    const parent = await this.findNonSubTaskParent(jira, this.findMentionedIssues(pr));
+    const parent = pr.isRenovate() || pr.isDependabot()
+      ? null  // Description contains release notes with irrelevant issue IDs
+      : await this.findNonSubTaskParent(jira, this.findMentionedIssues(pr));
     const projectKey = this.computeProjectKey(inputJiraProject, parent);
     if (projectKey) {
       const accountId = await jira.findAccountId(userEmail);
@@ -72,7 +74,7 @@ export class NewIssueData {
   private static async computeProjectKeyForEngExp(jira: JiraClient, pr: PullRequest, accountId: string): Promise<string> {
     if (pr.base.repo.name === 'parent-oss') {
       return 'PARENTOSS';
-    } else if (accountId) { 
+    } else if (accountId) {
       const team = await jira.findTeam(accountId);
       return team?.name === EngineeringExperienceSquad.name ? 'BUILD' : 'PREQ';
     } else {  // renovate and similar bots
