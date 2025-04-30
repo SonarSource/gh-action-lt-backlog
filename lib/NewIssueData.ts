@@ -122,7 +122,7 @@ export class NewIssueData {
   }
 
   private static findMentionedIssues(pr: PullRequest): Set<string> {
-    const mentionedIssues = pr.body?.match(JIRA_ISSUE_PATTERN) || [];
+    const mentionedIssues = pr.body?.match(JIRA_ISSUE_PATTERN) ?? [];
     console.log(mentionedIssues.length > 0 ? `Found mentioned issues: ${mentionedIssues}` : 'No mentioned issues found');
     return new Set(mentionedIssues);
   }
