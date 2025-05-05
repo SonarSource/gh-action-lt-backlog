@@ -35,13 +35,15 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         else if (pr.title !== this.cleanupWhitespace(pr.title)) { // New issues do this when persisting issue ID
             await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
         }
-        if (this.isEngXpSquad) {
-            for (const issue of fixedIssues) {
-                await this.updateJiraComponent(issue);
+        if (fixedIssues) {
+            if (this.isEngXpSquad) {
+                for (const issue of fixedIssues) {
+                    await this.updateJiraComponent(issue);
+                }
             }
-        }
-        else {
-            await this.addLinkedIssuesToDescription(pr, fixedIssues);
+            else {
+                await this.addLinkedIssuesToDescription(pr, fixedIssues);
+            }
         }
     }
     async processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields) {
