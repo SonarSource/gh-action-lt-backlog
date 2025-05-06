@@ -158,14 +158,14 @@ class JiraClient {
     }
     async createComponent(projectKey, name) {
         console.log(`Searching for component '${name}' in project ${projectKey}`);
-        const { total } = await this.sendRestGetApi(`project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`);
-        if (total === 0) {
-            console.log(`Component not found. Creating a new one.`);
-            return await this.sendRestPostApi('component', { project: projectKey, name }) != null;
+        const { total, values } = await this.sendRestGetApi(`project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`);
+        if (values.find(x => x.name === name)) { // values contains matches on partial names and descriptions
+            console.log(`Component found in ${total} result(s)`);
+            return true;
         }
         else {
-            console.log(`Found '${total}' result(s)`);
-            return true;
+            console.log(`Component not found in ${total} result(s). Creating a new one.`);
+            return await this.sendRestPostApi('component', { project: projectKey, name }) != null;
         }
     }
     async sendGraphQL(query) {
