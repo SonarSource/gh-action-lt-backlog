@@ -22,7 +22,9 @@ class PullRequestAction extends OctokitAction_1.OctokitAction {
     }
     async fixedJiraIssues() {
         const pr = await this.getPullRequest(this.payload.pull_request.number);
-        return (await this.findFixedIssues(pr)) ?? [];
+        return pr
+            ? (await this.findFixedIssues(pr)) ?? []
+            : [];
     }
 }
 exports.PullRequestAction = PullRequestAction;
