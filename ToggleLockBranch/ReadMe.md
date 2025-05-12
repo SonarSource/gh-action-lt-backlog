@@ -59,7 +59,7 @@ on:
 jobs:
   ToggleLockBranch_job:
     name: Toggle lock branch
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-large
     permissions:
       id-token: write
     steps:
