@@ -94,7 +94,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
     }
     async updateJiraComponent(issueId) {
         const component = this.repo.repo;
-        if (!await this.jira.createComponent(issueId.split('-')[0], component)) { // Same PR can have multiple issues from different projects
+        if (!await this.jira.createComponent(issueId.split('-')[0], component, this.payload.repository.html_url)) { // Same PR can have multiple issues from different projects
             this.setFailed('Failed to create component');
         }
         if (!await this.jira.addIssueComponent(issueId, component)) {

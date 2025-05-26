@@ -156,7 +156,7 @@ class JiraClient {
             return { id, name: match.team.displayName };
         }
     }
-    async createComponent(projectKey, name) {
+    async createComponent(projectKey, name, description) {
         console.log(`Searching for component '${name}' in project ${projectKey}`);
         const { total, values } = await this.sendRestGetApi(`project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`);
         if (values.find(x => x.name === name)) { // values contains matches on partial names and descriptions
@@ -165,7 +165,7 @@ class JiraClient {
         }
         else {
             console.log(`Component not found in ${total} result(s). Creating a new one.`);
-            return await this.sendRestPostApi('component', { project: projectKey, name }) != null;
+            return await this.sendRestPostApi('component', { project: projectKey, name, description }) != null;
         }
     }
     async sendGraphQL(query) {
