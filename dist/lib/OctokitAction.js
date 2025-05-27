@@ -77,6 +77,10 @@ class OctokitAction extends Action_1.Action {
         this.log(`Updating PR #${prNumber} description`);
         return this.updatePullRequest(prNumber, { body });
     }
+    cancelPullRequestAutoMerge(prNumber) {
+        this.log(`Canceling PR #${prNumber} Auto-Merge`);
+        return this.updatePullRequest(prNumber, { auto_merge: null });
+    }
     async updatePullRequest(prNumber, update) {
         try {
             await this.rest.pulls.update(this.addRepo({ pull_number: prNumber, ...update }));
