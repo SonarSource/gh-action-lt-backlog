@@ -4,6 +4,7 @@ const OctokitAction_1 = require("../lib/OctokitAction");
 class LockBranch extends OctokitAction_1.OctokitAction {
     async execute() {
         const pattern = this.getInput('branch-pattern');
+        this.log("DEBUG findRule");
         let rule = await this.findRule(pattern);
         if (rule) {
             const lockBranch = !rule.lockBranch;

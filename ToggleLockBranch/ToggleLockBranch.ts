@@ -18,6 +18,7 @@ type ProtectionRule = {
 class LockBranch extends OctokitAction {
   protected async execute(): Promise<void> {
     const pattern = this.getInput('branch-pattern');
+    this.log("DEBUG findRule");
     let rule = await this.findRule(pattern);
     if (rule) {
       const lockBranch = !rule.lockBranch;
