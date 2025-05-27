@@ -9,9 +9,9 @@ class LockBranch extends OctokitAction_1.OctokitAction {
         if (rule) {
             const lockBranch = !rule.lockBranch;
             if (rule.lockBranch) {
-                for (const ref of rule.matchingRefs.nodes) {
-                    await this.cancelAutoMerge(ref.name);
-                }
+                //for (const ref of rule.matchingRefs.nodes) {
+                await this.cancelAutoMerge(pattern);
+                //}
             }
             // FIXME: REMOVE DEBUG
             //rule = await this.updateRule(rule.id, lockBranch);

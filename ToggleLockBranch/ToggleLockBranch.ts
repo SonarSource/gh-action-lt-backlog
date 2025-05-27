@@ -5,14 +5,14 @@ type ProtectionRule = {
   id: string;
   lockBranch: boolean;
   pattern: string;
-  matchingRefs: {
-    nodes:
-    {
-      id: string,
-      name: string,   // "master"
-      prefix: string  // "refs/heads/"
-    }[];
-  }
+//  matchingRefs: {
+//    nodes:
+//    {
+//      id: string,
+//      name: string,   // "master"
+//      prefix: string  // "refs/heads/"
+//    }[];
+//  }
 };
 
 class LockBranch extends OctokitAction {
@@ -23,9 +23,9 @@ class LockBranch extends OctokitAction {
     if (rule) {
       const lockBranch = !rule.lockBranch;
       if (rule.lockBranch) {
-        for (const ref of rule.matchingRefs.nodes) {
-          await this.cancelAutoMerge(ref.name);
-        }
+        //for (const ref of rule.matchingRefs.nodes) {
+          await this.cancelAutoMerge(pattern);
+        //}
       }
       // FIXME: REMOVE DEBUG
       //rule = await this.updateRule(rule.id, lockBranch);
