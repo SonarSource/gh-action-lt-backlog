@@ -62,13 +62,6 @@ class LockBranch extends OctokitAction {
                         id
                         lockBranch
                         pattern
-                        matchingRefs(first: 100) {
-                            nodes{
-                                id
-                                name
-                                prefix
-                            }
-                        }
                     }
                 }
             }
