@@ -23,6 +23,11 @@ class LockBranch extends OctokitAction {
     if (rule) {
       const lockBranch = !rule.lockBranch;
       if (rule.lockBranch) {
+
+        // FIXME: Wait for PREQ
+        // FIXME: Re-run action to see if the update works
+        // FIXME: Restore GraphQL query and result to handle matchingRefs again
+
         //for (const ref of rule.matchingRefs.nodes) {
           await this.cancelAutoMerge(pattern);
         //}
