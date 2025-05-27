@@ -2,9 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AtlassianDocument = void 0;
 class AtlassianDocument {
+    type = 'doc';
+    version = 1;
+    content;
     constructor(content) {
-        this.type = 'doc';
-        this.version = 1;
         this.content = content;
     }
     static fromUrl(url) {

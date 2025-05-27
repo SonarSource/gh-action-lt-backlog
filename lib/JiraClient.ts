@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { JIRA_SITE_ID, JIRA_DOMAIN, JIRA_ORGANIZATION_ID } from './Constants';
 import { Config } from './Configuration';
 import { Team } from './Team';

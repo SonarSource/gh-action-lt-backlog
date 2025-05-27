@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addPullRequestExtensions = void 0;
+exports.addPullRequestExtensions = addPullRequestExtensions;
 function addPullRequestExtensions(pr) {
     return {
         ...pr,
@@ -12,5 +12,4 @@ function addPullRequestExtensions(pr) {
         }
     };
 }
-exports.addPullRequestExtensions = addPullRequestExtensions;
 //# sourceMappingURL=OctokitTypes.js.map

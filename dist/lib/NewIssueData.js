@@ -6,6 +6,9 @@ const AtlassianDocumentFormat_1 = require("./AtlassianDocumentFormat");
 const Configuration_1 = require("./Configuration");
 const Constants_1 = require("./Constants");
 class NewIssueData {
+    projectKey;
+    accountId;
+    additionalFields;
     constructor(projectKey, accountId, additionalFields) {
         this.projectKey = projectKey;
         this.accountId = accountId;
