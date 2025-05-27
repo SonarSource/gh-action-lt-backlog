@@ -111,7 +111,12 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  private async updatePullRequest(prNumber: number, update: { title?: string, body?: string }): Promise<void> {
+  protected cancelPullRequestAutoMerge(prNumber: number): Promise<void> {
+    this.log(`Canceling PR #${prNumber} Auto-Merge`);
+    return this.updatePullRequest(prNumber, { auto_merge: null });
+  }
+
+  private async updatePullRequest(prNumber: number, update: { title?: string, body?: string, auto_merge?: any }): Promise<void> {
     try {
       await this.rest.pulls.update(this.addRepo({ pull_number: prNumber, ...update }));
     } catch (error) {
