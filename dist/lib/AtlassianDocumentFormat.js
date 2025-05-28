@@ -40,11 +40,14 @@ class AdfNode {
     marks;
     text;
     constructor(block = null) {
+        // FIXME: Normalize headers
+        // FIXME: Links
+        // FIXME: Text quotes
         if (block) {
-            switch (block?.type) {
+            this.type = block.type;
+            switch (block.type) {
                 case 'heading': {
                     const level = block.text.indexOf(' ');
-                    this.type = block.type;
                     this.attrs = { level };
                     this.content = [
                         {
@@ -54,9 +57,22 @@ class AdfNode {
                     ];
                     break;
                 }
+                case 'blockquote': {
+                    this.content = [
+                        {
+                            type: 'paragraph',
+                            content: [
+                                {
+                                    type: 'text',
+                                    text: block.text
+                                }
+                            ]
+                        }
+                    ];
+                    break;
+                }
                 case 'codeBlock':
                 case 'paragraph': {
-                    this.type = block.type;
                     this.content = [
                         {
                             type: 'text',

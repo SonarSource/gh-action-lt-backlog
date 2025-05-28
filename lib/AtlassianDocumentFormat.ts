@@ -73,11 +73,16 @@ export class AdfNode {
   text?: string;
 
   public constructor(block: Block = null) {
+    // FIXME: Normalize headers
+
+    // FIXME: Links
+    // FIXME: Text quotes
+
     if (block) {
-      switch (block?.type) {
+      this.type = block.type;
+      switch (block.type) {
         case 'heading': {
           const level = block.text.indexOf(' ');
-          this.type = block.type;
           this.attrs = { level };
           this.content = [
             {
@@ -87,9 +92,22 @@ export class AdfNode {
           ];
           break;
         }
+        case 'blockquote': {
+          this.content = [
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  type: 'text',
+                  text: block.text
+                }
+              ]
+            }
+          ];
+          break;
+        }
         case 'codeBlock':
         case 'paragraph': {
-          this.type = block.type;
           this.content = [
             {
               type: 'text',

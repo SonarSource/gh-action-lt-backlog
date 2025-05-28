@@ -8,37 +8,65 @@ class MarkdownParser {
         this.lines = markdown.split('\n').map(line => line.trimEnd());
     }
     readBlock() {
-        if (this.nextIndex >= this.lines.length) {
+        if (!this.canRead()) {
             return null;
         }
-        const line = this.lines[this.nextIndex++];
+        let line = this.readLine();
+        while (line.trim() === '' && this.canRead()) {
+            line = this.readLine();
+        }
         if (this.isHeading(line)) {
             return { type: 'heading', text: line };
         }
         else if (this.isCodeBlock(line)) {
-            let text = "";
-            while (this.nextIndex < this.lines.length && !this.isCodeBlock(this.lines[this.nextIndex])) {
-                text += (text ? '\n' : '') + this.lines[this.nextIndex++];
-            }
-            this.nextIndex++; // Skip the closing code block line
-            return { type: 'codeBlock', text };
+            return { type: 'codeBlock', text: this.readCodeBlock() };
+        }
+        else if (this.isBlockQuote(line)) {
+            return { type: 'blockquote', text: this.readBlockquote(line) };
         }
         else {
-            let text = line;
-            while (this.nextIndex < this.lines.length && this.isParagraph(this.lines[this.nextIndex])) {
-                text += '\n' + this.lines[this.nextIndex++];
-            }
-            return { type: 'paragraph', text };
+            return { type: 'paragraph', text: this.readParagraph(line) };
         }
     }
+    canRead() {
+        return this.nextIndex < this.lines.length;
+    }
+    readLine() {
+        return this.lines[this.nextIndex++];
+    }
+    readCodeBlock() {
+        let text = "";
+        while (this.nextIndex < this.lines.length && !this.isCodeBlock(this.lines[this.nextIndex])) {
+            text += (text ? '\n' : '') + this.readLine();
+        }
+        this.nextIndex++; // Skip the closing code block line
+        return text;
+    }
+    readBlockquote(line) {
+        let text = line.substring(1).trimStart();
+        while (this.nextIndex < this.lines.length && this.isBlockQuote(this.lines[this.nextIndex])) {
+            text += '\n' + this.readLine().substring(1).trimStart();
+        }
+        return text;
+    }
+    readParagraph(line) {
+        let text = line;
+        while (this.nextIndex < this.lines.length && this.isParagraph(this.lines[this.nextIndex])) {
+            text += '\n' + this.readLine();
+        }
+        return text;
+    }
     isParagraph(line) {
-        return !this.isHeading(line) && !this.isCodeBlock(line);
+        return !this.isHeading(line) && !this.isCodeBlock(line) && !this.isBlockQuote(line);
     }
     isHeading(line) {
         return /^#{1,6} /.test(line);
     }
     isCodeBlock(line) {
         return /^```\w*$/.test(line);
+    }
+    isBlockQuote(line) {
+        return line.startsWith('>');
     }
 }
 exports.MarkdownParser = MarkdownParser;
