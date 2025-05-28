@@ -73,27 +73,33 @@ export class AdfNode {
   text?: string;
 
   public constructor(block: Block = null) {
-    switch (block?.type) {
-      case 'heading': {
-        const level = block.text.indexOf(' ');
-        this.type = block.type;
-        this.attrs = { level };
-        this.content = [
-          {
-            type: 'text',
-            text: block.text.substring(level + 1)
-          }
-        ];
-        break;
-      }
-      case 'paragraph': {
-        this.type = block.type;
-        this.content = [
-          {
-            type: 'text',
-            text: block.text
-          }
-        ];
+    if (block) {
+      switch (block?.type) {
+        case 'heading': {
+          const level = block.text.indexOf(' ');
+          this.type = block.type;
+          this.attrs = { level };
+          this.content = [
+            {
+              type: 'text',
+              text: block.text.substring(level + 1)
+            }
+          ];
+          break;
+        }
+        case 'codeBlock':
+        case 'paragraph': {
+          this.type = block.type;
+          this.content = [
+            {
+              type: 'text',
+              text: block.text
+            }
+          ];
+          break;
+        }
+        default:
+          throw new Error(`Unsupported block type: ${block.type}`);
       }
     }
   }

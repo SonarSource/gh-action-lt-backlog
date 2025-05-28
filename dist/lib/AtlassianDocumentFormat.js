@@ -26,15 +26,6 @@ class AtlassianDocument {
         const contents = [];
         const parser = new MarkdownParser_1.MarkdownParser(markdown);
         let block;
-        // FIXME: Titles
-        // #
-        // ##
-        // ###
-        // FIXME: Quoted text
-        // FIXME: Code blocks
-        // FIXME: Inline links
-        // FIXME: Inline code span (how is it called?)
-        // FIXME: Inline text, no formatting
         while (block = parser.readBlock()) {
             contents.push(new AdfNode(block));
         }
@@ -49,27 +40,33 @@ class AdfNode {
     marks;
     text;
     constructor(block = null) {
-        switch (block?.type) {
-            case 'heading': {
-                const level = block.text.indexOf(' ');
-                this.type = block.type;
-                this.attrs = { level };
-                this.content = [
-                    {
-                        type: 'text',
-                        text: block.text.substring(level + 1)
-                    }
-                ];
-                break;
-            }
-            case 'paragraph': {
-                this.type = block.type;
-                this.content = [
-                    {
-                        type: 'text',
-                        text: block.text
-                    }
-                ];
+        if (block) {
+            switch (block?.type) {
+                case 'heading': {
+                    const level = block.text.indexOf(' ');
+                    this.type = block.type;
+                    this.attrs = { level };
+                    this.content = [
+                        {
+                            type: 'text',
+                            text: block.text.substring(level + 1)
+                        }
+                    ];
+                    break;
+                }
+                case 'codeBlock':
+                case 'paragraph': {
+                    this.type = block.type;
+                    this.content = [
+                        {
+                            type: 'text',
+                            text: block.text
+                        }
+                    ];
+                    break;
+                }
+                default:
+                    throw new Error(`Unsupported block type: ${block.type}`);
             }
         }
     }

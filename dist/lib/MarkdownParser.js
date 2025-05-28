@@ -15,15 +15,30 @@ class MarkdownParser {
         if (this.isHeading(line)) {
             return { type: 'heading', text: line };
         }
+        else if (this.isCodeBlock(line)) {
+            let text = "";
+            while (this.nextIndex < this.lines.length && !this.isCodeBlock(this.lines[this.nextIndex])) {
+                text += (text ? '\n' : '') + this.lines[this.nextIndex++];
+            }
+            this.nextIndex++; // Skip the closing code block line
+            return { type: 'codeBlock', text };
+        }
         else {
-            return { type: 'paragraph', text: line };
+            let text = line;
+            while (this.nextIndex < this.lines.length && this.isParagraph(this.lines[this.nextIndex])) {
+                text += '\n' + this.lines[this.nextIndex++];
+            }
+            return { type: 'paragraph', text };
         }
     }
     isParagraph(line) {
-        return !this.isHeading(line);
+        return !this.isHeading(line) && !this.isCodeBlock(line);
     }
     isHeading(line) {
         return /^#{1,6} /.test(line);
+    }
+    isCodeBlock(line) {
+        return /^```\w*$/.test(line);
     }
 }
 exports.MarkdownParser = MarkdownParser;
