@@ -29,7 +29,17 @@ class AtlassianDocument {
         while (block = parser.readBlock()) {
             contents.push(new AdfNode(block));
         }
+        this.normalizeHeadings(contents);
         return new AtlassianDocument(contents);
+    }
+    static normalizeHeadings(nodes) {
+        const headings = nodes.filter(x => x.type === 'heading');
+        if (headings.length > 0) {
+            const min = headings.reduce((min, x) => Math.min(min, x.attrs.level), 6);
+            for (const node of headings) {
+                node.attrs.level -= min - 1; // Normalize to start from 1
+            }
+        }
     }
 }
 exports.AtlassianDocument = AtlassianDocument;
@@ -40,7 +50,6 @@ class AdfNode {
     marks;
     text;
     constructor(block = null) {
-        // FIXME: Normalize headers
         // FIXME: Links
         // FIXME: Text quotes
         if (block) {
