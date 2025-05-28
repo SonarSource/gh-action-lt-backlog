@@ -1,3 +1,4 @@
+import { Block, MarkdownParser } from "./MarkdownParser";
 
 export class AtlassianDocument {
   type: string = 'doc';
@@ -21,45 +22,81 @@ export class AtlassianDocument {
       }
     ]);
   }
+
+  static fromMarkdown(markdown: string): AtlassianDocument {
+    const contents: AdfNode[] = [];
+    const parser = new MarkdownParser(markdown);
+    let block: Block;
+    while (block = parser.readBlock()) {
+      contents.push(new AdfNode(block));
+    }
+    return new AtlassianDocument(contents);
+  }
 }
 
-export interface AdfNode {
+export class AdfNode {
   type:
-  // Top-level blocks
-  | 'blockquote'
-  | 'bulletList'
-  | 'codeBlock'
-  | 'expand'
-  | 'heading'
-  | 'mediaGroup'
-  | 'mediaSingle'
-  | 'multiBodiedExtension'
-  | 'orderedList'
-  | 'panel'
-  | 'paragraph'
-  | 'rule'
-  | 'table'
-  // Child blocks
-  | 'extensionFrame'
-  | 'listItem'
-  | 'media'
-  | 'nestedExpand'
-  | 'tableCell'
-  | 'tableHeader'
-  | 'tableRow'
-  // Inline
-  | 'date'
-  | 'emoji'
-  | 'hardBreak'
-  | 'inlineCard'
-  | 'mediaInline'
-  | 'mention'
-  | 'status'
-  | 'text';
+    // Top-level blocks
+    | 'blockquote'
+    | 'bulletList'
+    | 'codeBlock'
+    | 'expand'
+    | 'heading'
+    | 'mediaGroup'
+    | 'mediaSingle'
+    | 'multiBodiedExtension'
+    | 'orderedList'
+    | 'panel'
+    | 'paragraph'
+    | 'rule'
+    | 'table'
+    // Child blocks
+    | 'extensionFrame'
+    | 'listItem'
+    | 'media'
+    | 'nestedExpand'
+    | 'tableCell'
+    | 'tableHeader'
+    | 'tableRow'
+    // Inline
+    | 'date'
+    | 'emoji'
+    | 'hardBreak'
+    | 'inlineCard'
+    | 'mediaInline'
+    | 'mention'
+    | 'status'
+    | 'text';
   content?: AdfNode[];
   attrs?: Record<string, any>;
   marks?: AdfMark[];
   text?: string;
+
+  public constructor(block: Block = null) {
+    switch (block?.type) {
+      case 'heading': {
+        const level = block.text.indexOf(' ');
+        this.type = block.type;
+        this.attrs = { level };
+        this.content = [
+          {
+            type: 'text',
+            text: block.text.substring(level + 1)
+          }
+        ];
+        break;
+      }
+      case 'paragraph': {
+        this.type = block.type;
+        this.content = [
+          {
+            type: 'text',
+            text: block.text
+          }
+        ];
+      }
+    }
+  }
 }
 
 export interface AdfMark {

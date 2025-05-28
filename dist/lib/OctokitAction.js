@@ -57,6 +57,16 @@ class OctokitAction extends Action_1.Action {
             return null;
         }
     }
+    async getIssue(issue_number) {
+        try {
+            this.log(`Getting issue #${issue_number}`);
+            return (await this.rest.issues.get(this.addRepo({ issue_number }))).data;
+        }
+        catch (error) {
+            this.log(`Issue #${issue_number} not found: ${error}`);
+            return null;
+        }
+    }
     async findFixedIssues(pr) {
         const text = pr.isRenovate() // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
             ? (await this.listComments(pr.number)).filter(x => x.body?.startsWith(Constants_1.RENOVATE_PREFIX)).pop()?.body
@@ -174,6 +184,14 @@ class OctokitAction extends Action_1.Action {
                     }
                 }
             }
+        }
+    }
+    async addJiraComponent(issueId, name, description) {
+        if (!await this.jira.createComponent(issueId.split('-')[0], name, description)) { // Same PR can have multiple issues from different projects
+            this.setFailed('Failed to create component');
+        }
+        if (!await this.jira.addIssueComponent(issueId, name)) {
+            this.setFailed('Failed to add component');
         }
     }
 }

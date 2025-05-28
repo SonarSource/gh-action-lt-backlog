@@ -4,7 +4,7 @@ import * as graphqlTypes from '@octokit/graphql/dist-types/types';
 import { GitHub } from '@actions/github/lib/utils';
 import { Action } from './Action';
 import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types';
-import { PullRequest, IssueComment, addPullRequestExtensions } from './OctokitTypes';
+import { PullRequest, IssueComment, addPullRequestExtensions, Issue } from './OctokitTypes';
 import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
 import { JiraClient } from './JiraClient';
 import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX } from './Constants';
@@ -59,6 +59,16 @@ export abstract class OctokitAction extends Action {
       return addPullRequestExtensions((await this.rest.pulls.get(this.addRepo({ pull_number }))).data);
     } catch (error) {
       this.log(`Pull Request #${pull_number} not found: ${error}`);
+      return null;
+    }
+  }
+
+  protected async getIssue(issue_number: number): Promise<Issue> {
+    try {
+      this.log(`Getting issue #${issue_number}`);
+      return (await this.rest.issues.get(this.addRepo({ issue_number }))).data;
+    } catch (error) {
+      this.log(`Issue #${issue_number} not found: ${error}`);
       return null;
     }
   }
@@ -192,4 +202,14 @@ export abstract class OctokitAction extends Action {
       }
     }
   }
+
+  protected async addJiraComponent(issueId: string, name: string, description: string): Promise<void> {
+    if (!await this.jira.createComponent(issueId.split('-')[0], name, description)) {   // Same PR can have multiple issues from different projects
+      this.setFailed('Failed to create component');
+    }
+    if (!await this.jira.addIssueComponent(issueId, name)) {
+      this.setFailed('Failed to add component');
+    }
+  }
+
 }
