@@ -1,4 +1,4 @@
-import { AtlassianDocument } from '../lib/AtlassianDocumentFormat';
+import { AdfNode, AtlassianDocument } from '../lib/AtlassianDocumentFormat';
 import { NewIssueParameters } from '../lib/NewIssueParameters';
 import { OctokitAction } from '../lib/OctokitAction';
 import { Issue } from '../lib/OctokitTypes';
@@ -16,8 +16,11 @@ class ImportIssue extends OctokitAction {
         description: AtlassianDocument.fromMarkdown(issue.body ?? ''),
       };
 
-      this.logSerialized(parameters.description);
-      //return;
+
+      if (false) {
+        this.logSerialized(parameters.description);
+        return;
+      }
 
 
       const id = await this.jira.createIssue(this.getInput('jira-project'), issue.title, parameters);
@@ -56,3 +59,7 @@ class ImportIssue extends OctokitAction {
 
 const action = new ImportIssue();
 action.run();
+
+
+//const node: AdfNode = new AdfNode({ type: 'paragraph', text: 'Lorem ipsum `code` dolor' });
+//console.log(node);

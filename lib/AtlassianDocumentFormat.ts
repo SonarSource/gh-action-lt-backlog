@@ -1,4 +1,5 @@
 import { Block, MarkdownParser } from "./MarkdownParser";
+import { MarkdownTextParser, TextBlock } from "./MarkdownTextParser";
 
 export class AtlassianDocument {
   type: string = 'doc';
@@ -84,51 +85,65 @@ export class AdfNode {
   text?: string;
 
   public constructor(block: Block = null) {
-    // FIXME: Links
-    // FIXME: Text quotes
-
     if (block) {
       this.type = block.type;
       switch (block.type) {
         case 'heading': {
           const level = block.text.indexOf(' ');
           this.attrs = { level };
-          this.content = [
-            {
-              type: 'text',
-              text: block.text.substring(level + 1)
-            }
-          ];
+          this.content = AdfNode.parseText(block.text.substring(level + 1));
           break;
         }
         case 'blockquote': {
           this.content = [
             {
               type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: block.text
-                }
-              ]
+              content: AdfNode.parseText(block.text)
             }
           ];
           break;
         }
         case 'codeBlock':
         case 'paragraph': {
-          this.content = [
-            {
-              type: 'text',
-              text: block.text
-            }
-          ];
+          this.content = AdfNode.parseText(block.text);
           break;
         }
         default:
           throw new Error(`Unsupported block type: ${block.type}`);
       }
     }
+  }
+
+  private static parseText(text: string): AdfNode[] {
+    const nodes: AdfNode[] = [];
+    const parser = new MarkdownTextParser(text);
+    let block: TextBlock;
+    // FIXME: Links
+    while (block = parser.readBlock()) {
+
+      console.log(block);
+
+      switch (block.type) {
+        case 'code': {
+          nodes.push({
+            type: 'text',
+            text: block.text,
+            marks: [{ type: 'code' }]
+          });
+          break;
+        }
+        case 'text': {
+          nodes.push({
+            type: 'text',
+            text: block.text
+          });
+          break;
+        }
+        default:
+          throw new Error(`Unsupported text block type: ${block.type}`);
+      }
+    }
+    return nodes;
   }
 }
 

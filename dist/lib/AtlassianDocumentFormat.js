@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdfNode = exports.AtlassianDocument = void 0;
 const MarkdownParser_1 = require("./MarkdownParser");
+const MarkdownTextParser_1 = require("./MarkdownTextParser");
 class AtlassianDocument {
     type = 'doc';
     version = 1;
@@ -50,50 +51,62 @@ class AdfNode {
     marks;
     text;
     constructor(block = null) {
-        // FIXME: Links
-        // FIXME: Text quotes
         if (block) {
             this.type = block.type;
             switch (block.type) {
                 case 'heading': {
                     const level = block.text.indexOf(' ');
                     this.attrs = { level };
-                    this.content = [
-                        {
-                            type: 'text',
-                            text: block.text.substring(level + 1)
-                        }
-                    ];
+                    this.content = AdfNode.parseText(block.text.substring(level + 1));
                     break;
                 }
                 case 'blockquote': {
                     this.content = [
                         {
                             type: 'paragraph',
-                            content: [
-                                {
-                                    type: 'text',
-                                    text: block.text
-                                }
-                            ]
+                            content: AdfNode.parseText(block.text)
                         }
                     ];
                     break;
                 }
                 case 'codeBlock':
                 case 'paragraph': {
-                    this.content = [
-                        {
-                            type: 'text',
-                            text: block.text
-                        }
-                    ];
+                    this.content = AdfNode.parseText(block.text);
                     break;
                 }
                 default:
                     throw new Error(`Unsupported block type: ${block.type}`);
             }
         }
+    }
+    static parseText(text) {
+        const nodes = [];
+        const parser = new MarkdownTextParser_1.MarkdownTextParser(text);
+        let block;
+        // FIXME: Links
+        while (block = parser.readBlock()) {
+            console.log(block);
+            switch (block.type) {
+                case 'code': {
+                    nodes.push({
+                        type: 'text',
+                        text: block.text,
+                        marks: [{ type: 'code' }]
+                    });
+                    break;
+                }
+                case 'text': {
+                    nodes.push({
+                        type: 'text',
+                        text: block.text
+                    });
+                    break;
+                }
+                default:
+                    throw new Error(`Unsupported text block type: ${block.type}`);
+            }
+        }
+        return nodes;
     }
 }
 exports.AdfNode = AdfNode;

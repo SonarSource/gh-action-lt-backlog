@@ -12,8 +12,10 @@ class ImportIssue extends OctokitAction_1.OctokitAction {
                 issuetype: { name: this.issueType(issue) },
                 description: AtlassianDocumentFormat_1.AtlassianDocument.fromMarkdown(issue.body ?? ''),
             };
-            this.logSerialized(parameters.description);
-            //return;
+            if (false) {
+                this.logSerialized(parameters.description);
+                return;
+            }
             const id = await this.jira.createIssue(this.getInput('jira-project'), issue.title, parameters);
             console.log(`Created ${id}`);
             // FIXME: Components from "Type: " labels. Take each label, remove "Type"
@@ -47,4 +49,6 @@ class ImportIssue extends OctokitAction_1.OctokitAction {
 }
 const action = new ImportIssue();
 action.run();
+//const node: AdfNode = new AdfNode({ type: 'paragraph', text: 'Lorem ipsum `code` dolor' });
+//console.log(node);
 //# sourceMappingURL=ImportIssue.js.map
