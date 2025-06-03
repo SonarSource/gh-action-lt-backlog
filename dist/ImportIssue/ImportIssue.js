@@ -4,7 +4,8 @@ const AtlassianDocumentFormat_1 = require("../lib/AtlassianDocumentFormat");
 const OctokitAction_1 = require("../lib/OctokitAction");
 class ImportIssue extends OctokitAction_1.OctokitAction {
     async execute() {
-        const issue_number = 9690;
+        //const issue_number = 9690;
+        const issue_number = 9657;
         const issue = await this.getIssue(issue_number);
         if (issue) {
             // FIXME: Team?
@@ -49,6 +50,8 @@ class ImportIssue extends OctokitAction_1.OctokitAction {
 }
 const action = new ImportIssue();
 action.run();
+//const result = "[a](b)xxx".match(/^(?<FullLink>\[(?<Title>[^\]]+)\]\((?<Href>[^) ]+)\))/);
+//console.log(result);
 //const node: AdfNode = new AdfNode({ type: 'paragraph', text: 'Lorem ipsum `code` dolor' });
 //console.log(node);
 //# sourceMappingURL=ImportIssue.js.map

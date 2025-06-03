@@ -6,7 +6,8 @@ import { Issue } from '../lib/OctokitTypes';
 class ImportIssue extends OctokitAction {
   protected async execute(): Promise<void> {
 
-    const issue_number = 9690;
+    //const issue_number = 9690;
+    const issue_number = 9657;
 
     const issue = await this.getIssue(issue_number);
     if (issue) {
@@ -60,6 +61,8 @@ class ImportIssue extends OctokitAction {
 const action = new ImportIssue();
 action.run();
 
+//const result = "[a](b)xxx".match(/^(?<FullLink>\[(?<Title>[^\]]+)\]\((?<Href>[^) ]+)\))/);
+//console.log(result);
 
 //const node: AdfNode = new AdfNode({ type: 'paragraph', text: 'Lorem ipsum `code` dolor' });
 //console.log(node);

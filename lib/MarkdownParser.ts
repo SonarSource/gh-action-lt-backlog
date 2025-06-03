@@ -73,7 +73,7 @@ export class MarkdownParser {
   }
 
   private isCodeBlock(line: string): boolean {
-    return /^```\w*$/.test(line);
+    return /^```\w*#?$/.test(line); // 4 backticks ```` are not supported and it won't work correctly as they are used to escape ``` in snippets
   }
 
   private isBlockQuote(line: string): boolean {

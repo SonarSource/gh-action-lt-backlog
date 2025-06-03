@@ -63,7 +63,7 @@ class MarkdownParser {
         return /^#{1,6} /.test(line);
     }
     isCodeBlock(line) {
-        return /^```\w*$/.test(line);
+        return /^```\w*#?$/.test(line);
     }
     isBlockQuote(line) {
         return line.startsWith('>');

@@ -103,7 +103,10 @@ export class AdfNode {
           ];
           break;
         }
-        case 'codeBlock':
+        case 'codeBlock': {
+          this.content = [{ type: 'text', text: block.text }];  // No inner parsing
+          break;
+        }
         case 'paragraph': {
           this.content = AdfNode.parseText(block.text);
           break;
@@ -132,6 +135,14 @@ export class AdfNode {
           });
           break;
         }
+        case 'link': {
+          nodes.push({
+            type: 'text',
+            text: block.text,
+            marks: [{ type: 'link', attrs: { href: block.href } }]
+          });
+          break;
+        }
         case 'text': {
           nodes.push({
             type: 'text',
@@ -143,11 +154,14 @@ export class AdfNode {
           throw new Error(`Unsupported text block type: ${block.type}`);
       }
     }
+
+    console.log("EOI");
+
     return nodes;
   }
 }
 
 export interface AdfMark {
   type: 'border' | 'code' | 'em' | 'link' | 'strike' | 'strong' | 'subsup' | 'textColor' | 'underline';
-  attrs?: string;
+  attrs?: any;
 }
