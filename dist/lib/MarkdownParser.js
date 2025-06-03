@@ -63,7 +63,7 @@ class MarkdownParser {
         return /^#{1,6} /.test(line);
     }
     isCodeBlock(line) {
-        return /^```\w*#?$/.test(line);
+        return /^```\w*#?$/.test(line); // 4 backticks ```` are not supported and it won't work correctly as they are used to escape ``` in snippets
     }
     isBlockQuote(line) {
         return line.startsWith('>');
