@@ -8,7 +8,7 @@ class MarkdownTextParser {
         this.text = text;
     }
     readBlock() {
-        console.log(`readBlock ${this.nextIndex}: ${this.text.substring(this.nextIndex, this.nextIndex + 20)}`);
+        //console.log(`readBlock ${this.nextIndex}: ${this.text.substring(this.nextIndex, this.nextIndex + 20)}`)
         if (this.nextIndex >= this.text.length) {
             return null;
         }
