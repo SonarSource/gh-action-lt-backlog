@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const expect_1 = require("expect");
 const MarkdownTextParser_1 = require("../lib/MarkdownTextParser");
 describe('MarkdownTextParser', () => {
-    test('parses plain text', () => {
+    it('parses plain text', () => {
         const sut = new MarkdownTextParser_1.MarkdownTextParser('Lorem ipsum');
         (0, expect_1.expect)(sut.readBlock()).toEqual({ type: 'text', text: 'Lorem ipsum' });
         (0, expect_1.expect)(sut.readBlock()).toBeNull();

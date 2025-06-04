@@ -2,7 +2,7 @@ import { expect } from 'expect';
 import { MarkdownTextParser } from '../lib/MarkdownTextParser';
 
 describe('MarkdownTextParser', () => {
-  test('parses plain text', () => {
+  it('parses plain text', () => {
     const sut = new MarkdownTextParser('Lorem ipsum');
     expect(sut.readBlock()).toEqual({ type: 'text', text: 'Lorem ipsum' });
     expect(sut.readBlock()).toBeNull();
