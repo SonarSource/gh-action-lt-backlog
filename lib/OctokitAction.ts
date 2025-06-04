@@ -88,6 +88,11 @@ export abstract class OctokitAction extends Action {
     return (await this.rest.issues.listComments(this.addRepo({ issue_number }))).data;
   }
 
+  protected updateIssueTitle(issue_number: number, title: string): Promise<void> {
+    this.log(`Updating issue #${issue_number} title to: ${title}`);
+    return this.updateIssue(issue_number, { title });
+  }
+
   protected updatePullRequestTitle(prNumber: number, title: string): Promise<void> {
     this.log(`Updating PR #${prNumber} title to: ${title}`);
     return this.updatePullRequest(prNumber, { title });
@@ -96,6 +101,14 @@ export abstract class OctokitAction extends Action {
   protected updatePullRequestDescription(prNumber: number, body: string): Promise<void> {
     this.log(`Updating PR #${prNumber} description`);
     return this.updatePullRequest(prNumber, { body });
+  }
+
+  private async updateIssue(issue_number: number, update: { title?: string, body?: string }): Promise<void> {
+    try {
+      await this.rest.issues.update(this.addRepo({ issue_number, ...update }));
+    } catch (error) {
+      this.log(`Failed to update issue #${issue_number}: ${error}`);
+    }
   }
 
   private async updatePullRequest(prNumber: number, update: { title?: string, body?: string }): Promise<void> {
@@ -203,7 +216,7 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected async addJiraComponent(issueId: string, name: string, description: string): Promise<void> {
+  protected async addJiraComponent(issueId: string, name: string, description: string = null): Promise<void> {
     if (!await this.jira.createComponent(issueId.split('-')[0], name, description)) {   // Same PR can have multiple issues from different projects
       this.setFailed('Failed to create component');
     }

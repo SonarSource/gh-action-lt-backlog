@@ -4,19 +4,27 @@ const AtlassianDocumentFormat_1 = require("../lib/AtlassianDocumentFormat");
 const OctokitAction_1 = require("../lib/OctokitAction");
 class ImportIssue extends OctokitAction_1.OctokitAction {
     async execute() {
+        const inputJiraProject = this.getInput('jira-project');
         const issue_number = 9690;
-        //const issue_number = 9657;
+        // FIXME: All issues.
         const issue = await this.getIssue(issue_number);
-        if (issue) {
+        if (issue && !issue.title.startsWith(`${inputJiraProject}-`)) {
             const parameters = {
                 issuetype: { name: this.issueType(issue) },
                 description: AtlassianDocumentFormat_1.AtlassianDocument.fromMarkdown(issue.body ?? ''),
             };
-            const id = await this.jira.createIssue(this.getInput('jira-project'), issue.title, parameters);
+            const id = await this.jira.createIssue(inputJiraProject, issue.title, parameters);
             console.log(`Created ${id}`);
-            // FIXME: Components from "Type: " labels. Take each label, remove "Type"
-            // await this.addJiraComponent(id, "fixme", null);
-            await this.jira.addIssueRemoteLink(id, issue.html_url);
+            const promises = [];
+            promises.push(this.jira.addIssueRemoteLink(id, issue.html_url));
+            for (const component of issue.labels.map(x => typeof x === 'string' ? x : x.name).filter(x => x.startsWith('Type: ')).map(x => x.substring(6))) {
+                promises.push(this.addJiraComponent(id, component));
+            }
+            promises.push(this.updateIssueTitle(issue.number, `${id} ${issue.title}`));
+            await Promise.all(promises);
+        }
+        else if (issue) {
+            this.log(`Skip already imported: ${issue.title}`);
         }
     }
     issueType(issue) {

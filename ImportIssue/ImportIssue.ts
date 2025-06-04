@@ -5,23 +5,30 @@ import { Issue } from '../lib/OctokitTypes';
 
 class ImportIssue extends OctokitAction {
   protected async execute(): Promise<void> {
+    const inputJiraProject = this.getInput('jira-project');
 
     const issue_number = 9690;
-    //const issue_number = 9657;
+
+    // FIXME: All issues.
 
     const issue = await this.getIssue(issue_number);
-    if (issue) {
+    if (issue && !issue.title.startsWith(`${inputJiraProject}-`)) {
       const parameters: NewIssueParameters = {
         issuetype: { name: this.issueType(issue) },
         description: AtlassianDocument.fromMarkdown(issue.body ?? ''),
       };
 
-      const id = await this.jira.createIssue(this.getInput('jira-project'), issue.title, parameters);
+      const id = await this.jira.createIssue(inputJiraProject, issue.title, parameters);
       console.log(`Created ${id}`);
-      // FIXME: Components from "Type: " labels. Take each label, remove "Type"
-      // await this.addJiraComponent(id, "fixme", null);
-
-      await this.jira.addIssueRemoteLink(id, issue.html_url);
+      const promises: Promise<void>[] = [];
+      promises.push(this.jira.addIssueRemoteLink(id, issue.html_url));
+      for (const component of issue.labels.map(x => typeof x === 'string' ? x : x.name).filter(x => x.startsWith('Type: ')).map(x => x.substring(6))) {
+        promises.push(this.addJiraComponent(id, component));
+      }
+      promises.push(this.updateIssueTitle(issue.number, `${id} ${issue.title}`));
+      await Promise.all(promises);
+    } else if (issue) {
+      this.log(`Skip already imported: ${issue.title}`);
     }
   }
 
