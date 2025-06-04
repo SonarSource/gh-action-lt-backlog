@@ -121,10 +121,10 @@ export class AdfNode {
     const nodes: AdfNode[] = [];
     const parser = new MarkdownTextParser(text);
     let block: TextBlock;
-    // FIXME: Links
+    
     while (block = parser.readBlock()) {
 
-      console.log(block);
+      //console.log(block);
 
       switch (block.type) {
         case 'code': {
@@ -155,7 +155,7 @@ export class AdfNode {
       }
     }
 
-    console.log("EOI");
+    //console.log("EOI");
 
     return nodes;
   }

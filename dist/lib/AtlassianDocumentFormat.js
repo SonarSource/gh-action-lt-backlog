@@ -86,9 +86,8 @@ class AdfNode {
         const nodes = [];
         const parser = new MarkdownTextParser_1.MarkdownTextParser(text);
         let block;
-        // FIXME: Links
         while (block = parser.readBlock()) {
-            console.log(block);
+            //console.log(block);
             switch (block.type) {
                 case 'code': {
                     nodes.push({
@@ -117,7 +116,7 @@ class AdfNode {
                     throw new Error(`Unsupported text block type: ${block.type}`);
             }
         }
-        console.log("EOI");
+        //console.log("EOI");
         return nodes;
     }
 }
