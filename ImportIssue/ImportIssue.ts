@@ -1,4 +1,4 @@
-import { AdfNode, AtlassianDocument } from '../lib/AtlassianDocumentFormat';
+import { AtlassianDocument } from '../lib/AtlassianDocumentFormat';
 import { NewIssueParameters } from '../lib/NewIssueParameters';
 import { OctokitAction } from '../lib/OctokitAction';
 import { Issue } from '../lib/OctokitTypes';
@@ -6,33 +6,27 @@ import { Issue } from '../lib/OctokitTypes';
 class ImportIssue extends OctokitAction {
   protected async execute(): Promise<void> {
 
-    //const issue_number = 9690;
-    const issue_number = 9657;
+    const issue_number = 9690;
+    //const issue_number = 9657;
 
     const issue = await this.getIssue(issue_number);
     if (issue) {
-      // FIXME: Team?
       const parameters: NewIssueParameters = {
         issuetype: { name: this.issueType(issue) },
         description: AtlassianDocument.fromMarkdown(issue.body ?? ''),
       };
 
-
-      if (false) {
-        this.logSerialized(parameters.description);
-        return;
-      }
-
-
       const id = await this.jira.createIssue(this.getInput('jira-project'), issue.title, parameters);
       console.log(`Created ${id}`);
       // FIXME: Components from "Type: " labels. Take each label, remove "Type"
       // await this.addJiraComponent(id, "fixme", null);
+
+      await this.jira.addIssueRemoteLink(id, issue.html_url);
     }
   }
 
   private issueType(issue: Issue): string {
-    const data: {name, type}[] = [
+    const data: { name, type }[] = [
       { name: 'Type: Bug', type: 'Bug' },
       { name: 'Type: CFG/SE FPs', type: 'False Positive' },
       { name: 'Type: Code Fix', type: 'Improvement' },
@@ -61,8 +55,3 @@ class ImportIssue extends OctokitAction {
 const action = new ImportIssue();
 action.run();
 
-//const result = "[a](b)xxx".match(/^(?<FullLink>\[(?<Title>[^\]]+)\]\((?<Href>[^) ]+)\))/);
-//console.log(result);
-
-//const node: AdfNode = new AdfNode({ type: 'paragraph', text: 'Lorem ipsum `code` dolor' });
-//console.log(node);

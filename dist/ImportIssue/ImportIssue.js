@@ -4,23 +4,19 @@ const AtlassianDocumentFormat_1 = require("../lib/AtlassianDocumentFormat");
 const OctokitAction_1 = require("../lib/OctokitAction");
 class ImportIssue extends OctokitAction_1.OctokitAction {
     async execute() {
-        //const issue_number = 9690;
-        const issue_number = 9657;
+        const issue_number = 9690;
+        //const issue_number = 9657;
         const issue = await this.getIssue(issue_number);
         if (issue) {
-            // FIXME: Team?
             const parameters = {
                 issuetype: { name: this.issueType(issue) },
                 description: AtlassianDocumentFormat_1.AtlassianDocument.fromMarkdown(issue.body ?? ''),
             };
-            if (false) {
-                this.logSerialized(parameters.description);
-                return;
-            }
             const id = await this.jira.createIssue(this.getInput('jira-project'), issue.title, parameters);
             console.log(`Created ${id}`);
             // FIXME: Components from "Type: " labels. Take each label, remove "Type"
             // await this.addJiraComponent(id, "fixme", null);
+            await this.jira.addIssueRemoteLink(id, issue.html_url);
         }
     }
     issueType(issue) {
@@ -50,8 +46,4 @@ class ImportIssue extends OctokitAction_1.OctokitAction {
 }
 const action = new ImportIssue();
 action.run();
-//const result = "[a](b)xxx".match(/^(?<FullLink>\[(?<Title>[^\]]+)\]\((?<Href>[^) ]+)\))/);
-//console.log(result);
-//const node: AdfNode = new AdfNode({ type: 'paragraph', text: 'Lorem ipsum `code` dolor' });
-//console.log(node);
 //# sourceMappingURL=ImportIssue.js.map
