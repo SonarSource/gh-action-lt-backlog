@@ -38,8 +38,29 @@ describe('MarkdownTextParser', () => {
         (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'link', text: 'title3 no space before', href: 'link3' });
         (0, expect_1.expect)(parser.readBlock()).toBeNull();
     });
+    it('parses http(s)://', () => {
+        const parser = new MarkdownTextParser_1.MarkdownTextParser('Before http://http.no.comma, between https://https.no.semicolon; or http://with.single.questionmark?... But http://no.trailing.questionmark???? Or http://with.query.stirng?what=about&this? And https://with.hash#hash-asdf. https://with.all?key=value&flag#hash. And https:// too.');
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: 'Before ' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'link', text: 'http://http.no.comma', href: 'http://http.no.comma' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: ', between ' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'link', text: 'https://https.no.semicolon', href: 'https://https.no.semicolon' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: '; or ' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'link', text: 'http://with.single.questionmark', href: 'http://with.single.questionmark' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: '?... But ' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'link', text: 'http://no.trailing.questionmark', href: 'http://no.trailing.questionmark' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: '???? Or ' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'link', text: 'http://with.query.stirng?what=about&this', href: 'http://with.query.stirng?what=about&this' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: '? And ' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'link', text: 'https://with.hash#hash-asdf', href: 'https://with.hash#hash-asdf' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: '. ' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'link', text: 'https://with.all?key=value&flag#hash', href: 'https://with.all?key=value&flag#hash' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: '. And ' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'link', text: 'https://', href: 'https://' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: ' too.' });
+        (0, expect_1.expect)(parser.readBlock()).toBeNull();
+    });
     it('parses mixed content', () => {
-        const parser = new MarkdownTextParser_1.MarkdownTextParser('Before `snippet1` [title1](url1) `snippet2` [title2](url2) after.');
+        const parser = new MarkdownTextParser_1.MarkdownTextParser('Before `snippet1` [title1](url1) `snippet2` [title2](url2) https://example.com after.');
         (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: 'Before ' });
         (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'code', text: 'snippet1' });
         (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: ' ' });
@@ -48,6 +69,8 @@ describe('MarkdownTextParser', () => {
         (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'code', text: 'snippet2' });
         (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: ' ' });
         (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'link', text: 'title2', href: 'url2' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: ' ' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'link', text: 'https://example.com', href: 'https://example.com' });
         (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: ' after.' });
         (0, expect_1.expect)(parser.readBlock()).toBeNull();
     });

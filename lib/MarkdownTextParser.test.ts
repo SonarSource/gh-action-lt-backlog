@@ -42,8 +42,30 @@ describe('MarkdownTextParser', () => {
     expect(parser.readBlock()).toBeNull();
   });
 
+  it('parses http(s)://', () => {
+    const parser = new MarkdownTextParser('Before http://http.no.comma, between https://https.no.semicolon; or http://with.single.questionmark?... But http://no.trailing.questionmark???? Or http://with.query.stirng?what=about&this? And https://with.hash#hash-asdf. https://with.all?key=value&flag#hash. And https:// too.');
+    expect(parser.readBlock()).toEqual({ type: 'text', text: 'Before ' });
+    expect(parser.readBlock()).toEqual({ type: 'link', text: 'http://http.no.comma', href: 'http://http.no.comma' });
+    expect(parser.readBlock()).toEqual({ type: 'text', text: ', between ' });
+    expect(parser.readBlock()).toEqual({ type: 'link', text: 'https://https.no.semicolon', href: 'https://https.no.semicolon' });
+    expect(parser.readBlock()).toEqual({ type: 'text', text: '; or ' });
+    expect(parser.readBlock()).toEqual({ type: 'link', text: 'http://with.single.questionmark', href: 'http://with.single.questionmark' });
+    expect(parser.readBlock()).toEqual({ type: 'text', text: '?... But ' });
+    expect(parser.readBlock()).toEqual({ type: 'link', text: 'http://no.trailing.questionmark', href: 'http://no.trailing.questionmark' });
+    expect(parser.readBlock()).toEqual({ type: 'text', text: '???? Or ' });
+    expect(parser.readBlock()).toEqual({ type: 'link', text: 'http://with.query.stirng?what=about&this', href: 'http://with.query.stirng?what=about&this' });
+    expect(parser.readBlock()).toEqual({ type: 'text', text: '? And ' });
+    expect(parser.readBlock()).toEqual({ type: 'link', text: 'https://with.hash#hash-asdf', href: 'https://with.hash#hash-asdf' });
+    expect(parser.readBlock()).toEqual({ type: 'text', text: '. ' });
+    expect(parser.readBlock()).toEqual({ type: 'link', text: 'https://with.all?key=value&flag#hash', href: 'https://with.all?key=value&flag#hash' });
+    expect(parser.readBlock()).toEqual({ type: 'text', text: '. And ' });
+    expect(parser.readBlock()).toEqual({ type: 'link', text: 'https://', href: 'https://' });
+    expect(parser.readBlock()).toEqual({ type: 'text', text: ' too.' });
+    expect(parser.readBlock()).toBeNull();
+  });
+
   it('parses mixed content', () => {
-    const parser = new MarkdownTextParser('Before `snippet1` [title1](url1) `snippet2` [title2](url2) after.');
+    const parser = new MarkdownTextParser('Before `snippet1` [title1](url1) `snippet2` [title2](url2) https://example.com after.');
     expect(parser.readBlock()).toEqual({ type: 'text', text: 'Before ' });
     expect(parser.readBlock()).toEqual({ type: 'code', text: 'snippet1' });
     expect(parser.readBlock()).toEqual({ type: 'text', text: ' ' });
@@ -52,6 +74,8 @@ describe('MarkdownTextParser', () => {
     expect(parser.readBlock()).toEqual({ type: 'code', text: 'snippet2' });
     expect(parser.readBlock()).toEqual({ type: 'text', text: ' ' });
     expect(parser.readBlock()).toEqual({ type: 'link', text: 'title2', href: 'url2' });
+    expect(parser.readBlock()).toEqual({ type: 'text', text: ' ' });
+    expect(parser.readBlock()).toEqual({ type: 'link', text: 'https://example.com', href: 'https://example.com' });
     expect(parser.readBlock()).toEqual({ type: 'text', text: ' after.' });
     expect(parser.readBlock()).toBeNull();
   });
