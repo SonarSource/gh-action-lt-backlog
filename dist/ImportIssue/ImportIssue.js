@@ -14,8 +14,8 @@ class ImportIssue extends OctokitAction_1.OctokitAction {
                 const id = await this.importIssue(jiraProject, issue);
                 await this.addComment(issue_number, `Moved to [${id}](${Constants_1.JIRA_DOMAIN}/browse/${id})`);
                 await this.rest.issues.update(this.addRepo({ issue_number, state: 'closed' }));
-                this.log(`https://github.com/SonarSource/sonar-dotnet/issues/${issue_number}`);
-                log.push(`https://github.com/SonarSource/sonar-dotnet/issues/${issue_number}`);
+                this.log(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/${issue_number}`);
+                log.push(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/${issue_number}`);
                 this.log(`${Constants_1.JIRA_DOMAIN}/browse/${id}`);
                 log.push(`${Constants_1.JIRA_DOMAIN}/browse/${id}`);
             }
