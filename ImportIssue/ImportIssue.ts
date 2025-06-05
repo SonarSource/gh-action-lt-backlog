@@ -8,18 +8,20 @@ class ImportIssue extends OctokitAction {
   protected async execute(): Promise<void> {
     const jiraProject = this.getInput('jira-project');
     const log: string[] = [];
-    const issues = (await this.rest.issues.listForRepo(this.addRepo({ state: 'open', per_page: 3 }))).data; // FIXME: 100
 
-    for (const issue_number of issues.map(x => x.number)) {
-      const issue = await this.getIssue(issue_number);
-      if (issue && !issue.title.startsWith(`${jiraProject}-`)) {
+    const issues = (await this.rest.issues.listForRepo(this.addRepo({ state: 'open', per_page: 100 }))).data;
+    for (const issue of issues) {
+      //const issue = await this.getIssue(issue_number);
+      if (issue.pull_request) {
+        this.log(`#${issue.number} is a PR => SKIP`);
+      } else if (issue && !issue.title.startsWith(`${jiraProject}-`)) {
         const id = await this.importIssue(jiraProject, issue);
 
-        await this.addComment(issue_number, `Moved to [${id}](${JIRA_DOMAIN}/browse/${id})`);
-        await this.rest.issues.update(this.addRepo({ issue_number, state: 'closed' }));
+        await this.addComment(issue.number, `Moved to [${id}](${JIRA_DOMAIN}/browse/${id})`);
+        await this.rest.issues.update(this.addRepo({ issue_number: issue.number, state: 'closed' }));
 
-        this.log(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/${issue_number}`);
-        log.push(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/${issue_number}`);
+        this.log(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/${issue.number}`);
+        log.push(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/${issue.number}`);
         this.log(`${JIRA_DOMAIN}/browse/${id}`);
         log.push(`${JIRA_DOMAIN}/browse/${id}`);
 
