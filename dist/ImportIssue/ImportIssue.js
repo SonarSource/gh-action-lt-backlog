@@ -33,6 +33,7 @@ class ImportIssue extends OctokitAction_1.OctokitAction {
                     this.log(`Skip already imported: ${issue.title}`);
                 }
             }
+            page++;
         } while (issues.length === 100);
         this.log(`--- ${log.length / 2}x ---`);
         for (const line of log) {
