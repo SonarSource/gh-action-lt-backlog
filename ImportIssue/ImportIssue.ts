@@ -40,16 +40,16 @@ class ImportIssue extends OctokitAction {
   private async importIssue(jiraProject: string, issue: Issue): Promise<string> {
     const parameters: NewIssueParameters = {
       issuetype: { name: this.issueType(issue) },
-      description: AtlassianDocument.fromMarkdown(issue.body ?? ''),
+      description: AtlassianDocument.fromMarkdown(issue.body ?? '')
     };
 
     const id = await this.jira.createIssue(jiraProject, issue.title, parameters);
     console.log(`Created ${id}`);
     const promises: Promise<void>[] = [];
     promises.push(this.jira.addIssueRemoteLink(id, issue.html_url));
-    for (const component of issue.labels.map(x => typeof x === 'string' ? x : x.name).filter(x => x.startsWith('Type: ')).map(x => x.substring(6))) {
-      promises.push(this.addJiraComponent(id, component));
-    }
+    //for (const component of issue.labels.map(x => typeof x === 'string' ? x : x.name).filter(x => x.startsWith('Type: ')).map(x => x.substring(6))) {
+    //  promises.push(this.addJiraComponent(id, component));
+    //}
     // FIXME: Jen sonar-dotnet: promises.push(this.updateIssueTitle(issue.number, `${id} ${issue.title}`));
     await Promise.all(promises);
     return id;
@@ -58,23 +58,23 @@ class ImportIssue extends OctokitAction {
   private issueType(issue: Issue): string {
     const data: { name, type }[] = [
       { name: 'Type: Bug', type: 'Bug' },
-      { name: 'Type: CFG/SE FPs', type: 'False Positive' },
-      { name: 'Type: Code Fix', type: 'Improvement' },
-      { name: 'Type: Coverage', type: 'Improvement' },
-      { name: 'Type: Documentation', type: 'Documentation' }, // S4NET
-      { name: 'Type: False Negative', type: 'False Negative' },
-      { name: 'Type: False Positive', type: 'False Positive' },
-      { name: 'Type: Messages', type: 'Improvement' },
-      { name: 'Type: New Rule', type: 'New Feature' },
-      { name: 'Type: Parameters', type: 'Improvement' },      // S4NET
-      { name: 'Type: Performance', type: 'Improvement' },
-      { name: 'Type: RSPEC', type: 'Improvement' },
-      { name: 'Type: Rule Idea', type: 'New Feature' },
-      { name: 'Type: Rule rework', type: 'Improvement' },
-      { name: 'Type: SE', type: 'Improvement' },
-      { name: 'Type: Utility', type: 'Improvement' },
-      { name: 'Type: UX', type: 'Improvement' },
-      { name: 'Type: Web', type: 'Improvement' },
+      //{ name: 'Type: CFG/SE FPs', type: 'False Positive' },
+      //{ name: 'Type: Code Fix', type: 'Improvement' },
+      //{ name: 'Type: Coverage', type: 'Improvement' },
+      //{ name: 'Type: Documentation', type: 'Documentation' }, // S4NET
+      //{ name: 'Type: False Negative', type: 'False Negative' },
+      //{ name: 'Type: False Positive', type: 'False Positive' },
+      //{ name: 'Type: Messages', type: 'Improvement' },
+      //{ name: 'Type: New Rule', type: 'New Feature' },
+      //{ name: 'Type: Parameters', type: 'Improvement' },      // S4NET
+      //{ name: 'Type: Performance', type: 'Improvement' },
+      //{ name: 'Type: RSPEC', type: 'Improvement' },
+      //{ name: 'Type: Rule Idea', type: 'New Feature' },
+      //{ name: 'Type: Rule rework', type: 'Improvement' },
+      //{ name: 'Type: SE', type: 'Improvement' },
+      //{ name: 'Type: Utility', type: 'Improvement' },
+      //{ name: 'Type: UX', type: 'Improvement' },
+      //{ name: 'Type: Web', type: 'Improvement' },
     ];
     return data.find(x => this.hasLabel(issue, x.name))?.type ?? "Task";
   }
