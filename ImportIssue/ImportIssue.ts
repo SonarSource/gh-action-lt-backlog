@@ -1,35 +1,56 @@
 import { AtlassianDocument } from '../lib/AtlassianDocumentFormat';
+import { JIRA_DOMAIN } from '../lib/Constants';
 import { NewIssueParameters } from '../lib/NewIssueParameters';
 import { OctokitAction } from '../lib/OctokitAction';
 import { Issue } from '../lib/OctokitTypes';
 
 class ImportIssue extends OctokitAction {
   protected async execute(): Promise<void> {
-    const inputJiraProject = this.getInput('jira-project');
+    const jiraProject = this.getInput('jira-project');
+    const log: string[] = [];
+    const issues = (await this.rest.issues.listForRepo(this.addRepo({ state: 'open', per_page: 3 }))).data; // FIXME: 100
 
-    const issue_number = 9690;
+    for (const issue_number of issues.map(x => x.number)) {
+      const issue = await this.getIssue(issue_number);
+      if (issue && !issue.title.startsWith(`${jiraProject}-`)) {
+        const id = await this.importIssue(jiraProject, issue);
 
-    // FIXME: All issues.
+        await this.addComment(issue_number, `Moved to [${id}](${JIRA_DOMAIN}/browse/${id})`);
+        await this.rest.issues.update(this.addRepo({ issue_number, state: 'closed' }));
 
-    const issue = await this.getIssue(issue_number);
-    if (issue && !issue.title.startsWith(`${inputJiraProject}-`)) {
-      const parameters: NewIssueParameters = {
-        issuetype: { name: this.issueType(issue) },
-        description: AtlassianDocument.fromMarkdown(issue.body ?? ''),
-      };
+        this.log(`https://github.com/SonarSource/sonar-dotnet/issues/${issue_number}`);
+        log.push(`https://github.com/SonarSource/sonar-dotnet/issues/${issue_number}`);
+        this.log(`${JIRA_DOMAIN}/browse/${id}`);
+        log.push(`${JIRA_DOMAIN}/browse/${id}`);
 
-      const id = await this.jira.createIssue(inputJiraProject, issue.title, parameters);
-      console.log(`Created ${id}`);
-      const promises: Promise<void>[] = [];
-      promises.push(this.jira.addIssueRemoteLink(id, issue.html_url));
-      for (const component of issue.labels.map(x => typeof x === 'string' ? x : x.name).filter(x => x.startsWith('Type: ')).map(x => x.substring(6))) {
-        promises.push(this.addJiraComponent(id, component));
+      } else if (issue) {
+        this.log(`Skip already imported: ${issue.title}`);
       }
-      promises.push(this.updateIssueTitle(issue.number, `${id} ${issue.title}`));
-      await Promise.all(promises);
-    } else if (issue) {
-      this.log(`Skip already imported: ${issue.title}`);
     }
+
+    this.log(`--- ${log.length / 2}x ---`);
+    for (const line of log) {
+      this.log(line);
+    }
+
+  }
+
+  private async importIssue(jiraProject: string, issue: Issue): Promise<string> {
+    const parameters: NewIssueParameters = {
+      issuetype: { name: this.issueType(issue) },
+      description: AtlassianDocument.fromMarkdown(issue.body ?? ''),
+    };
+
+    const id = await this.jira.createIssue(jiraProject, issue.title, parameters);
+    console.log(`Created ${id}`);
+    const promises: Promise<void>[] = [];
+    promises.push(this.jira.addIssueRemoteLink(id, issue.html_url));
+    for (const component of issue.labels.map(x => typeof x === 'string' ? x : x.name).filter(x => x.startsWith('Type: ')).map(x => x.substring(6))) {
+      promises.push(this.addJiraComponent(id, component));
+    }
+    // FIXME: Jen sonar-dotnet: promises.push(this.updateIssueTitle(issue.number, `${id} ${issue.title}`));
+    await Promise.all(promises);
+    return id;
   }
 
   private issueType(issue: Issue): string {
@@ -38,10 +59,12 @@ class ImportIssue extends OctokitAction {
       { name: 'Type: CFG/SE FPs', type: 'False Positive' },
       { name: 'Type: Code Fix', type: 'Improvement' },
       { name: 'Type: Coverage', type: 'Improvement' },
+      { name: 'Type: Documentation', type: 'Documentation' }, // S4NET
       { name: 'Type: False Negative', type: 'False Negative' },
       { name: 'Type: False Positive', type: 'False Positive' },
       { name: 'Type: Messages', type: 'Improvement' },
       { name: 'Type: New Rule', type: 'New Feature' },
+      { name: 'Type: Parameters', type: 'Improvement' },      // S4NET
       { name: 'Type: Performance', type: 'Improvement' },
       { name: 'Type: RSPEC', type: 'Improvement' },
       { name: 'Type: Rule Idea', type: 'New Feature' },

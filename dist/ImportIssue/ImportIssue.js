@@ -1,31 +1,48 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const AtlassianDocumentFormat_1 = require("../lib/AtlassianDocumentFormat");
+const Constants_1 = require("../lib/Constants");
 const OctokitAction_1 = require("../lib/OctokitAction");
 class ImportIssue extends OctokitAction_1.OctokitAction {
     async execute() {
-        const inputJiraProject = this.getInput('jira-project');
-        const issue_number = 9690;
-        // FIXME: All issues.
-        const issue = await this.getIssue(issue_number);
-        if (issue && !issue.title.startsWith(`${inputJiraProject}-`)) {
-            const parameters = {
-                issuetype: { name: this.issueType(issue) },
-                description: AtlassianDocumentFormat_1.AtlassianDocument.fromMarkdown(issue.body ?? ''),
-            };
-            const id = await this.jira.createIssue(inputJiraProject, issue.title, parameters);
-            console.log(`Created ${id}`);
-            const promises = [];
-            promises.push(this.jira.addIssueRemoteLink(id, issue.html_url));
-            for (const component of issue.labels.map(x => typeof x === 'string' ? x : x.name).filter(x => x.startsWith('Type: ')).map(x => x.substring(6))) {
-                promises.push(this.addJiraComponent(id, component));
+        const jiraProject = this.getInput('jira-project');
+        const log = [];
+        const issues = (await this.rest.issues.listForRepo(this.addRepo({ state: 'open', per_page: 3 }))).data; // FIXME: 100
+        for (const issue_number of issues.map(x => x.number)) {
+            const issue = await this.getIssue(issue_number);
+            if (issue && !issue.title.startsWith(`${jiraProject}-`)) {
+                const id = await this.importIssue(jiraProject, issue);
+                await this.addComment(issue_number, `Moved to [${id}](${Constants_1.JIRA_DOMAIN}/browse/${id})`);
+                await this.rest.issues.update(this.addRepo({ issue_number, state: 'closed' }));
+                this.log(`https://github.com/SonarSource/sonar-dotnet/issues/${issue_number}`);
+                log.push(`https://github.com/SonarSource/sonar-dotnet/issues/${issue_number}`);
+                this.log(`${Constants_1.JIRA_DOMAIN}/browse/${id}`);
+                log.push(`${Constants_1.JIRA_DOMAIN}/browse/${id}`);
             }
-            promises.push(this.updateIssueTitle(issue.number, `${id} ${issue.title}`));
-            await Promise.all(promises);
+            else if (issue) {
+                this.log(`Skip already imported: ${issue.title}`);
+            }
         }
-        else if (issue) {
-            this.log(`Skip already imported: ${issue.title}`);
+        this.log(`--- ${log.length / 2}x ---`);
+        for (const line of log) {
+            this.log(line);
         }
+    }
+    async importIssue(jiraProject, issue) {
+        const parameters = {
+            issuetype: { name: this.issueType(issue) },
+            description: AtlassianDocumentFormat_1.AtlassianDocument.fromMarkdown(issue.body ?? ''),
+        };
+        const id = await this.jira.createIssue(jiraProject, issue.title, parameters);
+        console.log(`Created ${id}`);
+        const promises = [];
+        promises.push(this.jira.addIssueRemoteLink(id, issue.html_url));
+        for (const component of issue.labels.map(x => typeof x === 'string' ? x : x.name).filter(x => x.startsWith('Type: ')).map(x => x.substring(6))) {
+            promises.push(this.addJiraComponent(id, component));
+        }
+        // FIXME: Jen sonar-dotnet: promises.push(this.updateIssueTitle(issue.number, `${id} ${issue.title}`));
+        await Promise.all(promises);
+        return id;
     }
     issueType(issue) {
         const data = [
@@ -33,10 +50,12 @@ class ImportIssue extends OctokitAction_1.OctokitAction {
             { name: 'Type: CFG/SE FPs', type: 'False Positive' },
             { name: 'Type: Code Fix', type: 'Improvement' },
             { name: 'Type: Coverage', type: 'Improvement' },
+            { name: 'Type: Documentation', type: 'Documentation' }, // S4NET
             { name: 'Type: False Negative', type: 'False Negative' },
             { name: 'Type: False Positive', type: 'False Positive' },
             { name: 'Type: Messages', type: 'Improvement' },
             { name: 'Type: New Rule', type: 'New Feature' },
+            { name: 'Type: Parameters', type: 'Improvement' }, // S4NET
             { name: 'Type: Performance', type: 'Improvement' },
             { name: 'Type: RSPEC', type: 'Improvement' },
             { name: 'Type: Rule Idea', type: 'New Feature' },
