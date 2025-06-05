@@ -19,8 +19,12 @@ class ImportIssue extends OctokitAction {
         } else if (issue && !issue.title.startsWith(`${jiraProject}-`)) {
           const id = await this.importIssue(jiraProject, issue);
 
-          await this.addComment(issue.number, `Moved to [${id}](${JIRA_DOMAIN}/browse/${id})`);
-          await this.rest.issues.update(this.addRepo({ issue_number: issue.number, state: 'closed' }));
+          if (this.issueType(issue) == 'Task' || this.issueType(issue) === 'Improvement') {
+            await this.addComment(issue.number, `Moved to [${id}](${JIRA_DOMAIN}/browse/${id})`);
+            await this.rest.issues.update(this.addRepo({ issue_number: issue.number, state: 'closed' }));
+          } else {
+            await this.addComment(issue.number, `Internal ticket [${id}](${JIRA_DOMAIN}/browse/${id})`);
+          }
 
           this.log(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/${issue.number}`);
           log.push(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/${issue.number}`);
