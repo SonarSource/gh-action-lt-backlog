@@ -183,11 +183,11 @@ class JiraClient {
         return this.sendRequest("GET", `rest/agile/1.0/${endpoint}`);
     }
     async sendRestPostApi(endpoint, body) {
-        console.log(JSON.stringify(body, null, 2));
+        //FIXME: console.log(JSON.stringify(body, null, 2));
         return this.sendRequest("POST", `rest/api/3/${endpoint}`, body);
     }
     async sendRestPutApi(endpoint, body) {
-        console.log(JSON.stringify(body, null, 2));
+        //FIXME: console.log(JSON.stringify(body, null, 2));
         return this.sendRequest("PUT", `rest/api/3/${endpoint}`, body);
     }
     async sendRequest(method, path, body) {

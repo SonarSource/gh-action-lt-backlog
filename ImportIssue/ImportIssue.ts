@@ -46,11 +46,11 @@ class ImportIssue extends OctokitAction {
   }
 
   private async importIssue(jiraProject: string, issue: Issue): Promise<string> {
+    console.log(`Importing ${issue.html_url}`);
     const parameters: NewIssueParameters = {
       issuetype: { name: this.issueType(issue) },
       description: AtlassianDocument.fromMarkdown(issue.body ?? ''),
     };
-
     const id = await this.jira.createIssue(jiraProject, issue.title, parameters);
     console.log(`Created ${id}`);
     const promises: Promise<void>[] = [];

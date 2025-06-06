@@ -41,6 +41,7 @@ class ImportIssue extends OctokitAction_1.OctokitAction {
         }
     }
     async importIssue(jiraProject, issue) {
+        console.log(`Importing ${issue.html_url}`);
         const parameters = {
             issuetype: { name: this.issueType(issue) },
             description: AtlassianDocumentFormat_1.AtlassianDocument.fromMarkdown(issue.body ?? ''),

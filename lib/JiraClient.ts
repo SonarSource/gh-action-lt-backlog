@@ -217,12 +217,12 @@ export class JiraClient {
   }
 
   private async sendRestPostApi(endpoint: string, body: any): Promise<any> {
-    console.log(JSON.stringify(body, null, 2));
+    //FIXME: console.log(JSON.stringify(body, null, 2));
     return this.sendRequest("POST", `rest/api/3/${endpoint}`, body);
   }
 
   private async sendRestPutApi(endpoint: string, body: any): Promise<any> {
-    console.log(JSON.stringify(body, null, 2));
+    //FIXME: console.log(JSON.stringify(body, null, 2));
     return this.sendRequest("PUT", `rest/api/3/${endpoint}`, body);
   }
 
