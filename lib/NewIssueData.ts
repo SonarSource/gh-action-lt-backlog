@@ -2,19 +2,10 @@ import { EngineeringExperienceSquad } from "../Data/TeamConfiguration";
 import { AtlassianDocument } from "./AtlassianDocumentFormat";
 import { Config } from "./Configuration";
 import { JIRA_ISSUE_PATTERN } from "./Constants";
+import { NewIssueParameters } from "./NewIssueParameters";
 import { JiraClient } from "./JiraClient";
 import { PullRequest } from "./OctokitTypes";
 import { Team } from "./Team";
-
-interface IssueParameters {
-  issuetype: { name: string };
-  labels?: string[];
-  parent?: { key: string };
-  reporter?: { id: string };
-  description: AtlassianDocument;
-  customfield_10001?: string; // This is how Pattlasian* named teamId in Jira
-  customfield_10020?: number; // How would you name a sprintId? Oh, I know...
-}
 
 export class NewIssueData {
   public readonly projectKey: string;
@@ -95,7 +86,7 @@ export class NewIssueData {
     return {};
   }
 
-  private static newIssueParameters(projectKey: string, parent: any, issueType: string, description: AtlassianDocument): IssueParameters {
+  private static newIssueParameters(projectKey: string, parent: any, issueType: string, description: AtlassianDocument): NewIssueParameters {
     switch (parent?.fields.issuetype.name) {
       case 'Epic':
         return { issuetype: { name: issueType }, description, parent: { key: parent.key } };

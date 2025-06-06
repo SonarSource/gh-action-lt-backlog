@@ -1,0 +1,18 @@
+name: 'Import issue from GitHub into Jira'
+description: 'Import issue from GitHub into Jira.'
+inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
+  jira-user:
+    description: 'Jira auth User'
+    required: true
+  jira-token:
+    description: 'Jira auth Token'
+    required: true
+  jira-project:
+    description: 'Jira project key'
+    required: true
+runs:
+  using: 'node20'
+  main: '../dist/ImportIssue/ImportIssue.js'

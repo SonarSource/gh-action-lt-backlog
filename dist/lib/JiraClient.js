@@ -94,6 +94,10 @@ class JiraClient {
         };
         return await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request) != null;
     }
+    async addIssueRemoteLink(issueId, url, title = null) {
+        console.log(`${issueId}: Adding remote link ${url}`);
+        await this.sendRestPostApi(`issue/${issueId}/remotelink`, { object: { url, title: title ?? url } });
+    }
     async findAccountId(email) {
         if (email == null) {
             console.log('Could not find accountId, email is null');
@@ -178,12 +182,14 @@ class JiraClient {
     async sendRestGetAgile(endpoint) {
         return this.sendRequest("GET", `rest/agile/1.0/${endpoint}`);
     }
+    // FIXME: Private
     async sendRestPostApi(endpoint, body) {
-        console.log(JSON.stringify(body, null, 2));
+        // FIXME: console.log(JSON.stringify(body, null, 2));
         return this.sendRequest("POST", `rest/api/3/${endpoint}`, body);
     }
+    // FIXME: Private
     async sendRestPutApi(endpoint, body) {
-        console.log(JSON.stringify(body, null, 2));
+        //FIXME: console.log(JSON.stringify(body, null, 2));
         return this.sendRequest("PUT", `rest/api/3/${endpoint}`, body);
     }
     async sendRequest(method, path, body) {
@@ -198,6 +204,7 @@ class JiraClient {
             body: body ? JSON.stringify(body) : undefined,
         });
         const responseContent = await response.text();
+        //console.log(responseContent);
         const data = responseContent.length > 0 ? JSON.parse(responseContent) : {};
         if (response.ok) {
             return data;
