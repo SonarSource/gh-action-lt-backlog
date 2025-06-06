@@ -32,7 +32,18 @@ class ImportIssue extends OctokitAction {
           log.push(`${JIRA_DOMAIN}/browse/${id}`);
 
         } else if (issue) {
-          this.log(`Skip already imported: ${issue.title}`);
+
+
+
+          if (issue.user.login.endsWith('-sonarsource') && issue.labels.find(x => this.hasLabel(issue, "Type: False Negative"))) {
+            await this.addComment(issue.number, `Moved`);
+            await this.rest.issues.update(this.addRepo({ issue_number: issue.number, state: 'closed' }));
+            this.log(`https://github.com/${this.repo.owner}/${this.repo.repo}/issues/${issue.number}`);
+          } else if (issue.labels.find(x => this.hasLabel(issue, "Type: False Negative"))) {
+            log.push(issue.user.login);
+          } else {
+            this.log(`Skip already imported: ${issue.title}`);
+          }
         }
       }
       page++;
