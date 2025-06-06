@@ -84,6 +84,12 @@ describe('MarkdownTextParser', () => {
         (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: 'Not a [link' });
         (0, expect_1.expect)(parser.readBlock()).toBeNull();
     });
+    it('handles text starting with brackets that are not a link', () => {
+        const parser = new MarkdownTextParser_1.MarkdownTextParser('[S1234] is not a link `has also snippet`');
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'text', text: '[S1234] is not a link ' });
+        (0, expect_1.expect)(parser.readBlock()).toEqual({ type: 'code', text: 'has also snippet' });
+        (0, expect_1.expect)(parser.readBlock()).toBeNull();
+    });
     it('handles empty string', () => {
         const parser = new MarkdownTextParser_1.MarkdownTextParser('');
         (0, expect_1.expect)(parser.readBlock()).toBeNull();

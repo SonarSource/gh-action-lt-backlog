@@ -92,6 +92,13 @@ describe('MarkdownTextParser', () => {
     expect(parser.readBlock()).toBeNull();
   });
 
+  it('handles text starting with brackets that are not a link', () => {
+    const parser = new MarkdownTextParser('[S1234] is not a link `has also snippet`');
+    expect(parser.readBlock()).toEqual({ type: 'text', text: '[S1234] is not a link ' });
+    expect(parser.readBlock()).toEqual({ type: 'code', text: 'has also snippet' });
+    expect(parser.readBlock()).toBeNull();
+  });
+
   it('handles empty string', () => {
     const parser = new MarkdownTextParser('');
     expect(parser.readBlock()).toBeNull();

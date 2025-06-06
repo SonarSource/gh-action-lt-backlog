@@ -44,7 +44,7 @@ class MarkdownTextParser {
             if (next.token > 0 && (next.link < 0 || next.token < next.link)) {
                 return next.token;
             }
-            else if (next.link > 0) {
+            else if (next.link >= 0) {
                 if (this.matchLink(next.link) != null) {
                     return next.link;
                 }
@@ -88,8 +88,8 @@ class NextIndex {
         this.token = this.minToken(text.indexOf('`', index));
         this.token = this.minToken(text.indexOf('http://', index));
         this.token = this.minToken(text.indexOf('https://', index));
-        this.link = text.indexOf('[', index);
-        if (this.token === index || this.link === index) {
+        this.link = text.indexOf('[', index); // Might, or might not be a link
+        if (this.token === index) {
             throw new Error('This should be called only when current token starts with text.');
         }
     }
