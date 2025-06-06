@@ -216,12 +216,14 @@ export class JiraClient {
     return this.sendRequest("GET", `rest/agile/1.0/${endpoint}`);
   }
 
-  private async sendRestPostApi(endpoint: string, body: any): Promise<any> {
-    //FIXME: console.log(JSON.stringify(body, null, 2));
+  // FIXME: Private
+  public async sendRestPostApi(endpoint: string, body: any): Promise<any> {
+    // FIXME: console.log(JSON.stringify(body, null, 2));
     return this.sendRequest("POST", `rest/api/3/${endpoint}`, body);
   }
 
-  private async sendRestPutApi(endpoint: string, body: any): Promise<any> {
+  // FIXME: Private
+  public async sendRestPutApi(endpoint: string, body: any): Promise<any> {
     //FIXME: console.log(JSON.stringify(body, null, 2));
     return this.sendRequest("PUT", `rest/api/3/${endpoint}`, body);
   }
@@ -238,6 +240,9 @@ export class JiraClient {
       body: body ? JSON.stringify(body) : undefined,
     });
     const responseContent = await response.text();
+
+    //console.log(responseContent);
+
     const data = responseContent.length > 0 ? JSON.parse(responseContent) : {};
     if (response.ok) {
       return data
