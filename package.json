@@ -9,9 +9,13 @@
     "format": "prettier --write \"**/*.ts\""
   },
   "devDependencies": {
+
     "@babel/preset-env": "^7.27.2",
     "@babel/preset-typescript": "^7.27.1",
+
     "@types/node": "^22.13.8",
+
+    "expect": "^30.0.0-beta.3",
     "jest": "^29.7.0",
     "jest-editor-support": "^32.0.0-beta.1",
     "prettier": "^3.5.3",
