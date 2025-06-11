@@ -1,6 +1,10 @@
 container:
   image: node:latest
 
+env:
+  NPM_CONFIG_registry: https://repox.jfrog.io/artifactory/api/npm/npm
+  NPM_CONFIG_//repox.jfrog.io/artifactory/api/npm/:_authToken: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-private-reader access_token]
+
 validate_build_task:
   validate_build_script:
     - npm run build
