@@ -9,6 +9,6 @@ validate_build_task:
 
 test_task:
   restore_script:       # Restore DEV dependencies that are not present in the repo due to .gitignore of /node_modules/ to reduce the checkout size in production.
-    - npm run install
+    - npm install
   test_script:
     - npm run test
