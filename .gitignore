@@ -6,3 +6,6 @@
 
 # CI run uses different casing than local run => skip this file, it's for incremental build and not needed at runtime. We can try to remove this once we're out of Cirrus CI.
 /dist/tsconfig.tsbuildinfo
+
+# See the ReadMe.md file for dependency management strategy
+/node_modules/
