@@ -11,7 +11,7 @@ class Configuration {
   }
 
   public findTeam(name: string): TeamConfiguration {
-    return this.teams[name];
+    return this.teams[name] || null;
   }
 }
 

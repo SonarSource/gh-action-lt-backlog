@@ -47,6 +47,22 @@ All actions should be consumed from these branches.
 
     More info: https://docs.npmjs.com/cli/v9/configuring-npm/npmrc#auth-related-configuration
 
+### /node_modules/ dependencies
+
+The `/node_modules/` files that are part of the GIT repo:
+* Must contain production dependencies for the actions to run.
+* Must NOT contain development and testing dependencies, as those bring 10k+ small files that takes ages to check out on every action run.
+
+Dependency update:
+
+1. Delete `/node_module/`.
+1. Comment out `/node_module/` exclusion in `.gitignore` file.
+1. Run `npm install --omit=dev` to restore only production dependencies into the `/node_module/`.
+1. Commit all changes.
+1. Uncomment `/node_module/` exclusion in `.gitignore` file.
+1. Run `npm install` to get all remaining files for local development.
+1. Commit changes to `.package-lock.json` file.
+
 ### Run Octokit action from PowerShell:
 
 This syntax allows setting environment variables with hyphens in the name:
