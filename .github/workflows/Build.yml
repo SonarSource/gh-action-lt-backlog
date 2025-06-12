@@ -65,7 +65,7 @@ jobs:
       - name: Restore dev dependencies
         env:
             NPM_CONFIG_registry: https://repox.jfrog.io/artifactory/api/npm/npm
-            NPM_CONFIG_//repox.jfrog.io/artifactory/api/npm/:_authToken: ${{ fromJSON(steps.secrets.outputs.vault).ARTIFACTORY_PRIVATE_PASSWORD }}
+            NPM_CONFIG_//repox.jfrog.io/artifactory/api/npm/:_authToken: ${{ fromJSON(steps.secrets.outputs.vault).REPOX_TOKEN }}
         run: npm install
 
       - name: Run tests
