@@ -39,7 +39,6 @@ class PullRequestCreated extends OctokitAction {
         for (const issue of fixedIssues) {
           await this.updateJiraComponent(issue);
         }
-        // Oh no
       } else {
         await this.addLinkedIssuesToDescription(pr, fixedIssues);
       }
