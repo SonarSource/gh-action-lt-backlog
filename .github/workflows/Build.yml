@@ -45,7 +45,7 @@ jobs:
         uses: SonarSource/vault-action-wrapper@v3
         with:
           secrets: |
-            development/artifactory/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | NPM_CONFIG_//repox.jfrog.io/artifactory/api/npm/:_authToken:;
+            development/artifactory/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | NPM_CONFIG_//repox.jfrog.io/artifactory/api/npm/:_authToken:
 
         # Restore DEV dependencies that are not present in the repo due to .gitignore of /node_modules/ to reduce the checkout size in production.
       - name: Restore dev dependencies
