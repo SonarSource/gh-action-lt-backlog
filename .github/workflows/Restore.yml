@@ -1,14 +1,8 @@
-name: Build
-
 on:
-  push:
-    branches:
-      - master
-  pull_request:
+  workflow_call:
 
 jobs:
-  validate-build:
-    name: Validate Dist files
+  restore-dev-dependencies:
     runs-on: ubuntu-latest-large
     permissions:
       id-token: write
@@ -30,22 +24,3 @@ jobs:
             NPM_CONFIG_registry: https://repox.jfrog.io/artifactory/api/npm/npm
             NPM_CONFIG_//repox.jfrog.io/artifactory/api/npm/:_authToken: ${{ fromJSON(steps.secrets.outputs.vault).REPOX_TOKEN }}
         run: npm install
-
-      - name: Build
-        run: npm run build
-
-      - name: Validate committed files
-        run: ./scripts/check-committed.sh
-
-  test:
-    name: Run tests
-    runs-on: ubuntu-latest-large
-    permissions:
-      id-token: write
-      contents: write
-
-    steps:
-      - uses: ./.github/workflows/Restore.yml
-
-      - name: Run tests
-        run: npm run test
