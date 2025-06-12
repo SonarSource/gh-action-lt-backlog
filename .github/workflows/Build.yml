@@ -1,0 +1,46 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  validate-build:
+    name: Validate build files
+    runs-on: sonar-xs
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+#      - name: Restore dev dependencies
+#        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Validate committed files
+        run: ./scripts/check-committed.sh
+
+  test:
+    name: Run tests
+    runs-on: sonar-xs
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+        # Restore DEV dependencies that are not present in the repo due to .gitignore of /node_modules/ to reduce the checkout size in production.
+      - name: Restore dev dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm run test
