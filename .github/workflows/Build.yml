@@ -35,7 +35,6 @@ jobs:
       contents: write
     env:
       NPM_CONFIG_registry: https://repox.jfrog.io/artifactory/api/npm/npm
-       ${{ secrets[''] }}
 
     steps:
       - name: Checkout code
