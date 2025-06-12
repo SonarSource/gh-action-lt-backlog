@@ -33,10 +33,19 @@ jobs:
     permissions:
       id-token: write
       contents: write
+    env:
+      NPM_CONFIG_registry: https://repox.jfrog.io/artifactory/api/npm/npm
+       ${{ secrets[''] }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - id: secrets
+        uses: SonarSource/vault-action-wrapper@v3
+        with:
+          secrets: |
+            development/artifactory/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | NPM_CONFIG_//repox.jfrog.io/artifactory/api/npm/:_authToken:;
 
         # Restore DEV dependencies that are not present in the repo due to .gitignore of /node_modules/ to reduce the checkout size in production.
       - name: Restore dev dependencies
