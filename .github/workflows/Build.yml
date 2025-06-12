@@ -50,7 +50,14 @@ jobs:
         uses: SonarSource/vault-action-wrapper@v3
         with:
           secrets: |
-            development/artifactory/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | NPM_CONFIG_//repox.jfrog.io/artifactory/api/npm/:_authToken:
+            development/artifactory/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | REPOX_TOKEN;
+
+        #FIXME
+      - name: List environment variable names
+        run: printenv | cut -d= -f1
+
+      - name: Set NPM auth token env var
+        run: echo "NPM_CONFIG_//repox.jfrog.io/artifactory/api/npm/:_authToken=$REPOX_TOKEN" >> $GITHUB_ENV
 
         #FIXME
       - name: List environment variable names
