@@ -1,0 +1,21 @@
+name: 'Trello Sync'
+description: 'Synchronize plan from Trello to Jira.'
+inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
+  jira-user:
+    description: 'Jira auth User'
+    required: true
+  jira-token:
+    description: 'Jira auth Token'
+    required: true
+  trello-api-key:
+    description: 'Trello API Key'
+    required: true
+  trello-api-token:
+    description: 'Trello auth Token'
+    required: true
+runs:
+  using: 'node20'
+  main: '../dist/TrelloSync/TrelloSync.js'
