@@ -20,17 +20,24 @@ class TrelloSync extends OctokitAction {
 
   protected async execute(): Promise<void> {
     const pattern: RegExp = /^[A-Z][A-Z0-9]*-\d+/g;
+    const log: string[] = [];
     for (const card of await this.listCards('VXbSw1ia', 'Planned')) {
       if (card.start && card.due) {
         const ids = card.name.match(pattern);
         if (ids && ids.length === 1) {
           await this.updateIssue(ids[0], new Date(card.start).toISOString().split('T')[0], new Date(card.due).toISOString().split('T')[0]);
         } else {
+          log.push(`SKIP missing id: ${card.name}`);
           this.log(`SKIP missing id: ${card.name}`);
         }
       } else {
+        log.push(`SKIP date: ${card.name}`);
         this.log(`SKIP date: ${card.name}`);
       }
+    }
+    this.log('--- ALL SKIP ---');
+    for (const line of log) {
+      this.log(line);
     }
   }
 

@@ -11,6 +11,7 @@ class TrelloSync extends OctokitAction_1.OctokitAction {
     }
     async execute() {
         const pattern = /^[A-Z][A-Z0-9]*-\d+/g;
+        const log = [];
         for (const card of await this.listCards('VXbSw1ia', 'Planned')) {
             if (card.start && card.due) {
                 const ids = card.name.match(pattern);
@@ -18,12 +19,18 @@ class TrelloSync extends OctokitAction_1.OctokitAction {
                     await this.updateIssue(ids[0], new Date(card.start).toISOString().split('T')[0], new Date(card.due).toISOString().split('T')[0]);
                 }
                 else {
+                    log.push(`SKIP missing id: ${card.name}`);
                     this.log(`SKIP missing id: ${card.name}`);
                 }
             }
             else {
+                log.push(`SKIP date: ${card.name}`);
                 this.log(`SKIP date: ${card.name}`);
             }
+        }
+        this.log('--- ALL SKIP ---');
+        for (const line of log) {
+            this.log(line);
         }
     }
     async updateIssue(id, start, due) {
@@ -34,7 +41,7 @@ class TrelloSync extends OctokitAction_1.OctokitAction {
                 duedate: due
             }
         };
-        await this.jira.sendRestPutApi(`issue/${id}`, request);
+        await this.jira.sendRestPutApi(`issue/${id}?notifyUsers=false`, request);
     }
     async listCards(boardId, columnName) {
         const list = (await this.fetchTrello(`boards/${boardId}/lists`)).find(x => x.name === columnName);
