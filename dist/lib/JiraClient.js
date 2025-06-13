@@ -236,6 +236,7 @@ class JiraClient {
         console.log(JSON.stringify(body, null, 2));
         return this.sendRequest("POST", `rest/api/3/${endpoint}`, body);
     }
+    // FIXME: Private
     async sendRestPutApi(endpoint, body) {
         console.log(JSON.stringify(body, null, 2));
         return this.sendRequest("PUT", `rest/api/3/${endpoint}`, body);

@@ -75,6 +75,9 @@ export type Issue = {
     components: NamedItem[];
     customfield_11227: Account[]; // Reviewers
     customfield_11228: Account[]; // Reviewed by
+    customfield_10001: NamedItem; // Team
+    customfield_10015: string;    // Start date
+    duedate: string;              // Due date
   }
 }
 
@@ -340,7 +343,8 @@ export class JiraClient {
     return this.sendRequest("POST", `rest/api/3/${endpoint}`, body);
   }
 
-  private async sendRestPutApi(endpoint: string, body: any): Promise<any> {
+  // FIXME: Private
+  public async sendRestPutApi(endpoint: string, body: any): Promise<any> {
     console.log(JSON.stringify(body, null, 2));
     return this.sendRequest("PUT", `rest/api/3/${endpoint}`, body);
   }
