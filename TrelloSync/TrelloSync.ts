@@ -42,7 +42,7 @@ class TrelloSync extends OctokitAction {
         duedate: due
       }
     }
-    await this.jira.sendRestPutApi(`issue/${id}`, request);
+    await this.jira.sendRestPutApi(`issue/${id}?notifyUsers=false`, request);
   }
 
   private async listCards(boardId: string, columnName: string): Promise<Card[]> {
