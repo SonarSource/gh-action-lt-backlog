@@ -7,20 +7,6 @@ export class AtlassianDocument {
   constructor(content: AdfNode[]) {
     this.content = content;
   }
-
-  static fromUrl(url: string): AtlassianDocument {
-    return new AtlassianDocument([
-      {
-        type: 'paragraph',
-        content: [
-          {
-            type: 'inlineCard',
-            attrs: { url }
-          }
-        ]
-      }
-    ]);
-  }
 }
 
 export interface AdfNode {

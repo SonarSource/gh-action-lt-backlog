@@ -8,19 +8,6 @@ class AtlassianDocument {
     constructor(content) {
         this.content = content;
     }
-    static fromUrl(url) {
-        return new AtlassianDocument([
-            {
-                type: 'paragraph',
-                content: [
-                    {
-                        type: 'inlineCard',
-                        attrs: { url }
-                    }
-                ]
-            }
-        ]);
-    }
 }
 exports.AtlassianDocument = AtlassianDocument;
 //# sourceMappingURL=AtlassianDocumentFormat.js.map

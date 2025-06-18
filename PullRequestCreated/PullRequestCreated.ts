@@ -56,6 +56,7 @@ class PullRequestCreated extends OctokitAction {
         return null;
       } else {
         await this.persistIssueId(pr, issueId);
+        await this.jira.addIssueRemoteLink(issueId, pr.html_url);
         await this.jira.moveIssue(issueId, 'Commit');   // OPEN  -> TO DO
         if (data.accountId != null) {
           await this.jira.moveIssue(issueId, 'Start');  // TO DO -> IN PROGRESS only for real accounts, no bots GHA-8

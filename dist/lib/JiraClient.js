@@ -94,6 +94,10 @@ class JiraClient {
         };
         return await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request) != null;
     }
+    async addIssueRemoteLink(issueId, url, title = null) {
+        console.log(`${issueId}: Adding remote link ${url}`);
+        await this.sendRestPostApi(`issue/${issueId}/remotelink`, { object: { url, title: title ?? url } });
+    }
     async findAccountId(email) {
         if (email == null) {
             console.log('Could not find accountId, email is null');
