@@ -1,18 +1,6 @@
 import { AtlassianDocument, AdfNode } from './AtlassianDocumentFormat';
 
 describe('AtlassianDocument', () => {
-  describe('fromUrl', () => {
-    it('creates document', () => {
-      const doc = AtlassianDocument.fromUrl('https://example.com');
-      expect(doc).toEqual({
-        type: 'doc',
-        version: 1,
-        content: [{ type: 'paragraph', content: [{ type: 'inlineCard', attrs: { url: 'https://example.com' } }] }
-        ]
-      });
-    });
-  });
-
   describe('fromMarkdown', () => {
     it('parses all blocks', () => {
       const doc = AtlassianDocument.fromMarkdown(`

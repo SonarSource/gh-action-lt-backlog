@@ -122,6 +122,11 @@ export class JiraClient {
     return await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request) != null;
   }
 
+  public async addIssueRemoteLink(issueId: string, url: string, title: string = null): Promise<void> {
+    console.log(`${issueId}: Adding remote link ${url}`);
+    await this.sendRestPostApi(`issue/${issueId}/remotelink`, { object: { url, title: title ?? url } });
+  }
+
   public async findAccountId(email: string): Promise<string> {
     if (email == null) {
       console.log('Could not find accountId, email is null');

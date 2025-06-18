@@ -2,17 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const AtlassianDocumentFormat_1 = require("./AtlassianDocumentFormat");
 describe('AtlassianDocument', () => {
-    describe('fromUrl', () => {
-        it('creates document', () => {
-            const doc = AtlassianDocumentFormat_1.AtlassianDocument.fromUrl('https://example.com');
-            expect(doc).toEqual({
-                type: 'doc',
-                version: 1,
-                content: [{ type: 'paragraph', content: [{ type: 'inlineCard', attrs: { url: 'https://example.com' } }] }
-                ]
-            });
-        });
-    });
     describe('fromMarkdown', () => {
         it('parses all blocks', () => {
             const doc = AtlassianDocumentFormat_1.AtlassianDocument.fromMarkdown(`

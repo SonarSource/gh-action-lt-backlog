@@ -10,19 +10,6 @@ class AtlassianDocument {
     constructor(content) {
         this.content = content;
     }
-    static fromUrl(url) {
-        return new AtlassianDocument([
-            {
-                type: 'paragraph',
-                content: [
-                    {
-                        type: 'inlineCard',
-                        attrs: { url }
-                    }
-                ]
-            }
-        ]);
-    }
     static fromMarkdown(markdown) {
         const contents = [];
         const parser = new MarkdownParser_1.MarkdownParser(markdown);

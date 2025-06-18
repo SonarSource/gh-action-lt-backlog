@@ -10,20 +10,6 @@ export class AtlassianDocument {
     this.content = content;
   }
 
-  static fromUrl(url: string): AtlassianDocument {
-    return new AtlassianDocument([
-      {
-        type: 'paragraph',
-        content: [
-          {
-            type: 'inlineCard',
-            attrs: { url }
-          }
-        ]
-      }
-    ]);
-  }
-
   static fromMarkdown(markdown: string): AtlassianDocument {
     const contents: AdfNode[] = [];
     const parser = new MarkdownParser(markdown);
