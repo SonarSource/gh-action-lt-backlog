@@ -68,6 +68,7 @@ Dependency update:
 This syntax allows setting environment variables with hyphens in the name:
 
 ```
+${env:NODE_TLS_REJECT_UNAUTHORIZED}="0"
 ${env:GITHUB_REPOSITORY}="SonarSource/<YourRepoName>"
 ${env:INPUT_GITHUB-TOKEN}="ghp_...."
 ${env:INPUT_PARAM}="True"
@@ -75,3 +76,4 @@ ${env:INPUT_PARAM-NAME-WITH-HYPHEN}="Value"
 clear; node .\dist\ActionName\ActionName.js
 ```
 
+`NODE_TLS_REJECT_UNAUTHORIZED` is unsafe and needed due to custom certificate in our network chain. It should be used only in short-lived console session.
