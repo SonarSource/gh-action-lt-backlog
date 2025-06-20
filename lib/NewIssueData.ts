@@ -26,7 +26,7 @@ export class NewIssueData {
     if (projectKey) {
       const accountId = await jira.findAccountId(userEmail);
       const additionalFields = this.parseAdditionalFields(inputAdditionFields);
-      const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task', AtlassianDocument.fromUrl(pr.html_url)); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
+      const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
       if (parameters.issuetype.name !== 'Sub-task') {                   // These fields cannot be set on Sub-task. Their values are inherited from the parent issue.
         const team = await this.findTeam(jira, accountId, projectKey);  // Can be null for bots when project lead is not member of any team. Jira request will fail if the field is mandatory for the project.
         if (team != null) {
@@ -45,7 +45,7 @@ export class NewIssueData {
   public static async createForEngExp(jira: JiraClient, pr: PullRequest, userEmail: string): Promise<NewIssueData> {
     const accountId = await jira.findAccountId(userEmail);
     const projectKey = await this.computeProjectKeyForEngExp(jira, pr, accountId);
-    const parameters = this.newIssueParameters(projectKey, null, 'Task', AtlassianDocument.fromUrl(pr.html_url));
+    const parameters = this.newIssueParameters(projectKey, null, 'Task');
     const sprintId = await this.findSprintId(jira, EngineeringExperienceSquad.name);
     if (accountId) {
       parameters.reporter = { id: accountId };
@@ -86,18 +86,18 @@ export class NewIssueData {
     return {};
   }
 
-  private static newIssueParameters(projectKey: string, parent: any, issueType: string, description: AtlassianDocument): NewIssueParameters {
+  private static newIssueParameters(projectKey: string, parent: any, issueType: string): NewIssueParameters {
     switch (parent?.fields.issuetype.name) {
       case 'Epic':
-        return { issuetype: { name: issueType }, description, parent: { key: parent.key } };
+        return { issuetype: { name: issueType }, parent: { key: parent.key } };
       case 'Sub-task':
       case undefined:
       case null:
-        return { issuetype: { name: issueType }, description };
+        return { issuetype: { name: issueType } };
       default:
         return parent.fields.project.key === projectKey   // Sub-task must be created in the same project
-          ? { issuetype: { name: 'Sub-task' }, description, parent: { key: parent.key } }
-          : { issuetype: { name: issueType }, description };
+          ? { issuetype: { name: 'Sub-task' }, parent: { key: parent.key } }
+          : { issuetype: { name: issueType } };
     }
   }
 
