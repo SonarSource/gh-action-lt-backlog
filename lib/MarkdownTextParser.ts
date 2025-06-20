@@ -1,4 +1,3 @@
-
 export interface TextBlock {
   type: 'text' | 'code' | 'link';
   text: string;
