@@ -8,7 +8,6 @@ class MarkdownTextParser {
         this.text = text;
     }
     readBlock() {
-        //console.log(`readBlock ${this.nextIndex}: ${this.text.substring(this.nextIndex, this.nextIndex + 20)}`)
         if (this.nextIndex >= this.text.length) {
             return null;
         }
@@ -40,7 +39,6 @@ class MarkdownTextParser {
         let index = this.nextIndex;
         let next = new NextIndex(this.text, index);
         while (next.token > 0 || next.link > 0) {
-            //console.log(next);
             if (next.token > 0 && (next.link < 0 || next.token < next.link)) {
                 return next.token;
             }

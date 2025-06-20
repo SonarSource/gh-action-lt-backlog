@@ -197,5 +197,4 @@ export abstract class OctokitAction extends Action {
       this.setFailed('Failed to add component');
     }
   }
-
 }

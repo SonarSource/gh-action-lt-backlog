@@ -1,4 +1,3 @@
-
 export interface Block {
   type: 'heading' | 'paragraph' | 'codeBlock' | 'blockquote';
   text: string;
