@@ -38,7 +38,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         if (fixedIssues) {
             if (this.isEngXpSquad) {
                 for (const issue of fixedIssues) {
-                    await this.updateJiraComponent(issue);
+                    await this.addJiraComponent(issue, this.repo.repo, this.payload.repository.html_url);
                 }
             }
             else {
@@ -91,15 +91,6 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
     }
     issueLink(issue) {
         return `[${issue}](${Constants_1.JIRA_DOMAIN}/browse/${issue})`;
-    }
-    async updateJiraComponent(issueId) {
-        const component = this.repo.repo;
-        if (!await this.jira.createComponent(issueId.split('-')[0], component, this.payload.repository.html_url)) { // Same PR can have multiple issues from different projects
-            this.setFailed('Failed to create component');
-        }
-        if (!await this.jira.addIssueComponent(issueId, component)) {
-            this.setFailed('Failed to add component');
-        }
     }
 }
 const action = new PullRequestCreated();
