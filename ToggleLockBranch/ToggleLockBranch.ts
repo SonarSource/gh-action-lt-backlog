@@ -9,7 +9,7 @@ type ProtectionRule = {
 
 class LockBranch extends OctokitAction {
   protected async execute(): Promise<void> {
-    const pattern = this.getInput('branch-pattern');
+    const pattern = this.inputString('branch-pattern');
     let rule = await this.FindRule(pattern);
     if (rule) {
       const lockBranch = !rule.lockBranch;

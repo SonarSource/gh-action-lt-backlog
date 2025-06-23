@@ -5,8 +5,8 @@ import { NewIssueData } from '../lib/NewIssueData';
 
 class PullRequestCreated extends OctokitAction {
   protected async execute(): Promise<void> {
-    const inputJiraProject = this.getInput('jira-project');
-    const inputAdditionalFields = this.getInput('additional-fields');
+    const inputJiraProject = this.inputString('jira-project');
+    const inputAdditionalFields = this.inputString('additional-fields');
     if (this.isEngXpSquad) {
       if (inputJiraProject) {
         this.setFailed('jira-project input is not supported when is-eng-xp-squad is set.');
@@ -21,7 +21,7 @@ class PullRequestCreated extends OctokitAction {
       this.log("'DO NOT MERGE' found in the PR title, skipping the action.");
       return;
     }
-    const pr = await this.getPullRequest(this.payload.pull_request.number);
+    const pr = await this.loadPullRequest(this.payload.pull_request.number);
     if (pr == null) {
       return;
     }

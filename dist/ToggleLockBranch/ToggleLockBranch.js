@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const OctokitAction_1 = require("../lib/OctokitAction");
 class LockBranch extends OctokitAction_1.OctokitAction {
     async execute() {
-        const pattern = this.getInput('branch-pattern');
+        const pattern = this.inputString('branch-pattern');
         let rule = await this.FindRule(pattern);
         if (rule) {
             const lockBranch = !rule.lockBranch;

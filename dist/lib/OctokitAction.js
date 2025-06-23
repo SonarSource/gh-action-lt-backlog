@@ -16,26 +16,26 @@ class OctokitAction extends Action_1.Action {
     graphqlWithAuth;
     constructor() {
         super();
-        this.jira = new JiraClient_1.JiraClient(this.getInput('jira-user'), this.getInput('jira-token'));
-        this.octokit = github.getOctokit(this.getInput('github-token'));
+        this.jira = new JiraClient_1.JiraClient(this.inputString('jira-user'), this.inputString('jira-token'));
+        this.octokit = github.getOctokit(this.inputString('github-token'));
         this.rest = this.octokit.rest;
-        this.isEngXpSquad = this.getInputBoolean('is-eng-xp-squad');
+        this.isEngXpSquad = this.inputBoolean('is-eng-xp-squad');
     }
     sendGraphQL(query) {
         if (!this.graphqlWithAuth) {
             this.graphqlWithAuth = graphql_1.graphql.defaults({
                 headers: {
-                    authorization: `token ${this.getInput('github-token')}`,
+                    authorization: `token ${this.inputString('github-token')}`,
                 },
             });
         }
         return this.graphqlWithAuth(query);
     }
-    getInput(name) {
+    inputString(name) {
         return core.getInput(name);
     }
-    getInputNumber(name) {
-        const input = this.getInput(name);
+    inputNumber(name) {
+        const input = this.inputString(name);
         const value = parseInt(input);
         if (isNaN(value)) {
             throw new Error(`Value of input '${name}' is not a number: ${input}`);
@@ -44,12 +44,12 @@ class OctokitAction extends Action_1.Action {
             return value;
         }
     }
-    getInputBoolean(name) {
-        return this.getInput(name).toLowerCase() === 'true';
+    inputBoolean(name) {
+        return this.inputString(name).toLowerCase() === 'true';
     }
-    async getPullRequest(pull_number) {
+    async loadPullRequest(pull_number) {
         try {
-            this.log(`Getting PR #${pull_number}`);
+            this.log(`Loading PR #${pull_number}`);
             return (0, OctokitTypes_1.addPullRequestExtensions)((await this.rest.pulls.get(this.addRepo({ pull_number }))).data);
         }
         catch (error) {
@@ -116,7 +116,7 @@ class OctokitAction extends Action_1.Action {
         }
     }
     async sendSlackMessage(text) {
-        const channel = this.getInput("slack-channel");
+        const channel = this.inputString("slack-channel");
         if (channel) {
             this.log("Sending Slack message");
             await this.sendSlackPost("https://slack.com/api/chat.postMessage", { channel, text });
@@ -126,7 +126,7 @@ class OctokitAction extends Action_1.Action {
         }
     }
     async sendSlackPost(url, jsonRequest) {
-        const token = this.getInput("slack-token");
+        const token = this.inputString("slack-token");
         if (!token) {
             throw new Error("slack-token was not set");
         }

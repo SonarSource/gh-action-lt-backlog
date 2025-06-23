@@ -21,7 +21,7 @@ export abstract class PullRequestAction extends OctokitAction {
   }
 
   private async fixedJiraIssues(): Promise<string[]> {
-    const pr = await this.getPullRequest(this.payload.pull_request.number);
+    const pr = await this.loadPullRequest(this.payload.pull_request.number);
     return pr
       ? (await this.findFixedIssues(pr)) ?? []
       : [];
