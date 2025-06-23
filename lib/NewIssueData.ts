@@ -104,10 +104,14 @@ export class NewIssueData {
   private static async findNonSubTaskParent(jira: JiraClient, issues: Set<string>): Promise<any> {
     console.log('Looking for a non-Sub-task ticket');
     for (const issueKey of issues) {
-      const issue = await jira.getIssue(issueKey);
-      if (issue && issue.fields.issuetype.name !== 'Sub-task') {
-        console.log(`Parent issue: ${issue.key} ${issue.fields.issuetype.name}`);
-        return issue;
+      if (issueKey.startsWith("BUILD-") || issueKey.startsWith("PREQ-")) {
+        console.log(`Ignoring Eng. Xp Squad project: ${issueKey}`);
+      } else {
+        const issue = await jira.getIssue(issueKey);
+        if (issue && issue.fields.issuetype.name !== 'Sub-task') {
+          console.log(`Parent issue: ${issue.key} ${issue.fields.issuetype.name}`);
+          return issue;
+        }
       }
     }
     console.log('No parent issue found');
