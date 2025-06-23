@@ -57,6 +57,16 @@ class OctokitAction extends Action_1.Action {
             return null;
         }
     }
+    async loadIssue(issue_number) {
+        try {
+            this.log(`Loading issue #${issue_number}`);
+            return (await this.rest.issues.get(this.addRepo({ issue_number }))).data;
+        }
+        catch (error) {
+            this.log(`Issue #${issue_number} not found: ${error}`);
+            return null;
+        }
+    }
     async findFixedIssues(pr) {
         const text = pr.isRenovate() // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
             ? (await this.listComments(pr.number)).filter(x => x.body?.startsWith(Constants_1.RENOVATE_PREFIX)).pop()?.body
@@ -69,6 +79,10 @@ class OctokitAction extends Action_1.Action {
     async listComments(issue_number) {
         return (await this.rest.issues.listComments(this.addRepo({ issue_number }))).data;
     }
+    updateIssueTitle(issue_number, title) {
+        this.log(`Updating issue #${issue_number} title to: ${title}`);
+        return this.updateIssue(issue_number, { title });
+    }
     updatePullRequestTitle(prNumber, title) {
         this.log(`Updating PR #${prNumber} title to: ${title}`);
         return this.updatePullRequest(prNumber, { title });
@@ -76,6 +90,14 @@ class OctokitAction extends Action_1.Action {
     updatePullRequestDescription(prNumber, body) {
         this.log(`Updating PR #${prNumber} description`);
         return this.updatePullRequest(prNumber, { body });
+    }
+    async updateIssue(issue_number, update) {
+        try {
+            await this.rest.issues.update(this.addRepo({ issue_number, ...update }));
+        }
+        catch (error) {
+            this.log(`Failed to update issue #${issue_number}: ${error}`);
+        }
     }
     async updatePullRequest(prNumber, update) {
         try {
