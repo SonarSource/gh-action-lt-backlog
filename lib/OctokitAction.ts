@@ -4,7 +4,7 @@ import * as graphqlTypes from '@octokit/graphql/dist-types/types';
 import { GitHub } from '@actions/github/lib/utils';
 import { Action } from './Action';
 import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types';
-import { PullRequest, IssueComment, addPullRequestExtensions } from './OctokitTypes';
+import { PullRequest, IssueComment, addPullRequestExtensions, Issue } from './OctokitTypes';
 import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
 import { JiraClient } from './JiraClient';
 import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX } from './Constants';
@@ -63,6 +63,16 @@ export abstract class OctokitAction extends Action {
     }
   }
 
+  protected async loadIssue(issue_number: number): Promise<Issue> {
+    try {
+      this.log(`Loading issue #${issue_number}`);
+      return (await this.rest.issues.get(this.addRepo({ issue_number }))).data;
+    } catch (error) {
+      this.log(`Issue #${issue_number} not found: ${error}`);
+      return null;
+    }
+  }
+
   protected async findFixedIssues(pr: PullRequest): Promise<string[]> {
     const text = pr.isRenovate() // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
       ? (await this.listComments(pr.number)).filter(x => x.body?.startsWith(RENOVATE_PREFIX)).pop()?.body
@@ -78,6 +88,11 @@ export abstract class OctokitAction extends Action {
     return (await this.rest.issues.listComments(this.addRepo({ issue_number }))).data;
   }
 
+  protected updateIssueTitle(issue_number: number, title: string): Promise<void> {
+    this.log(`Updating issue #${issue_number} title to: ${title}`);
+    return this.updateIssue(issue_number, { title });
+  }
+
   protected updatePullRequestTitle(prNumber: number, title: string): Promise<void> {
     this.log(`Updating PR #${prNumber} title to: ${title}`);
     return this.updatePullRequest(prNumber, { title });
@@ -86,6 +101,14 @@ export abstract class OctokitAction extends Action {
   protected updatePullRequestDescription(prNumber: number, body: string): Promise<void> {
     this.log(`Updating PR #${prNumber} description`);
     return this.updatePullRequest(prNumber, { body });
+  }
+
+  private async updateIssue(issue_number: number, update: { title?: string, body?: string }): Promise<void> {
+    try {
+      await this.rest.issues.update(this.addRepo({ issue_number, ...update }));
+    } catch (error) {
+      this.log(`Failed to update issue #${issue_number}: ${error}`);
+    }
   }
 
   private async updatePullRequest(prNumber: number, update: { title?: string, body?: string }): Promise<void> {
