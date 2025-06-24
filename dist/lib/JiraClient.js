@@ -20,12 +20,12 @@ class JiraClient {
         const response = await this.sendRestPostApi('issue', request);
         return response?.key;
     }
-    getIssue(issueKey) {
-        console.log(`Get issue '${issueKey}'`);
+    loadIssue(issueKey) {
+        console.log(`Load issue '${issueKey}'`);
         return this.sendRestGetApi(`issue/${issueKey}`);
     }
-    getProject(projectKey) {
-        console.log(`Get project '${projectKey}'`);
+    loadProject(projectKey) {
+        console.log(`Load project '${projectKey}'`);
         return this.sendRestGetApi(`project/${projectKey}`);
     }
     async moveIssue(issueId, transitionName, fields = null) {

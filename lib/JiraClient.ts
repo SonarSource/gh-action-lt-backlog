@@ -38,13 +38,13 @@ export class JiraClient {
     return response?.key;
   }
 
-  public getIssue(issueKey: string): Promise<any> {
-    console.log(`Get issue '${issueKey}'`);
+  public loadIssue(issueKey: string): Promise<any> {
+    console.log(`Load issue '${issueKey}'`);
     return this.sendRestGetApi(`issue/${issueKey}`);
   }
 
-  public getProject(projectKey: string): Promise<any> {
-    console.log(`Get project '${projectKey}'`);
+  public loadProject(projectKey: string): Promise<any> {
+    console.log(`Load project '${projectKey}'`);
     return this.sendRestGetApi(`project/${projectKey}`);
   }
 

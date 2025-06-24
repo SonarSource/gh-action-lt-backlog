@@ -101,7 +101,7 @@ class NewIssueData {
                 console.log(`Ignoring Eng. Xp Squad project: ${issueKey}`);
             }
             else {
-                const issue = await jira.getIssue(issueKey);
+                const issue = await jira.loadIssue(issueKey);
                 if (issue && issue.fields.issuetype.name !== 'Sub-task') {
                     console.log(`Parent issue: ${issue.key} ${issue.fields.issuetype.name}`);
                     return issue;
@@ -123,7 +123,7 @@ class NewIssueData {
                 return team;
             }
         }
-        const { lead: { accountId: leadAccountId, displayName } } = await jira.getProject(projectKey);
+        const { lead: { accountId: leadAccountId, displayName } } = await jira.loadProject(projectKey);
         console.log(`No team found for current user, using ${projectKey} lead ${displayName}`);
         return jira.findTeam(leadAccountId);
     }
