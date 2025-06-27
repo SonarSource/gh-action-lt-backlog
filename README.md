@@ -77,3 +77,23 @@ clear; node .\dist\ActionName\ActionName.js
 ```
 
 `NODE_TLS_REJECT_UNAUTHORIZED` is unsafe and needed due to custom certificate in our network chain. It should be used only in short-lived console session.
+
+### Local debugging
+
+Create `.vscode/launch.json` file, update `program` path to `FIXME` startup file and start debugging:
+
+```
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "program": "${workspaceFolder}/dist/FIXME/FIXME.js",
+      "type": "node",
+      "request": "launch",
+      "name": "Launch",
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "outFiles": [ "${workspaceFolder}/dist/**/*.js" ]
+    }
+  ]
+}
+```
