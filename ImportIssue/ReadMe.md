@@ -26,7 +26,7 @@ None
 
 ## Prerequisites
 
-Ask DevInfra Squad to "Add Jira GitHub tokens" to the Vault configuration of your repository. Example: [EREQ-92](https://sonarsource.atlassian.net/browse/EREQ-92)
+Ask DevInfra Squad to "Add Jira GitHub tokens" to the Vault configuration of your repository. Example: [PREQ-1272](https://sonarsource.atlassian.net/browse/PREQ-1272). This has additional need for `issues: write`, compared to the other actions.
 
 ## Example usage
 
