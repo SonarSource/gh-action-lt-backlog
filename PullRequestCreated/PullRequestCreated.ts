@@ -35,12 +35,11 @@ class PullRequestCreated extends OctokitAction {
       await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
     }
     if (fixedIssues) {
+      await this.addLinkedIssuesToDescription(pr, fixedIssues);
       if (this.isEngXpSquad) {
         for (const issue of fixedIssues) {
           await this.addJiraComponent(issue, this.repo.repo, this.payload.repository.html_url);
         }
-      } else {
-        await this.addLinkedIssuesToDescription(pr, fixedIssues);
       }
     }
   }
