@@ -2,13 +2,30 @@ import { JIRA_SITE_ID, JIRA_DOMAIN, JIRA_ORGANIZATION_ID } from './Constants';
 import { Config } from './Configuration';
 import { Team } from './Team';
 
-interface TeamSearchV2Detail {
+interface TeamSearchV2NodeTeam {
   id: string;
   displayName: string;
 }
 
-interface TeamSearchV2 {
-  team: TeamSearchV2Detail;
+interface TeamSearchV2Node {
+  team: TeamSearchV2NodeTeam;
+}
+
+interface TeamSearchV2Result {
+  nodes: TeamSearchV2Node[];
+}
+
+interface TeamSearchV2Team {
+  teamSearchV2: TeamSearchV2Result;
+}
+
+interface TeamSearchV2Data {
+  team?: TeamSearchV2Team
+}
+
+interface TeamSearchV2Response {
+  errors?: any[];
+  data: TeamSearchV2Data;
 }
 
 interface Sprint {
@@ -164,7 +181,7 @@ export class JiraClient {
 
   public async findTeam(accountId: string): Promise<Team> {
     console.log(`Searching for teams of account ${accountId}`);
-    const { data: { team: { teamSearchV2: { nodes } } } }: { data: { team: { teamSearchV2: { nodes: TeamSearchV2[] } } } } = await this.sendGraphQL(`
+    const response: TeamSearchV2Response = await this.sendGraphQL(`
       query MandatoryButUselessQueryName {
         team {
           teamSearchV2 (
@@ -179,15 +196,21 @@ export class JiraClient {
           }
         }
       }`);
-    if (nodes.length === 0) {
-      console.log(`Could not find team for account ${accountId} in Jira`);
+    if (response.errors) {
+      console.log(`ERROR: Failed to search for teams. ${JSON.stringify(response.errors, null, 2)}`);
       return null;
-    }
-    else {
-      const match = nodes.find((x: TeamSearchV2) => Config.findTeam(x.team.displayName) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
-      const id = match.team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
-      console.log(`Found ${nodes.length} team(s), using ${id} ${match.team.displayName}`);
-      return { id, name: match.team.displayName };
+    } else {
+      const nodes = response.data.team.teamSearchV2.nodes;
+      if (nodes.length === 0) {
+        console.log(`Could not find team for account ${accountId} in Jira`);
+        return null;
+      }
+      else {
+        const match = nodes.find((x: TeamSearchV2Node) => Config.findTeam(x.team.displayName) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
+        const id = match.team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
+        console.log(`Found ${nodes.length} team(s), using ${id} ${match.team.displayName}`);
+        return { id, name: match.team.displayName };
+      }
     }
   }
 
