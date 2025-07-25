@@ -134,7 +134,7 @@ class JiraClient {
     }
     async findTeam(accountId) {
         console.log(`Searching for teams of account ${accountId}`);
-        const { data: { team: { teamSearchV2: { nodes } } } } = await this.sendGraphQL(`
+        const response = await this.sendGraphQL(`
       query MandatoryButUselessQueryName {
         team {
           teamSearchV2 (
@@ -149,15 +149,22 @@ class JiraClient {
           }
         }
       }`);
-        if (nodes.length === 0) {
-            console.log(`Could not find team for account ${accountId} in Jira`);
+        if (response.errors) {
+            console.log(`ERROR: Failed to search for teams. ${JSON.stringify(response.errors, null, 2)}`);
             return null;
         }
         else {
-            const match = nodes.find((x) => Configuration_1.Config.findTeam(x.team.displayName) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
-            const id = match.team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
-            console.log(`Found ${nodes.length} team(s), using ${id} ${match.team.displayName}`);
-            return { id, name: match.team.displayName };
+            const nodes = response.data.team.teamSearchV2.nodes;
+            if (nodes.length === 0) {
+                console.log(`Could not find team for account ${accountId} in Jira`);
+                return null;
+            }
+            else {
+                const match = nodes.find((x) => Configuration_1.Config.findTeam(x.team.displayName) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
+                const id = match.team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
+                console.log(`Found ${nodes.length} team(s), using ${id} ${match.team.displayName}`);
+                return { id, name: match.team.displayName };
+            }
         }
     }
     async createComponent(projectKey, name, description) {
