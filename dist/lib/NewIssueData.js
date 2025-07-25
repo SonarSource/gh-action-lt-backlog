@@ -13,7 +13,7 @@ class NewIssueData {
         this.accountId = accountId;
         this.additionalFields = additionalFields;
     }
-    static async create(jira, pr, inputJiraProject, inputAdditionFields, userEmail) {
+    static async create(jira, pr, inputJiraProject, inputAdditionFields, userEmail, fallbackTeam) {
         const parent = pr.isRenovate() || pr.isDependabot()
             ? null // Description contains release notes with irrelevant issue IDs
             : await this.findNonSubTaskParent(jira, this.findMentionedIssues(pr));
@@ -23,7 +23,7 @@ class NewIssueData {
             const additionalFields = this.parseAdditionalFields(inputAdditionFields);
             const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
             if (parameters.issuetype.name !== 'Sub-task') { // These fields cannot be set on Sub-task. Their values are inherited from the parent issue.
-                const team = await this.findTeam(jira, accountId, projectKey); // Can be null for bots when project lead is not member of any team. Jira request will fail if the field is mandatory for the project.
+                const team = await this.findTeam(jira, accountId, projectKey, fallbackTeam); // Can be null for bots when project lead is not member of any team, and fallbackTeam is not set. Jira request will fail if the field is mandatory for the project.
                 if (team != null) {
                     const sprintId = await this.findSprintId(jira, team.name);
                     parameters.customfield_10001 = team.id;
@@ -62,7 +62,7 @@ class NewIssueData {
             return 'PARENTOSS';
         }
         else if (accountId) {
-            const team = await jira.findTeam(accountId);
+            const team = await jira.findTeamByUser(accountId);
             return team?.name === TeamConfiguration_1.EngineeringExperienceSquad.name ? 'BUILD' : 'PREQ';
         }
         else { // renovate and similar bots
@@ -116,16 +116,22 @@ class NewIssueData {
         console.log(mentionedIssues.length > 0 ? `Found mentioned issues: ${mentionedIssues}` : 'No mentioned issues found');
         return new Set(mentionedIssues);
     }
-    static async findTeam(jira, userAccountId, projectKey) {
-        if (userAccountId != null) {
-            const team = await jira.findTeam(userAccountId);
-            if (team != null) {
+    static async findTeam(jira, userAccountId, projectKey, fallbackTeam) {
+        if (userAccountId) {
+            const team = await jira.findTeamByUser(userAccountId);
+            if (team) {
+                return team;
+            }
+        }
+        if (fallbackTeam) {
+            const team = await jira.findTeamByName(fallbackTeam);
+            if (team) {
                 return team;
             }
         }
         const { lead: { accountId: leadAccountId, displayName } } = await jira.loadProject(projectKey);
         console.log(`No team found for current user, using ${projectKey} lead ${displayName}`);
-        return jira.findTeam(leadAccountId);
+        return jira.findTeamByUser(leadAccountId);
     }
     static async findSprintId(jira, teamName) {
         const team = Configuration_1.Config.findTeam(teamName);
