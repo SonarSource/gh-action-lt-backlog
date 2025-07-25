@@ -54,6 +54,10 @@ This parameter changes project selection rules, adds implicit labels, components
 
 When set, do not set `jira-project` nor `additional-fields` parameters.
 
+### `fallback-team`
+
+The name of a Jira Team that is used as a default fallback when a team for PR author can not be determined. It's typically used for bots. Name of this team takes precedence over the project lead of the Jira project.
+
 ## Outputs
 
 None
