@@ -113,6 +113,7 @@ class OctokitAction extends Action_1.Action {
     }
     async findEmail(login) {
         // FIXME: DEBUG only
+        return null;
         return 'pavel.mikula@sonarsource.com';
         this.log(`Searching for SAML identity of ${login}`);
         const identities = await this.findExternalIdentities(login);

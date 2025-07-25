@@ -127,6 +127,8 @@ export abstract class OctokitAction extends Action {
   protected async findEmail(login: string): Promise<string> {
 
     // FIXME: DEBUG only
+    return null;
+
     return 'pavel.mikula@sonarsource.com';
 
     this.log(`Searching for SAML identity of ${login}`);
