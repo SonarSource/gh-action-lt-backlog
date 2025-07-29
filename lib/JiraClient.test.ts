@@ -88,12 +88,11 @@ describe('JiraClient', () => {
 
   });
 
-  it.skip('createIssue', async () => {
-    // FIXME
-  });
-
-  it.skip('loadProject', async () => {
-    // FIXME
+  it('loadProject', async () => {
+    expect(await sut.loadProject('GHA')).toMatchObject({
+      key: 'GHA',
+      lead: { accountId: '5dc3f7c6e3cc320c5e8a91f1', displayName: 'Pavel Mikula' }  
+    });
   });
 
   it.skip('findTransition', async () => {
