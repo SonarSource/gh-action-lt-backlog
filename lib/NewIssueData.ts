@@ -1,5 +1,4 @@
 import { EngineeringExperienceSquad } from "../Data/TeamConfiguration";
-import { AtlassianDocument } from "./AtlassianDocumentFormat";
 import { Config } from "./Configuration";
 import { JIRA_ISSUE_PATTERN } from "./Constants";
 import { NewIssueParameters } from "./NewIssueParameters";
