@@ -57,7 +57,7 @@ export class JiraClient {
     }
     console.log(`Creating issue in project '${projectKey}'`);
     const response = await this.sendRestPostApi('issue', request);
-    return response?.key;
+    return response?.key || null;
   }
 
   public loadIssue(issueKey: string): Promise<any> {
@@ -271,7 +271,7 @@ export class JiraClient {
         'Authorization': `Basic ${this.token}`,
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Accept-Language': 'en',  // Otherwise Pattlassian* returns errors in Chineese :facepalm:
+        'Accept-Language': 'en',  // Otherwise Patlassian* returns errors in Chineese :facepalm:
       },
       body: body ? JSON.stringify(body) : undefined,
     });
