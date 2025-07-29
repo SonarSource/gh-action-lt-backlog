@@ -212,6 +212,7 @@ class JiraClient {
                 'Authorization': `Basic ${this.token}`,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
+                'Accept-Language': 'en', // Otherwise Pattlassian* returns errors in Chineese :facepalm:
             },
             body: body ? JSON.stringify(body) : undefined,
         });

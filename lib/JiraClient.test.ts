@@ -12,10 +12,10 @@ describe('JiraClient', () => {
     const withoutToken = new JiraClient("wrong", "token");
     const result = await withoutToken.loadIssue("TEST-42");
     expect(result).toBeNull();
-    expect(logSpy).toHaveBeenCalledWith('404 (Not Found): 事务不存在或者您没有查看的权限。');
+    expect(logSpy).toHaveBeenCalledWith('404 (Not Found): Issue does not exist or you do not have permission to see it.');
     expect(logSpy).toHaveBeenCalledWith(`{
   "errorMessages": [
-    "事务不存在或者您没有查看的权限。"
+    "Issue does not exist or you do not have permission to see it."
   ],
   "errors": {}
 }`);

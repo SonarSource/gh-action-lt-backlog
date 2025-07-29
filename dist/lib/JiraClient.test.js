@@ -7,12 +7,17 @@ beforeAll(() => {
 });
 describe('JiraClient', () => {
     it('handles errors', async () => {
+        const logSpy = jest.spyOn(console, 'log').mockImplementation(() => { });
         const withoutToken = new JiraClient_1.JiraClient("wrong", "token");
         const result = await withoutToken.loadIssue("TEST-42");
         expect(result).toBeNull();
-        //await expect(async () => {
-        //  await withoutToken.loadIssue("TEST-42");
-        //}).toThrow("FIXME");
+        expect(logSpy).toHaveBeenCalledWith('404 (Not Found): Issue does not exist or you do not have permission to see it.');
+        expect(logSpy).toHaveBeenCalledWith(`{
+  "errorMessages": [
+    "Issue does not exist or you do not have permission to see it."
+  ],
+  "errors": {}
+}`);
     });
     it.skip('createIssue', () => {
         // FIXME
