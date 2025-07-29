@@ -1,11 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JiraClient = void 0;
-const Constants_1 = require("./Constants");
 const Configuration_1 = require("./Configuration");
 class JiraClient {
+    domain;
+    siteId;
+    organizationId;
     token;
-    constructor(user, token) {
+    constructor(domain, siteId, organizationId, user, token) {
+        this.domain = domain;
+        this.siteId = siteId;
+        this.organizationId = organizationId;
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
     }
     async createIssue(projectKey, summary, additionalFields) {
@@ -145,8 +150,8 @@ class JiraClient {
       query MandatoryButUselessQueryName {
         team {
           teamSearchV2 (
-            siteId: "${Constants_1.JIRA_SITE_ID}",
-            organizationId: "ari:cloud:platform::org/${Constants_1.JIRA_ORGANIZATION_ID}",
+            siteId: "${this.siteId}",
+            organizationId: "ari:cloud:platform::org/${this.organizationId}",
             filter: { ${queryFilter} }
           )
           {
@@ -205,7 +210,7 @@ class JiraClient {
         return this.sendRequest("PUT", `rest/api/3/${endpoint}`, body);
     }
     async sendRequest(method, path, body) {
-        const url = `${Constants_1.JIRA_DOMAIN}/${path}`;
+        const url = `${this.domain}/${path}`;
         const response = await fetch(url, {
             method,
             headers: {

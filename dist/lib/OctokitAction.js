@@ -16,7 +16,7 @@ class OctokitAction extends Action_1.Action {
     graphqlWithAuth;
     constructor() {
         super();
-        this.jira = new JiraClient_1.JiraClient(this.inputString('jira-user'), this.inputString('jira-token'));
+        this.jira = new JiraClient_1.JiraClient(Constants_1.JIRA_DOMAIN, Constants_1.JIRA_SITE_ID, Constants_1.JIRA_ORGANIZATION_ID, this.inputString('jira-user'), this.inputString('jira-token'));
         this.octokit = github.getOctokit(this.inputString('github-token'));
         this.rest = this.octokit.rest;
         this.isEngXpSquad = this.inputBoolean('is-eng-xp-squad');

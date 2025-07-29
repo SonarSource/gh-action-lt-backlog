@@ -1,4 +1,3 @@
-import { JIRA_SITE_ID, JIRA_DOMAIN, JIRA_ORGANIZATION_ID } from './Constants';
 import { Config } from './Configuration';
 import { Team } from './Team';
 
@@ -36,9 +35,15 @@ interface Sprint {
 }
 
 export class JiraClient {
+  private readonly domain: string;
+  private readonly siteId: string;
+  private readonly organizationId: string;
   private readonly token: string;
 
-  constructor(user: string, token: string) {
+  constructor(domain: string, siteId: string, organizationId: string, user: string, token: string) {
+    this.domain = domain;
+    this.siteId = siteId;
+    this.organizationId = organizationId;
     this.token = Buffer.from(`${user}:${token}`).toString('base64');
   }
 
@@ -194,8 +199,8 @@ export class JiraClient {
       query MandatoryButUselessQueryName {
         team {
           teamSearchV2 (
-            siteId: "${JIRA_SITE_ID}",
-            organizationId: "ari:cloud:platform::org/${JIRA_ORGANIZATION_ID}",
+            siteId: "${this.siteId}",
+            organizationId: "ari:cloud:platform::org/${this.organizationId}",
             filter: { ${queryFilter} }
           )
           {
@@ -259,7 +264,7 @@ export class JiraClient {
   }
 
   private async sendRequest(method: "GET" | "POST" | "PUT", path: string, body?: any): Promise<any> {
-    const url = `${JIRA_DOMAIN}/${path}`;
+    const url = `${this.domain}/${path}`;
     const response = await fetch(url, {
       method,
       headers: {
