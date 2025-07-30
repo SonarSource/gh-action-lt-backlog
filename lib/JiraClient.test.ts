@@ -222,8 +222,12 @@ describe('JiraClient', () => {
     expect(await sut.findSprintId(boardId)).toBeGreaterThan(0);
   });
 
-  it('findTeam', async () => {
-    const accountId = '557058:f82b4ae5-78e0-4689-9f9e-419b773bf121';    // Thomas Vérin The Greatest, it can be any member of Eng Xp squad Jira team
-    expect(await sut.findTeam(accountId)).toMatchObject({ id: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6', name: EngineeringExperienceSquad.name });  // Eng Xp, because we maintain hardcoded value for it
+  it('findTeamByUser', async () => {
+    const accountId = '557058:f82b4ae5-78e0-4689-9f9e-419b773bf121';                        // Thomas Vérin The Greatest, it can be any member of Eng Xp squad Jira team
+    expect(await sut.findTeamByUser(accountId)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
+  });
+
+  it('findTeamByName', async () => {
+    expect(await sut.findTeamByName(EngineeringExperienceSquad.name)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
   });
 });

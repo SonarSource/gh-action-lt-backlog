@@ -155,7 +155,7 @@ class JiraClient {
     }
     async findTeamByUser(accountId) {
         console.log(`Searching for teams of account ${accountId}`);
-        return this.findTeam(`{ membership: { memberIds: "${accountId}" } }`, x => true); // No post-filtering
+        return this.findTeam(`membership: { memberIds: "${accountId}" }`, x => true); // No post-filtering
     }
     async findTeamByName(teamName) {
         console.log(`Searching for team ${teamName}`);
