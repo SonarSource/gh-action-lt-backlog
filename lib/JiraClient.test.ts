@@ -186,8 +186,9 @@ describe('JiraClient', () => {
     expect(issue.fields.components).toMatchObject([{ name: 'JiraClient UT' }]);
   });
 
-  it.skip('addIssueRemoteLink', async () => {
-    // FIXME
+  it('addIssueRemoteLink and loadIssueRemoteLinks', async () => {
+    await sut.addIssueRemoteLink(issueId, 'https://www.sonarsource.com/', 'Sonar');
+    expect(await sut.loadIssueRemoteLinks(issueId)).toMatchObject([{ object: { url: 'https://www.sonarsource.com/', title: 'Sonar' } }]);
   });
 
   it('findAccountId', async () => {

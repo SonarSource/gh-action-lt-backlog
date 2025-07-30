@@ -39,6 +39,14 @@ interface Transition {
   name: string;
 }
 
+interface RemoteLink {
+  id: string,
+  object: {
+    url: string,
+    title: string
+  }
+}
+
 export class JiraClient {
   private readonly domain: string;
   private readonly siteId: string;
@@ -164,6 +172,11 @@ export class JiraClient {
   public async addIssueRemoteLink(issueId: string, url: string, title: string = null): Promise<void> {
     console.log(`${issueId}: Adding remote link ${url}`);
     await this.sendRestPostApi(`issue/${issueId}/remotelink`, { object: { url, title: title ?? url } });
+  }
+
+  public loadIssueRemoteLinks(issueId: string): Promise<RemoteLink[]> {
+    console.log(`${issueId}: Load remote links for ${issueId}`);
+    return this.sendRestGetApi(`issue/${issueId}/remotelink`);
   }
 
   public async findAccountId(email: string): Promise<string> {
