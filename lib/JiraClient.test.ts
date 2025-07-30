@@ -126,12 +126,20 @@ describe('JiraClient', () => {
     expect((await sut.loadIssue(issueId)).fields.status.name).toBe('Done');
   });
 
-  it.skip('assignIssueToEmail', async () => {
-    // FIXME
+  it('assignIssueToEmail', async () => {
+    let issue = await sut.loadIssue(issueId);
+    const email = issue.fields.assignee?.emailAddress === "helpdesk+jira-githubtech@sonarsource.com" ? "pavel.mikula@sonarsource" : "helpdesk+jira-githubtech@sonarsource.com";
+    await sut.assignIssueToEmail(issueId, email);
+    issue = await sut.loadIssue(issueId);
+    expect(issue.fields.assignee?.emailAddress).toBe(email);
   });
 
-  it.skip('assignIssueToAccount', async () => {
-    // FIXME
+  it('assignIssueToAccount', async () => {
+    let issue = await sut.loadIssue(issueId);
+    const accountId = issue.fields.assignee?.accountId === "712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4" ? "5dc3f7c6e3cc320c5e8a91f1" : "712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4";
+    await sut.assignIssueToAccount(issueId, accountId);
+    issue = await sut.loadIssue(issueId);
+    expect(issue.fields.assignee?.accountId).toBe(accountId);
   });
 
   it.skip('addReviewer', async () => {
