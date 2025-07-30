@@ -150,8 +150,39 @@ describe('JiraClient', () => {
     // FIXME
   });
 
-  it.skip('addIssueComponent', async () => {
-    // FIXME
+  it('createComponent existing', async () => {
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => { });
+    try {
+      const name = 'JiraClient UT';
+      const result = await sut.createComponent('GHA', name, 'Test component created by JiraClient unit test');
+      expect(result).toBe(true);
+      expect(logSpy).toHaveBeenCalledWith(`Searching for component 'JiraClient UT' in project GHA`);
+      expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(/Component found in \d+ result\(s\)/));
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it('createComponent new', async () => {
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => { });
+    try {
+      const name = `JiraClient UT  ${crypto.randomUUID()}`;
+      const result = await sut.createComponent('GHA', name, 'Test component created by JiraClient unit test');
+      expect(result).toBe(true);
+      expect(logSpy).toHaveBeenCalledWith(`Searching for component '${name}' in project GHA`);
+      expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(/Component not found in \d+ result\(s\). Creating a new one./));
+      const project = await sut.loadProject('GHA');
+      const component = project.components.find(x => x.name === name);
+      expect(component).toMatchObject({ name, description: 'Test component created by JiraClient unit test' });
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it('addIssueComponent', async () => {
+    expect(await sut.addIssueComponent(issueId, 'JiraClient UT')).toBe(true);
+    const issue = await sut.loadIssue(issueId);
+    expect(issue.fields.components).toMatchObject([{ name: 'JiraClient UT' }]);
   });
 
   it.skip('addIssueRemoteLink', async () => {
@@ -167,10 +198,6 @@ describe('JiraClient', () => {
   });
 
   it.skip('findTeam', async () => {
-    // FIXME
-  });
-
-  it.skip('createComponent', async () => {
     // FIXME
   });
 });

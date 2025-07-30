@@ -114,11 +114,19 @@ describe('JiraClient', () => {
         await sut.moveIssue(issueId, 'Close as Done');
         expect((await sut.loadIssue(issueId)).fields.status.name).toBe('Done');
     });
-    it.skip('assignIssueToEmail', async () => {
-        // FIXME
+    it('assignIssueToEmail', async () => {
+        let issue = await sut.loadIssue(issueId);
+        const email = issue.fields.assignee?.emailAddress === "helpdesk+jira-githubtech@sonarsource.com" ? "pavel.mikula@sonarsource" : "helpdesk+jira-githubtech@sonarsource.com";
+        await sut.assignIssueToEmail(issueId, email);
+        issue = await sut.loadIssue(issueId);
+        expect(issue.fields.assignee?.emailAddress).toBe(email);
     });
-    it.skip('assignIssueToAccount', async () => {
-        // FIXME
+    it('assignIssueToAccount', async () => {
+        let issue = await sut.loadIssue(issueId);
+        const accountId = issue.fields.assignee?.accountId === "712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4" ? "5dc3f7c6e3cc320c5e8a91f1" : "712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4";
+        await sut.assignIssueToAccount(issueId, accountId);
+        issue = await sut.loadIssue(issueId);
+        expect(issue.fields.assignee?.accountId).toBe(accountId);
     });
     it.skip('addReviewer', async () => {
         // FIXME
@@ -126,8 +134,39 @@ describe('JiraClient', () => {
     it.skip('addReviewedBy', async () => {
         // FIXME
     });
-    it.skip('addIssueComponent', async () => {
-        // FIXME
+    it('createComponent existing', async () => {
+        const logSpy = jest.spyOn(console, 'log').mockImplementation(() => { });
+        try {
+            const name = 'JiraClient UT';
+            const result = await sut.createComponent('GHA', name, 'Test component created by JiraClient unit test');
+            expect(result).toBe(true);
+            expect(logSpy).toHaveBeenCalledWith(`Searching for component 'JiraClient UT' in project GHA`);
+            expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(/Component found in \d+ result\(s\)/));
+        }
+        finally {
+            logSpy.mockRestore();
+        }
+    });
+    it('createComponent new', async () => {
+        const logSpy = jest.spyOn(console, 'log').mockImplementation(() => { });
+        try {
+            const name = `JiraClient UT  ${crypto.randomUUID()}`;
+            const result = await sut.createComponent('GHA', name, 'Test component created by JiraClient unit test');
+            expect(result).toBe(true);
+            expect(logSpy).toHaveBeenCalledWith(`Searching for component '${name}' in project GHA`);
+            expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(/Component not found in \d+ result\(s\). Creating a new one./));
+            const project = await sut.loadProject('GHA');
+            const component = project.components.find(x => x.name === name);
+            expect(component).toMatchObject({ name, description: 'Test component created by JiraClient unit test' });
+        }
+        finally {
+            logSpy.mockRestore();
+        }
+    });
+    it('addIssueComponent', async () => {
+        expect(await sut.addIssueComponent(issueId, 'JiraClient UT')).toBe(true);
+        const issue = await sut.loadIssue(issueId);
+        expect(issue.fields.components).toMatchObject([{ name: 'JiraClient UT' }]);
     });
     it.skip('addIssueRemoteLink', async () => {
         // FIXME
@@ -139,9 +178,6 @@ describe('JiraClient', () => {
         // FIXME
     });
     it.skip('findTeam', async () => {
-        // FIXME
-    });
-    it.skip('createComponent', async () => {
         // FIXME
     });
 });
