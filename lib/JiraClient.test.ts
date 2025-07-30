@@ -44,7 +44,7 @@ async function ensurePreqIssueId(): Promise<string> {
 
 describe('JiraClient', () => {
   it('handles errors', async () => {
-    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => { });
+    const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => jest.requireActual('console').log(...args));
     try {
       const withoutToken = new JiraClient(sandboxDomain, sandboxSiteId, sandboxOrganizationId, 'wrong', 'token');
       const result = await withoutToken.loadIssue("TEST-42");
@@ -108,7 +108,7 @@ describe('JiraClient', () => {
   });
 
   it('moveIssue no transition', async () => {
-    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => { });
+    const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => jest.requireActual('console').log(...args));
     try {
       await sut.moveIssue('GHA-42', 'Hallucinated');
       expect(logSpy).toHaveBeenCalledWith("GHA-42: Could not find the transition 'Hallucinated'");
@@ -174,7 +174,7 @@ describe('JiraClient', () => {
   });
 
   it('createComponent existing', async () => {
-    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => { });
+    const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => jest.requireActual('console').log(...args));
     try {
       const name = 'JiraClient UT';
       const result = await sut.createComponent('GHA', name, 'Test component created by JiraClient unit test');
@@ -187,7 +187,7 @@ describe('JiraClient', () => {
   });
 
   it('createComponent new', async () => {
-    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => { });
+    const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => jest.requireActual('console').log(...args));
     try {
       const name = `JiraClient UT  ${crypto.randomUUID()}`;
       const result = await sut.createComponent('GHA', name, 'Test component created by JiraClient unit test');
