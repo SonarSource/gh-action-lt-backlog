@@ -81,7 +81,21 @@ describe('JiraClient', () => {
             labels: ['FirstLabel', 'SecondLabel'],
             parent: { key: 'GHA-37' },
             reporter: { accountId: '712020:7dcfc909-3fa9-496f-9127-163d8cd0e30f' }, // The same thing has two different names in different API calls, of course.
-            description: AtlassianDocumentFormat_1.AtlassianDocument.fromMarkdown('Lorem ipsum'),
+            description: {
+                "type": "doc",
+                "version": 1,
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "Lorem ipsum"
+                            }
+                        ]
+                    }
+                ]
+            },
             customfield_10001: { id: '3ca60b21-53c7-48e2-a2e2-6e85b39551d0' }, // Why would the same field have same structure everywhere anyway?
             customfield_10020: [{ id: sprintId }], // Why would the same field have same structure everywhere anyway?
         });
@@ -125,7 +139,7 @@ describe('JiraClient', () => {
     });
     it('assignIssueToEmail', async () => {
         let issue = await sut.loadIssue(issueId);
-        const email = issue.fields.assignee?.emailAddress === 'helpdesk+jira-githubtech@sonarsource.com' ? 'pavel.mikula@sonarsource' : 'helpdesk+jira-githubtech@sonarsource.com';
+        const email = issue.fields.assignee?.emailAddress === 'helpdesk+jira-githubtech@sonarsource.com' ? 'pavel.mikula@sonarsource.com' : 'helpdesk+jira-githubtech@sonarsource.com';
         await sut.assignIssueToEmail(issueId, email);
         issue = await sut.loadIssue(issueId);
         expect(issue.fields.assignee?.emailAddress).toBe(email);
