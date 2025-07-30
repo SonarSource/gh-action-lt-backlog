@@ -34,6 +34,11 @@ interface Sprint {
   endDate: string;
 }
 
+interface Transition {
+  id: string;
+  name: string;
+}
+
 export class JiraClient {
   private readonly domain: string;
   private readonly siteId: string;
@@ -80,12 +85,12 @@ export class JiraClient {
     }
   }
 
-  public async findTransition(issueId: string, transitionName: string): Promise<any> {
-    const transitions = (await this.sendRestGetApi(`issue/${issueId}/transitions`))?.transitions ?? [];
-    return transitions.find((x: any) => x.name === transitionName) || null;
+  public async findTransition(issueId: string, transitionName: string): Promise<Transition> {
+    const transitions: Transition[] = (await this.sendRestGetApi(`issue/${issueId}/transitions`))?.transitions ?? [];
+    return transitions.find((x) => x.name === transitionName) || null;
   }
 
-  public async transitionIssue(issueId: string, transition: any, fields: any = null): Promise<void> {
+  public async transitionIssue(issueId: string, transition: Transition, fields: any = null): Promise<void> {
     console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
     await this.sendRestPostApi(`issue/${issueId}/transitions`, { transition: { id: transition.id }, fields });
   }
