@@ -82,7 +82,7 @@ export class JiraClient {
 
   public async findTransition(issueId: string, transitionName: string): Promise<any> {
     const transitions = (await this.sendRestGetApi(`issue/${issueId}/transitions`))?.transitions ?? [];
-    return transitions.find((x: any) => x.name === transitionName);
+    return transitions.find((x: any) => x.name === transitionName) || null;
   }
 
   public async transitionIssue(issueId: string, transition: any, fields: any = null): Promise<void> {

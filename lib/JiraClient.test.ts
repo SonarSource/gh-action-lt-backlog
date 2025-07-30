@@ -8,12 +8,15 @@ const sandboxDomain = 'https://sonarsource-sandbox-608.atlassian.net';
 const sandboxSiteId = '5ea71b8c-f3d5-4b61-b038-001c50df1666';
 const sandboxOrganizationId = '78eed3e4-84ad-4374-b777-a3b4ba5d9516';
 let sut: JiraClient;
+let issueId: string;
 
-beforeAll(() => {
+beforeAll(async () => {
   const user = process.env["JIRA_USER"];    // Can't use the same name as environment variables read by Octokit actions, because the dash is not propagated from shell to node
   const token = process.env["JIRA_TOKEN"];
   if (user && token) {
     sut = new JiraClient(sandboxDomain, sandboxSiteId, sandboxOrganizationId, user, token);
+    const parameters: NewIssueParameters = { issuetype: { name: 'New Feature' } };
+    issueId = await sut.createIssue('GHA', `JiraClient unit test shared ${crypto.randomUUID()}`, parameters);
   } else {
     fail("JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.");
   }
@@ -50,7 +53,7 @@ describe('JiraClient', () => {
   });
 
   it('createIssue', async () => {
-    const summary = `JiraClient unit test ${crypto.randomUUID()}`;
+    const summary = `JiraClient unit test createIssue ${crypto.randomUUID()}`;
     const sprintId = await findFirstActiveSprintId()
     // The GHA project needs to have all of these on it's create screen in production and sandbox, as production overrides the sandbox once in a while
     const parameters: NewIssueParameters = {
@@ -91,16 +94,36 @@ describe('JiraClient', () => {
   it('loadProject', async () => {
     expect(await sut.loadProject('GHA')).toMatchObject({
       key: 'GHA',
-      lead: { accountId: '5dc3f7c6e3cc320c5e8a91f1', displayName: 'Pavel Mikula' }  
+      lead: { accountId: '5dc3f7c6e3cc320c5e8a91f1', displayName: 'Pavel Mikula' }
     });
   });
 
-  it.skip('findTransition', async () => {
-    // FIXME
+  it('moveIssue no transition', async () => {
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => { });
+    try {
+      await sut.moveIssue('GHA-42', 'Hallucinated');
+      expect(logSpy).toHaveBeenCalledWith("GHA-42: Could not find the transition 'Hallucinated'");
+    } finally {
+      logSpy.mockRestore();
+    }
   });
 
-  it.skip('transitionIssue', async () => {
-    // FIXME
+  it('moveIssue moves issue', async () => {
+    await sut.moveIssue(issueId, 'Start');
+    expect((await sut.loadIssue(issueId)).fields.status.name).toBe('In Progress');
+  });
+
+  it('findTransition no transition', async () => {
+    expect(await sut.findTransition(issueId, 'Hallucinated')).toBeNull();
+  });
+
+  it('findTransition finds', async () => {
+    expect(await sut.findTransition(issueId, 'Cancel Issue')).toMatchObject({ id: "11", name: 'Cancel Issue', });
+  });
+
+  it('transitionIssue', async () => {
+    await sut.moveIssue(issueId, 'Close as Done');
+    expect((await sut.loadIssue(issueId)).fields.status.name).toBe('Done');
   });
 
   it.skip('assignIssueToEmail', async () => {

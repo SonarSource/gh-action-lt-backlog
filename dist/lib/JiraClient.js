@@ -44,7 +44,7 @@ class JiraClient {
     }
     async findTransition(issueId, transitionName) {
         const transitions = (await this.sendRestGetApi(`issue/${issueId}/transitions`))?.transitions ?? [];
-        return transitions.find((x) => x.name === transitionName);
+        return transitions.find((x) => x.name === transitionName) || null;
     }
     async transitionIssue(issueId, transition, fields = null) {
         console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
