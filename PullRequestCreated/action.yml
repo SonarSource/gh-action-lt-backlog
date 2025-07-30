@@ -20,6 +20,9 @@ inputs:
     description: 'Repo is owned by Engineering Experience Squad'
     required: false
     default: 'false'
+  fallback-team:
+    description: 'Jira Team name to be used as a default fallback'
+    required: false
 runs:
   using: 'node20'
   main: '../dist/PullRequestCreated/PullRequestCreated.js'

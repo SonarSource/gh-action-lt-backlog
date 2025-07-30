@@ -132,15 +132,22 @@ class JiraClient {
             return sprint.id;
         }
     }
-    async findTeam(accountId) {
+    async findTeamByUser(accountId) {
         console.log(`Searching for teams of account ${accountId}`);
+        return this.findTeam(`{ membership: { memberIds: "${accountId}" } }`, x => true); // No post-filtering
+    }
+    async findTeamByName(teamName) {
+        console.log(`Searching for team ${teamName}`);
+        return this.findTeam(`query: "${teamName}"`, x => x.team.displayName === teamName); // Query returns also partial matches. We need to post-filter them
+    }
+    async findTeam(queryFilter, resultFilter) {
         const response = await this.sendGraphQL(`
       query MandatoryButUselessQueryName {
         team {
           teamSearchV2 (
             siteId: "${Constants_1.JIRA_SITE_ID}",
             organizationId: "ari:cloud:platform::org/${Constants_1.JIRA_ORGANIZATION_ID}",
-            filter: { membership: { memberIds: "${accountId}" } }
+            filter: { ${queryFilter} }
           )
           {
             nodes {
@@ -154,9 +161,9 @@ class JiraClient {
             return null;
         }
         else {
-            const nodes = response.data.team.teamSearchV2.nodes;
+            const nodes = response.data.team.teamSearchV2.nodes.filter(resultFilter);
             if (nodes.length === 0) {
-                console.log(`Could not find team for account ${accountId} in Jira`);
+                console.log(`Could not find team in Jira`);
                 return null;
             }
             else {

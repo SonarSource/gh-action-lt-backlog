@@ -47,7 +47,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
     async processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields) {
         const data = this.isEngXpSquad
             ? await NewIssueData_1.NewIssueData.createForEngExp(this.jira, pr, await this.findEmail(this.payload.sender.login))
-            : await NewIssueData_1.NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, await this.findEmail(this.payload.sender.login));
+            : await NewIssueData_1.NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, await this.findEmail(this.payload.sender.login), this.inputString('fallback-team'));
         if (data) {
             const issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
             if (issueId == null) {
