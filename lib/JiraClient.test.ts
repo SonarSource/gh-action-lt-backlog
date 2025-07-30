@@ -2,7 +2,8 @@
 import { JiraClient } from './JiraClient';
 import { fail } from 'assert';
 import { NewIssueParameters } from './NewIssueParameters';
-import { TeamConfigurationData } from '../Data/TeamConfiguration';
+import { EngineeringExperienceSquad, TeamConfigurationData } from '../Data/TeamConfiguration';
+import { Config } from './Configuration';
 
 const sandboxDomain = 'https://sonarsource-sandbox-608.atlassian.net';
 const sandboxSiteId = '5ea71b8c-f3d5-4b61-b038-001c50df1666';
@@ -189,15 +190,17 @@ describe('JiraClient', () => {
     // FIXME
   });
 
-  it.skip('findAccountId', async () => {
-    // FIXME
+  it('findAccountId', async () => {
+    expect(await sut.findAccountId('helpdesk+jira-githubtech@sonarsource.com')).toBe('712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4');
   });
 
-  it.skip('findSprintId', async () => {
-    // FIXME
+  it('findSprintId', async () => {
+    const boardId = Config.findTeam(EngineeringExperienceSquad.name).boardId;
+    expect(await sut.findSprintId(boardId)).toBeGreaterThan(0);
   });
 
-  it.skip('findTeam', async () => {
-    // FIXME
+  it('findTeam', async () => {
+    const accountId = '557058:f82b4ae5-78e0-4689-9f9e-419b773bf121';    // Thomas Vérin The Greatest, it can be any member of Eng Xp squad Jira team
+    expect(await sut.findTeam(accountId)).toMatchObject({ id: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6', name: EngineeringExperienceSquad.name });  // Eng Xp, because we maintain hardcoded value for it
   });
 });
