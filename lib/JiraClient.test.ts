@@ -10,6 +10,7 @@ const sandboxSiteId = '5ea71b8c-f3d5-4b61-b038-001c50df1666';
 const sandboxOrganizationId = '78eed3e4-84ad-4374-b777-a3b4ba5d9516';
 let sut: JiraClient;
 let issueId: string;
+let preqIssueId: string;
 
 beforeAll(async () => {
   const user = process.env["JIRA_USER"];    // Can't use the same name as environment variables read by Octokit actions, because the dash is not propagated from shell to node
@@ -33,6 +34,13 @@ async function findFirstActiveSprintId(): Promise<number> {
   fail('Scaffolding: Could not find any active sprint ID');
 }
 
+async function ensurePreqIssueId(): Promise<string> {
+  if (!preqIssueId) {
+    const parameters: NewIssueParameters = { issuetype: { name: 'Task' } };
+    preqIssueId = await sut.createIssue('PREQ', `JiraClient unit test PREQ ${crypto.randomUUID()}`, parameters);
+  }
+  return preqIssueId;
+}
 
 describe('JiraClient', () => {
   it('handles errors', async () => {
@@ -129,7 +137,7 @@ describe('JiraClient', () => {
 
   it('assignIssueToEmail', async () => {
     let issue = await sut.loadIssue(issueId);
-    const email = issue.fields.assignee?.emailAddress === "helpdesk+jira-githubtech@sonarsource.com" ? "pavel.mikula@sonarsource" : "helpdesk+jira-githubtech@sonarsource.com";
+    const email = issue.fields.assignee?.emailAddress === 'helpdesk+jira-githubtech@sonarsource.com' ? 'pavel.mikula@sonarsource' : 'helpdesk+jira-githubtech@sonarsource.com';
     await sut.assignIssueToEmail(issueId, email);
     issue = await sut.loadIssue(issueId);
     expect(issue.fields.assignee?.emailAddress).toBe(email);
@@ -143,12 +151,26 @@ describe('JiraClient', () => {
     expect(issue.fields.assignee?.accountId).toBe(accountId);
   });
 
-  it.skip('addReviewer', async () => {
-    // FIXME
+  it('addReviewer', async () => {
+    const issueId = await ensurePreqIssueId();
+    await sut.addReviewer(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
+    let issue = await sut.loadIssue(issueId);
+    expect(issue.fields.customfield_11227).toMatchObject([{ emailAddress: 'helpdesk+jira-githubtech@sonarsource.com' }]);
+    // Second call does not change anything
+    await sut.addReviewer(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
+    issue = await sut.loadIssue(issueId);
+    expect(issue.fields.customfield_11227).toMatchObject([{ emailAddress: 'helpdesk+jira-githubtech@sonarsource.com' }]);
   });
 
-  it.skip('addReviewedBy', async () => {
-    // FIXME
+  it('addReviewedBy', async () => {
+    const issueId = await ensurePreqIssueId();
+    await sut.addReviewedBy(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
+    let issue = await sut.loadIssue(issueId);
+    expect(issue.fields.customfield_11228).toMatchObject([{ emailAddress: 'helpdesk+jira-githubtech@sonarsource.com' }]);
+    // Second call does not change anything
+    await sut.addReviewedBy(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
+    issue = await sut.loadIssue(issueId);
+    expect(issue.fields.customfield_11228).toMatchObject([{ emailAddress: 'helpdesk+jira-githubtech@sonarsource.com' }]);
   });
 
   it('createComponent existing', async () => {
