@@ -55,6 +55,8 @@ jobs:
         with:
           secrets: |
             development/artifactory/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | REPOX_TOKEN;
+            development/kv/data/jira user | JIRA_USER;
+            development/kv/data/jira token | JIRA_TOKEN;
 
         # Restore DEV dependencies that are not present in the repo due to .gitignore of /node_modules/ to reduce the checkout size in production.
       - name: Restore dev dependencies
@@ -64,4 +66,7 @@ jobs:
         run: npm install
 
       - name: Run tests
+        env:
+            JIRA_USER:  ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
+            JIRA_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
         run: npm run test

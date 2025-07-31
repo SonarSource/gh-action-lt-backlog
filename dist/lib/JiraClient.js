@@ -1,11 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JiraClient = void 0;
-const Constants_1 = require("./Constants");
 const Configuration_1 = require("./Configuration");
 class JiraClient {
+    domain;
+    siteId;
+    organizationId;
     token;
-    constructor(user, token) {
+    constructor(domain, siteId, organizationId, user, token) {
+        this.domain = domain;
+        this.siteId = siteId;
+        this.organizationId = organizationId;
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
     }
     async createIssue(projectKey, summary, additionalFields) {
@@ -18,7 +23,7 @@ class JiraClient {
         };
         console.log(`Creating issue in project '${projectKey}'`);
         const response = await this.sendRestPostApi('issue', request);
-        return response?.key;
+        return response?.key || null;
     }
     loadIssue(issueKey) {
         console.log(`Load issue '${issueKey}'`);
@@ -39,7 +44,7 @@ class JiraClient {
     }
     async findTransition(issueId, transitionName) {
         const transitions = (await this.sendRestGetApi(`issue/${issueId}/transitions`))?.transitions ?? [];
-        return transitions.find((x) => x.name === transitionName);
+        return transitions.find((x) => x.name === transitionName) || null;
     }
     async transitionIssue(issueId, transition, fields = null) {
         console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
@@ -83,6 +88,18 @@ class JiraClient {
             await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request);
         }
     }
+    async createComponent(projectKey, name, description) {
+        console.log(`Searching for component '${name}' in project ${projectKey}`);
+        const { total, values } = await this.sendRestGetApi(`project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`);
+        if (values.find(x => x.name === name)) { // values contains matches on partial names and descriptions
+            console.log(`Component found in ${total} result(s)`);
+            return true;
+        }
+        else {
+            console.log(`Component not found in ${total} result(s). Creating a new one.`);
+            return await this.sendRestPostApi('component', { project: projectKey, name, description }) != null;
+        }
+    }
     async addIssueComponent(issueId, name) {
         console.log(`${issueId}: Adding component ${name}`);
         const request = {
@@ -97,6 +114,10 @@ class JiraClient {
     async addIssueRemoteLink(issueId, url, title = null) {
         console.log(`${issueId}: Adding remote link ${url}`);
         await this.sendRestPostApi(`issue/${issueId}/remotelink`, { object: { url, title: title ?? url } });
+    }
+    loadIssueRemoteLinks(issueId) {
+        console.log(`${issueId}: Load remote links for ${issueId}`);
+        return this.sendRestGetApi(`issue/${issueId}/remotelink`);
     }
     async findAccountId(email) {
         if (email == null) {
@@ -134,7 +155,7 @@ class JiraClient {
     }
     async findTeamByUser(accountId) {
         console.log(`Searching for teams of account ${accountId}`);
-        return this.findTeam(`{ membership: { memberIds: "${accountId}" } }`, x => true); // No post-filtering
+        return this.findTeam(`membership: { memberIds: "${accountId}" }`, x => true); // No post-filtering
     }
     async findTeamByName(teamName) {
         console.log(`Searching for team ${teamName}`);
@@ -145,8 +166,8 @@ class JiraClient {
       query MandatoryButUselessQueryName {
         team {
           teamSearchV2 (
-            siteId: "${Constants_1.JIRA_SITE_ID}",
-            organizationId: "ari:cloud:platform::org/${Constants_1.JIRA_ORGANIZATION_ID}",
+            siteId: "${this.siteId}",
+            organizationId: "ari:cloud:platform::org/${this.organizationId}",
             filter: { ${queryFilter} }
           )
           {
@@ -174,18 +195,6 @@ class JiraClient {
             }
         }
     }
-    async createComponent(projectKey, name, description) {
-        console.log(`Searching for component '${name}' in project ${projectKey}`);
-        const { total, values } = await this.sendRestGetApi(`project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`);
-        if (values.find(x => x.name === name)) { // values contains matches on partial names and descriptions
-            console.log(`Component found in ${total} result(s)`);
-            return true;
-        }
-        else {
-            console.log(`Component not found in ${total} result(s). Creating a new one.`);
-            return await this.sendRestPostApi('component', { project: projectKey, name, description }) != null;
-        }
-    }
     async sendGraphQL(query) {
         console.log(query); // Log only the GraphQL query, without the surrounding { "query": ... }
         return this.sendRequest("POST", "gateway/api/graphql", { query });
@@ -205,13 +214,14 @@ class JiraClient {
         return this.sendRequest("PUT", `rest/api/3/${endpoint}`, body);
     }
     async sendRequest(method, path, body) {
-        const url = `${Constants_1.JIRA_DOMAIN}/${path}`;
+        const url = `${this.domain}/${path}`;
         const response = await fetch(url, {
             method,
             headers: {
                 'Authorization': `Basic ${this.token}`,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
+                'Accept-Language': 'en', // Otherwise Patlassian* returns errors in Chineese :facepalm:
             },
             body: body ? JSON.stringify(body) : undefined,
         });

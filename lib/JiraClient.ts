@@ -1,4 +1,3 @@
-import { JIRA_SITE_ID, JIRA_DOMAIN, JIRA_ORGANIZATION_ID } from './Constants';
 import { Config } from './Configuration';
 import { Team } from './Team';
 
@@ -35,10 +34,29 @@ interface Sprint {
   endDate: string;
 }
 
+interface Transition {
+  id: string;
+  name: string;
+}
+
+interface RemoteLink {
+  id: string,
+  object: {
+    url: string,
+    title: string
+  }
+}
+
 export class JiraClient {
+  private readonly domain: string;
+  private readonly siteId: string;
+  private readonly organizationId: string;
   private readonly token: string;
 
-  constructor(user: string, token: string) {
+  constructor(domain: string, siteId: string, organizationId: string, user: string, token: string) {
+    this.domain = domain;
+    this.siteId = siteId;
+    this.organizationId = organizationId;
     this.token = Buffer.from(`${user}:${token}`).toString('base64');
   }
 
@@ -52,7 +70,7 @@ export class JiraClient {
     }
     console.log(`Creating issue in project '${projectKey}'`);
     const response = await this.sendRestPostApi('issue', request);
-    return response?.key;
+    return response?.key || null;
   }
 
   public loadIssue(issueKey: string): Promise<any> {
@@ -75,12 +93,12 @@ export class JiraClient {
     }
   }
 
-  public async findTransition(issueId: string, transitionName: string): Promise<any> {
-    const transitions = (await this.sendRestGetApi(`issue/${issueId}/transitions`))?.transitions ?? [];
-    return transitions.find((x: any) => x.name === transitionName);
+  public async findTransition(issueId: string, transitionName: string): Promise<Transition> {
+    const transitions: Transition[] = (await this.sendRestGetApi(`issue/${issueId}/transitions`))?.transitions ?? [];
+    return transitions.find((x) => x.name === transitionName) || null;
   }
 
-  public async transitionIssue(issueId: string, transition: any, fields: any = null): Promise<void> {
+  public async transitionIssue(issueId: string, transition: Transition, fields: any = null): Promise<void> {
     console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
     await this.sendRestPostApi(`issue/${issueId}/transitions`, { transition: { id: transition.id }, fields });
   }
@@ -127,6 +145,18 @@ export class JiraClient {
     }
   }
 
+  public async createComponent(projectKey: string, name: string, description: string): Promise<boolean> {
+    console.log(`Searching for component '${name}' in project ${projectKey}`);
+    const { total, values } = await this.sendRestGetApi(`project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`);
+    if (values.find(x => x.name === name)) {  // values contains matches on partial names and descriptions
+      console.log(`Component found in ${total} result(s)`);
+      return true;
+    } else {
+      console.log(`Component not found in ${total} result(s). Creating a new one.`);
+      return await this.sendRestPostApi('component', { project: projectKey, name, description }) != null;
+    }
+  }
+
   public async addIssueComponent(issueId: string, name: string): Promise<boolean> {
     console.log(`${issueId}: Adding component ${name}`);
     const request = {
@@ -142,6 +172,11 @@ export class JiraClient {
   public async addIssueRemoteLink(issueId: string, url: string, title: string = null): Promise<void> {
     console.log(`${issueId}: Adding remote link ${url}`);
     await this.sendRestPostApi(`issue/${issueId}/remotelink`, { object: { url, title: title ?? url } });
+  }
+
+  public loadIssueRemoteLinks(issueId: string): Promise<RemoteLink[]> {
+    console.log(`${issueId}: Load remote links for ${issueId}`);
+    return this.sendRestGetApi(`issue/${issueId}/remotelink`);
   }
 
   public async findAccountId(email: string): Promise<string> {
@@ -181,7 +216,7 @@ export class JiraClient {
 
   public async findTeamByUser(accountId: string): Promise<Team> {
     console.log(`Searching for teams of account ${accountId}`);
-    return this.findTeam(`{ membership: { memberIds: "${accountId}" } }`, x => true); // No post-filtering
+    return this.findTeam(`membership: { memberIds: "${accountId}" }`, x => true); // No post-filtering
   }
 
   public async findTeamByName(teamName: string): Promise<Team> {
@@ -194,8 +229,8 @@ export class JiraClient {
       query MandatoryButUselessQueryName {
         team {
           teamSearchV2 (
-            siteId: "${JIRA_SITE_ID}",
-            organizationId: "ari:cloud:platform::org/${JIRA_ORGANIZATION_ID}",
+            siteId: "${this.siteId}",
+            organizationId: "ari:cloud:platform::org/${this.organizationId}",
             filter: { ${queryFilter} }
           )
           {
@@ -223,18 +258,6 @@ export class JiraClient {
     }
   }
 
-  public async createComponent(projectKey: string, name: string, description: string): Promise<boolean> {
-    console.log(`Searching for component '${name}' in project ${projectKey}`);
-    const { total, values } = await this.sendRestGetApi(`project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`);
-    if (values.find(x => x.name === name)) {  // values contains matches on partial names and descriptions
-      console.log(`Component found in ${total} result(s)`);
-      return true;
-    } else {
-      console.log(`Component not found in ${total} result(s). Creating a new one.`);
-      return await this.sendRestPostApi('component', { project: projectKey, name, description }) != null;
-    }
-  }
-
   private async sendGraphQL(query: string): Promise<any> {
     console.log(query); // Log only the GraphQL query, without the surrounding { "query": ... }
     return this.sendRequest("POST", "gateway/api/graphql", { query });
@@ -259,13 +282,14 @@ export class JiraClient {
   }
 
   private async sendRequest(method: "GET" | "POST" | "PUT", path: string, body?: any): Promise<any> {
-    const url = `${JIRA_DOMAIN}/${path}`;
+    const url = `${this.domain}/${path}`;
     const response = await fetch(url, {
       method,
       headers: {
         'Authorization': `Basic ${this.token}`,
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'Accept-Language': 'en',  // Otherwise Patlassian* returns errors in Chineese :facepalm:
       },
       body: body ? JSON.stringify(body) : undefined,
     });
