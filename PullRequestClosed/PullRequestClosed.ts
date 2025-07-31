@@ -1,6 +1,6 @@
 import { PullRequestAction } from '../lib/PullRequestAction';
 
-class PullRequestClosed extends PullRequestAction {
+export class PullRequestClosed extends PullRequestAction {
   protected async processJiraIssue(issueId: string): Promise<void> {
     if (this.isEngXpSquad) { // Can't auto-close auto-created issues, the reporter is set to the actual user
       const pr = await this.loadPullRequest(this.payload.pull_request.number);
@@ -46,6 +46,3 @@ class PullRequestClosed extends PullRequestAction {
       : '10001';  // "Won't do"
   }
 }
-
-const action = new PullRequestClosed();
-action.run();

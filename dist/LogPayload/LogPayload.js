@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.LogPayload = void 0;
 const Action_1 = require("../lib/Action");
 class LogPayload extends Action_1.Action {
     async execute() {
@@ -8,6 +9,5 @@ class LogPayload extends Action_1.Action {
         this.log('----------');
     }
 }
-const action = new LogPayload();
-action.run();
+exports.LogPayload = LogPayload;
 //# sourceMappingURL=LogPayload.js.map

@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToggleLockBranch = void 0;
 const OctokitAction_1 = require("../lib/OctokitAction");
-class LockBranch extends OctokitAction_1.OctokitAction {
+class ToggleLockBranch extends OctokitAction_1.OctokitAction {
     async execute() {
         const pattern = this.inputString('branch-pattern');
         let rule = await this.findRule(pattern);
@@ -110,6 +111,5 @@ class LockBranch extends OctokitAction_1.OctokitAction {
       }`);
     }
 }
-const action = new LockBranch();
-action.run();
+exports.ToggleLockBranch = ToggleLockBranch;
 //# sourceMappingURL=ToggleLockBranch.js.map
