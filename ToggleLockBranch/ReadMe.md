@@ -41,8 +41,8 @@ None
 ## Prerequisites
 
 Ask DevInfra squad to add a 
-* `github_lock` token to the Vault configuration of your repository. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/3f5efb03a94a38d1346cbde62631ce1a340b5e14/orders/bubble-dotnet.yaml#L180-L182)
-* `development/kv/data/slack` token. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/3f5efb03a94a38d1346cbde62631ce1a340b5e14/orders/bubble-dotnet.yaml#L186)
+* `github_lock` token to the Vault configuration of your repository. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/8372a71d1dbb5d408f777eaaea1ead6d85c75299/orders/analysis-dotnet-squad.yaml#L185-L186)
+* `development/kv/data/slack` token. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/8372a71d1dbb5d408f777eaaea1ead6d85c75299/orders/analysis-dotnet-squad.yaml#L200)
 
 A branch protection rule for the configured `branch-pattern` has to exist before running this action.
 
