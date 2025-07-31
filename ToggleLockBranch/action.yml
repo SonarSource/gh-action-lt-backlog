@@ -19,4 +19,4 @@ inputs:
 
 runs:
   using: 'node20'
-  main: '../dist/ToggleLockBranch/ToggleLockBranch.js'
+  main: '../dist/ToggleLockBranch/Index.js'

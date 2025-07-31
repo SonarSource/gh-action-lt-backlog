@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.SubmitReview = void 0;
 const PullRequestAction_1 = require("../lib/PullRequestAction");
 class SubmitReview extends PullRequestAction_1.PullRequestAction {
     async processJiraIssue(issueId) {
@@ -19,6 +20,5 @@ class SubmitReview extends PullRequestAction_1.PullRequestAction {
         }
     }
 }
-const action = new SubmitReview();
-action.run();
+exports.SubmitReview = SubmitReview;
 //# sourceMappingURL=SubmitReview.js.map
