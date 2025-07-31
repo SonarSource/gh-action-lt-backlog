@@ -7,7 +7,7 @@ type ProtectionRule = {
   pattern: string;
 };
 
-class LockBranch extends OctokitAction {
+export class ToggleLockBranch extends OctokitAction {
   protected async execute(): Promise<void> {
     const pattern = this.inputString('branch-pattern');
     let rule = await this.FindRule(pattern);
@@ -74,6 +74,3 @@ class LockBranch extends OctokitAction {
     return branchProtectionRule;
   }
 }
-
-const action = new LockBranch();
-action.run();

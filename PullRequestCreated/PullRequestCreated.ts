@@ -3,7 +3,7 @@ import { PullRequest } from '../lib/OctokitTypes';
 import { JIRA_DOMAIN, RENOVATE_PREFIX } from '../lib/Constants';
 import { NewIssueData } from '../lib/NewIssueData';
 
-class PullRequestCreated extends OctokitAction {
+export class PullRequestCreated extends OctokitAction {
   protected async execute(): Promise<void> {
     const inputJiraProject = this.inputString('jira-project');
     const inputAdditionalFields = this.inputString('additional-fields');
@@ -93,6 +93,3 @@ class PullRequestCreated extends OctokitAction {
     return `[${issue}](${JIRA_DOMAIN}/browse/${issue})`;
   }
 }
-
-const action = new PullRequestCreated();
-action.run();
