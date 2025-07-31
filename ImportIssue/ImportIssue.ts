@@ -4,7 +4,7 @@ import { NewIssueParameters } from '../lib/NewIssueParameters';
 import { OctokitAction } from '../lib/OctokitAction';
 import { Issue } from '../lib/OctokitTypes';
 
-class ImportIssue extends OctokitAction {
+export class ImportIssue extends OctokitAction {
   protected async execute(): Promise<void> {
     const jiraProject = this.inputString('jira-project');
     const issue = this.payload.issue as Issue;
@@ -47,7 +47,3 @@ class ImportIssue extends OctokitAction {
     return issue.labels.some(x => typeof x === 'object' && x.name === label);
   }
 }
-
-const action = new ImportIssue();
-action.run();
-

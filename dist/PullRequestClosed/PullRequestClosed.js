@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.PullRequestClosed = void 0;
 const PullRequestAction_1 = require("../lib/PullRequestAction");
 class PullRequestClosed extends PullRequestAction_1.PullRequestAction {
     async processJiraIssue(issueId) {
@@ -47,6 +48,5 @@ class PullRequestClosed extends PullRequestAction_1.PullRequestAction {
             : '10001'; // "Won't do"
     }
 }
-const action = new PullRequestClosed();
-action.run();
+exports.PullRequestClosed = PullRequestClosed;
 //# sourceMappingURL=PullRequestClosed.js.map
