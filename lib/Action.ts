@@ -27,6 +27,8 @@ export abstract class Action {
       this.log('Done');
     } catch (ex) {
       core.setFailed(ex.message);
+      console.log();
+      console.log(ex.stack);
     }
   }
 
