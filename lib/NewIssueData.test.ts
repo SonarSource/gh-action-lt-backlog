@@ -40,6 +40,7 @@ const jiraClient = {
   async findTeamByName(accountId: string): Promise<Team> {
     switch (accountId) {
       case 'fallback-team': return { name: 'Analysis Processing Squad', id: 'fallback-team' };
+      case 'nonexistent-fallback-team': return null;
       default: throw new Error(`Scaffolding did not expect team name ${accountId}`);
     }
   },
@@ -86,6 +87,10 @@ function createExpectedWithoutAccount(): NewIssueData {
 describe('NewIssueData', () => {
   it('create standalone PR', async () => {
     expect(await NewIssueData.create(jiraClient, createPullRequest('Title', 'Body'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
+  });
+
+  it('create standalone PR with body null', async () => {
+    expect(await NewIssueData.create(jiraClient, createPullRequest('Title', null), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
   });
 
   it('create fixed issue', async () => {
@@ -184,7 +189,7 @@ describe('NewIssueData', () => {
     expect(await NewIssueData.create(jiraClient, createPullRequest('Dependabot PR', 'FOREIGN-1234 and NET-1111'), 'KEY', '', 'dependabot@dependabot.com', '')).toEqual(createExpectedWithoutAccount());
   });
 
-  it('create with fallbackTeam', async () => {
+  it('create with fallbackTeam valid', async () => {
     const expected: NewIssueData = {
       accountId: null,
       additionalFields: {
@@ -195,6 +200,10 @@ describe('NewIssueData', () => {
       projectKey: 'KEY'
     };
     expect(await NewIssueData.create(jiraClient, createPullRequest('Renovate PR', 'Body'), 'KEY', '', 'renovate@renovate.com', 'fallback-team')).toEqual(expected);
+  });
+
+  it('create with fallbackTeam nonexistent', async () => {
+    expect(await NewIssueData.create(jiraClient, createPullRequest('Renovate PR', 'Body'), 'KEY', '', 'renovate@renovate.com', 'nonexistent-fallback-team')).toEqual(createExpectedWithoutAccount());
   });
 
   it('create with project lead team', async () => {
