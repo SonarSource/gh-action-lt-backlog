@@ -4,6 +4,7 @@ import { fail } from 'assert';
 import { NewIssueParameters } from './NewIssueParameters';
 import { EngineeringExperienceSquad, TeamConfigurationData } from '../Data/TeamConfiguration';
 import { Config } from './Configuration';
+import { LogTester } from '../tests/LogTester';
 
 const sandboxDomain = 'https://sonarsource-sandbox-608.atlassian.net';
 const sandboxSiteId = '5ea71b8c-f3d5-4b61-b038-001c50df1666';
@@ -43,22 +44,27 @@ async function ensurePreqIssueId(): Promise<string> {
 }
 
 describe('JiraClient', () => {
+  let logTester: LogTester;
+
+  beforeEach(() => {
+    logTester = new LogTester();
+  });
+
+  afterEach(() => {
+    logTester.afterEach();
+  });
+
   it('handles errors', async () => {
-    const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => jest.requireActual('console').log(...args));
-    try {
-      const withoutToken = new JiraClient(sandboxDomain, sandboxSiteId, sandboxOrganizationId, 'wrong', 'token');
-      const result = await withoutToken.loadIssue("TEST-42");
-      expect(result).toBeNull();
-      expect(logSpy).toHaveBeenCalledWith('404 (Not Found): Issue does not exist or you do not have permission to see it.');
-      expect(logSpy).toHaveBeenCalledWith(`{
+    const withoutToken = new JiraClient(sandboxDomain, sandboxSiteId, sandboxOrganizationId, 'wrong', 'token');
+    const result = await withoutToken.loadIssue("TEST-42");
+    expect(result).toBeNull();
+    expect(logTester.logSpy).toHaveBeenCalledWith('404 (Not Found): Issue does not exist or you do not have permission to see it.');
+    expect(logTester.logSpy).toHaveBeenCalledWith(`{
   "errorMessages": [
     "Issue does not exist or you do not have permission to see it."
   ],
   "errors": {}
 }`);
-    } finally {
-      logSpy.mockRestore();
-    }
   });
 
   it('createIssue', async () => {
@@ -122,13 +128,8 @@ describe('JiraClient', () => {
   });
 
   it('moveIssue no transition', async () => {
-    const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => jest.requireActual('console').log(...args));
-    try {
-      await sut.moveIssue('GHA-42', 'Hallucinated');
-      expect(logSpy).toHaveBeenCalledWith("GHA-42: Could not find the transition 'Hallucinated'");
-    } finally {
-      logSpy.mockRestore();
-    }
+    await sut.moveIssue('GHA-42', 'Hallucinated');
+    expect(logTester.logSpy).toHaveBeenCalledWith("GHA-42: Could not find the transition 'Hallucinated'");
   });
 
   it('moveIssue moves issue', async () => {
@@ -188,32 +189,22 @@ describe('JiraClient', () => {
   });
 
   it('createComponent existing', async () => {
-    const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => jest.requireActual('console').log(...args));
-    try {
-      const name = 'JiraClient UT';
-      const result = await sut.createComponent('GHA', name, 'Test component created by JiraClient unit test');
-      expect(result).toBe(true);
-      expect(logSpy).toHaveBeenCalledWith(`Searching for component 'JiraClient UT' in project GHA`);
-      expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(/Component found in \d+ result\(s\)/));
-    } finally {
-      logSpy.mockRestore();
-    }
+    const name = 'JiraClient UT';
+    const result = await sut.createComponent('GHA', name, 'Test component created by JiraClient unit test');
+    expect(result).toBe(true);
+    expect(logTester.logSpy).toHaveBeenCalledWith(`Searching for component 'JiraClient UT' in project GHA`);
+    expect(logTester.logSpy).toHaveBeenCalledWith(expect.stringMatching(/Component found in \d+ result\(s\)/));
   });
 
   it('createComponent new', async () => {
-    const logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => jest.requireActual('console').log(...args));
-    try {
-      const name = `JiraClient UT  ${crypto.randomUUID()}`;
-      const result = await sut.createComponent('GHA', name, 'Test component created by JiraClient unit test');
-      expect(result).toBe(true);
-      expect(logSpy).toHaveBeenCalledWith(`Searching for component '${name}' in project GHA`);
-      expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(/Component not found in \d+ result\(s\). Creating a new one./));
-      const project = await sut.loadProject('GHA');
-      const component = project.components.find(x => x.name === name);
-      expect(component).toMatchObject({ name, description: 'Test component created by JiraClient unit test' });
-    } finally {
-      logSpy.mockRestore();
-    }
+    const name = `JiraClient UT  ${crypto.randomUUID()}`;
+    const result = await sut.createComponent('GHA', name, 'Test component created by JiraClient unit test');
+    expect(result).toBe(true);
+    expect(logTester.logSpy).toHaveBeenCalledWith(`Searching for component '${name}' in project GHA`);
+    expect(logTester.logSpy).toHaveBeenCalledWith(expect.stringMatching(/Component not found in \d+ result\(s\). Creating a new one./));
+    const project = await sut.loadProject('GHA');
+    const component = project.components.find(x => x.name === name);
+    expect(component).toMatchObject({ name, description: 'Test component created by JiraClient unit test' });
   });
 
   it('addIssueComponent', async () => {
