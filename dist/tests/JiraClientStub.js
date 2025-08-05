@@ -44,6 +44,21 @@ exports.jiraClientStub = {
     },
     async findSprintId(boardId) {
         return 42;
+    },
+    async createIssue(projectKey, summary, additionalFields) {
+        console.log(`Invoked jira.createIssue('${projectKey}', '${summary}', ${JSON.stringify(additionalFields)})`);
+        return `${projectKey}-4242`;
+    },
+    async addIssueRemoteLink(issueId, url, title = null) {
+        title = title ? `'${title}'` : 'null';
+        console.log(`Invoked jira.addIssueRemoteLink('${issueId}'', '${url}', ${title})`);
+    },
+    async moveIssue(issueId, transitionName, fields = null) {
+        fields = fields ? JSON.stringify(fields) : 'null';
+        console.log(`Invoked jira.moveIssue('${issueId}', '${transitionName}', ${fields})`);
+    },
+    async assignIssueToAccount(issueId, accountId) {
+        console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);
     }
 };
 //# sourceMappingURL=JiraClientStub.js.map

@@ -43,5 +43,20 @@ export const jiraClientStub = {
   },
   async findSprintId(boardId: number): Promise<number> {
     return 42;
+  },
+  async createIssue(projectKey: string, summary: string, additionalFields: any): Promise<string> {
+    console.log(`Invoked jira.createIssue('${projectKey}', '${summary}', ${JSON.stringify(additionalFields)})`);
+    return `${projectKey}-4242`;
+  },
+  async addIssueRemoteLink(issueId: string, url: string, title: string = null): Promise<void> {
+    title = title ? `'${title}'` : 'null';
+    console.log(`Invoked jira.addIssueRemoteLink('${issueId}'', '${url}', ${title})`);
+  },
+  async moveIssue(issueId: string, transitionName: string, fields: any = null): Promise<void> {
+    fields = fields ? JSON.stringify(fields) : 'null';
+    console.log(`Invoked jira.moveIssue('${issueId}', '${transitionName}', ${fields})`);
+  },
+  async assignIssueToAccount(issueId: string, accountId: string): Promise<void> {
+    console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);
   }
 } as unknown as JiraClient;
