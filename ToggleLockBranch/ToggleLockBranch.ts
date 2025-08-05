@@ -118,7 +118,6 @@ export class ToggleLockBranch extends OctokitAction {
             }
           }
         }`);
-      this.log(`${hasNextPage}, ${endCursor}`);
       allNodes.push(...nodes);
       after = hasNextPage ? endCursor : null;
     }

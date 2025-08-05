@@ -222,6 +222,11 @@ describe('JiraClient', () => {
     expect(await sut.findAccountId('helpdesk+jira-githubtech@sonarsource.com')).toBe('712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4');
   });
 
+  it('findBoard', async () => {
+    const boardId = Config.findTeam(EngineeringExperienceSquad.name).boardId;
+    expect(await sut.findBoard(boardId)).not.toBeNull();
+  });
+
   it('findSprintId', async () => {
     const boardId = Config.findTeam(EngineeringExperienceSquad.name).boardId;
     expect(await sut.findSprintId(boardId)).toBeGreaterThan(0);
