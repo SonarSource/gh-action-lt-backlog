@@ -13,14 +13,14 @@ class NewIssueData {
         this.accountId = accountId;
         this.additionalFields = additionalFields;
     }
-    static async create(jira, pr, inputJiraProject, inputAdditionFields, userEmail, fallbackTeam) {
+    static async create(jira, pr, inputJiraProject, inputAdditionalFields, userEmail, fallbackTeam) {
         const parent = pr.isRenovate() || pr.isDependabot()
             ? null // Description contains release notes with irrelevant issue IDs
             : await this.findNonSubTaskParent(jira, this.findMentionedIssues(pr));
         const projectKey = this.computeProjectKey(inputJiraProject, parent);
         if (projectKey) {
             const accountId = await jira.findAccountId(userEmail);
-            const additionalFields = this.parseAdditionalFields(inputAdditionFields);
+            const additionalFields = this.parseAdditionalFields(inputAdditionalFields);
             const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
             if (parameters.issuetype.name !== 'Sub-task') { // These fields cannot be set on Sub-task. Their values are inherited from the parent issue.
                 const team = await this.findTeam(jira, accountId, projectKey, fallbackTeam); // Can be null for bots when project lead is not member of any team, and fallbackTeam is not set. Jira request will fail if the field is mandatory for the project.
