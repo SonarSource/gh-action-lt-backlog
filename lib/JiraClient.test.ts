@@ -13,8 +13,8 @@ let issueId: string;
 let preqIssueId: string;
 
 beforeAll(async () => {
-  const user = process.env["JIRA_USER"];    // Can't use the same name as environment variables read by Octokit actions, because the dash is not propagated from shell to node
-  const token = process.env["JIRA_TOKEN"];
+  const user = process.env["INPUT_JIRA-USER"];    // Can't use the same name as environment variables read by Octokit actions, because the dash is not propagated from shell to node
+  const token = process.env["INPUT_JIRA-TOKEN"];
   if (user && token) {
     sut = new JiraClient(sandboxDomain, sandboxSiteId, sandboxOrganizationId, user, token);
     const parameters: NewIssueParameters = { issuetype: { name: 'New Feature' } };

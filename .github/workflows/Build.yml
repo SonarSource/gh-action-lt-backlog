@@ -67,6 +67,6 @@ jobs:
 
       - name: Run tests
         env:
-            JIRA_USER:  ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
-            JIRA_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
+            INPUT_JIRA-USER:  ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
+            INPUT_JIRA-TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
         run: npm run test
