@@ -85,7 +85,7 @@ class LockBranch extends OctokitAction {
 
   private async cancelAutoMerge(branch: string): Promise<void> {
     this.log(`Canceling auto-merge for branch '${branch}'`);
-    const targetPRs = await this.loadRequests(branch);
+    const targetPRs = await this.loadPullRequests(branch);
     const autoClosePRs = targetPRs.filter(x => x.autoMergeRequest);
     this.log(`Found ${targetPRs.length} PRs targeting ${branch}, and ${autoClosePRs.length} with auto-merge.`);
     for (const pr of autoClosePRs) {
@@ -94,14 +94,13 @@ class LockBranch extends OctokitAction {
     }
   }
 
-  private async loadRequests(targetBranch: string): Promise<PullRequest[]> {
+  private async loadPullRequests(targetBranch: string): Promise<PullRequest[]> {
     const allNodes: PullRequest[] = [];
     let after: string = "";
     while (after !== null) {
       const {
         repository: {
           pullRequests: { nodes, pageInfo: { endCursor, hasNextPage } },
-
         },
       }: GraphQlQueryResponseData = await this.sendGraphQL(`
         query {

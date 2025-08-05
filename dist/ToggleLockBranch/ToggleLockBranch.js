@@ -65,7 +65,7 @@ class LockBranch extends OctokitAction_1.OctokitAction {
     }
     async cancelAutoMerge(branch) {
         this.log(`Canceling auto-merge for branch '${branch}'`);
-        const targetPRs = await this.loadRequests(branch);
+        const targetPRs = await this.loadPullRequests(branch);
         const autoClosePRs = targetPRs.filter(x => x.autoMergeRequest);
         this.log(`Found ${targetPRs.length} PRs targeting ${branch}, and ${autoClosePRs.length} with auto-merge.`);
         for (const pr of autoClosePRs) {
@@ -73,7 +73,7 @@ class LockBranch extends OctokitAction_1.OctokitAction {
             await this.addComment(pr.number, `The target branch was unlocked and auto-merge was canceled to prevent unexpected actions.`);
         }
     }
-    async loadRequests(targetBranch) {
+    async loadPullRequests(targetBranch) {
         const allNodes = [];
         let after = "";
         while (after !== null) {
