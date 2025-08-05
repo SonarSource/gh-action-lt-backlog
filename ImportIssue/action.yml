@@ -15,4 +15,4 @@ inputs:
     required: true
 runs:
   using: 'node20'
-  main: '../dist/ImportIssue/ImportIssue.js'
+  main: '../dist/ImportIssue/Index.js'

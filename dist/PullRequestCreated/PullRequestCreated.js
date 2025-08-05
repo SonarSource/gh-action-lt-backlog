@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.PullRequestCreated = void 0;
 const OctokitAction_1 = require("../lib/OctokitAction");
 const Constants_1 = require("../lib/Constants");
 const NewIssueData_1 = require("../lib/NewIssueData");
@@ -92,6 +93,5 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         return `[${issue}](${Constants_1.JIRA_DOMAIN}/browse/${issue})`;
     }
 }
-const action = new PullRequestCreated();
-action.run();
+exports.PullRequestCreated = PullRequestCreated;
 //# sourceMappingURL=PullRequestCreated.js.map

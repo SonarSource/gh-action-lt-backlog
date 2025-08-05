@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ImportIssue = void 0;
 const AtlassianDocumentFormat_1 = require("../lib/AtlassianDocumentFormat");
 const Constants_1 = require("../lib/Constants");
 const OctokitAction_1 = require("../lib/OctokitAction");
@@ -43,6 +44,5 @@ class ImportIssue extends OctokitAction_1.OctokitAction {
         return issue.labels.some(x => typeof x === 'object' && x.name === label);
     }
 }
-const action = new ImportIssue();
-action.run();
+exports.ImportIssue = ImportIssue;
 //# sourceMappingURL=ImportIssue.js.map

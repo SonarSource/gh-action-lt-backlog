@@ -1,6 +1,6 @@
 import { PullRequestAction } from '../lib/PullRequestAction';
 
-class SubmitReview extends PullRequestAction {
+export class SubmitReview extends PullRequestAction {
 
   protected async processJiraIssue(issueId: string): Promise<void> {
     if (this.payload.review.state === 'approved') {
@@ -17,6 +17,3 @@ class SubmitReview extends PullRequestAction {
     }
   }
 }
-
-const action = new SubmitReview();
-action.run();
