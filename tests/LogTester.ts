@@ -1,7 +1,7 @@
 
 // This should be created `beforeEach` unit test to:
 // * Unify console.log assertions
-// * Supress console.log noise from successful tests. Each console.log produces 5 lines in UT output, making it too hard to work with.
+// * Suppress console.log noise from successful tests. Each console.log produces 5 lines in UT output, making it too hard to work with.
 // `afterEach` should be called to restore mocking and to dump logs for failed UTs.
 export class LogTester {
   public readonly logSpy: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]], any>;

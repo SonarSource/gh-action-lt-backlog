@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LogTester = void 0;
 // This should be created `beforeEach` unit test to:
 // * Unify console.log assertions
-// * Supress console.log noise from successful tests. Each console.log produces 5 lines in UT output, making it too hard to work with.
+// * Suppress console.log noise from successful tests. Each console.log produces 5 lines in UT output, making it too hard to work with.
 // `afterEach` should be called to restore mocking and to dump logs for failed UTs.
 class LogTester {
     logSpy;
