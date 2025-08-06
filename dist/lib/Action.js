@@ -19,6 +19,8 @@ class Action {
         }
         catch (ex) {
             core.setFailed(ex.message);
+            console.log();
+            console.log(ex.stack);
         }
     }
     log(line) {
