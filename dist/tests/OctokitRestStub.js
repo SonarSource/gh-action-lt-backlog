@@ -7,6 +7,14 @@ function createOctokitRestStub(title, body, login = 'test-user') {
             createComment(params) {
                 console.log(`Invoked rest.issues.createComment(${JSON.stringify(params)})`);
             },
+            get(params) {
+                return {
+                    data: {
+                        number: 24,
+                        title: "Issue title"
+                    }
+                };
+            },
             listComments(params) {
                 return {
                     data: []
