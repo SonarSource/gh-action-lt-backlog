@@ -59,6 +59,17 @@ exports.jiraClientStub = {
     },
     async assignIssueToAccount(issueId, accountId) {
         console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);
+    },
+    async assignIssueToEmail(issueId, userEmail) {
+        console.log(`Invoked jira.assignIssueToEmail('${issueId}', '${userEmail}')`);
+    },
+    async createComponent(projectKey, name, description) {
+        console.log(`Invoked jira.createComponent('${projectKey}', '${name}', '${description}')`);
+        return true;
+    },
+    async addIssueComponent(issueId, name) {
+        console.log(`Invoked jira.addIssueComponent('${issueId}', '${name}')`);
+        return true;
     }
 };
 //# sourceMappingURL=JiraClientStub.js.map

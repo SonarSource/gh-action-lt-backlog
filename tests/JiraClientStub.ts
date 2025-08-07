@@ -58,5 +58,16 @@ export const jiraClientStub = {
   },
   async assignIssueToAccount(issueId: string, accountId: string): Promise<void> {
     console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);
+  },
+  async assignIssueToEmail(issueId: string, userEmail: string): Promise<void> {
+    console.log(`Invoked jira.assignIssueToEmail('${issueId}', '${userEmail}')`);
+  },
+  async createComponent(projectKey: string, name: string, description: string): Promise<boolean> {
+    console.log(`Invoked jira.createComponent('${projectKey}', '${name}', '${description}')`);
+    return true;
+  },
+  async addIssueComponent(issueId: string, name: string): Promise<boolean> {
+    console.log(`Invoked jira.addIssueComponent('${issueId}', '${name}')`);
+    return true;
   }
 } as unknown as JiraClient;
