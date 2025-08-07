@@ -175,7 +175,34 @@ describe('OctokitAction', () => {
     });
     it.skip('sendSlackMessage', async () => {
     });
-    it.skip('processRequestReview', async () => {
+    it('processRequestReview', async () => {
+        sut.findEmail = async function (login) {
+            return "test.user@sonarsource.com";
+        };
+        await sut.processRequestReview("42", { login: 'test-user', type: 'User' });
+        expect(logTester.logsParams).toStrictEqual([
+            "Invoked jira.moveIssue('42', 'Request Review', null)",
+            "Invoked jira.assignIssueToEmail('42', 'test.user@sonarsource.com')"
+        ]);
+    });
+    it('processRequestReview is-eng-xp-squad', async () => {
+        sut.isEngXpSquad = true;
+        sut.findEmail = async function (login) {
+            return "test.user@sonarsource.com";
+        };
+        await sut.processRequestReview("42", { login: 'test-user', type: 'User' });
+        expect(logTester.logsParams).toStrictEqual([
+            "Invoked jira.moveIssue('42', 'Request Review', null)",
+            "Invoked jira.addReviewer('42', 'test.user@sonarsource.com')"
+        ]);
+    });
+    it('processRequestReview from team', async () => {
+        await sut.processRequestReview("42", null);
+        expect(logTester.logsParams).toStrictEqual(["Invoked jira.moveIssue('42', 'Request Review', null)"]);
+    });
+    it('processRequestReview from Bot', async () => {
+        await sut.processRequestReview("42", { login: 'renovate[bot]', type: 'Bot' });
+        expect(logTester.logsParams).toStrictEqual(["Skipping request review from bot: renovate[bot]"]);
     });
     it.skip('addJiraComponent success', async () => {
     });
