@@ -16,9 +16,13 @@ function createOctokitRestStub(title, body, login = 'test-user') {
                 };
             },
             listComments(params) {
+                console.log(`Invoked rest.issues.listComments(${JSON.stringify(params)})`);
                 return {
                     data: []
                 };
+            },
+            update(params) {
+                console.log(`Invoked rest.issues.update(${JSON.stringify(params)})`);
             }
         },
         pulls: {
