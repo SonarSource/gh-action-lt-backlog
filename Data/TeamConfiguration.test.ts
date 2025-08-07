@@ -33,7 +33,6 @@ const ignoredTeams = [
   "FieldOps",
   "Finance Team",
   "Front-Office Squad (Stripe)",
-  "GRIP Task Force",      // Obsolete
   "Growth & New Ventures",
   "Growth Marketing",
   "GTM - Web Development Squad",
@@ -52,11 +51,9 @@ const ignoredTeams = [
   "PLG squad",
   "PM Team",
   "Purchase",
-  "Renewals Squad",
+  "Renewals Team",
   "RIS Squad",
-  "SC-Squad-3",           // Obsolete
   "Services",
-  "Sonar Solution Squad", // Obsolete
   "Storefront EM",
   "Support Council",
   "Support Team",
