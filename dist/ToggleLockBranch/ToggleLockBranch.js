@@ -94,7 +94,6 @@ class ToggleLockBranch extends OctokitAction_1.OctokitAction {
             }
           }
         }`);
-            this.log(`${hasNextPage}, ${endCursor}`);
             allNodes.push(...nodes);
             after = hasNextPage ? endCursor : null;
         }

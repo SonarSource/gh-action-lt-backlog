@@ -138,6 +138,10 @@ class JiraClient {
         }
     }
     ;
+    findBoard(boardId) {
+        console.log(`Searching for boardId ${boardId}`);
+        return this.sendRestGetAgile(`board/${boardId}`);
+    }
     async findSprintId(boardId) {
         console.log(`Searching for active sprint in board ${boardId}`);
         let { values } = await this.sendRestGetAgile(`board/${boardId}/sprint?state=active`);
@@ -159,41 +163,60 @@ class JiraClient {
     }
     async findTeamByName(teamName) {
         console.log(`Searching for team ${teamName}`);
-        return this.findTeam(`query: "${teamName}"`, x => x.team.displayName === teamName); // Query returns also partial matches. We need to post-filter them
+        return this.findTeam(`query: "${teamName}"`, x => x.name === teamName); // Query returns also partial matches. We need to post-filter them
     }
     async findTeam(queryFilter, resultFilter) {
-        const response = await this.sendGraphQL(`
-      query MandatoryButUselessQueryName {
-        team {
-          teamSearchV2 (
-            siteId: "${this.siteId}",
-            organizationId: "ari:cloud:platform::org/${this.organizationId}",
-            filter: { ${queryFilter} }
-          )
-          {
-            nodes {
-              team { id displayName }
-            }
-          }
-        }
-      }`);
-        if (response.errors) {
-            console.log(`ERROR: Failed to search for teams. ${JSON.stringify(response.errors, null, 2)}`);
+        const nodes = (await this.findTeams(queryFilter)).filter(resultFilter);
+        if (nodes.length === 0) {
+            console.log(`Could not find team in Jira`);
             return null;
         }
         else {
-            const nodes = response.data.team.teamSearchV2.nodes.filter(resultFilter);
-            if (nodes.length === 0) {
-                console.log(`Could not find team in Jira`);
+            const match = nodes.find((x) => Configuration_1.Config.findTeam(x.name) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
+            console.log(`Found ${nodes.length} team(s), using ${match.id} ${match.name}`);
+            return match;
+        }
+    }
+    async findTeams(queryFilter) {
+        const allTeams = [];
+        let after = null; // Must be serialized to 'after: null' in the string, because 'after: ""' does not work.
+        let hasNextPage = true;
+        while (hasNextPage) {
+            const response = await this.sendGraphQL(`
+        query MandatoryButUselessQueryName {
+          team {
+            teamSearchV2 (
+              siteId: "${this.siteId}",
+              organizationId: "ari:cloud:platform::org/${this.organizationId}",
+              filter: { ${queryFilter} }
+              after: "${after}"
+            )
+            {
+              nodes {
+                team { id displayName }
+              }
+              pageInfo {
+                hasNextPage # This is lying and returning false only on the last page :facepalm:
+                endCursor
+              }
+            }
+          }
+        }`);
+            if (response.errors) {
+                console.log(`ERROR: Failed to search for teams. ${JSON.stringify(response.errors, null, 2)}`);
                 return null;
             }
             else {
-                const match = nodes.find((x) => Configuration_1.Config.findTeam(x.team.displayName) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
-                const id = match.team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
-                console.log(`Found ${nodes.length} team(s), using ${id} ${match.team.displayName}`);
-                return { id, name: match.team.displayName };
+                const teamData = response.data.team.teamSearchV2;
+                for (const team of teamData.nodes) {
+                    const id = team.team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
+                    allTeams.push({ id, name: team.team.displayName });
+                }
+                hasNextPage = teamData.pageInfo.hasNextPage;
+                after = teamData.pageInfo.endCursor;
             }
         }
+        return allTeams;
     }
     async sendGraphQL(query) {
         console.log(query); // Log only the GraphQL query, without the surrounding { "query": ... }
