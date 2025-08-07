@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const expect_1 = require("expect");
 const NewIssueData_1 = require("../lib/NewIssueData");
 const JiraClientStub_1 = require("../tests/JiraClientStub");
+const LogTester_1 = require("../tests/LogTester");
 function createPullRequest(title, body, repo = 'repo') {
     return {
         number: 42,
@@ -36,6 +37,13 @@ function createExpectedWithoutAccount() {
     };
 }
 describe('NewIssueData', () => {
+    let logTester;
+    beforeEach(() => {
+        logTester = new LogTester_1.LogTester();
+    });
+    afterEach(() => {
+        logTester.afterEach();
+    });
     it('create standalone PR', async () => {
         (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
     });

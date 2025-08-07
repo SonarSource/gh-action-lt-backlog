@@ -2,6 +2,7 @@ import { expect } from 'expect';
 import { NewIssueData } from '../lib/NewIssueData';
 import { PullRequest } from './OctokitTypes';
 import { jiraClientStub } from '../tests/JiraClientStub';
+import { LogTester } from '../tests/LogTester';
 
 function createPullRequest(title: string, body: string, repo: string = 'repo'): PullRequest {
   return {
@@ -39,6 +40,16 @@ function createExpectedWithoutAccount(): NewIssueData {
 }
 
 describe('NewIssueData', () => {
+  let logTester: LogTester;
+
+  beforeEach(() => {
+    logTester = new LogTester();
+  });
+
+  afterEach(() => {
+    logTester.afterEach();
+  });
+
   it('create standalone PR', async () => {
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
   });
