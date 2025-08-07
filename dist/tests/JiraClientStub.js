@@ -6,8 +6,8 @@ exports.jiraClientStub = {
     async loadIssue(issueId) {
         switch (issueId) {
             case 'MMF-1111': return { key: 'MMF-1111', fields: { project: { key: 'MMF' }, issuetype: { name: 'Epic' } } };
-            case 'KEY-1111': return { key: 'KEY-1111', fields: { project: { key: 'KEY' }, issuetype: { name: 'Epic' } } };
-            case 'KEY-1234': return { key: 'KEY-1234', fields: { project: { key: 'KEY' }, issuetype: { name: 'Task' } } };
+            case 'KEY-1234': return { key: 'KEY-1234', fields: { project: { key: 'KEY' }, issuetype: { name: 'Task' }, creator: { displayName: "CreatorKEY1234" } } };
+            case 'KEY-5678': return { key: 'KEY-1234', fields: { project: { key: 'KEY' }, issuetype: { name: 'Task' }, creator: { displayName: "Jira Tech User GitHub" } } };
             case 'KEY-5555': return { key: 'KEY-5555', fields: { project: { key: 'KEY' }, issuetype: { name: 'Sub-task' } } };
             default: throw new Error(`Scaffolding did not expect ${issueId}`);
         }
