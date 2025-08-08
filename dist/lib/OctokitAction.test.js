@@ -89,12 +89,12 @@ describe('OctokitAction', () => {
     });
     it('loadPullRequest', async () => {
         const pr = await sut.loadPullRequest(42);
-        expect(pr).toMatchObject({ number: 42, title: "PR title" }); // Plus the remainig properties from scaffolding
+        expect(pr).toMatchObject({ number: 42, title: "PR title" }); // Plus the remaining properties from scaffolding
         expect(logTester.logsParams).toStrictEqual(["Loading PR #42"]);
     });
     it('loadIssue', async () => {
         const issue = await sut.loadIssue(24);
-        expect(issue).toMatchObject({ number: 24, title: "Issue title" }); // Plus the remainig properties from scaffolding
+        expect(issue).toMatchObject({ number: 24, title: "Issue title" }); // Plus the remaining properties from scaffolding
         expect(logTester.logsParams).toStrictEqual(["Loading issue #24"]);
     });
     it('findFixedIssues no issue', async () => {
