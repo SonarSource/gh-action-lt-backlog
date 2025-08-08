@@ -30,7 +30,7 @@ describe('OctokitAction', () => {
                     delete process.env[key];
                 }
             }
-            process.env['GITHUB_REPOSITORY'] = 'test-owner/test-repo';
+            process.env['GITHUB_REPOSITORY'] = 'SonarSource/test-repo'; // Owner needs to be correct for findEmail to work properly
             process.env['INPUT_GITHUB-TOKEN'] = token;
             sut = new TestOctokitAction();
         }
@@ -141,38 +141,42 @@ describe('OctokitAction', () => {
     });
     it('addComment', async () => {
         await sut.addComment(42, "Lorem ipsum");
-        expect(logTester.logsParams).toStrictEqual(["Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Lorem ipsum\"})"]);
+        expect(logTester.logsParams).toStrictEqual(["Invoked rest.issues.createComment({\"owner\":\"SonarSource\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Lorem ipsum\"})"]);
     });
     it('listComments', async () => {
         await sut.listComments(42);
-        expect(logTester.logsParams).toStrictEqual(["Invoked rest.issues.listComments({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42})"]);
+        expect(logTester.logsParams).toStrictEqual(["Invoked rest.issues.listComments({\"owner\":\"SonarSource\",\"repo\":\"test-repo\",\"issue_number\":42})"]);
     });
     it('updateIssueTitle', async () => {
         await sut.updateIssueTitle(42, 'New title');
         expect(logTester.logsParams).toStrictEqual([
             "Updating issue #42 title to: New title",
-            "Invoked rest.issues.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"title\":\"New title\"})"
+            "Invoked rest.issues.update({\"owner\":\"SonarSource\",\"repo\":\"test-repo\",\"issue_number\":42,\"title\":\"New title\"})"
         ]);
     });
     it('updatePullRequestTitle', async () => {
         await sut.updatePullRequestTitle(42, 'New title');
         expect(logTester.logsParams).toStrictEqual([
             "Updating PR #42 title to: New title",
-            "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"New title\"})"
+            "Invoked rest.pulls.update({\"owner\":\"SonarSource\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"New title\"})"
         ]);
     });
     it('updatePullRequestDescription', async () => {
         await sut.updatePullRequestDescription(42, 'New description');
         expect(logTester.logsParams).toStrictEqual([
             "Updating PR #42 description",
-            "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"body\":\"New description\"})"
+            "Invoked rest.pulls.update({\"owner\":\"SonarSource\",\"repo\":\"test-repo\",\"pull_number\":42,\"body\":\"New description\"})"
         ]);
     });
-    it.skip('findEmail returns first', async () => {
+    // Local token is impossible to craft with required permissions
+    itRunsOnlyInCI('findEmail succeeds', async () => {
+        // Preferably someone from https://github.com/orgs/SonarSource/people when visited in incognito mode, not to leak any information
+        // Don't hardcode specific email in public repo.
+        expect(await sut.findEmail('agigleux')).toContain('sonar');
     });
-    it.skip('findEmail no results', async () => {
-    });
-    it.skip('findEmail bad token', async () => {
+    // Local token is impossible to craft with required permissions
+    itRunsOnlyInCI('findEmail no results', async () => {
+        expect(await sut.findEmail('renovate[bot]')).toBeNull();
     });
     // Local token is difficult to craft
     itRunsOnlyInCI('sendSlackMessage succeeds', async () => {
