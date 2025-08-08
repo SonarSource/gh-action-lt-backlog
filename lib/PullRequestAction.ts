@@ -6,7 +6,7 @@ export abstract class PullRequestAction extends OctokitAction {
   protected async execute(): Promise<void> {
     const issueIds = await this.fixedJiraIssues();
     if (issueIds.length === 0) {
-      console.warn('No Jira issue found in the PR title.');
+      console.log('No Jira issue found in the PR title.');
     } else {
       for (const issueId of issueIds) {
         // BUILD/PREQ tickets are processed only when they are from Engineering Experience Squad repos. They should be ignored in any other repo, not to interfere with their process.
