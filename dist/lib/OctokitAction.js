@@ -199,6 +199,7 @@ class OctokitAction extends Action_1.Action {
     async addJiraComponent(issueId, name, description = null) {
         if (!await this.jira.createComponent(issueId.split('-')[0], name, description)) { // Same PR can have multiple issues from different projects
             this.setFailed('Failed to create component');
+            return;
         }
         if (!await this.jira.addIssueComponent(issueId, name)) {
             this.setFailed('Failed to add component');

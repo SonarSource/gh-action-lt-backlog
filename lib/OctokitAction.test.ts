@@ -8,7 +8,7 @@ class TestOctokitAction extends OctokitAction {
 
   constructor() {
     super();
-    (this as any).jira = jiraClientStub;
+    (this as any).jira = { ...jiraClientStub }; // Expanded copy, we'll be modifying it in these tests
     (this as any).rest = createOctokitRestStub('PR title');
   }
 
@@ -258,15 +258,36 @@ describe('OctokitAction', () => {
     expect(logTester.logsParams).toStrictEqual(["Skipping request review from bot: renovate[bot]"]);
   });
 
-  it.skip('addJiraComponent success', async () => {
-
+  it('addJiraComponent success', async () => {
+    await sut.addJiraComponent('GHA-42', 'Component Name', 'Component Description');
+    expect(logTester.logsParams).toStrictEqual([
+      "Invoked jira.createComponent('GHA', 'Component Name', 'Component Description')",
+      "Invoked jira.addIssueComponent('GHA-42', 'Component Name')",
+    ]);
   });
 
-  it.skip('addJiraComponent fails to create component', async () => {
-
+  it('addJiraComponent fails to create component', async () => {
+    sut.jira.createComponent = async function (projectKey: string, name: string, description: string): Promise<boolean> {
+      console.log('Invoked jira.createComponent returning false');
+      return false;
+    }
+    sut.setFailed = jest.fn();
+    await sut.addJiraComponent('GHA-42', 'Component Name', 'Component Description');
+    expect(sut.setFailed).toHaveBeenCalledWith('Failed to create component');
+    expect(logTester.logsParams).toStrictEqual(["Invoked jira.createComponent returning false"]);
   });
 
-  it.skip('addJiraComponent fails to assign component', async () => {
-
+  it('addJiraComponent fails to assign component', async () => {
+    sut.jira.addIssueComponent = async function (issueId: string, name: string): Promise<boolean> {
+      console.log('Invoked jira.addIssueComponent returning false');
+      return false;
+    }
+    sut.setFailed = jest.fn();
+    await sut.addJiraComponent('GHA-42', 'Component Name', 'Component Description');
+    expect(sut.setFailed).toHaveBeenCalledWith('Failed to add component');
+    expect(logTester.logsParams).toStrictEqual([
+      "Invoked jira.createComponent('GHA', 'Component Name', 'Component Description')",
+      "Invoked jira.addIssueComponent returning false"
+    ]);
   });
 });

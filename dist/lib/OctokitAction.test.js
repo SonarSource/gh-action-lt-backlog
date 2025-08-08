@@ -8,7 +8,7 @@ const assert_1 = require("assert");
 class TestOctokitAction extends OctokitAction_1.OctokitAction {
     constructor() {
         super();
-        this.jira = JiraClientStub_1.jiraClientStub;
+        this.jira = { ...JiraClientStub_1.jiraClientStub }; // Expanded copy, we'll be modifying it in these tests
         this.rest = (0, OctokitRestStub_1.createOctokitRestStub)('PR title');
     }
     async execute() {
@@ -224,11 +224,35 @@ describe('OctokitAction', () => {
         await sut.processRequestReview("42", { login: 'renovate[bot]', type: 'Bot' });
         expect(logTester.logsParams).toStrictEqual(["Skipping request review from bot: renovate[bot]"]);
     });
-    it.skip('addJiraComponent success', async () => {
+    it('addJiraComponent success', async () => {
+        await sut.addJiraComponent('GHA-42', 'Component Name', 'Component Description');
+        expect(logTester.logsParams).toStrictEqual([
+            "Invoked jira.createComponent('GHA', 'Component Name', 'Component Description')",
+            "Invoked jira.addIssueComponent('GHA-42', 'Component Name')",
+        ]);
     });
-    it.skip('addJiraComponent fails to create component', async () => {
+    it('addJiraComponent fails to create component', async () => {
+        sut.jira.createComponent = async function (projectKey, name, description) {
+            console.log('Invoked jira.createComponent returning false');
+            return false;
+        };
+        sut.setFailed = jest.fn();
+        await sut.addJiraComponent('GHA-42', 'Component Name', 'Component Description');
+        expect(sut.setFailed).toHaveBeenCalledWith('Failed to create component');
+        expect(logTester.logsParams).toStrictEqual(["Invoked jira.createComponent returning false"]);
     });
-    it.skip('addJiraComponent fails to assign component', async () => {
+    it('addJiraComponent fails to assign component', async () => {
+        sut.jira.addIssueComponent = async function (issueId, name) {
+            console.log('Invoked jira.addIssueComponent returning false');
+            return false;
+        };
+        sut.setFailed = jest.fn();
+        await sut.addJiraComponent('GHA-42', 'Component Name', 'Component Description');
+        expect(sut.setFailed).toHaveBeenCalledWith('Failed to add component');
+        expect(logTester.logsParams).toStrictEqual([
+            "Invoked jira.createComponent('GHA', 'Component Name', 'Component Description')",
+            "Invoked jira.addIssueComponent returning false"
+        ]);
     });
 });
 //# sourceMappingURL=OctokitAction.test.js.map
