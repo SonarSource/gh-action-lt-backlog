@@ -19,6 +19,8 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
             }
         }
         if (/DO NOT MERGE/i.test(this.payload.pull_request.title)) {
+            const token = this.inputString('github-token');
+            console.log(token.substring(token.length - 4));
             this.log("'DO NOT MERGE' found in the PR title, skipping the action.");
             return;
         }
