@@ -97,25 +97,75 @@ describe('OctokitAction', () => {
         expect(issue).toMatchObject({ number: 24, title: "Issue title" }); // Plus the remainig properties from scaffolding
         expect(logTester.logsParams).toStrictEqual(["Loading issue #24"]);
     });
-    it.skip('findFixedIssues no body', async () => {
+    it('findFixedIssues no issue', async () => {
+        const pr = await sut.loadPullRequest(42);
+        pr.title = "Standalone PR";
+        expect(await sut.findFixedIssues(pr)).toBeNull();
     });
-    it.skip('findFixedIssues no issue', async () => {
+    it('findFixedIssues with issues', async () => {
+        const pr = await sut.loadPullRequest(42);
+        pr.title = "GHA-42, [GHA-43] And also SCAN4NET-44 with number in project key, but no lowercase-22";
+        expect(await sut.findFixedIssues(pr)).toStrictEqual([
+            "GHA-42",
+            "GHA-43",
+            "SCAN4NET-44"
+        ]);
     });
-    it.skip('findFixedIssues with issues in body', async () => {
+    it('findFixedIssues renovate no renovate issue comment', async () => {
+        sut.rest.issues.listComments = function (params) {
+            return {
+                data: [
+                    { body: "SQ QG or something else" },
+                    { body: null },
+                ]
+            };
+        };
+        const pr = await sut.loadPullRequest(42);
+        pr.user.login = 'renovate[bot]';
+        expect(await sut.findFixedIssues(pr)).toBeNull();
     });
-    it.skip('findFixedIssues renovate no issue', async () => {
+    it('findFixedIssues renovate with renovate issue issue', async () => {
+        sut.rest.issues.listComments = function (params) {
+            return {
+                data: [
+                    { body: "SQ QG or something else" },
+                    { body: null },
+                    { body: "Renovate Jira issue ID: GHA-42" }
+                ]
+            };
+        };
+        const pr = await sut.loadPullRequest(42);
+        pr.user.login = 'renovate[bot]';
+        expect(await sut.findFixedIssues(pr)).toStrictEqual(["GHA-42"]);
     });
-    it.skip('findFixedIssues renovate with issue', async () => {
+    it('addComment', async () => {
+        await sut.addComment(42, "Lorem ipsum");
+        expect(logTester.logsParams).toStrictEqual(["Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Lorem ipsum\"})"]);
     });
-    it.skip('addComment', async () => {
+    it('listComments', async () => {
+        await sut.listComments(42);
+        expect(logTester.logsParams).toStrictEqual(["Invoked rest.issues.listComments({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42})"]);
     });
-    it.skip('listComments', async () => {
+    it('updateIssueTitle', async () => {
+        await sut.updateIssueTitle(42, 'New title');
+        expect(logTester.logsParams).toStrictEqual([
+            "Updating issue #42 title to: New title",
+            "Invoked rest.issues.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"title\":\"New title\"})"
+        ]);
     });
-    it.skip('updateIssueTitle', async () => {
+    it('updatePullRequestTitle', async () => {
+        await sut.updatePullRequestTitle(42, 'New title');
+        expect(logTester.logsParams).toStrictEqual([
+            "Updating PR #42 title to: New title",
+            "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"New title\"})"
+        ]);
     });
-    it.skip('updatePullRequestTitle', async () => {
-    });
-    it.skip('updatePullRequestDescription', async () => {
+    it('updatePullRequestDescription', async () => {
+        await sut.updatePullRequestDescription(42, 'New description');
+        expect(logTester.logsParams).toStrictEqual([
+            "Updating PR #42 description",
+            "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"body\":\"New description\"})"
+        ]);
     });
     it.skip('findEmail returns first', async () => {
     });

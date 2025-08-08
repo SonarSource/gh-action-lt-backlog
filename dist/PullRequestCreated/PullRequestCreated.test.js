@@ -147,6 +147,7 @@ describe('PullRequestCreated', () => {
         await runAction('KEY', 'Standalone PR', null, 'renovate[bot]');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
+            "Invoked rest.issues.listComments({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42})",
             "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Task\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":42})",
             "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Renovate Jira issue ID: [KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
             "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
