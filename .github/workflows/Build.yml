@@ -56,6 +56,7 @@ jobs:
           secrets: |
             development/github/token/{REPO_OWNER_NAME_DASH}-jira token | GITHUB_TOKEN;
             development/artifactory/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | REPOX_TOKEN;
+            development/kv/data/slack token | SLACK_TOKEN;
             development/kv/data/jira user | JIRA_USER;
             development/kv/data/jira token | JIRA_TOKEN;
 
@@ -69,6 +70,7 @@ jobs:
       - name: Run tests
         env:
             GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
+            SLACK_TOKEN:  ${{ fromJSON(steps.secrets.outputs.vault).SLACK_TOKEN }}
             JIRA_USER:    ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
             JIRA_TOKEN:   ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
         run: npm run test

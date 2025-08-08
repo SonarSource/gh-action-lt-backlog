@@ -156,7 +156,7 @@ describe('JiraClient', () => {
         await sut.addReviewer(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
         issue = await sut.loadIssue(issueId);
         expect(issue.fields.customfield_11227).toMatchObject([{ emailAddress: 'helpdesk+jira-githubtech@sonarsource.com' }]);
-    });
+    }, 10000); // 10s timeout
     it('addReviewedBy', async () => {
         const issueId = await ensurePreqIssueId();
         await sut.addReviewedBy(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
@@ -166,7 +166,7 @@ describe('JiraClient', () => {
         await sut.addReviewedBy(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
         issue = await sut.loadIssue(issueId);
         expect(issue.fields.customfield_11228).toMatchObject([{ emailAddress: 'helpdesk+jira-githubtech@sonarsource.com' }]);
-    });
+    }, 10000); // 10s timeout
     it('createComponent existing', async () => {
         const name = 'JiraClient UT';
         const result = await sut.createComponent('GHA', name, 'Test component created by JiraClient unit test');
