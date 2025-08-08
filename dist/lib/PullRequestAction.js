@@ -6,7 +6,7 @@ class PullRequestAction extends OctokitAction_1.OctokitAction {
     async execute() {
         const issueIds = await this.fixedJiraIssues();
         if (issueIds.length === 0) {
-            console.warn('No Jira issue found in the PR title.');
+            console.log('No Jira issue found in the PR title.');
         }
         else {
             for (const issueId of issueIds) {
