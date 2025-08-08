@@ -1,6 +1,7 @@
 type RestStub = {
   issues: {
     createComment: (params: any) => void,
+    get: (params: any) => any,
     listComments: (params: any) => any
   }
   pulls: {
@@ -14,6 +15,14 @@ export function createOctokitRestStub(title: string, body?: string, login: strin
     issues: {
       createComment(params: any): void {
         console.log(`Invoked rest.issues.createComment(${JSON.stringify(params)})`);
+      },
+      get(params: any): any {
+        return {
+          data: {
+            number: 24,
+            title: "Issue title"
+          }
+        }
       },
       listComments(params: any): any {
         return {
@@ -38,7 +47,7 @@ export function createOctokitRestStub(title: string, body?: string, login: strin
               login,
             }
           }
-        }
+        };
       },
       update(params: any): void {
         console.log(`Invoked rest.pulls.update(${JSON.stringify(params)})`);
