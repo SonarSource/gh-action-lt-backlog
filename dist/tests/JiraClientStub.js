@@ -73,6 +73,9 @@ exports.jiraClientStub = {
     },
     async addReviewer(issueId, userEmail) {
         console.log(`Invoked jira.addReviewer('${issueId}', '${userEmail}')`);
+    },
+    async addReviewedBy(issueId, userEmail) {
+        console.log(`Invoked jira.addReviewedBy('${issueId}', '${userEmail}')`);
     }
 };
 //# sourceMappingURL=JiraClientStub.js.map
