@@ -100,13 +100,13 @@ describe('OctokitAction', () => {
 
   it('loadPullRequest', async () => {
     const pr = await sut.loadPullRequest(42);
-    expect(pr).toMatchObject({ number: 42, title: "PR title" });  // Plus the remainig properties from scaffolding
+    expect(pr).toMatchObject({ number: 42, title: "PR title" });  // Plus the remaining properties from scaffolding
     expect(logTester.logsParams).toStrictEqual(["Loading PR #42"]);
   });
 
   it('loadIssue', async () => {
     const issue = await sut.loadIssue(24);
-    expect(issue).toMatchObject({ number: 24, title: "Issue title" });  // Plus the remainig properties from scaffolding
+    expect(issue).toMatchObject({ number: 24, title: "Issue title" });  // Plus the remaining properties from scaffolding
     expect(logTester.logsParams).toStrictEqual(["Loading issue #24"]);
   });
 
@@ -206,8 +206,37 @@ describe('OctokitAction', () => {
 
   });
 
-  it.skip('processRequestReview', async () => {
+  it('processRequestReview', async () => {
+    sut.findEmail = async function (login: string): Promise<string> {
+      return "test.user@sonarsource.com";
+    }
+    await sut.processRequestReview("42", { login: 'test-user', type: 'User' });
+    expect(logTester.logsParams).toStrictEqual([
+      "Invoked jira.moveIssue('42', 'Request Review', null)",
+      "Invoked jira.assignIssueToEmail('42', 'test.user@sonarsource.com')"
+    ]);
+  });
 
+  it('processRequestReview is-eng-xp-squad', async () => {
+    sut.isEngXpSquad = true;
+    sut.findEmail = async function (login: string): Promise<string> {
+      return "test.user@sonarsource.com";
+    }
+    await sut.processRequestReview("42", { login: 'test-user', type: 'User' });
+    expect(logTester.logsParams).toStrictEqual([
+      "Invoked jira.moveIssue('42', 'Request Review', null)",
+      "Invoked jira.addReviewer('42', 'test.user@sonarsource.com')"
+    ]);
+  });
+
+  it('processRequestReview from team', async () => {
+    await sut.processRequestReview("42", null);
+    expect(logTester.logsParams).toStrictEqual(["Invoked jira.moveIssue('42', 'Request Review', null)"]);
+  });
+
+  it('processRequestReview from Bot', async () => {
+    await sut.processRequestReview("42", { login: 'renovate[bot]', type: 'Bot' });
+    expect(logTester.logsParams).toStrictEqual(["Skipping request review from bot: renovate[bot]"]);
   });
 
   it.skip('addJiraComponent success', async () => {

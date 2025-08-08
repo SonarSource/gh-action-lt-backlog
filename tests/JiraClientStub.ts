@@ -69,5 +69,8 @@ export const jiraClientStub = {
   async addIssueComponent(issueId: string, name: string): Promise<boolean> {
     console.log(`Invoked jira.addIssueComponent('${issueId}', '${name}')`);
     return true;
+  },
+  async addReviewer(issueId: string, userEmail: string): Promise<void> {
+    console.log(`Invoked jira.addReviewer('${issueId}', '${userEmail}')`);
   }
 } as unknown as JiraClient;

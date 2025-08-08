@@ -70,6 +70,9 @@ exports.jiraClientStub = {
     async addIssueComponent(issueId, name) {
         console.log(`Invoked jira.addIssueComponent('${issueId}', '${name}')`);
         return true;
+    },
+    async addReviewer(issueId, userEmail) {
+        console.log(`Invoked jira.addReviewer('${issueId}', '${userEmail}')`);
     }
 };
 //# sourceMappingURL=JiraClientStub.js.map
