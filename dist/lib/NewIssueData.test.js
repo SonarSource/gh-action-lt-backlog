@@ -17,6 +17,7 @@ function createPullRequest(title, body, repo = 'repo') {
 function createExpected() {
     return {
         accountId: '1234-account',
+        assigneeId: '1234-account',
         additionalFields: {
             customfield_10001: 'dot-neeet-team',
             customfield_10020: 42,
@@ -28,6 +29,7 @@ function createExpected() {
 function createExpectedWithoutAccount() {
     return {
         accountId: null,
+        assigneeId: null,
         additionalFields: {
             customfield_10001: 'dot-neeet-team',
             customfield_10020: 42,
@@ -56,6 +58,7 @@ describe('NewIssueData', () => {
     it('create projectKey parent Epic MMF', async () => {
         const expected = {
             accountId: '1234-account',
+            assigneeId: '1234-account',
             additionalFields: {
                 customfield_10001: 'dot-neeet-team',
                 customfield_10020: 42,
@@ -69,6 +72,7 @@ describe('NewIssueData', () => {
     it('create projectKey parent Epic project', async () => {
         const expected = {
             accountId: '1234-account',
+            assigneeId: '1234-account',
             additionalFields: {
                 customfield_10001: 'dot-neeet-team',
                 customfield_10020: 42,
@@ -85,6 +89,7 @@ describe('NewIssueData', () => {
     it('create projectKey parent Issue', async () => {
         const expected = {
             accountId: '1234-account',
+            assigneeId: '1234-account',
             additionalFields: {
                 // No team or sprint for Sub=task
                 issuetype: { name: 'Sub-task' },
@@ -101,6 +106,7 @@ describe('NewIssueData', () => {
     it('create projectKey not configured with parent', async () => {
         const expected = {
             accountId: '1234-account',
+            assigneeId: '1234-account',
             additionalFields: {
                 // No team or sprint for Sub-task
                 issuetype: { name: 'Sub-task' },
@@ -113,6 +119,7 @@ describe('NewIssueData', () => {
     it('create with additional fields', async () => {
         const expected = {
             accountId: '1234-account',
+            assigneeId: '1234-account',
             additionalFields: {
                 components: [{ name: 'Some Component' }],
                 customfield_10001: 'dot-neeet-team',
@@ -138,6 +145,7 @@ describe('NewIssueData', () => {
     it('create with fallbackTeam valid', async () => {
         const expected = {
             accountId: null,
+            assigneeId: null,
             additionalFields: {
                 customfield_10001: 'fallback-team',
                 customfield_10020: 42,
@@ -156,6 +164,7 @@ describe('NewIssueData', () => {
     it('create with no team', async () => {
         const expected = {
             accountId: null,
+            assigneeId: null,
             additionalFields: {
                 // No team, no sprint
                 issuetype: { name: 'Task' }
@@ -167,6 +176,7 @@ describe('NewIssueData', () => {
     it('createForEngExp internal contributor', async () => {
         const expected = {
             accountId: '3333-eng-exp-account',
+            assigneeId: '3333-eng-exp-account',
             additionalFields: {
                 customfield_10001: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6',
                 customfield_10020: 42,
@@ -181,6 +191,7 @@ describe('NewIssueData', () => {
     it('createForEngExp external contributor', async () => {
         const expected = {
             accountId: '1234-account',
+            assigneeId: null,
             additionalFields: {
                 customfield_10001: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6',
                 customfield_10020: 42,
@@ -195,6 +206,7 @@ describe('NewIssueData', () => {
     it('createForEngExp renovate', async () => {
         const expected = {
             accountId: null,
+            assigneeId: null,
             additionalFields: {
                 customfield_10001: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6',
                 customfield_10020: 42,
@@ -208,6 +220,7 @@ describe('NewIssueData', () => {
     it('createForEngExp parent-oss project', async () => {
         const expected = {
             accountId: '1234-account',
+            assigneeId: '1234-account',
             additionalFields: {
                 customfield_10001: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6',
                 customfield_10020: 42,
