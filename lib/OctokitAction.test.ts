@@ -193,9 +193,8 @@ describe('OctokitAction', () => {
 
   // Local token is impossible to craft with required permissions
   itRunsOnlyInCI('findEmail succeeds', async () => {
-    // Preferably someone from https://github.com/orgs/SonarSource/people when visited in incognito mode, not to leak any information
-    // Don't hardcode specific email in public repo.
-    expect(await sut.findEmail('agigleux')).toContain('sonar');
+    // Preferably choose someone from https://github.com/orgs/SonarSource/people when visited in incognito mode, not to leak any information
+    expect(await sut.findEmail('agigleux')).toContain('sonar'); // Do not write the full email address here to avoid its exposure
   });
 
   // Local token is impossible to craft with required permissions
