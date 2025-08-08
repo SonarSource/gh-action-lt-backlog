@@ -14,7 +14,7 @@ class ToggleLockBranch extends OctokitAction_1.OctokitAction {
             rule = await this.updateRule(rule.id, lockBranch);
             if (rule.lockBranch === lockBranch) {
                 const message = `${this.repo.repo}: The branch \`${pattern}\` was ${lockBranch ? 'locked :ice_cube:' : 'unlocked and is now open for changes :sunny:'}`;
-                this.log(`Done: ${message}'`);
+                this.log(`Done: ${message}`);
                 this.sendSlackMessage(message);
             }
             else {
@@ -34,34 +34,34 @@ class ToggleLockBranch extends OctokitAction_1.OctokitAction {
     }
     async loadRules() {
         const { repository: { branchProtectionRules: { nodes }, }, } = await this.sendGraphQL(`
-        query {
-            repository(owner: "${this.repo.owner}", name: "${this.repo.repo}") {
-                branchProtectionRules(first: 100) {
-                    nodes {
-                        id
-                        lockBranch
-                        pattern
-                    }
-                }
+      query {
+        repository(owner: "${this.repo.owner}", name: "${this.repo.repo}") {
+          branchProtectionRules(first: 100) {
+            nodes {
+              id
+              lockBranch
+              pattern
             }
-        }`);
+          }
+        }
+      }`);
         return nodes;
     }
     async updateRule(id, lockBranch) {
         const { updateBranchProtectionRule: { branchProtectionRule }, } = await this.sendGraphQL(`
-        mutation {
-            updateBranchProtectionRule(input:{
-                branchProtectionRuleId: "${id}",
-                lockBranch: ${lockBranch}
-            })
-            {
-                branchProtectionRule {
-                    id
-                    lockBranch
-                    pattern
-                }
-            }
-        }`);
+      mutation {
+        updateBranchProtectionRule(input:{
+          branchProtectionRuleId: "${id}",
+          lockBranch: ${lockBranch}
+        })
+        {
+          branchProtectionRule {
+            id
+            lockBranch
+            pattern
+          }
+        }
+      }`);
         return branchProtectionRule;
     }
     async cancelAutoMerge(branch) {
@@ -80,9 +80,9 @@ class ToggleLockBranch extends OctokitAction_1.OctokitAction {
         while (after !== null) {
             const { repository: { pullRequests: { nodes, pageInfo: { endCursor, hasNextPage } }, }, } = await this.sendGraphQL(`
         query {
-            repository(owner: "${this.repo.owner}", name: "${this.repo.repo}") {
-              pullRequests(first: 100, after: "${after}", states: OPEN, baseRefName:"${targetBranch}"){
-              nodes{
+          repository(owner: "${this.repo.owner}", name: "${this.repo.repo}") {
+            pullRequests(first: 100, after: "${after}", states: OPEN, baseRefName:"${targetBranch}"){
+              nodes {
                 id
                 number
                 autoMergeRequest { commitHeadline } # We don't need commitHeadline, but GraphQL syntax requires to query something there
