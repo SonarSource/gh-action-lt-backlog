@@ -17,6 +17,7 @@ class TestOctokitAction extends OctokitAction_1.OctokitAction {
 }
 describe('OctokitAction', () => {
     const originalKeys = Object.keys(process.env);
+    const itRunsOnlyInCI = process.env.GITHUB_ACTIONS === 'true' ? it : it.skip;
     let logTester;
     let sut; // TestOctokitAction, but with access to protected methods
     beforeEach(() => {
@@ -173,7 +174,26 @@ describe('OctokitAction', () => {
     });
     it.skip('findEmail bad token', async () => {
     });
-    it.skip('sendSlackMessage', async () => {
+    // Local token is difficult to craft
+    itRunsOnlyInCI('sendSlackMessage succeeds', async () => {
+        process.env['INPUT_SLACK-TOKEN'] = process.env.SLACK_TOKEN;
+        process.env['INPUT_SLACK-CHANNEL'] = 'notification_tester';
+        await sut.sendSlackMessage('gh-action-lt-backlog Unit Test');
+        expect(logTester.logsParams).toStrictEqual([
+            "Sending Slack message",
+            "Sending slack POST: {\"channel\":\"notification_tester\",\"text\":\"gh-action-lt-backlog Unit Test\"}",
+        ]);
+    });
+    // Local token is difficult to craft
+    itRunsOnlyInCI('sendSlackMessage fails', async () => {
+        process.env['INPUT_SLACK-TOKEN'] = process.env.SLACK_TOKEN;
+        process.env['INPUT_SLACK-CHANNEL'] = 'this_channel_exists_only_when_someone_trolls_this_test';
+        await sut.sendSlackMessage('gh-action-lt-backlog Unit Test');
+        expect(logTester.logsParams).toStrictEqual([
+            "Sending Slack message",
+            "Sending slack POST: {\"channel\":\"this_channel_exists_only_when_someone_trolls_this_test\",\"text\":\"gh-action-lt-backlog Unit Test\"}",
+            "Failed to send API request. Error: channel_not_found"
+        ]);
     });
     it('processRequestReview', async () => {
         sut.findEmail = async function (login) {
