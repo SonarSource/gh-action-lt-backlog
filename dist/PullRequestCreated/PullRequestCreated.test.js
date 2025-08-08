@@ -194,7 +194,6 @@ describe('PullRequestCreated', () => {
             "Invoked jira.addIssueRemoteLink('PREQ-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
             "Invoked jira.moveIssue('PREQ-4242', 'Commit', null)",
             "Invoked jira.moveIssue('PREQ-4242', 'Start', null)",
-            "Invoked jira.assignIssueToAccount('PREQ-4242', '1234-account')",
             "Adding the following ticket in description: PREQ-4242",
             "Updating PR #42 description",
             "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"body\":\"[PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242)\\n\\n\"})",

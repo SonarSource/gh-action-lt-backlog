@@ -7,10 +7,12 @@ const Constants_1 = require("./Constants");
 class NewIssueData {
     projectKey;
     accountId;
+    assigneeId;
     additionalFields;
-    constructor(projectKey, accountId, additionalFields) {
+    constructor(projectKey, accountId, assigneeId, additionalFields) {
         this.projectKey = projectKey;
         this.accountId = accountId;
+        this.assigneeId = assigneeId;
         this.additionalFields = additionalFields;
     }
     static async create(jira, pr, inputJiraProject, inputAdditionalFields, userEmail, fallbackTeam) {
@@ -30,7 +32,7 @@ class NewIssueData {
                     parameters.customfield_10020 = sprintId;
                 }
             }
-            return new NewIssueData(projectKey, accountId, { ...additionalFields, ...parameters });
+            return new NewIssueData(projectKey, accountId, accountId, { ...additionalFields, ...parameters });
         }
         else {
             console.log('No suitable project key found, issue will not be created');
@@ -50,7 +52,7 @@ class NewIssueData {
         parameters.labels = pr.isRenovate()
             ? ['dvi-created-by-automation', 'dvi-renovate']
             : ['dvi-created-by-automation'];
-        return new NewIssueData(projectKey, accountId, parameters);
+        return new NewIssueData(projectKey, accountId, projectKey === 'PREQ' ? null : accountId, parameters); // GHA-86 Leave PREQ unassigned
     }
     static computeProjectKey(inputJiraProject, parent) {
         return parent && !["Epic", "Sub-task"].includes(parent.fields.issuetype.name)

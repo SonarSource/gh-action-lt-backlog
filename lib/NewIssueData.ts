@@ -9,11 +9,13 @@ import { Team } from "./Team";
 export class NewIssueData {
   public readonly projectKey: string;
   public readonly accountId: string;
+  public readonly assigneeId: string;
   public readonly additionalFields: any;
 
-  private constructor(projectKey: string, accountId: string, additionalFields: any) {
+  private constructor(projectKey: string, accountId: string, assigneeId: string, additionalFields: any) {
     this.projectKey = projectKey;
     this.accountId = accountId;
+    this.assigneeId = assigneeId;
     this.additionalFields = additionalFields;
   }
 
@@ -34,7 +36,7 @@ export class NewIssueData {
           parameters.customfield_10020 = sprintId;
         }
       }
-      return new NewIssueData(projectKey, accountId, { ...additionalFields, ...parameters });
+      return new NewIssueData(projectKey, accountId, accountId, { ...additionalFields, ...parameters });
     } else {
       console.log('No suitable project key found, issue will not be created');
       return null;
@@ -54,7 +56,7 @@ export class NewIssueData {
     parameters.labels = pr.isRenovate()
       ? ['dvi-created-by-automation', 'dvi-renovate']
       : ['dvi-created-by-automation'];
-    return new NewIssueData(projectKey, accountId, parameters);
+    return new NewIssueData(projectKey, accountId, projectKey === 'PREQ' ? null : accountId, parameters); // GHA-86 Leave PREQ unassigned
   }
 
   private static computeProjectKey(inputJiraProject: string, parent: any): string {
