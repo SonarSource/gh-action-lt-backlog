@@ -1,4 +1,4 @@
-import { MarkdownParser, Block } from './MarkdownParser';
+import { MarkdownParser } from './MarkdownParser';
 
 describe('MarkdownParser', () => {
   it('parses paragraph', () => {
