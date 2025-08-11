@@ -4,10 +4,10 @@ exports.addPullRequestExtensions = addPullRequestExtensions;
 function addPullRequestExtensions(pr) {
     return {
         ...pr,
-        isRenovate: function () {
+        isRenovate() {
             return this.user.login === "renovate[bot]";
         },
-        isDependabot: function () {
+        isDependabot() {
             return this.user.login === "dependabot[bot]";
         }
     };
