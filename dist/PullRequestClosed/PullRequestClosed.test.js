@@ -1,15 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const core = require("@actions/core");
 const github = require("@actions/github");
 const PullRequestClosed_1 = require("./PullRequestClosed");
 const LogTester_1 = require("../tests/LogTester");
 const JiraClientStub_1 = require("../tests/JiraClientStub");
 const OctokitRestStub_1 = require("../tests/OctokitRestStub");
-async function runAction(jiraProject, title, body, user = 'test-user') {
-    process.env['INPUT_JIRA-PROJECT'] = jiraProject;
+async function runAction(title, user = 'test-user') {
+    process.env['INPUT_JIRA-PROJECT'] = 'KEY';
     const action = new PullRequestClosed_1.PullRequestClosed();
     action.jira = JiraClientStub_1.jiraClientStub;
-    action.rest = (0, OctokitRestStub_1.createOctokitRestStub)(title, body, user);
+    action.rest = (0, OctokitRestStub_1.createOctokitRestStub)(title, "", user);
     if (user === "renovate[bot]") {
         action.rest.issues.listComments = function () {
             return {
@@ -45,7 +46,7 @@ describe('PullRequestClosed', () => {
     });
     it('is-eng-xp-squad non-Bot PR skips issue resolution', async () => {
         process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
-        await runAction('KEY', 'KEY-1234 Title');
+        await runAction('KEY-1234 Title');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
             "Loading PR #42",
@@ -53,9 +54,21 @@ describe('PullRequestClosed', () => {
             "Done"
         ]);
     });
-    it('is-eng-xp-squad Bot PR resolves issue', async () => {
+    it('is-eng-xp-squad Bot PR merged PR moves issue to Done', async () => {
         process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
-        await runAction('KEY', 'Title', null, "renovate[bot]");
+        github.context.payload.pull_request.merged = true;
+        github.context.payload.pull_request.base = { ref: 'master' };
+        await runAction('Title', "renovate[bot]");
+        expect(logTester.logsParams).toStrictEqual([
+            "Loading PR #42",
+            "Loading PR #42",
+            "Invoked jira.moveIssue('KEY-1234', 'Resolve issue', {\"resolution\":{\"id\":\"10000\"}})",
+            "Done",
+        ]);
+    });
+    it('is-eng-xp-squad Bot PR unmerged PR cancels issue', async () => {
+        process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
+        await runAction('Title', "renovate[bot]");
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
             "Loading PR #42",
@@ -63,39 +76,63 @@ describe('PullRequestClosed', () => {
             "Done",
         ]);
     });
-    it('PR closed by custom creator', async () => {
-        await runAction('KEY', 'KEY-1234 Title');
-        expect(logTester.logsParams).toStrictEqual([
-            "Loading PR #42",
-            "Skipping issue cancellation for creator CreatorKEY1234",
-            "Done"
-        ]);
-    });
-    it('PR closed by Jira Tech User GitHub creator', async () => {
-        await runAction('KEY', 'KEY-5678 Title');
+    it('Unmerged PR for ticket created by automation closed', async () => {
+        await runAction('KEY-5678 Title');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
             "Invoked jira.moveIssue('KEY-5678', 'Cancel Issue', {\"resolution\":{\"id\":\"10001\"}})",
             "Done"
         ]);
     });
-    it('PR merged on release branch', async () => {
-        github.context.payload.pull_request.merged = true;
-        github.context.payload.pull_request.base = { ref: 'master' };
-        await runAction('KEY', 'KEY-1234 Title');
+    it('Unmerged PR for pre-existing issue closed', async () => {
+        await runAction('KEY-1234 Title');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
-            "KEY-1234: Executing 'MergeMaster' (10000) transition",
+            "Skipping issue cancellation for creator Creator of KEY-1234",
+            "Done"
+        ]);
+    });
+    it('Jira issue does not exist', async () => {
+        const logSpy = jest.spyOn(core, 'setFailed').mockImplementation(() => { });
+        try {
+            await runAction('FAKE-1234 Title');
+            expect(logSpy).toHaveBeenCalledWith('Scaffolding did not expect FAKE-1234');
+        }
+        finally {
+            logSpy.mockRestore();
+        }
+    });
+    it('PR merged into release branch', async () => {
+        const releaseBranches = ['master', 'main', 'branch-0.0.0'];
+        for (const branchName of releaseBranches) {
+            github.context.payload.pull_request.merged = true;
+            github.context.payload.pull_request.base = { ref: branchName };
+            await runAction('KEY-1234 Title');
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                `Invoked jira.transitionIssue('KEY-1234', 'transition: Merge into master 10000', null`,
+                "Done",
+            ]);
+            logTester.logsParams = [];
+        }
+    });
+    it('PR merged into non-release branch', async () => {
+        github.context.payload.pull_request.merged = true;
+        github.context.payload.pull_request.base = { ref: 'user/branch' };
+        await runAction('KEY-5678 Title');
+        expect(logTester.logsParams).toStrictEqual([
+            "Loading PR #42",
+            "Invoked jira.transitionIssue('KEY-5678', 'transition: Merge into branch 10001', null",
             "Done",
         ]);
     });
-    it('PR merged on normal branch', async () => {
+    it('Merge Pull Request - transision is missing', async () => {
         github.context.payload.pull_request.merged = true;
         github.context.payload.pull_request.base = { ref: 'user/branch' };
-        await runAction('KEY', 'KEY-1234 Title');
+        await runAction('KEY-1111 Title');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
-            "KEY-1234: Executing 'MergeBranch' (10001) transition",
+            "Invoked jira.moveIssue('KEY-1111', 'Merge', null)",
             "Done",
         ]);
     });

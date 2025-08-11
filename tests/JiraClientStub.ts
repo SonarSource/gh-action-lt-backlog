@@ -7,7 +7,7 @@ export const jiraClientStub = {
     switch (issueId) {
       case 'MMF-1111': return { key: 'MMF-1111', fields: { project: { key: 'MMF' }, issuetype: { name: 'Epic' } } };
       case 'KEY-1111': return { key: 'KEY-1111', fields: { project: { key: 'KEY' }, issuetype: { name: 'Epic' } } };
-      case 'KEY-1234': return { key: 'KEY-1234', fields: { project: { key: 'KEY' }, issuetype: { name: 'Task' }, creator: {displayName: "CreatorKEY1234"} } };
+      case 'KEY-1234': return { key: 'KEY-1234', fields: { project: { key: 'KEY' }, issuetype: { name: 'Task' }, creator: {displayName: "Creator of KEY-1234"} } };
       case 'KEY-5678': return { key: 'KEY-5678', fields: { project: { key: 'KEY' }, issuetype: { name: 'Task' }, creator: { displayName: "Jira Tech User GitHub"} } };
       case 'KEY-5555': return { key: 'KEY-5555', fields: { project: { key: 'KEY' }, issuetype: { name: 'Sub-task' } } };
       default: throw new Error(`Scaffolding did not expect ${issueId}`);
@@ -44,9 +44,9 @@ export const jiraClientStub = {
   },
   async findTransition(issueId: string, transitionName: string) {
     switch (transitionName) {
-      case 'Merge into master': return { id: '10000', name: 'MergeMaster' };
-      case 'Merge into branch': return { id: '10001', name: 'MergeBranch' };
-     // case 'Resolve issue': return { id: '10002', name: 'MergeBranch' };
+      case 'Merge into master': return issueId === "KEY-1111" ? null : { id: '10000', name: transitionName };
+      case 'Merge into branch': return issueId === "KEY-1111" ? null : { id: '10001', name: transitionName };
+      case 'Merge': return { id: '10002', name: transitionName }
       default: return null; // No transition found
     }
   },
@@ -66,7 +66,7 @@ export const jiraClientStub = {
     console.log(`Invoked jira.moveIssue('${issueId}', '${transitionName}', ${fields})`);
   },
   async transitionIssue(issueId: string, transition: any, fields: any = null): Promise<void> {
-    console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
+    console.log(`Invoked jira.transitionIssue('${issueId}', 'transition: ${transition.name} ${transition.id}', ${fields}`);
   },
   async assignIssueToAccount(issueId: string, accountId: string): Promise<void> {
     console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);
