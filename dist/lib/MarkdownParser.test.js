@@ -104,7 +104,7 @@ Code comment
         expect(parser.readBlock()).toEqual({ type: 'heading', text: '## Heading 2' });
         expect(parser.readBlock()).toEqual({ type: 'codeBlock', text: '[This is not a](link)\nAnd this is not a `snippet`.\nThis is a reproducer code block.' });
         expect(parser.readBlock()).toEqual({ type: 'paragraph', text: 'Code comment\n' });
-        expect(parser.readBlock()).toEqual({ type: 'heading', text: '# Heading \`1\` or [3](#3)?' });
+        expect(parser.readBlock()).toEqual({ type: 'heading', text: '# Heading `1` or [3](#3)?' });
         expect(parser.readBlock()).toEqual({ type: 'blockquote', text: 'I `told` you\nso [here](#citation).' });
         expect(parser.readBlock()).toEqual({ type: 'paragraph', text: '' });
         expect(parser.readBlock()).toBeNull();
