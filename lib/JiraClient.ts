@@ -303,7 +303,10 @@ export class JiraClient {
             }
           }
         }`);
-      if (response.errors) {
+      if (!response) {
+        console.log(`ERROR: Failed to search for teams.`);  // The http error was likely already logged
+        return null;
+      } else if (response.errors) {
         console.log(`ERROR: Failed to search for teams. ${JSON.stringify(response.errors, null, 2)}`);
         return null;
       } else {
