@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const core = require("@actions/core");
 const github = require("@actions/github");
 const PullRequestClosed_1 = require("./PullRequestClosed");
 const LogTester_1 = require("../tests/LogTester");
@@ -10,7 +9,7 @@ async function runAction(title, user = 'test-user') {
     process.env['INPUT_JIRA-PROJECT'] = 'KEY';
     const action = new PullRequestClosed_1.PullRequestClosed();
     action.jira = JiraClientStub_1.jiraClientStub;
-    action.rest = (0, OctokitRestStub_1.createOctokitRestStub)(title, "", user);
+    action.rest = (0, OctokitRestStub_1.createOctokitRestStub)(title, null, user);
     if (user === "renovate[bot]") {
         action.rest.issues.listComments = function () {
             return {
@@ -76,7 +75,7 @@ describe('PullRequestClosed', () => {
             "Done",
         ]);
     });
-    it('Unmerged PR for ticket created by automation closed', async () => {
+    it('Unmerged PR for ticket created by automation is closed', async () => {
         await runAction('KEY-5678 Title');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
@@ -84,7 +83,7 @@ describe('PullRequestClosed', () => {
             "Done"
         ]);
     });
-    it('Unmerged PR for pre-existing issue closed', async () => {
+    it('Unmerged PR for pre-existing issue is closed', async () => {
         await runAction('KEY-1234 Title');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
@@ -93,14 +92,12 @@ describe('PullRequestClosed', () => {
         ]);
     });
     it('Jira issue does not exist', async () => {
-        const logSpy = jest.spyOn(core, 'setFailed').mockImplementation(() => { });
-        try {
-            await runAction('FAKE-1234 Title');
-            expect(logSpy).toHaveBeenCalledWith('Scaffolding did not expect FAKE-1234');
-        }
-        finally {
-            logSpy.mockRestore();
-        }
+        await runAction('FAKE-1234 Title');
+        expect(logTester.logsParams).toStrictEqual([
+            "Loading PR #42",
+            "Skipping issue cancellation for creator undefined",
+            "Done"
+        ]);
     });
     it('PR merged into release branch', async () => {
         const releaseBranches = ['master', 'main', 'branch-0.0.0'];
@@ -110,7 +107,7 @@ describe('PullRequestClosed', () => {
             await runAction('KEY-1234 Title');
             expect(logTester.logsParams).toStrictEqual([
                 "Loading PR #42",
-                `Invoked jira.transitionIssue('KEY-1234', 'transition: Merge into master 10000', null`,
+                "Invoked jira.transitionIssue('KEY-1234', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null",
                 "Done",
             ]);
             logTester.logsParams = [];
@@ -122,13 +119,13 @@ describe('PullRequestClosed', () => {
         await runAction('KEY-5678 Title');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
-            "Invoked jira.transitionIssue('KEY-5678', 'transition: Merge into branch 10001', null",
+            "Invoked jira.transitionIssue('KEY-5678', {\"id\":\"10001\",\"name\":\"Merge into branch\"}, null",
             "Done",
         ]);
     });
-    it('Merge Pull Request - transision is missing', async () => {
+    it('Merge PR for workflow without feature branches', async () => {
         github.context.payload.pull_request.merged = true;
-        github.context.payload.pull_request.base = { ref: 'user/branch' };
+        github.context.payload.pull_request.base = { ref: 'master' };
         await runAction('KEY-1111 Title');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",

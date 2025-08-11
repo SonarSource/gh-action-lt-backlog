@@ -10,6 +10,7 @@ exports.jiraClientStub = {
             case 'KEY-1234': return { key: 'KEY-1234', fields: { project: { key: 'KEY' }, issuetype: { name: 'Task' }, creator: { displayName: "Creator of KEY-1234" } } };
             case 'KEY-5678': return { key: 'KEY-5678', fields: { project: { key: 'KEY' }, issuetype: { name: 'Task' }, creator: { displayName: "Jira Tech User GitHub" } } };
             case 'KEY-5555': return { key: 'KEY-5555', fields: { project: { key: 'KEY' }, issuetype: { name: 'Sub-task' } } };
+            case 'FAKE-1234': return null;
             default: throw new Error(`Scaffolding did not expect ${issueId}`);
         }
     },
@@ -67,7 +68,7 @@ exports.jiraClientStub = {
         console.log(`Invoked jira.moveIssue('${issueId}', '${transitionName}', ${fields})`);
     },
     async transitionIssue(issueId, transition, fields = null) {
-        console.log(`Invoked jira.transitionIssue('${issueId}', 'transition: ${transition.name} ${transition.id}', ${fields}`);
+        console.log(`Invoked jira.transitionIssue('${issueId}', ${JSON.stringify(transition)}, ${JSON.stringify(fields)})`);
     },
     async assignIssueToAccount(issueId, accountId) {
         console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);
