@@ -26,9 +26,9 @@ describe('MarkdownTextParser', () => {
   });
 
   it('parses a link', () => {
-    const parser = new MarkdownTextParser('Before [title](http://example.com) after.');
+    const parser = new MarkdownTextParser('Before [title](https://example.com) after.');
     expect(parser.readBlock()).toEqual({ type: 'text', text: 'Before ' });
-    expect(parser.readBlock()).toEqual({ type: 'link', text: 'title', href: 'http://example.com' });
+    expect(parser.readBlock()).toEqual({ type: 'link', text: 'title', href: 'https://example.com' });
     expect(parser.readBlock()).toEqual({ type: 'text', text: ' after.' });
     expect(parser.readBlock()).toBeNull();
   });
@@ -43,17 +43,17 @@ describe('MarkdownTextParser', () => {
   });
 
   it('parses http(s)://', () => {
-    const parser = new MarkdownTextParser('Before http://http.no.comma, between https://https.no.semicolon; or http://with.single.questionmark?... But http://no.trailing.questionmark???? Or http://with.query.stirng?what=about&this? And https://with.hash#hash-asdf. https://with.all?key=value&flag#hash. And https:// too.');
+    const parser = new MarkdownTextParser('Before https://http.no.comma, between https://https.no.semicolon; or https://with.single.questionmark?... But https://no.trailing.questionmark???? Or https://with.query.stirng?what=about&this? And https://with.hash#hash-asdf. https://with.all?key=value&flag#hash. And https:// too.');
     expect(parser.readBlock()).toEqual({ type: 'text', text: 'Before ' });
-    expect(parser.readBlock()).toEqual({ type: 'link', text: 'http://http.no.comma', href: 'http://http.no.comma' });
+    expect(parser.readBlock()).toEqual({ type: 'link', text: 'https://http.no.comma', href: 'https://http.no.comma' });
     expect(parser.readBlock()).toEqual({ type: 'text', text: ', between ' });
     expect(parser.readBlock()).toEqual({ type: 'link', text: 'https://https.no.semicolon', href: 'https://https.no.semicolon' });
     expect(parser.readBlock()).toEqual({ type: 'text', text: '; or ' });
-    expect(parser.readBlock()).toEqual({ type: 'link', text: 'http://with.single.questionmark', href: 'http://with.single.questionmark' });
+    expect(parser.readBlock()).toEqual({ type: 'link', text: 'https://with.single.questionmark', href: 'https://with.single.questionmark' });
     expect(parser.readBlock()).toEqual({ type: 'text', text: '?... But ' });
-    expect(parser.readBlock()).toEqual({ type: 'link', text: 'http://no.trailing.questionmark', href: 'http://no.trailing.questionmark' });
+    expect(parser.readBlock()).toEqual({ type: 'link', text: 'https://no.trailing.questionmark', href: 'https://no.trailing.questionmark' });
     expect(parser.readBlock()).toEqual({ type: 'text', text: '???? Or ' });
-    expect(parser.readBlock()).toEqual({ type: 'link', text: 'http://with.query.stirng?what=about&this', href: 'http://with.query.stirng?what=about&this' });
+    expect(parser.readBlock()).toEqual({ type: 'link', text: 'https://with.query.stirng?what=about&this', href: 'https://with.query.stirng?what=about&this' });
     expect(parser.readBlock()).toEqual({ type: 'text', text: '? And ' });
     expect(parser.readBlock()).toEqual({ type: 'link', text: 'https://with.hash#hash-asdf', href: 'https://with.hash#hash-asdf' });
     expect(parser.readBlock()).toEqual({ type: 'text', text: '. ' });
