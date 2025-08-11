@@ -1,0 +1,5 @@
+{
+  "sonarCloudOrganization": "sonarsource",
+  "region": "EU",
+  "projectKey": "SonarSource_gh-action-lt-backlog"
+}
