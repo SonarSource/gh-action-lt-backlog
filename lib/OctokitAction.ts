@@ -164,7 +164,7 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  private async sendSlackPost(url: string, jsonRequest: any): Promise<any> {
+  protected async sendSlackPost(url: string, jsonRequest: any): Promise<any> {
     const token = this.inputString("slack-token");
     if (!token) {
       throw new Error("slack-token was not set");

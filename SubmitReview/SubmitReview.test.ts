@@ -3,6 +3,7 @@ import { LogTester } from '../tests/LogTester';
 import { createOctokitRestStub } from '../tests/OctokitRestStub';
 import { SubmitReview } from './SubmitReview';
 import { jiraClientStub } from '../tests/JiraClientStub';
+import { OctokitActionStub } from '../tests/OctokitActionStub';
 
 async function runAction(state: string, findEmailResult: string = null) {
   github.context.payload = {
@@ -22,10 +23,10 @@ async function runAction(state: string, findEmailResult: string = null) {
       type: "User"
     }
   };
-  const action = new SubmitReview();
-  (action as any).jira = jiraClientStub;
-  (action as any).rest = createOctokitRestStub('GHA-42 and GHA-43 are processed');
-  (action as any).findEmail = async function (login: string): Promise<string> {
+  const action = new SubmitReview() as SubmitReview & OctokitActionStub;
+  action.jira = jiraClientStub;
+  action.rest = createOctokitRestStub('GHA-42 and GHA-43 are processed');
+  action.findEmail = async function (login: string): Promise<string> {
     return findEmailResult;
   };
   await action.run();

@@ -3,6 +3,7 @@ import { LogTester } from '../tests/LogTester';
 import { createOctokitRestStub } from '../tests/OctokitRestStub';
 import { RequestReview } from './RequestReview';
 import { jiraClientStub } from '../tests/JiraClientStub';
+import { OctokitActionStub } from '../tests/OctokitActionStub';
 
 describe('RequestReview', () => {
   const originalKeys = Object.keys(process.env);
@@ -40,10 +41,10 @@ describe('RequestReview', () => {
 
   // This is just a smoke test to make sure the other components works together. Details are tested in their respective classes
   it('Processes all issues in title', async () => {
-    const sut = new RequestReview();
-    (sut as any).jira = jiraClientStub;
-    (sut as any).rest = createOctokitRestStub("GHA-42 and GHA-43");
-    (sut as any).findEmail = async function (login: string): Promise<string> {
+    const sut = new RequestReview() as RequestReview & OctokitActionStub;
+    sut.jira = jiraClientStub;
+    sut.rest = createOctokitRestStub("GHA-42 and GHA-43");
+    sut.findEmail = async function (login: string): Promise<string> {
       return "user@sonarsource.com";
     }
     await sut.run();

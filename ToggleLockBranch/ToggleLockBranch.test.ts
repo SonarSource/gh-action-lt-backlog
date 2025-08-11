@@ -1,6 +1,7 @@
 import { ToggleLockBranch } from './ToggleLockBranch';
 import { LogTester } from '../tests/LogTester';
 import { createOctokitRestStub } from '../tests/OctokitRestStub';
+import { OctokitActionStub } from '../tests/OctokitActionStub';
 
 function sendGraphQLStub(query: string): any {
   const graphQL: { name: string, query: string, response: any }[] = [
@@ -168,10 +169,10 @@ function sendGraphQLStub(query: string): any {
 }
 
 async function runAction(): Promise<void> {
-  const action = new ToggleLockBranch();
+  const action = new ToggleLockBranch() as ToggleLockBranch & OctokitActionStub;
   action.sendGraphQL = sendGraphQLStub;
-  (action as any).rest = createOctokitRestStub("Irrelevant");
-  (action as any).sendSlackPost = async function (url: string, jsonRequest: any): Promise<any> {
+  action.rest = createOctokitRestStub("Irrelevant");
+  action.sendSlackPost = async function (url: string, jsonRequest: any): Promise<any> {
     console.log(`Invoked sendSlackPost('${url}', ${JSON.stringify(jsonRequest)}`)
     return {};
   }

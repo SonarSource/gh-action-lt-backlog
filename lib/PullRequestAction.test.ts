@@ -2,12 +2,13 @@ import * as github from '@actions/github';
 import { LogTester } from '../tests/LogTester';
 import { createOctokitRestStub } from '../tests/OctokitRestStub';
 import { PullRequestAction } from './PullRequestAction';
+import { OctokitActionStub } from '../tests/OctokitActionStub';
 
 class TestPullRequestAction extends PullRequestAction {
 
   constructor(title: string, login?: string) {
     super();
-    (this as any).rest = createOctokitRestStub(title, null, login);
+    (this as unknown as OctokitActionStub).rest = createOctokitRestStub(title, null, login);
   }
 
   async processJiraIssue(issueId: string): Promise<void> {
@@ -97,8 +98,8 @@ describe('PullRequestAction', () => {
   });
 
   it('Process BUILD and PREQ for is-eng-xp-squad', async () => {
-    const sut = new TestPullRequestAction("BUILD-42 and PREQ-43 are processed");
-    (sut as any).isEngXpSquad = true;
+    const sut = new TestPullRequestAction("BUILD-42 and PREQ-43 are processed") as TestPullRequestAction & OctokitActionStub;
+    sut.isEngXpSquad = true;
     await sut.run();
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
