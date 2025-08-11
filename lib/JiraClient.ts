@@ -1,56 +1,86 @@
 import { Config } from './Configuration';
 import { Team } from './Team';
 
-interface TeamSearchV2NodeTeam {
+type TeamSearchV2NodeTeam = {
   id: string;
   displayName: string;
 }
 
-interface TeamSearchV2Node {
+type TeamSearchV2Node = {
   team: TeamSearchV2NodeTeam;
 }
 
-interface PageInfo {
+type PageInfo = {
   hasNextPage: boolean;
   endCursor: string;
 }
 
-interface TeamSearchV2Result {
+type TeamSearchV2Result = {
   nodes: TeamSearchV2Node[];
   pageInfo: PageInfo;
 }
 
-interface TeamSearchV2Team {
+type TeamSearchV2Team = {
   teamSearchV2: TeamSearchV2Result;
 }
 
-interface TeamSearchV2Data {
+type TeamSearchV2Data = {
   team?: TeamSearchV2Team
 }
 
-interface TeamSearchV2Response {
-  errors?: any[];
+type TeamSearchV2Response = {
+  errors?: unknown[];
   data: TeamSearchV2Data;
 }
 
-interface Sprint {
+type Sprint = {
   id: number;
   name: string;
   originBoardId: number;
   endDate: string;
 }
 
-interface Transition {
+type Transition = {
   id: string;
   name: string;
 }
 
-interface RemoteLink {
+type RemoteLink = {
   id: string,
   object: {
     url: string,
     title: string
   }
+}
+
+type Account = {
+  accountId: string;
+  emailAddress: string;
+  displayName: string;
+}
+
+type NamedItem = {
+  id: string;
+  name: string;
+}
+
+export type Issue = {
+  key: string;
+  fields: {
+    summary: string;
+    creator: Account;
+    assignee: Account;
+    issuetype: NamedItem;
+    status: NamedItem;
+    components: NamedItem[];
+    customfield_11227: Account[]; // Reviewers
+    customfield_11228: Account[]; // Reviewed by
+  }
+}
+
+export type Project = {
+  components: NamedItem[];
+  lead: Account;
 }
 
 export class JiraClient {
@@ -79,12 +109,12 @@ export class JiraClient {
     return response?.key || null;
   }
 
-  public loadIssue(issueKey: string): Promise<any> {
+  public loadIssue(issueKey: string): Promise<Issue> {
     console.log(`Load issue '${issueKey}'`);
     return this.sendRestGetApi(`issue/${issueKey}`);
   }
 
-  public loadProject(projectKey: string): Promise<any> {
+  public loadProject(projectKey: string): Promise<Project> {
     console.log(`Load project '${projectKey}'`);
     return this.sendRestGetApi(`project/${projectKey}`);
   }
@@ -192,8 +222,8 @@ export class JiraClient {
     }
     const logUser = email.substring(0, email.indexOf('@')).replace('.', ' '); // Do not leak email addresses to logs
     console.log(`Searching for user: ${logUser}`);
-    let accounts: any[] = (await this.sendRestGetApi(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
-    accounts = accounts.filter((x: any) => x.emailAddress === email); // Just in case the address is part of the name, or other unexpected field
+    let accounts: Account[] = (await this.sendRestGetApi(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
+    accounts = accounts.filter((x: Account) => x.emailAddress === email); // Just in case the address is part of the name, or other unexpected field
     if (accounts.length === 0) {
       console.log(`Could not find user ${logUser} in Jira`);
       return null;
