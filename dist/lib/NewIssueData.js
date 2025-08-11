@@ -129,9 +129,9 @@ class NewIssueData {
                 return team;
             }
         }
-        const { lead: { accountId: leadAccountId, displayName } } = await jira.loadProject(projectKey);
-        console.log(`No team found for current user, using ${projectKey} lead ${displayName}`);
-        return jira.findTeamByUser(leadAccountId);
+        const project = await jira.loadProject(projectKey);
+        console.log(`No team found for current user, using ${projectKey} lead ${project.lead.displayName}`);
+        return jira.findTeamByUser(project.lead.accountId);
     }
     static async findSprintId(jira, teamName) {
         const team = Configuration_1.Config.findTeam(teamName);
