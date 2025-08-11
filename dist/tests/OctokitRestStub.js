@@ -40,6 +40,7 @@ function createOctokitRestStub(title, body, login = 'test-user') {
                         },
                         user: {
                             login,
+                            type: login === 'renovate[bot]' ? 'Bot' : 'User'
                         }
                     }
                 };

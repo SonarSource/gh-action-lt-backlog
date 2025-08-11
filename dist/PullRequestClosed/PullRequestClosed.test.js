@@ -5,20 +5,20 @@ const PullRequestClosed_1 = require("./PullRequestClosed");
 const LogTester_1 = require("../tests/LogTester");
 const JiraClientStub_1 = require("../tests/JiraClientStub");
 const OctokitRestStub_1 = require("../tests/OctokitRestStub");
-class TestPullRequestClosed extends PullRequestClosed_1.PullRequestClosed {
-    async findEmail(login) {
-        switch (login) {
-            case 'test-user': return 'user@sonarsource.com';
-            case 'renovate[bot]': return null;
-            default: throw new Error(`Scaffolding did not expect login ${login}`);
-        }
-    }
-}
 async function runAction(jiraProject, title, body, user = 'test-user') {
     process.env['INPUT_JIRA-PROJECT'] = jiraProject;
-    const action = new TestPullRequestClosed();
+    const action = new PullRequestClosed_1.PullRequestClosed();
     action.jira = JiraClientStub_1.jiraClientStub;
     action.rest = (0, OctokitRestStub_1.createOctokitRestStub)(title, body, user);
+    if (user === "renovate[bot]") {
+        action.rest.issues.listComments = function () {
+            return {
+                data: [
+                    { body: "Renovate Jira issue ID: KEY-1234" }
+                ]
+            };
+        };
+    }
     await action.run();
 }
 describe('PullRequestClosed', () => {
@@ -36,23 +36,32 @@ describe('PullRequestClosed', () => {
         process.env['INPUT_GITHUB-TOKEN'] = 'fake';
         github.context.payload = {
             pull_request: {
-                number: 42,
-                title: 'KEY-4444 Title',
-                body: 'Description'
-            },
-            repository: {
-                html_url: "https://github.com/test-owner/test-repo",
-                name: 'test-repo',
-                owner: null
-            },
-            sender: {
-                login: 'test-user',
-                type: "User"
+                number: 42
             }
         };
     });
     afterEach(() => {
         logTester.afterEach();
+    });
+    it('is-eng-xp-squad non-Bot PR skips issue resolution', async () => {
+        process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
+        await runAction('KEY', 'KEY-1234 Title');
+        expect(logTester.logsParams).toStrictEqual([
+            "Loading PR #42",
+            "Loading PR #42",
+            "Skipping issue resolution for non-Bot PR",
+            "Done"
+        ]);
+    });
+    it('is-eng-xp-squad Bot PR resolves issue', async () => {
+        process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
+        await runAction('KEY', 'Title', null, "renovate[bot]");
+        expect(logTester.logsParams).toStrictEqual([
+            "Loading PR #42",
+            "Loading PR #42",
+            "Invoked jira.moveIssue('KEY-1234', 'Resolve issue', {\"resolution\":{\"id\":\"10001\"}})",
+            "Done",
+        ]);
     });
     it('PR closed by custom creator', async () => {
         await runAction('KEY', 'KEY-1234 Title');
@@ -70,11 +79,24 @@ describe('PullRequestClosed', () => {
             "Done"
         ]);
     });
-    it('PR merged by custom creator', async () => {
+    it('PR merged on release branch', async () => {
         github.context.payload.pull_request.merged = true;
+        github.context.payload.pull_request.base = { ref: 'master' };
         await runAction('KEY', 'KEY-1234 Title');
         expect(logTester.logsParams).toStrictEqual([
-            "Loading PR #42"
+            "Loading PR #42",
+            "KEY-1234: Executing 'MergeMaster' (10000) transition",
+            "Done",
+        ]);
+    });
+    it('PR merged on normal branch', async () => {
+        github.context.payload.pull_request.merged = true;
+        github.context.payload.pull_request.base = { ref: 'user/branch' };
+        await runAction('KEY', 'KEY-1234 Title');
+        expect(logTester.logsParams).toStrictEqual([
+            "Loading PR #42",
+            "KEY-1234: Executing 'MergeBranch' (10001) transition",
+            "Done",
         ]);
     });
 });

@@ -7,7 +7,7 @@ exports.jiraClientStub = {
         switch (issueId) {
             case 'MMF-1111': return { key: 'MMF-1111', fields: { project: { key: 'MMF' }, issuetype: { name: 'Epic' } } };
             case 'KEY-1234': return { key: 'KEY-1234', fields: { project: { key: 'KEY' }, issuetype: { name: 'Task' }, creator: { displayName: "CreatorKEY1234" } } };
-            case 'KEY-5678': return { key: 'KEY-1234', fields: { project: { key: 'KEY' }, issuetype: { name: 'Task' }, creator: { displayName: "Jira Tech User GitHub" } } };
+            case 'KEY-5678': return { key: 'KEY-5678', fields: { project: { key: 'KEY' }, issuetype: { name: 'Task' }, creator: { displayName: "Jira Tech User GitHub" } } };
             case 'KEY-5555': return { key: 'KEY-5555', fields: { project: { key: 'KEY' }, issuetype: { name: 'Sub-task' } } };
             default: throw new Error(`Scaffolding did not expect ${issueId}`);
         }
@@ -42,6 +42,14 @@ exports.jiraClientStub = {
             default: throw new Error(`Scaffolding did not expect team name ${accountId}`);
         }
     },
+    async findTransition(issueId, transitionName) {
+        switch (transitionName) {
+            case 'Merge into master': return { id: '10000', name: 'MergeMaster' };
+            case 'Merge into branch': return { id: '10001', name: 'MergeBranch' };
+            // case 'Resolve issue': return { id: '10002', name: 'MergeBranch' };
+            default: return null; // No transition found
+        }
+    },
     async findSprintId(boardId) {
         return 42;
     },
@@ -56,6 +64,9 @@ exports.jiraClientStub = {
     async moveIssue(issueId, transitionName, fields = null) {
         fields = fields ? JSON.stringify(fields) : 'null';
         console.log(`Invoked jira.moveIssue('${issueId}', '${transitionName}', ${fields})`);
+    },
+    async transitionIssue(issueId, transition, fields = null) {
+        console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
     },
     async assignIssueToAccount(issueId, accountId) {
         console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);
