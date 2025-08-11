@@ -7,8 +7,10 @@ export const jiraClientStub = {
     switch (issueId) {
       case 'MMF-1111': return { key: 'MMF-1111', fields: { project: { key: 'MMF' }, issuetype: { name: 'Epic' } } };
       case 'KEY-1111': return { key: 'KEY-1111', fields: { project: { key: 'KEY' }, issuetype: { name: 'Epic' } } };
-      case 'KEY-1234': return { key: 'KEY-1234', fields: { project: { key: 'KEY' }, issuetype: { name: 'Task' } } };
+      case 'KEY-1234': return { key: 'KEY-1234', fields: { project: { key: 'KEY' }, issuetype: { name: 'Task' }, creator: {displayName: "Creator of KEY-1234"} } };
+      case 'KEY-5678': return { key: 'KEY-5678', fields: { project: { key: 'KEY' }, issuetype: { name: 'Task' }, creator: { displayName: "Jira Tech User GitHub"} } };
       case 'KEY-5555': return { key: 'KEY-5555', fields: { project: { key: 'KEY' }, issuetype: { name: 'Sub-task' } } };
+      case 'FAKE-1234': return null;
       default: throw new Error(`Scaffolding did not expect ${issueId}`);
     }
   },
@@ -41,6 +43,14 @@ export const jiraClientStub = {
       default: throw new Error(`Scaffolding did not expect team name ${accountId}`);
     }
   },
+  async findTransition(issueId: string, transitionName: string) {
+    switch (transitionName) {
+      case 'Merge into master': return issueId === "KEY-1111" ? null : { id: '10000', name: transitionName };
+      case 'Merge into branch': return issueId === "KEY-1111" ? null : { id: '10001', name: transitionName };
+      case 'Merge': return { id: '10002', name: transitionName }
+      default: return null; // No transition found
+    }
+  },
   async findSprintId(boardId: number): Promise<number> {
     return 42;
   },
@@ -55,6 +65,9 @@ export const jiraClientStub = {
   async moveIssue(issueId: string, transitionName: string, fields: any = null): Promise<void> {
     fields = fields ? JSON.stringify(fields) : 'null';
     console.log(`Invoked jira.moveIssue('${issueId}', '${transitionName}', ${fields})`);
+  },
+  async transitionIssue(issueId: string, transition: any, fields: any = null): Promise<void> {
+    console.log(`Invoked jira.transitionIssue('${issueId}', ${JSON.stringify(transition)}, ${JSON.stringify(fields)})`);
   },
   async assignIssueToAccount(issueId: string, accountId: string): Promise<void> {
     console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);

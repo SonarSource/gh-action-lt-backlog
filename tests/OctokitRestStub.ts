@@ -39,6 +39,7 @@ export function createOctokitRestStub(title: string, body?: string, login: strin
             },
             user: {
               login,
+              type: login === 'renovate[bot]' ? 'Bot' : 'User'
             }
           }
         };
