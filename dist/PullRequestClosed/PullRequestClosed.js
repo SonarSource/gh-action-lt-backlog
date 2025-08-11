@@ -31,7 +31,7 @@ class PullRequestClosed extends PullRequestAction_1.PullRequestAction {
     }
     async processClose(issueId) {
         const issue = await this.jira.loadIssue(issueId);
-        const creator = issue?.fields.creator.displayName;
+        const creator = issue?.fields.creator.displayName || null;
         if (creator === "Jira Tech User GitHub") {
             await this.jira.moveIssue(issueId, 'Cancel Issue', { resolution: { id: this.resolutionId() } });
         }

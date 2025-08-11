@@ -104,7 +104,7 @@ describe('PullRequestClosed', () => {
     await runAction('FAKE-1234 Title');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
-      "Skipping issue cancellation for creator undefined",
+      "Skipping issue cancellation for creator null",
       "Done"
     ]);
   });
@@ -117,7 +117,7 @@ describe('PullRequestClosed', () => {
       await runAction('KEY-1234 Title');
       expect(logTester.logsParams).toStrictEqual([
         "Loading PR #42",
-        "Invoked jira.transitionIssue('KEY-1234', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null",
+        "Invoked jira.transitionIssue('KEY-1234', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
         "Done",
       ]);
       logTester.logsParams = [];
@@ -130,7 +130,7 @@ describe('PullRequestClosed', () => {
     await runAction('KEY-5678 Title');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
-      "Invoked jira.transitionIssue('KEY-5678', {\"id\":\"10001\",\"name\":\"Merge into branch\"}, null",
+      "Invoked jira.transitionIssue('KEY-5678', {\"id\":\"10001\",\"name\":\"Merge into branch\"}, null)",
       "Done",
     ]);
   });
