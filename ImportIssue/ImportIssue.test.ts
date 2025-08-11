@@ -3,6 +3,7 @@ import { ImportIssue } from './ImportIssue';
 import { LogTester } from '../tests/LogTester';
 import { jiraClientStub } from '../tests/JiraClientStub';
 import { createOctokitRestStub } from '../tests/OctokitRestStub';
+import { OctokitActionStub } from '../tests/OctokitActionStub';
 
 async function runAction(title: string, label: string) {
   process.env['INPUT_JIRA-PROJECT'] = 'GHA';
@@ -15,9 +16,9 @@ async function runAction(title: string, label: string) {
       html_url: "https://www.github.com/test-owner/test-repo/issues/42"
     }
   };
-  const action = new ImportIssue();
-  (action as any).jira = jiraClientStub;
-  (action as any).rest = createOctokitRestStub(title, "Lorem Ipsum");
+  const action = new ImportIssue() as ImportIssue & OctokitActionStub;
+  action.jira = jiraClientStub;
+  action.rest = createOctokitRestStub(title, "Lorem Ipsum");
   await action.run();
 }
 

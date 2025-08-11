@@ -131,7 +131,7 @@ describe('TeamConfiguration', () => {
     expect(knownTeams.size).toBeGreaterThan(0);  // Having at least one assertion prevents logTester from dumping console logs
     expect(jiraTeams.length).toBeGreaterThan(0);
     if (newTeams) {
-        fail(`New teams found in Jira. Add them to TeamConfigurationData or ignoredTeams:\n${newTeams}`);
+      fail(`New teams found in Jira. Add them to TeamConfigurationData or ignoredTeams:\n${newTeams}`);
     }
   });
 });

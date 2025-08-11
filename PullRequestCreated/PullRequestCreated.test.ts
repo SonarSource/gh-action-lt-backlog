@@ -4,6 +4,7 @@ import { PullRequestCreated } from './PullRequestCreated';
 import { LogTester } from '../tests/LogTester';
 import { jiraClientStub } from '../tests/JiraClientStub';
 import { createOctokitRestStub } from '../tests/OctokitRestStub';
+import { OctokitActionStub } from '../tests/OctokitActionStub';
 
 class TestPullRequestCreated extends PullRequestCreated {
   protected async findEmail(login: string): Promise<string> {
@@ -17,9 +18,9 @@ class TestPullRequestCreated extends PullRequestCreated {
 
 async function runAction(jiraProject: string, title: string, body?: string, user: string = 'test-user') {
   process.env['INPUT_JIRA-PROJECT'] = jiraProject;
-  const action = new TestPullRequestCreated();
-  (action as any).jira = jiraClientStub;
-  (action as any).rest = createOctokitRestStub(title, body, user);
+  const action = new TestPullRequestCreated() as TestPullRequestCreated & OctokitActionStub;
+  action.jira = jiraClientStub;
+  action.rest = createOctokitRestStub(title, body, user);
   await action.run();
 }
 

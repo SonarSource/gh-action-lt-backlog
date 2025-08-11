@@ -3,13 +3,14 @@ import { jiraClientStub } from '../tests/JiraClientStub';
 import { createOctokitRestStub } from '../tests/OctokitRestStub';
 import { OctokitAction } from './OctokitAction';
 import { fail } from 'assert';
+import { OctokitActionStub } from '../tests/OctokitActionStub';
 
 class TestOctokitAction extends OctokitAction {
 
   constructor() {
     super();
-    (this as any).jira = { ...jiraClientStub }; // Expanded copy, we'll be modifying it in these tests
-    (this as any).rest = createOctokitRestStub('PR title');
+    (this as unknown as OctokitActionStub).jira = { ...jiraClientStub }; // Expanded copy, we'll be modifying it in these tests
+    (this as unknown as OctokitActionStub).rest = createOctokitRestStub('PR title');
   }
 
   async execute(): Promise<void> {
@@ -47,13 +48,13 @@ describe('OctokitAction', () => {
 
   it('isEngXpSquad is true', async () => {
     process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
-    const action = new TestOctokitAction();
-    expect((action as any).isEngXpSquad).toBe(true);
+    const action = new TestOctokitAction() as TestOctokitAction & OctokitActionStub;
+    expect(action.isEngXpSquad).toBe(true);
   });
 
   it('isEngXpSquad is false', async () => {
-    const action = new TestOctokitAction();
-    expect((action as any).isEngXpSquad).toBe(false);
+    const action = new TestOctokitAction() as TestOctokitAction & OctokitActionStub;
+    expect(action.isEngXpSquad).toBe(false);
   });
 
   it('sendGraphQL', async () => {

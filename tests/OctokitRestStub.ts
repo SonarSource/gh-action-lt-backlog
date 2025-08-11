@@ -1,17 +1,6 @@
-type RestStub = {
-  issues: {
-    createComment: (params: any) => void,
-    get: (params: any) => any,
-    listComments: (params: any) => any
-    update: (params: any) => any
-  }
-  pulls: {
-    get: (params: any) => any,
-    update: (params: any) => void
-  }
-}
+import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types';
 
-export function createOctokitRestStub(title: string, body?: string, login: string = 'test-user'): RestStub {
+export function createOctokitRestStub(title: string, body?: string, login: string = 'test-user'): RestEndpointMethods {
   return {
     issues: {
       createComment(params: any): void {
@@ -58,5 +47,5 @@ export function createOctokitRestStub(title: string, body?: string, login: strin
         console.log(`Invoked rest.pulls.update(${JSON.stringify(params)})`);
       }
     }
-  }
+  } as RestEndpointMethods;
 }
