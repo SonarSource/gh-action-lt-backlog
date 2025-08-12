@@ -50,7 +50,7 @@ A branch protection rule for the configured `branch-pattern` has to exist before
 
 When the branch protection is configured as IaC in `re-service-config`, the next Terraform deployment will randomly override the branch lock, rendering this action ineffective.
 
-Update your IaC branch protection to ignore changes of `lock_branch`. [Example](https://github.com/SonarSource/re-service-config/blob/e24020e5d678547358e38b57979546038d645e17/github_sonarsource/analysis-team/repo_analysis-dotnet-squad.tf#L1387-L1389)
+Update your IaC branch protection to ignore changes of `lock_branch`. [Example](https://github.com/SonarSource/re-service-config/blob/423de3a4be1f390f60d5e770ae273d278de29fa9/github_sonarsource/analysis-team/repo_analysis-dotnet-squad.tf#L1389-L1392)
 
 ## Example usage
 
