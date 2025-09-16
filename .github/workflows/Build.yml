@@ -31,4 +31,4 @@ jobs:
       - name: Build and analyze
         shell: powershell
         run: |
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner"
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner
