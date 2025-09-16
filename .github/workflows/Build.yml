@@ -6,7 +6,7 @@ on:
 jobs:
   debug:
     name: Debug
-    runs-on: windows-latest-large
+    runs-on: github-windows-latest-s
 
     steps:
       - name: Set up JDK 17
