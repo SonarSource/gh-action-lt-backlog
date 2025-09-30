@@ -234,7 +234,6 @@ describe('NewIssueData', () => {
       assigneeId: null,
       additionalFields: {
         customfield_10001: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6',
-        customfield_10020: 42,
         issuetype: { name: 'Task' },
         labels: ['dvi-created-by-automation', 'dvi-renovate']
       },
