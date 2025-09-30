@@ -1,3 +1,5 @@
+import { Config } from './Configuration';
+import { JiraClient } from './JiraClient';
 import { OctokitAction } from './OctokitAction';
 
 export abstract class PullRequestAction extends OctokitAction {
@@ -25,5 +27,16 @@ export abstract class PullRequestAction extends OctokitAction {
     return pr
       ? (await this.findFixedIssues(pr)) ?? []
       : [];
+  }
+
+  public static async findSprintId(jira: JiraClient, teamName: string): Promise<number> {
+    const team = Config.findTeam(teamName);
+    if (team?.boardId) {
+      return jira.findSprintId(team.boardId);
+    }
+    else {
+      console.log(`No boardId is configured for team ${teamName}`);
+      return null;
+    }
   }
 }

@@ -1,3 +1,5 @@
+import { EngineeringExperienceSquad } from '../Data/TeamConfiguration';
+import { Config } from '../lib/Configuration';
 import { PullRequestAction } from '../lib/PullRequestAction';
 
 export class SubmitReview extends PullRequestAction {
@@ -9,6 +11,9 @@ export class SubmitReview extends PullRequestAction {
         if (userEmail) {
           await this.jira.addReviewedBy(issueId, userEmail);
         }
+        const team = Config.findTeam(EngineeringExperienceSquad.name);
+        const sprintId = await this.jira.findSprintId(team.boardId);
+        await this.jira.setSprint(issueId, sprintId);
       } else {
         await this.jira.moveIssue(issueId, 'Approve');
       }

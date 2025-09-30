@@ -181,6 +181,18 @@ export class JiraClient {
     }
   }
 
+  public async setSprint(issueId: string, sprintId: any): Promise<void> {
+    console.log(`${issueId}: Setting sprint to ${sprintId}`);
+    const request = {
+      update: {
+        customfield_10020: [{
+          add: { sprintId } // Nothing will happen if it already exists
+        }]
+      }
+    };
+    await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request);
+  }
+
   public async createComponent(projectKey: string, name: string, description: string): Promise<boolean> {
     console.log(`Searching for component '${name}' in project ${projectKey}`);
     const { total, values } = await this.sendRestGetApi(`project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`);
