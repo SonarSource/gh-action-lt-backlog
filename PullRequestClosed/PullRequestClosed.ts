@@ -5,7 +5,11 @@ export class PullRequestClosed extends PullRequestAction {
     if (this.isEngXpSquad) { // Can't auto-close auto-created issues, the reporter is set to the actual user
       const pr = await this.loadPullRequest(this.payload.pull_request.number);
       if (pr.user.type === "Bot") {
-        await this.jira.moveIssue(issueId, 'Resolve issue', { resolution: { id: this.resolutionId() } });
+        if (issueId.startsWith('PREQ-')) {
+          await this.jira.moveIssue(issueId, 'Resolve issue', { resolution: { id: this.resolutionId() } });
+        } else {
+          await this.jira.moveIssue(issueId, 'Resolve Issue', { resolution: { id: this.resolutionId() } });
+        }
       } else {
         this.log(`Skipping issue resolution for non-Bot PR`);
       }
