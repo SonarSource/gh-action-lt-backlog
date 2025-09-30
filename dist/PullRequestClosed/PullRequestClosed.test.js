@@ -61,7 +61,7 @@ describe('PullRequestClosed', () => {
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
             "Loading PR #42",
-            "Invoked jira.moveIssue('KEY-1234', 'Resolve issue', {\"resolution\":{\"id\":\"10000\"}})",
+            "Invoked jira.moveIssue('KEY-1234', 'Resolve Issue', {\"resolution\":{\"id\":\"10000\"}})",
             "Done",
         ]);
     });
@@ -71,7 +71,7 @@ describe('PullRequestClosed', () => {
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
             "Loading PR #42",
-            "Invoked jira.moveIssue('KEY-1234', 'Resolve issue', {\"resolution\":{\"id\":\"10001\"}})",
+            "Invoked jira.moveIssue('KEY-1234', 'Resolve Issue', {\"resolution\":{\"id\":\"10001\"}})",
             "Done",
         ]);
     });
