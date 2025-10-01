@@ -52,7 +52,9 @@ export class NewIssueData {
       parameters.reporter = { id: accountId };
     }
     parameters.customfield_10001 = EngineeringExperienceSquad.id;
-    parameters.customfield_10020 = sprintId;
+    if (!pr.isRenovate()) {
+      parameters.customfield_10020 = sprintId;
+    }
     parameters.labels = pr.isRenovate()
       ? ['dvi-created-by-automation', 'dvi-renovate']
       : ['dvi-created-by-automation'];
