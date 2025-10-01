@@ -2,7 +2,7 @@ import { LogTester } from '../tests/LogTester';
 import { jiraClientStub } from '../tests/JiraClientStub';
 import { createOctokitRestStub } from '../tests/OctokitRestStub';
 import { OctokitAction } from './OctokitAction';
-import { fail } from 'assert';
+import { fail } from 'node:assert';
 import { OctokitActionStub } from '../tests/OctokitActionStub';
 
 class TestOctokitAction extends OctokitAction {

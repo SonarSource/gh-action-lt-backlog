@@ -1,6 +1,6 @@
 ﻿import { AtlassianDocument } from './AtlassianDocumentFormat';
 import { JiraClient } from './JiraClient';
-import { fail } from 'assert';
+import { fail } from 'node:assert';
 import { NewIssueParameters } from './NewIssueParameters';
 import { EngineeringExperienceSquad, TeamConfigurationData } from '../Data/TeamConfiguration';
 import { Config } from './Configuration';

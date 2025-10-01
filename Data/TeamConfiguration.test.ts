@@ -2,7 +2,7 @@
 import { JiraClient } from "../lib/JiraClient";
 import { LogTester } from "../tests/LogTester";
 import { EngineeringExperienceSquad, TeamConfigurationData } from "./TeamConfiguration";
-import { fail } from 'assert';
+import { fail } from 'node:assert';
 import { Team } from '../lib/Team';
 
 let jira: JiraClient;

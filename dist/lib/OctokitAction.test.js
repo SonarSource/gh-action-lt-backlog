@@ -4,7 +4,7 @@ const LogTester_1 = require("../tests/LogTester");
 const JiraClientStub_1 = require("../tests/JiraClientStub");
 const OctokitRestStub_1 = require("../tests/OctokitRestStub");
 const OctokitAction_1 = require("./OctokitAction");
-const assert_1 = require("assert");
+const node_assert_1 = require("node:assert");
 class TestOctokitAction extends OctokitAction_1.OctokitAction {
     constructor() {
         super();
@@ -35,7 +35,7 @@ describe('OctokitAction', () => {
             sut = new TestOctokitAction();
         }
         else {
-            (0, assert_1.fail)("OctokitAction tests require GITHUB_TOKEN environment variables to be set.");
+            (0, node_assert_1.fail)("OctokitAction tests require GITHUB_TOKEN environment variables to be set.");
         }
     });
     afterEach(() => {
