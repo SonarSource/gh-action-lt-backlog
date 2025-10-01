@@ -50,6 +50,7 @@ const ignoredTeams = [
   "Nice LTS shirt :)",
   "PLG squad",
   "PM Team",
+  "ProdSec",
   "Purchase",
   "Renewals Team",
   "RIS Squad",
@@ -92,7 +93,7 @@ describe('TeamConfiguration', () => {
     expect(team.id).toBe(EngineeringExperienceSquad.id);
   });
 
-  it('has valid team names', async () => {
+  it('teams have valid names', async () => {
     expect(TeamConfigurationData.length).toBeGreaterThan(0);  // Having at least one assertion prevents logTester from dumping console logs
     for (const teamData of TeamConfigurationData) {
       const team = await jira.findTeamByName(teamData.name);
