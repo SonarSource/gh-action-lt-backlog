@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const AtlassianDocumentFormat_1 = require("./AtlassianDocumentFormat");
 const JiraClient_1 = require("./JiraClient");
-const assert_1 = require("assert");
+const node_assert_1 = require("node:assert");
 const TeamConfiguration_1 = require("../Data/TeamConfiguration");
 const Configuration_1 = require("./Configuration");
 const LogTester_1 = require("../tests/LogTester");
@@ -21,7 +21,7 @@ beforeAll(async () => {
         issueId = await sut.createIssue('GHA', `JiraClient unit test shared ${crypto.randomUUID()}`, parameters);
     }
     else {
-        (0, assert_1.fail)("JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.");
+        (0, node_assert_1.fail)("JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.");
     }
 });
 async function findFirstActiveSprintId() {
@@ -31,7 +31,7 @@ async function findFirstActiveSprintId() {
             return sprintId;
         }
     }
-    (0, assert_1.fail)('Scaffolding: Could not find any active sprint ID');
+    (0, node_assert_1.fail)('Scaffolding: Could not find any active sprint ID');
 }
 async function ensurePreqIssueId() {
     if (!preqIssueId) {

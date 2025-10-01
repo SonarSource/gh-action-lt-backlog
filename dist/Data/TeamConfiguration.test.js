@@ -4,7 +4,7 @@ const Constants_1 = require("../lib/Constants");
 const JiraClient_1 = require("../lib/JiraClient");
 const LogTester_1 = require("../tests/LogTester");
 const TeamConfiguration_1 = require("./TeamConfiguration");
-const assert_1 = require("assert");
+const node_assert_1 = require("node:assert");
 let jira;
 // All teams that exist in Jira, but do not create PRs and do not need boardId configured:
 const ignoredTeams = [
@@ -71,7 +71,7 @@ beforeAll(() => {
         jira = new JiraClient_1.JiraClient(Constants_1.JIRA_DOMAIN, Constants_1.JIRA_SITE_ID, Constants_1.JIRA_ORGANIZATION_ID, user, token);
     }
     else {
-        (0, assert_1.fail)("JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.");
+        (0, node_assert_1.fail)("JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.");
     }
 });
 describe('TeamConfiguration', () => {
@@ -92,7 +92,7 @@ describe('TeamConfiguration', () => {
         for (const teamData of TeamConfiguration_1.TeamConfigurationData) {
             const team = await jira.findTeamByName(teamData.name);
             if (!team) {
-                (0, assert_1.fail)(`Configured team does not exist in Jira: ${teamData.name}`);
+                (0, node_assert_1.fail)(`Configured team does not exist in Jira: ${teamData.name}`);
             }
         }
     }, 20000); // 20s timeout
@@ -101,7 +101,7 @@ describe('TeamConfiguration', () => {
         for (const team of TeamConfiguration_1.TeamConfigurationData) {
             const board = await jira.findBoard(team.boardId);
             if (!board) {
-                (0, assert_1.fail)(`Configured team ${team.name} does not have a valid boardId: ${team.boardId}`);
+                (0, node_assert_1.fail)(`Configured team ${team.name} does not have a valid boardId: ${team.boardId}`);
             }
         }
     }, 20000); // 20s timeout
@@ -124,7 +124,7 @@ describe('TeamConfiguration', () => {
         expect(knownTeams.size).toBeGreaterThan(0); // Having at least one assertion prevents logTester from dumping console logs
         expect(jiraTeams.length).toBeGreaterThan(0);
         if (newTeams) {
-            (0, assert_1.fail)(`New teams found in Jira. Add them to TeamConfigurationData or ignoredTeams:\n${newTeams}`);
+            (0, node_assert_1.fail)(`New teams found in Jira. Add them to TeamConfigurationData or ignoredTeams:\n${newTeams}`);
         }
     });
 });
