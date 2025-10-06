@@ -29,6 +29,7 @@ const ignoredTeams = [
     "End-User Technology",
     "Engineering Project Management",
     "Enterprise Acquisition - North America ",
+    "Events",
     "FieldOps",
     "Finance Team",
     "Front-Office Squad (Stripe)",
@@ -63,6 +64,14 @@ const ignoredTeams = [
     "Technology Alliances Program",
     "UX Team",
     "Vendor Management",
+    "WE Alexandria",
+    "WE Annecy",
+    "WE Austin",
+    "WE Bochum",
+    "WE Geneva",
+    "WE London",
+    "WE Singapore",
+    "WE Tokyo",
 ];
 beforeAll(() => {
     const user = process.env["JIRA_USER"]; // Can't use the same name as environment variables read by Octokit actions, because the dash is not propagated from shell to node

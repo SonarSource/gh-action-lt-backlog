@@ -30,6 +30,7 @@ const ignoredTeams = [
   "End-User Technology",
   "Engineering Project Management",
   "Enterprise Acquisition - North America ",
+  "Events",
   "FieldOps",
   "Finance Team",
   "Front-Office Squad (Stripe)",
@@ -64,6 +65,14 @@ const ignoredTeams = [
   "Technology Alliances Program",
   "UX Team",
   "Vendor Management",
+  "WE Alexandria",
+  "WE Annecy",
+  "WE Austin",
+  "WE Bochum",
+  "WE Geneva",
+  "WE London",
+  "WE Singapore",
+  "WE Tokyo",
 ];
 
 beforeAll(() => {
