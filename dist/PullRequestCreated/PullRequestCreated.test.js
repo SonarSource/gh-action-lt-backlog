@@ -188,7 +188,7 @@ describe('PullRequestCreated', () => {
         await runAction('', 'Standalone PR');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
-            "Invoked jira.createIssue('PREQ', 'Standalone PR', {\"issuetype\":{\"name\":\"Task\"},\"reporter\":{\"id\":\"1234-account\"},\"customfield_10001\":\"eb40f25e-3596-4541-b661-cf83e7bc4fa6\",\"customfield_10020\":42,\"labels\":[\"dvi-created-by-automation\"]})",
+            "Invoked jira.createIssue('PREQ', 'Standalone PR', {\"issuetype\":{\"name\":\"Task\"},\"reporter\":{\"id\":\"1234-account\"},\"customfield_10001\":\"eb40f25e-3596-4541-b661-cf83e7bc4fa6\",\"labels\":[\"dvi-created-by-automation\"]})",
             "Updating PR #42 title to: PREQ-4242 Standalone PR",
             "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"PREQ-4242 Standalone PR\"})",
             "Invoked jira.addIssueRemoteLink('PREQ-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",

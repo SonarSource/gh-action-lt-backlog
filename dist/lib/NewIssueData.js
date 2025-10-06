@@ -43,12 +43,14 @@ class NewIssueData {
         const accountId = await jira.findAccountId(userEmail);
         const projectKey = await this.computeProjectKeyForEngExp(jira, pr, accountId);
         const parameters = this.newIssueParameters(projectKey, null, 'Task');
-        const sprintId = await this.findSprintId(jira, TeamConfiguration_1.EngineeringExperienceSquad.name);
         if (accountId) {
             parameters.reporter = { id: accountId };
         }
         parameters.customfield_10001 = TeamConfiguration_1.EngineeringExperienceSquad.id;
-        parameters.customfield_10020 = sprintId;
+        if (!pr.isRenovate() && projectKey !== "PREQ") {
+            const sprintId = await this.findSprintId(jira, TeamConfiguration_1.EngineeringExperienceSquad.name);
+            parameters.customfield_10020 = sprintId;
+        }
         parameters.labels = pr.isRenovate()
             ? ['dvi-created-by-automation', 'dvi-renovate']
             : ['dvi-created-by-automation'];
