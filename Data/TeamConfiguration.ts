@@ -32,6 +32,7 @@ export const EngineeringExperienceSquad: Team = { id: "eb40f25e-3596-4541-b661-c
 export const TeamConfigurationData: TeamConfiguration[] = [
   { name: ".NET Squad", boardId: 1737 },
   { name: "Architecture Squad", boardId: 1561 },
+  { name: "Analysis as a Service", boardId: 5313 },
   { name: "Analysis Processing Squad", boardId: 1443 },
   { name: "Billing-Squad", boardId: 1536 },
   { name: "BizTech - Back Office", boardId: 1464 },
@@ -41,8 +42,8 @@ export const TeamConfigurationData: TeamConfiguration[] = [
   { name: "Cloud Security", boardId: 1462 },
   { name: "Code Data Storage", boardId: 1610 },
   { name: "Code Generation", boardId: 1569 },
+  { name: "DTL Taint", boardId: 4146 },
   { name: "Organization & Reporting Squad", boardId: 1555 },
-  { name: "Data", boardId: 1466 },
   { name: "DBD Squad", boardId: 1638 },
   { name: EngineeringExperienceSquad.name, boardId: 1551 },
   { name: "Front-End Engineering", boardId: 1444 },
@@ -56,8 +57,8 @@ export const TeamConfigurationData: TeamConfiguration[] = [
   { name: "RAD Squad", boardId: 1770 },
   { name: "Security SCA", boardId: 1803 },
   { name: "SDLC Data Squad", boardId: 2034 },
-  { name: "SonarReview Incubation Squad", boardId: 3717 },
-  { name: "Taint Analysis", boardId: 371 },
+  { name: "Code Review Incubator Squad", boardId: 3717 },
+  { name: "STL Taint", boardId: 4179 },
   { name: "Web Squad", boardId: 1672 },
   { name: "Workflow & Standards Squad", boardId: 1550 },
 ];
