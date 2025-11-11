@@ -73,4 +73,40 @@ jobs:
             SLACK_TOKEN:  ${{ fromJSON(steps.secrets.outputs.vault).SLACK_TOKEN }}
             JIRA_USER:    ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
             JIRA_TOKEN:   ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
-        run: npm run test
+        # Do not run Data/TeamConfiguration.test.ts to avoid blocked PRs due to changes in Jira
+        run: npm run test-uts
+
+  data-consistency-check:
+    name: Data Consistency Check
+    runs-on: github-ubuntu-latest-s
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - id: secrets
+        uses: SonarSource/vault-action-wrapper@v3
+        with:
+          secrets: |
+            development/github/token/{REPO_OWNER_NAME_DASH}-jira token | GITHUB_TOKEN;
+            development/artifactory/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | REPOX_TOKEN;
+            development/kv/data/jira user | JIRA_USER;
+            development/kv/data/jira token | JIRA_TOKEN;
+
+        # Restore DEV dependencies that are not present in the repo due to .gitignore of /node_modules/ to reduce the checkout size in production.
+      - name: Restore dev dependencies
+        env:
+            NPM_CONFIG_registry: https://repox.jfrog.io/artifactory/api/npm/npm
+            NPM_CONFIG_//repox.jfrog.io/artifactory/api/npm/:_authToken: ${{ fromJSON(steps.secrets.outputs.vault).REPOX_TOKEN }}
+        run: npm install
+
+      - name: Run Data Consistency Check
+        env:
+            GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
+            JIRA_USER:    ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
+            JIRA_TOKEN:   ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
+        # Run Data/TeamConfiguration.test.ts separately to narrow down the necessary change. This check is not required on PRs to pass
+        run: npm run test-data
