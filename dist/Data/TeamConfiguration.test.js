@@ -33,6 +33,7 @@ const ignoredTeams = [
     "AICoreTeam",
     "BizTech - FrontOffice",
     "BizTech - SolutionEnablement",
+    "Business Intelligence", // Not using sprints
     "Business Projects",
     "Cloud ARB",
     "CodeNext Bravo Squad",
@@ -40,6 +41,7 @@ const ignoredTeams = [
     "Customer Marketing",
     "Customer Onboarding Squad",
     "Customer Success",
+    "Data & Insights", // Not using sprints
     "DevRel",
     "Documentation Squad",
     "EA",
@@ -48,6 +50,7 @@ const ignoredTeams = [
     "End-User Technology",
     "Engineering Project Management",
     "Enterprise Acquisition - North America ",
+    "Enterprise Architecture Squad",
     "Events",
     "FieldOps",
     "Finance Team",
@@ -55,6 +58,7 @@ const ignoredTeams = [
     "Growth & New Ventures",
     "Growth Marketing",
     "GTM - Web Development Squad",
+    "Identity UX",
     "Incident & Problem Management",
     "InfoSec",
     "Infrastructure",
@@ -70,15 +74,18 @@ const ignoredTeams = [
     "PLG squad",
     "PM Team",
     "ProdSec",
+    "Product Data", // Not using sprints
     "Purchase",
     "Renewals Team",
     "RIS Squad",
+    "SecGov",
     "Services",
     "Storefront EM",
     "Support Council",
     "Support Team",
     "Support Team Jira Admins",
     "Support-test",
+    "Taint Analysis", // Replaced by STL and DTL Taint teams
     "Team Ramrod",
     "Technology Alliances Program",
     "UX Team",
@@ -90,6 +97,7 @@ const ignoredTeams = [
     "WE Geneva",
     "WE London",
     "WE Singapore",
+    "WE Sonar",
     "WE Tokyo",
 ];
 beforeAll(() => {
