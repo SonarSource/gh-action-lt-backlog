@@ -24,7 +24,7 @@ jobs:
         uses: SonarSource/vault-action-wrapper@v3
         with:
           secrets: |
-            development/artifactory/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | REPOX_TOKEN;
+            development/artifactory/token/{REPO_OWNER_NAME_DASH}-public-reader access_token | REPOX_TOKEN;
 
         # Restore DEV dependencies that are not present in the repo due to .gitignore of /node_modules/ to reduce the checkout size in production.
       - name: Restore dev dependencies
@@ -55,7 +55,7 @@ jobs:
         with:
           secrets: |
             development/github/token/{REPO_OWNER_NAME_DASH}-jira token | GITHUB_TOKEN;
-            development/artifactory/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | REPOX_TOKEN;
+            development/artifactory/token/{REPO_OWNER_NAME_DASH}-public-reader access_token | REPOX_TOKEN;
             development/kv/data/slack token | SLACK_TOKEN;
             development/kv/data/jira user | JIRA_USER;
             development/kv/data/jira token | JIRA_TOKEN;
@@ -92,7 +92,7 @@ jobs:
         with:
           secrets: |
             development/github/token/{REPO_OWNER_NAME_DASH}-jira token | GITHUB_TOKEN;
-            development/artifactory/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | REPOX_TOKEN;
+            development/artifactory/token/{REPO_OWNER_NAME_DASH}-public-reader access_token | REPOX_TOKEN;
             development/kv/data/jira user | JIRA_USER;
             development/kv/data/jira token | JIRA_TOKEN;
 
