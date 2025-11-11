@@ -130,7 +130,7 @@ describe('JiraClient', () => {
         expect(await sut.findTransition(issueId, 'Cancel Issue')).toMatchObject({ id: "11", name: 'Cancel Issue', });
     });
     it('transitionIssue', async () => {
-        await sut.moveIssue(issueId, 'Close as Done');
+        await sut.moveIssue(issueId, 'Merge');
         expect((await sut.loadIssue(issueId)).fields.status.name).toBe('Done');
     });
     it('assignIssueToEmail', async () => {
