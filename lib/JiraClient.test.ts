@@ -146,7 +146,7 @@ describe('JiraClient', () => {
   });
 
   it('transitionIssue', async () => {
-    await sut.moveIssue(issueId, 'Close as Done');
+    await sut.moveIssue(issueId, 'Merge');
     expect((await sut.loadIssue(issueId)).fields.status.name).toBe('Done');
   });
 
