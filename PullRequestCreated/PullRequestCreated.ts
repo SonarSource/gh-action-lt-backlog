@@ -55,7 +55,9 @@ export class PullRequestCreated extends OctokitAction {
       await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
     }
     if (fixedIssues) {
-      await this.addLinkedIssuesToDescription(pr, fixedIssues);
+      if (!pr.isRenovate()) { // Renovate already has a comment with issue ID to persist the actual issue
+        await this.addLinkedIssuesAsComment(pr, fixedIssues);
+      }
       if (this.isEngXpSquad) {
         for (const issue of fixedIssues) {
           await this.addJiraComponent(issue, this.repo.repo, this.payload.repository.html_url);
@@ -106,9 +108,9 @@ export class PullRequestCreated extends OctokitAction {
     return value.replace(/\s\s+/g, " ").trim();  // Mainly remove triple space between issue ID and title when copying from Jira
   }
 
-  private async addLinkedIssuesToDescription(pr: PullRequest, linkedIssues: string[]): Promise<void> {
-    console.log(`Adding the following ticket in description: ${linkedIssues}`);
-    await this.updatePullRequestDescription(pr.number, `${linkedIssues.map(x => this.issueLink(x)).join('\n')}\n\n${pr.body || ''}`);
+  private async addLinkedIssuesAsComment(pr: PullRequest, linkedIssues: string[]): Promise<void> {
+    console.log(`Adding the following ticket as comment: ${linkedIssues}`);
+    await this.addComment(pr.number, linkedIssues.map(x => this.issueLink(x)).join('\n'));
   }
 
   private issueLink(issue: string): string {
