@@ -4,7 +4,7 @@
     <BuildCommand>npm run build</BuildCommand>
     <!--Command to run on project clean-->
     <CleanCommand>npm run clean</CleanCommand>
-    <JavaScriptTestRoot>\</JavaScriptTestRoot>
+    <JavaScriptTestRoot>.\</JavaScriptTestRoot>
     <JavaScriptTestFramework>Jest</JavaScriptTestFramework>
   </PropertyGroup>
   <ItemGroup>
