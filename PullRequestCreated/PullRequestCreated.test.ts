@@ -143,9 +143,8 @@ describe('PullRequestCreated', () => {
       "Invoked jira.moveIssue('KEY-4242', 'Commit', null)",
       "Invoked jira.moveIssue('KEY-4242', 'Start', null)",
       "Invoked jira.assignIssueToAccount('KEY-4242', '1234-account')",
-      "Adding the following ticket in description: KEY-4242",
-      "Updating PR #42 description",
-      "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\\n\\n\"})",
+      "Adding the following ticket as comment: KEY-4242",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
       "Done"
     ]);
   });
@@ -165,9 +164,8 @@ describe('PullRequestCreated', () => {
       "Invoked jira.moveIssue('KEY-4242', 'Commit', null)",
       "Invoked jira.moveIssue('KEY-4242', 'Start', null)",
       "Invoked jira.assignIssueToAccount('KEY-4242', '1234-account')",
-      "Adding the following ticket in description: KEY-4242",
-      "Updating PR #42 description",
-      "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\\n\\nOriginal description\"})",
+      "Adding the following ticket as comment: KEY-4242",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
       "Done"
     ]);
   });
@@ -183,9 +181,6 @@ describe('PullRequestCreated', () => {
       "Invoked jira.moveIssue('KEY-4242', 'Commit', null)",
       "Invoked jira.moveIssue('KEY-4242', 'Start', null)",
       "Invoked jira.assignIssueToAccount('KEY-4242', '1234-account')",
-      "Adding the following ticket in description: KEY-4242",
-      "Updating PR #42 description",
-      "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\\n\\n\"})",
       "Done"
     ]);
   });
@@ -207,10 +202,9 @@ describe('PullRequestCreated', () => {
       "Invoked jira.assignIssueToAccount('KEY-4242', '1234-account')",
       "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
       "Invoked jira.assignIssueToEmail('KEY-4242', 'user@sonarsource.com')",
-      "Adding the following ticket in description: KEY-4242",
-      "Updating PR #42 description",
-      "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\\n\\n\"})",
-      "Done"
+      "Adding the following ticket as comment: KEY-4242",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
+       "Done"
     ]);
   });
 
@@ -225,10 +219,9 @@ describe('PullRequestCreated', () => {
       "Invoked jira.addIssueRemoteLink('PREQ-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
       "Invoked jira.moveIssue('PREQ-4242', 'Commit', null)",
       "Invoked jira.moveIssue('PREQ-4242', 'Start', null)",
-      "Adding the following ticket in description: PREQ-4242",
-      "Updating PR #42 description",
-      "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"body\":\"[PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242)\\n\\n\"})",
-      "Invoked jira.createComponent('PREQ', 'test-repo', 'https://github.com/test-owner/test-repo')",
+      "Adding the following ticket as comment: PREQ-4242",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242)\"})",
+       "Invoked jira.createComponent('PREQ', 'test-repo', 'https://github.com/test-owner/test-repo')",
       "Invoked jira.addIssueComponent('PREQ-4242', 'test-repo')",
       "Done"
     ]);
@@ -240,9 +233,8 @@ describe('PullRequestCreated', () => {
       "Loading PR #42",
       "Updating PR #42 title to: GHA-1000 Useless whitespace",
       "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"GHA-1000 Useless whitespace\"})",
-      "Adding the following ticket in description: GHA-1000",
-      "Updating PR #42 description",
-      "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"body\":\"[GHA-1000](https://sonarsource.atlassian.net/browse/GHA-1000)\\n\\n\"})",
+      "Adding the following ticket as comment: GHA-1000",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[GHA-1000](https://sonarsource.atlassian.net/browse/GHA-1000)\"})",
       "Done"
     ]);
   });
@@ -252,9 +244,8 @@ describe('PullRequestCreated', () => {
     await runAction('', 'BUILD-4444 Fix normal issue');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
-      "Adding the following ticket in description: BUILD-4444",
-      "Updating PR #42 description",
-      "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"body\":\"[BUILD-4444](https://sonarsource.atlassian.net/browse/BUILD-4444)\\n\\n\"})",
+      "Adding the following ticket as comment: BUILD-4444",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[BUILD-4444](https://sonarsource.atlassian.net/browse/BUILD-4444)\"})",
       "Invoked jira.createComponent('BUILD', 'test-repo', 'https://github.com/test-owner/test-repo')",
       "Invoked jira.addIssueComponent('BUILD-4444', 'test-repo')",
       "Done"
