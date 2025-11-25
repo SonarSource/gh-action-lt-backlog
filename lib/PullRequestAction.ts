@@ -19,12 +19,20 @@
  */
 
 import { OctokitAction } from './OctokitAction';
+import { PullRequest } from './OctokitTypes';
 
 export abstract class PullRequestAction extends OctokitAction {
   protected abstract processJiraIssue(issueId: string): Promise<void>;
 
+  protected postProcess(pr: PullRequest, issueIds: string[]): Promise<void> {
+    return; // Override me, optionally
+  }
+
   protected async execute(): Promise<void> {
-    const issueIds = await this.fixedJiraIssues();
+    const pr = await this.loadPullRequest(this.payload.pull_request.number);
+    const issueIds = pr
+      ? (await this.findFixedIssues(pr)) ?? []
+      : [];
     if (issueIds.length === 0) {
       console.log('No Jira issue found in the PR title.');
     } else {
@@ -38,12 +46,6 @@ export abstract class PullRequestAction extends OctokitAction {
         }
       }
     }
-  }
-
-  private async fixedJiraIssues(): Promise<string[]> {
-    const pr = await this.loadPullRequest(this.payload.pull_request.number);
-    return pr
-      ? (await this.findFixedIssues(pr)) ?? []
-      : [];
+    await this.postProcess(pr, issueIds); // Also for 0 issues
   }
 }

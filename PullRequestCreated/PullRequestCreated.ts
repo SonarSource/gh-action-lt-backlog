@@ -64,12 +64,17 @@ export class PullRequestCreated extends OctokitAction {
         }
       }
     }
+    if (this.payload.pull_request.requested_teams.length > 0) {     // When PR is created directly with a (code-owner) reviewer team, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
+      // FIXME: Create cached way how to load user email, most of the time, it will not be needed, share it with processNewJiraIssue
+      await this.processRequestTeamReview(pr, fixedIssues, userEmail, this.payload.pull_request.requested_teams[0]);
+    }
   }
 
   private async processNewJiraIssue(pr: PullRequest, inputJiraProject: string, inputAdditionalFields: string): Promise<string> {
+    const userEmail = await this.findEmail(this.payload.sender.login);
     const data = this.isEngXpSquad
-      ? await NewIssueData.createForEngExp(this.jira, pr, await this.findEmail(this.payload.sender.login))
-      : await NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, await this.findEmail(this.payload.sender.login), this.inputString('fallback-team'));
+      ? await NewIssueData.createForEngExp(this.jira, pr, userEmail)
+      : await NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, userEmail, this.inputString('fallback-team'));
     if (data) {
       const issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
       if (issueId == null) {

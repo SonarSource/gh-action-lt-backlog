@@ -19,9 +19,14 @@
  */
 
 import { PullRequestAction } from '../lib/PullRequestAction';
+import { PullRequest } from '../lib/OctokitTypes';
 
 export class RequestReview extends PullRequestAction {
   protected async processJiraIssue(issueId: string): Promise<void> {
     await this.processRequestReview(issueId, this.payload.requested_reviewer); // When team is requested for a review, it has this.payload.requested_team
+  }
+
+  protected async postProcess(pr: PullRequest, issueIds: string[]): Promise<void> {
+    await this.processRequestTeamReview(pr, issueIds, this.payload.requested_team);
   }
 }

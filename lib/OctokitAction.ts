@@ -28,6 +28,8 @@ import { PullRequest, IssueComment, addPullRequestExtensions, Issue } from './Oc
 import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
 import { JiraClient } from './JiraClient';
 import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN } from './Constants';
+import { AtlassianDocument } from './AtlassianDocumentFormat';
+import { NewIssueParameters } from './NewIssueParameters';
 
 export abstract class OctokitAction extends Action {
   public readonly rest: RestEndpointMethods;
@@ -233,6 +235,18 @@ export abstract class OctokitAction extends Action {
           }
         }
       }
+    }
+  }
+
+  protected async processRequestTeamReview(pr: PullRequest, issueIds: string[], userEmail: string, requested_team: any): Promise<void> {
+    // Issue was typically already moved by "Request Review" transition, without assignee
+    if (requested_team?.name === "quality-dotnet-squad") {  // FIXME: platform-cloud-squad
+      const parameters: NewIssueParameters = {
+        issuetype: { name: 'Task' },
+        // FIXME: reporter: 
+        // FIXME: label
+      };
+      await this.jira.createIssue('PREQ', `PR review for ${pr.title}`, parameters);
     }
   }
 
