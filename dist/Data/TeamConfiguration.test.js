@@ -80,6 +80,7 @@ const ignoredTeams = [
     "RIS Squad",
     "SecGov",
     "Services",
+    "Signup & Onboarding",
     "Storefront EM",
     "Support Council",
     "Support Team",
