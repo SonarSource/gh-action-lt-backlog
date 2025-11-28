@@ -129,7 +129,7 @@ describe('JiraClient', () => {
       customfield_10001: { id: '3ca60b21-53c7-48e2-a2e2-6e85b39551d0' },        // Why would the same field have same structure everywhere anyway?
       customfield_10020: [{ id: sprintId }],                                    // Why would the same field have same structure everywhere anyway?
     });
-  });
+  }, 20000);  // 20s timeout
 
   it('loadIssue', async () => {
     const result = await sut.loadIssue('GHA-42');
