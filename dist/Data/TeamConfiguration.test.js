@@ -37,6 +37,8 @@ const ignoredTeams = [
     "Business Projects",
     "Cloud ARB",
     "CodeNext Bravo Squad",
+    "CodeNextTeam", // Not using sprints
+    "Code Review Incubator Squad", // Not using sprints
     "Core Squad",
     "Customer Marketing",
     "Customer Onboarding Squad",
@@ -59,12 +61,14 @@ const ignoredTeams = [
     "Growth Marketing",
     "GTM - Web Development Squad",
     "Identity UX",
+    "Identity Triage",
     "Incident & Problem Management",
     "InfoSec",
     "Infrastructure",
     "IST",
     "IST-PST",
     "IST-SECGOV",
+    "ITOPS",
     "ITOPS-EUT",
     "ITOPS-ISE",
     "ITOPS-SM",
@@ -89,6 +93,7 @@ const ignoredTeams = [
     "Taint Analysis", // Replaced by STL and DTL Taint teams
     "Team Ramrod",
     "Technology Alliances Program",
+    "Travel Team",
     "UX Team",
     "Vendor Management",
     "WE Alexandria",
@@ -164,5 +169,15 @@ describe('TeamConfiguration', () => {
             (0, node_assert_1.fail)(`New teams found in Jira. Add them to TeamConfigurationData or ignoredTeams:\n${newTeams}`);
         }
     });
+    it('boardId uses sprints', async () => {
+        for (const team of TeamConfiguration_1.TeamConfigurationData) {
+            try {
+                await jira.findSprintId(team.boardId); // Can fail with 400 (Bad Request): The board does not support sprints
+            }
+            catch (error) {
+                (0, node_assert_1.fail)(`Team "${team.name}" with boardId ${team.boardId} findSprintId failed: ${error}`);
+            }
+        }
+    }, 20000); // 20s timeout
 });
 //# sourceMappingURL=TeamConfiguration.test.js.map
