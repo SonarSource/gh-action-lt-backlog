@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Backlog Automation
  * Copyright (C) 2022-2025 SonarSource Sàrl
  * mailto: info AT sonarsource DOT com
@@ -56,6 +56,12 @@ export class PullRequestCreated extends OctokitAction {
     }
     if (fixedIssues && !pr.isRenovate()) { // Renovate already has a comment with issue ID to persist the actual issue
       await this.addLinkedIssuesAsComment(pr, fixedIssues);
+    }
+    if (fixedIssues && this.isEngXpSquad) {
+      const buildIssues = fixedIssues.filter(issue => issue.startsWith('BUILD-'));
+      for (const issue of buildIssues) {
+        await this.addJiraComponent(issue, this.repo.repo, this.payload.repository.html_url);
+      }
     }
   }
 
