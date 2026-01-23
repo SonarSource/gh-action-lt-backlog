@@ -58,11 +58,6 @@ export class PullRequestCreated extends OctokitAction {
       if (!pr.isRenovate()) { // Renovate already has a comment with issue ID to persist the actual issue
         await this.addLinkedIssuesAsComment(pr, fixedIssues);
       }
-      if (this.isEngXpSquad) {
-        for (const issue of fixedIssues) {
-          await this.addJiraComponent(issue, this.repo.repo, this.payload.repository.html_url);
-        }
-      }
     }
   }
 
