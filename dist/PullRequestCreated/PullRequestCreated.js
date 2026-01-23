@@ -55,15 +55,8 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         else if (pr.title !== this.cleanupWhitespace(pr.title)) { // New issues do this when persisting issue ID
             await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
         }
-        if (fixedIssues) {
-            if (!pr.isRenovate()) { // Renovate already has a comment with issue ID to persist the actual issue
-                await this.addLinkedIssuesAsComment(pr, fixedIssues);
-            }
-            if (this.isEngXpSquad) {
-                for (const issue of fixedIssues) {
-                    await this.addJiraComponent(issue, this.repo.repo, this.payload.repository.html_url);
-                }
-            }
+        if (fixedIssues && !pr.isRenovate()) { // Renovate already has a comment with issue ID to persist the actual issue
+            await this.addLinkedIssuesAsComment(pr, fixedIssues);
         }
     }
     async processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields) {

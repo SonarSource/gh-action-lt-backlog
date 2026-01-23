@@ -209,8 +209,6 @@ describe('PullRequestCreated', () => {
             "Invoked jira.moveIssue('PREQ-4242', 'Start', null)",
             "Adding the following ticket as comment: PREQ-4242",
             "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242)\"})",
-            "Invoked jira.createComponent('PREQ', 'test-repo', 'https://github.com/test-owner/test-repo')",
-            "Invoked jira.addIssueComponent('PREQ-4242', 'test-repo')",
             "Done"
         ]);
     });
@@ -232,8 +230,6 @@ describe('PullRequestCreated', () => {
             "Loading PR #42",
             "Adding the following ticket as comment: BUILD-4444",
             "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[BUILD-4444](https://sonarsource.atlassian.net/browse/BUILD-4444)\"})",
-            "Invoked jira.createComponent('BUILD', 'test-repo', 'https://github.com/test-owner/test-repo')",
-            "Invoked jira.addIssueComponent('BUILD-4444', 'test-repo')",
             "Done"
         ]);
     });
