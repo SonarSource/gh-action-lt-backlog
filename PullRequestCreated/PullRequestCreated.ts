@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Backlog Automation
  * Copyright (C) 2022-2025 SonarSource Sàrl
  * mailto: info AT sonarsource DOT com
@@ -54,10 +54,8 @@ export class PullRequestCreated extends OctokitAction {
     } else if (pr.title !== this.cleanupWhitespace(pr.title)) { // New issues do this when persisting issue ID
       await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
     }
-    if (fixedIssues) {
-      if (!pr.isRenovate()) { // Renovate already has a comment with issue ID to persist the actual issue
-        await this.addLinkedIssuesAsComment(pr, fixedIssues);
-      }
+    if (fixedIssues && !pr.isRenovate()) { // Renovate already has a comment with issue ID to persist the actual issue
+      await this.addLinkedIssuesAsComment(pr, fixedIssues);
     }
   }
 
