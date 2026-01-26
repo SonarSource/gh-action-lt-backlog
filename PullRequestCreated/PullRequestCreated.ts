@@ -59,7 +59,7 @@ export class PullRequestCreated extends OctokitAction {
         await this.addLinkedIssuesAsComment(pr, fixedIssues);
       }
       if (this.isEngXpSquad) {
-        for (const issue of fixedIssues) {
+        for (const issue of fixedIssues.filter(x => x.startsWith('BUILD-'))) {  // BUILD-9328: No component for PREQ tickets
           await this.addJiraComponent(issue, this.repo.repo, this.payload.repository.html_url);
         }
       }
