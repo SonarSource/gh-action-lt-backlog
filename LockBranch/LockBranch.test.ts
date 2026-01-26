@@ -18,15 +18,15 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { ToggleLockBranch } from './ToggleLockBranch';
+import { LockBranch } from './LockBranch';
 import { LogTester } from '../tests/LogTester';
 import { createOctokitRestStub } from '../tests/OctokitRestStub';
 import { OctokitActionStub } from '../tests/OctokitActionStub';
 import { createLockBranchGraphQLStub } from '../tests/GraphQLStub';
 
 async function runAction(): Promise<void> {
-  const graphQLStub = createLockBranchGraphQLStub(true);
-  const action = new ToggleLockBranch() as ToggleLockBranch & OctokitActionStub;
+  const graphQLStub = createLockBranchGraphQLStub();
+  const action = new LockBranch() as LockBranch & OctokitActionStub;
   action.sendGraphQL = (query: string) => graphQLStub.sendGraphQL(query);
   action.rest = createOctokitRestStub("Irrelevant");
   action.sendSlackPost = async function (url: string, jsonRequest: unknown): Promise<unknown> {
@@ -36,13 +36,14 @@ async function runAction(): Promise<void> {
   await action.run();
 }
 
-describe('ToggleLockBranch', () => {
+describe('LockBranch', () => {
   let logTester: LogTester;
 
   beforeEach(() => {
     logTester = new LogTester();
     process.env['GITHUB_REPOSITORY'] = 'test-owner/test-repo';
     process.env['INPUT_GITHUB-TOKEN'] = 'fake';
+    process.env['INPUT_SLACK-CHANNEL'] = '';
   });
 
   afterEach(() => {
@@ -51,6 +52,7 @@ describe('ToggleLockBranch', () => {
 
   it('Missing branch protection', async () => {
     process.env['INPUT_BRANCH-PATTERN'] = 'nonexistent';
+    process.env['INPUT_LOCK'] = 'true';
     await runAction();
     expect(logTester.logsParams).toStrictEqual([
       "Invoked sendGraphQL list branch protection rules",
@@ -59,8 +61,9 @@ describe('ToggleLockBranch', () => {
     ]);
   });
 
-  it('Lock unlocked without slack', async () => {
+  it('Lock unlocked branch', async () => {
     process.env['INPUT_BRANCH-PATTERN'] = 'unlocked';
+    process.env['INPUT_LOCK'] = 'true';
     await runAction();
     expect(logTester.logsParams).toStrictEqual([
       "Invoked sendGraphQL list branch protection rules",
@@ -71,35 +74,19 @@ describe('ToggleLockBranch', () => {
     ]);
   });
 
-  it('Lock unlocked with slack', async () => {
-    process.env['INPUT_BRANCH-PATTERN'] = 'unlocked';
-    process.env['INPUT_SLACK-CHANNEL'] = 'channel-name';
-    await runAction();
-    expect(logTester.logsParams).toStrictEqual([
-      "Invoked sendGraphQL list branch protection rules",
-      "Invoked sendGraphQL updateBranchProtectionRule to lock id-of-unlocked-3", "Done: test-repo: The branch `unlocked` was locked :ice_cube:",
-      "Sending Slack message",
-      "Invoked sendSlackPost('https://slack.com/api/chat.postMessage', {\"channel\":\"channel-name\",\"text\":\"test-repo: The branch `unlocked` was locked :ice_cube:\"}",
-      "Done"
-    ]);
-  });
-
-  it('Unlock locked and cancel auto-merge', async () => {
+  it('Unlock locked branch and cancel auto-merge', async () => {
     process.env['INPUT_BRANCH-PATTERN'] = 'locked';
+    process.env['INPUT_LOCK'] = 'false';
     process.env['INPUT_SLACK-CHANNEL'] = 'channel-name';
     await runAction();
     expect(logTester.logsParams).toStrictEqual([
       "Invoked sendGraphQL list branch protection rules",
       "Canceling auto-merge for branch 'locked'",
       "Invoked sendGraphQL list open pullrequests, page 1",
-      "Invoked sendGraphQL list open pullrequests, page 2",
-      "Found 4 PRs targeting locked, and 2 with auto-merge.",
+      "Found 2 PRs targeting locked, and 1 with auto-merge.",
       "Canceling auto-merge for PR #12",
       "Invoked sendGraphQL disablePullRequestAutoMerge for pr-12",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":12,\"body\":\"The target branch was unlocked and auto-merge was canceled to prevent unexpected actions.\"})",
-      "Canceling auto-merge for PR #21",
-      "Invoked sendGraphQL disablePullRequestAutoMerge for pr-21",
-      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":21,\"body\":\"The target branch was unlocked and auto-merge was canceled to prevent unexpected actions.\"})",
       "Invoked sendGraphQL updateBranchProtectionRule to unlock id-of-locked-222",
       "Done: test-repo: The branch `locked` was unlocked and is now open for changes :sunny:",
       "Sending Slack message",

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es2024",
-    "lib": ["es6", "dom"],
+    "lib": ["es2021", "dom"],
     "sourceMap": true,
     "newLine":  "lf",
     "outDir": "./dist",

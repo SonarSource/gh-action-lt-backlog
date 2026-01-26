@@ -20,13 +20,9 @@
 
 import { LockBranchBase } from '../lib/LockBranchBase';
 
-export class ToggleLockBranch extends LockBranchBase {
+export class LockBranch extends LockBranchBase {
   protected async execute(): Promise<void> {
-    const pattern = this.inputString('branch-pattern');
-    const rule = await this.findRule(pattern);
-    if (rule) {
-      const lockBranch = !rule.lockBranch;
-      await this.setLockBranch(lockBranch, rule);
-    }
+    const lock = this.inputBoolean('lock');
+    await this.setLockBranch(lock);
   }
 }

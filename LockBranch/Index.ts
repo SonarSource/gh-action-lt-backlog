@@ -18,15 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { LockBranchBase } from '../lib/LockBranchBase';
+import { LockBranch } from "./LockBranch";
 
-export class ToggleLockBranch extends LockBranchBase {
-  protected async execute(): Promise<void> {
-    const pattern = this.inputString('branch-pattern');
-    const rule = await this.findRule(pattern);
-    if (rule) {
-      const lockBranch = !rule.lockBranch;
-      await this.setLockBranch(lockBranch, rule);
-    }
-  }
-}
+const action = new LockBranch();
+action.run();

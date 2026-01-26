@@ -1,3 +1,4 @@
+"use strict";
 /*
  * Backlog Automation
  * Copyright (C) 2022-2025 SonarSource Sàrl
@@ -17,16 +18,8 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
-import { LockBranchBase } from '../lib/LockBranchBase';
-
-export class ToggleLockBranch extends LockBranchBase {
-  protected async execute(): Promise<void> {
-    const pattern = this.inputString('branch-pattern');
-    const rule = await this.findRule(pattern);
-    if (rule) {
-      const lockBranch = !rule.lockBranch;
-      await this.setLockBranch(lockBranch, rule);
-    }
-  }
-}
+Object.defineProperty(exports, "__esModule", { value: true });
+const LockBranch_1 = require("./LockBranch");
+const action = new LockBranch_1.LockBranch();
+action.run();
+//# sourceMappingURL=Index.js.map
