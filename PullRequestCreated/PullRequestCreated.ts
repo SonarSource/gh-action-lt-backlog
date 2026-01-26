@@ -54,13 +54,14 @@ export class PullRequestCreated extends OctokitAction {
     } else if (pr.title !== this.cleanupWhitespace(pr.title)) { // New issues do this when persisting issue ID
       await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
     }
-    if (fixedIssues && !pr.isRenovate()) { // Renovate already has a comment with issue ID to persist the actual issue
-      await this.addLinkedIssuesAsComment(pr, fixedIssues);
-    }
-    if (fixedIssues && this.isEngXpSquad) {
-      const buildIssues = fixedIssues.filter(issue => issue.startsWith('BUILD-'));
-      for (const issue of buildIssues) {
-        await this.addJiraComponent(issue, this.repo.repo, this.payload.repository.html_url);
+    if (fixedIssues) {
+      if (!pr.isRenovate()) { // Renovate already has a comment with issue ID to persist the actual issue
+        await this.addLinkedIssuesAsComment(pr, fixedIssues);
+      }
+      if (this.isEngXpSquad) {
+        for (const issue of fixedIssues.filter(x => x.startsWith('BUILD-'))) {  // BUILD-9328: No component for PREQ tickets
+          await this.addJiraComponent(issue, this.repo.repo, this.payload.repository.html_url);
+        }
       }
     }
   }
