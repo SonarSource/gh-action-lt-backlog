@@ -1,23 +1,23 @@
 "use strict";
 /*
- * Backlog Automation
- * Copyright (C) 2022-2025 SonarSource Sàrl
- * mailto: info AT sonarsource DOT com
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+* Backlog Automation
+* Copyright (C) 2022-2025 SonarSource Sàrl
+* mailto: info AT sonarsource DOT com
+*
+* This program is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public
+* License as published by the Free Software Foundation; either
+* version 3 of the License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public License
+* along with this program; if not, write to the Free Software Foundation,
+* Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = require("@actions/core");
 const github = require("@actions/github");
@@ -230,6 +230,8 @@ describe('PullRequestCreated', () => {
             "Loading PR #42",
             "Adding the following ticket as comment: BUILD-4444",
             "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[BUILD-4444](https://sonarsource.atlassian.net/browse/BUILD-4444)\"})",
+            "Invoked jira.createComponent('BUILD', 'test-repo', 'https://github.com/test-owner/test-repo')",
+            "Invoked jira.addIssueComponent('BUILD-4444', 'test-repo')",
             "Done"
         ]);
     });
