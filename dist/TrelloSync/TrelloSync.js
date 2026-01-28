@@ -57,7 +57,7 @@ class TrelloSync extends OctokitAction_1.OctokitAction {
                 duedate: due
             }
         };
-        await this.jira.sendRestPutApi(`issue/${id}?notifyUsers=false`, request);
+        await this.jira.sendRestPutApi(`issue/${id}`, request);
     }
     async listCards(boardId, columnName) {
         const list = (await this.fetchTrello(`boards/${boardId}/lists`)).find(x => x.name === columnName);
