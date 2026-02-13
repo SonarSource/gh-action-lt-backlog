@@ -42,7 +42,7 @@ function createExpected(): NewIssueData {
     additionalFields: {
       customfield_10001: 'dot-neeet-team',
       customfield_10020: 42,
-      issuetype: { name: 'Task' }
+      issuetype: { name: 'Maintenance' }
     },
     projectKey: 'KEY'
   };
@@ -55,7 +55,7 @@ function createExpectedWithoutAccount(): NewIssueData {
     additionalFields: {
       customfield_10001: 'dot-neeet-team',
       customfield_10020: 42,
-      issuetype: { name: 'Task' }
+      issuetype: { name: 'Maintenance' }
     },
     projectKey: 'KEY'
   };
@@ -91,7 +91,7 @@ describe('NewIssueData', () => {
       additionalFields: {
         customfield_10001: 'dot-neeet-team',
         customfield_10020: 42,
-        issuetype: { name: 'Task' },
+        issuetype: { name: 'Maintenance' },
         parent: { key: 'MMF-1111' },
       },
       projectKey: 'KEY'
@@ -106,7 +106,7 @@ describe('NewIssueData', () => {
       additionalFields: {
         customfield_10001: 'dot-neeet-team',
         customfield_10020: 42,
-        issuetype: { name: 'Task' },
+        issuetype: { name: 'Maintenance' },
         parent: { key: 'KEY-1111' },
       },
       projectKey: 'KEY'
@@ -129,7 +129,7 @@ describe('NewIssueData', () => {
       },
       projectKey: 'KEY'
     };
-    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of Task KEY-1234'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(expected);
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of work item KEY-1234'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(expected);
   });
 
   it('create projectKey not configured standalone PR', async () => {
@@ -148,7 +148,7 @@ describe('NewIssueData', () => {
       },
       projectKey: 'KEY'
     };
-    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of Task KEY-1234'), '', '', 'user@sonarsource.com', '')).toEqual(expected);
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of work item KEY-1234'), '', '', 'user@sonarsource.com', '')).toEqual(expected);
   });
 
   it('create with additional fields', async () => {
@@ -160,7 +160,7 @@ describe('NewIssueData', () => {
         customfield_10001: 'dot-neeet-team',
         customfield_10020: 42,
         labels: ['SomeLabel'],
-        issuetype: { name: 'Task' }
+        issuetype: { name: 'Maintenance' }
       },
       projectKey: 'KEY'
     };
@@ -188,7 +188,7 @@ describe('NewIssueData', () => {
       additionalFields: {
         customfield_10001: 'fallback-team',
         customfield_10020: 42,
-        issuetype: { name: 'Task' }
+        issuetype: { name: 'Maintenance' }
       },
       projectKey: 'KEY'
     };
@@ -209,7 +209,7 @@ describe('NewIssueData', () => {
       assigneeId: null,
       additionalFields: {
         // No team, no sprint
-        issuetype: { name: 'Task' }
+        issuetype: { name: 'Maintenance' }
       },
       projectKey: 'NOTEAM'
     };
@@ -223,7 +223,7 @@ describe('NewIssueData', () => {
       additionalFields: {
         customfield_10001: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6',
         customfield_10020: 42,
-        issuetype: { name: 'Task' },
+        issuetype: { name: 'Maintenance' },
         labels: ['dvi-created-by-automation'],
         reporter: { id: '3333-eng-exp-account' }
       },
@@ -253,7 +253,7 @@ describe('NewIssueData', () => {
       assigneeId: null,
       additionalFields: {
         customfield_10001: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6',
-        issuetype: { name: 'Task' },
+        issuetype: { name: 'Maintenance' },
         labels: ['dvi-created-by-automation', 'dvi-renovate']
       },
       projectKey: 'BUILD'
@@ -268,7 +268,7 @@ describe('NewIssueData', () => {
       additionalFields: {
         customfield_10001: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6',
         customfield_10020: 42,
-        issuetype: { name: 'Task' },
+        issuetype: { name: 'Maintenance' },
         labels: ['dvi-created-by-automation'],
         reporter: { id: '1234-account' }
       },

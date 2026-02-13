@@ -38,7 +38,7 @@ beforeAll(async () => {
   const token = process.env["JIRA_TOKEN"];
   if (user && token) {
     sut = new JiraClient(sandboxDomain, sandboxSiteId, sandboxOrganizationId, user, token);
-    const parameters: NewIssueParameters = { issuetype: { name: 'New Feature' } };
+    const parameters: NewIssueParameters = { issuetype: { name: 'Feature' } };
     issueId = await sut.createIssue('GHA', `JiraClient unit test shared ${crypto.randomUUID()}`, parameters);
   } else {
     fail("JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.");
@@ -92,7 +92,7 @@ describe('JiraClient', () => {
     const sprintId = await findFirstActiveSprintId()
     // The GHA project needs to have all of these on it's create screen in production and sandbox, as production overrides the sandbox once in a while
     const parameters: NewIssueParameters = {
-      issuetype: { name: 'Improvement' },
+      issuetype: { name: 'Feature' },
       labels: ['FirstLabel', 'SecondLabel'],
       parent: { key: 'GHA-37' },
       reporter: { id: '712020:7dcfc909-3fa9-496f-9127-163d8cd0e30f' },  // "Jira Automation". Any user except the "Jira Tech User GitHub" that would be used as a default user assigned by the token 
@@ -107,7 +107,7 @@ describe('JiraClient', () => {
     const issue = await sut.loadIssue(result);
     expect(issue).not.toBeNull();
     expect(issue.fields).toMatchObject({
-      issuetype: { name: 'Improvement' },
+      issuetype: { name: 'Feature' },
       labels: ['FirstLabel', 'SecondLabel'],
       parent: { key: 'GHA-37' },
       reporter: { accountId: '712020:7dcfc909-3fa9-496f-9127-163d8cd0e30f' },   // The same thing has two different names in different API calls, of course.

@@ -47,7 +47,7 @@ export class NewIssueData {
     if (projectKey) {
       const accountId = await jira.findAccountId(userEmail);
       const additionalFields = this.parseAdditionalFields(inputAdditionalFields);
-      const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Task'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
+      const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Maintenance'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
       if (parameters.issuetype.name !== 'Sub-task') {                                 // These fields cannot be set on Sub-task. Their values are inherited from the parent issue.
         const team = await this.findTeam(jira, accountId, projectKey, fallbackTeam);  // Can be null for bots when project lead is not member of any team, and fallbackTeam is not set. Jira request will fail if the field is mandatory for the project.
         if (team != null) {
@@ -66,7 +66,7 @@ export class NewIssueData {
   public static async createForEngExp(jira: JiraClient, pr: PullRequest, userEmail: string): Promise<NewIssueData> {
     const accountId = await jira.findAccountId(userEmail);
     const projectKey = await this.computeProjectKeyForEngExp(jira, pr, accountId);
-    const parameters = this.newIssueParameters(projectKey, null, 'Task');
+    const parameters = this.newIssueParameters(projectKey, null, projectKey === 'PREQ' ? 'Task' : 'Maintenance'); // PREQ will not be migrated (yet)
     if (accountId) {
       parameters.reporter = { id: accountId };
     }

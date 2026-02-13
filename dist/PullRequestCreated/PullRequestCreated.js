@@ -71,7 +71,13 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
             ? await NewIssueData_1.NewIssueData.createForEngExp(this.jira, pr, await this.findEmail(this.payload.sender.login))
             : await NewIssueData_1.NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, await this.findEmail(this.payload.sender.login), this.inputString('fallback-team'));
         if (data) {
-            const issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
+            let issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
+            // ToDo: GHA-182 Remove this temporary fallback once Jira Engineering Taxonomy migration is completed
+            if (!issueId && data.additionalFields.issuetype.name === 'Maintenance') {
+                this.log('Failed to create Maintenance issue, attempting to use Task issue type instead');
+                data.additionalFields.issuetype.name = 'Task';
+                issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
+            }
             if (issueId == null) {
                 this.setFailed('Failed to create a new issue in Jira');
                 return null;
