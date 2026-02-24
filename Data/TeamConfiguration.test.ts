@@ -63,6 +63,7 @@ const ignoredTeams = [
   "Growth & New Ventures",
   "Growth Marketing",
   "GTM - Web Development Squad",
+  "HR Operations",
   "Identity UX",
   "Identity Triage",
   "Incident & Problem Management",

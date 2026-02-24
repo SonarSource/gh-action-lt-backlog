@@ -49,7 +49,6 @@ exports.TeamConfigurationData = [
     { name: "Python / Data-ML Squad", boardId: 1572 },
     { name: "RAD Squad", boardId: 1770 },
     { name: "Security SCA", boardId: 1803 },
-    { name: "SDLC Data Squad", boardId: 2034 },
     { name: "STL Taint", boardId: 4179 },
     { name: "Web Squad", boardId: 1672 },
     { name: "Workflow & Standards Squad", boardId: 1550 },
