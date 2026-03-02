@@ -61,7 +61,7 @@ class NewIssueData {
     static async createForEngExp(jira, pr, userEmail) {
         const accountId = await jira.findAccountId(userEmail);
         const projectKey = await this.computeProjectKeyForEngExp(jira, pr, accountId);
-        const parameters = this.newIssueParameters(projectKey, null, projectKey === 'PREQ' ? 'Task' : 'Maintenance'); // PREQ will not be migrated (yet)
+        const parameters = this.newIssueParameters(projectKey, null, 'Maintenance');
         if (accountId) {
             parameters.reporter = { id: accountId };
         }

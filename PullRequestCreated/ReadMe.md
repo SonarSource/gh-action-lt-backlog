@@ -3,9 +3,9 @@
 Upon pull request creation, create a Jira ticket if no tickets are mentioned in the title.
 
 This action will take the first non-`Sub-task` ticket and use it as a parent for the created ticket:
-- if the parent is an `Epic`, the created ticket will be a `Task`
+- if the parent is an `Epic`, the created ticket will be a `Maintenance`
 - if the parent is not an `Epic`, the created ticket will be a `Sub-task`
-- if there is no parent, the created ticket will be a `Task`
+- if there is no parent, the created ticket will be a `Maintenance`
 
 When creating a new Jira issue, the action will add the new issue ID to the PR title.
 The action will update the PR description with links to all mentioned Jira tickets for easy navigation.
@@ -34,7 +34,7 @@ Token to access the Jira API.
 
 ### `jira-project`
 
-Jira project key that is used to create new issues. If key is not specified, the action will not create tasks. It will only create a sub-task, if a parent issue is mentioned in the description.
+Jira project key that is used to create new issues. If key is not specified, the action will not create any work item. It will only create a sub-task, if a parent issue is mentioned in the description.
 
 ### `additional-fields`
 
@@ -72,7 +72,7 @@ Ask DevInfra Squad to "Add Jira GitHub tokens" to the Vault configuration of you
 
     > Field 'customfield_...' cannot be set. It is not on the appropriate screen, or unknown.
 
-    Ask Jira Admin to update Issue creation screen for your project and Task issue type. It is missing Team or Sprint field.
+    Ask Jira Admin to update Issue creation screen for your project and Maintenance issue type. It is missing Team or Sprint field.
 
 1. Search for active sprint fails
 
