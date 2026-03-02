@@ -213,7 +213,7 @@ describe('NewIssueData', () => {
             assigneeId: null,
             additionalFields: {
                 customfield_10001: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6',
-                issuetype: { name: 'Task' },
+                issuetype: { name: 'Maintenance' },
                 labels: ['dvi-created-by-automation'],
                 reporter: { id: '1234-account' }
             },

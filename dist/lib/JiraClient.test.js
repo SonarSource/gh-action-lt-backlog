@@ -54,7 +54,7 @@ async function findFirstActiveSprintId() {
 }
 async function ensurePreqIssueId() {
     if (!preqIssueId) {
-        const parameters = { issuetype: { name: 'Task' } };
+        const parameters = { issuetype: { name: 'Maintenance' } };
         preqIssueId = await sut.createIssue('PREQ', `JiraClient unit test PREQ ${crypto.randomUUID()}`, parameters);
     }
     return preqIssueId;
