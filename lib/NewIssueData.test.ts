@@ -41,7 +41,7 @@ function createExpected(): NewIssueData {
     assigneeId: '1234-account',
     additionalFields: {
       customfield_10001: 'dot-neeet-team',
-      customfield_10020: 42,
+      customfield_10020: null,
       issuetype: { name: 'Maintenance' }
     },
     projectKey: 'KEY'
@@ -54,7 +54,7 @@ function createExpectedWithoutAccount(): NewIssueData {
     assigneeId: null,
     additionalFields: {
       customfield_10001: 'dot-neeet-team',
-      customfield_10020: 42,
+      customfield_10020: null,
       issuetype: { name: 'Maintenance' }
     },
     projectKey: 'KEY'
@@ -90,7 +90,7 @@ describe('NewIssueData', () => {
       assigneeId: '1234-account',
       additionalFields: {
         customfield_10001: 'dot-neeet-team',
-        customfield_10020: 42,
+        customfield_10020: null,
         issuetype: { name: 'Maintenance' },
         parent: { key: 'MMF-1111' },
       },
@@ -105,7 +105,7 @@ describe('NewIssueData', () => {
       assigneeId: '1234-account',
       additionalFields: {
         customfield_10001: 'dot-neeet-team',
-        customfield_10020: 42,
+        customfield_10020: null,
         issuetype: { name: 'Maintenance' },
         parent: { key: 'KEY-1111' },
       },
@@ -158,7 +158,7 @@ describe('NewIssueData', () => {
       additionalFields: {
         components: [{ name: 'Some Component' }],
         customfield_10001: 'dot-neeet-team',
-        customfield_10020: 42,
+        customfield_10020: null,
         labels: ['SomeLabel'],
         issuetype: { name: 'Maintenance' }
       },

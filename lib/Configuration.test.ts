@@ -22,7 +22,7 @@ import { Config } from './Configuration';
 
 describe('Configuration', () => {
   it('findTeam finds team by name', () => {
-    expect(Config.findTeam('.NET Squad')).toEqual({ name: '.NET Squad', boardId: 1737 });
+    expect(Config.findTeam('Architecture Squad')).toEqual({ name: 'Architecture Squad', boardId: 1561 }); // Any squad with boardId
   });
 
   it('findTeam returns null', () => {
