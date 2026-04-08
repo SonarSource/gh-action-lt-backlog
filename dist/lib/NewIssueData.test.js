@@ -39,7 +39,7 @@ function createExpected() {
         assigneeId: '1234-account',
         additionalFields: {
             customfield_10001: 'dot-neeet-team',
-            customfield_10020: 42,
+            customfield_10020: null,
             issuetype: { name: 'Maintenance' }
         },
         projectKey: 'KEY'
@@ -51,7 +51,7 @@ function createExpectedWithoutAccount() {
         assigneeId: null,
         additionalFields: {
             customfield_10001: 'dot-neeet-team',
-            customfield_10020: 42,
+            customfield_10020: null,
             issuetype: { name: 'Maintenance' }
         },
         projectKey: 'KEY'
@@ -63,7 +63,7 @@ describe('NewIssueData', () => {
         logTester = new LogTester_1.LogTester();
     });
     afterEach(() => {
-        logTester.afterEach();
+        logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
     });
     it('create standalone PR', async () => {
         (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
@@ -80,7 +80,7 @@ describe('NewIssueData', () => {
             assigneeId: '1234-account',
             additionalFields: {
                 customfield_10001: 'dot-neeet-team',
-                customfield_10020: 42,
+                customfield_10020: null,
                 issuetype: { name: 'Maintenance' },
                 parent: { key: 'MMF-1111' },
             },
@@ -94,7 +94,7 @@ describe('NewIssueData', () => {
             assigneeId: '1234-account',
             additionalFields: {
                 customfield_10001: 'dot-neeet-team',
-                customfield_10020: 42,
+                customfield_10020: null,
                 issuetype: { name: 'Maintenance' },
                 parent: { key: 'KEY-1111' },
             },
@@ -142,7 +142,7 @@ describe('NewIssueData', () => {
             additionalFields: {
                 components: [{ name: 'Some Component' }],
                 customfield_10001: 'dot-neeet-team',
-                customfield_10020: 42,
+                customfield_10020: null,
                 labels: ['SomeLabel'],
                 issuetype: { name: 'Maintenance' }
             },

@@ -30,7 +30,7 @@ describe('LogPayload', () => {
         process.env['INPUT_GITHUB-TOKEN'] = 'fake';
     });
     afterEach(() => {
-        logTester.afterEach();
+        logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
     });
     it('Log payload as-is', async () => {
         github.context.payload = {

@@ -205,7 +205,7 @@ describe('ToggleLockBranch', () => {
         process.env['INPUT_GITHUB-TOKEN'] = 'fake';
     });
     afterEach(() => {
-        logTester.afterEach();
+        logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
     });
     it('Missing branch protection', async () => {
         process.env['INPUT_BRANCH-PATTERN'] = 'nonexistent';

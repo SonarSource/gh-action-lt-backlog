@@ -24,17 +24,18 @@ exports.EngineeringExperienceSquad = { id: "eb40f25e-3596-4541-b661-cf83e7bc4fa6
 // If a new Jira issue is created for a standalone PR, it will be assigned to a sprint from a board defined by this file.
 // If a new team or default board is created, this file should be updated accordingly.
 exports.TeamConfigurationData = [
-    { name: ".NET Squad", boardId: 1737 },
     { name: "Architecture Squad", boardId: 1561 },
     { name: "Analysis as a Service", boardId: 5313 },
     { name: "Analysis Processing Squad", boardId: 1443 },
     { name: "Billing-Squad", boardId: 1536 },
     { name: "BizTech - Back Office", boardId: 1464 },
     { name: "CFamily Squad", boardId: 173 },
-    { name: "Cloud Platform", boardId: 1442 },
+    { name: "Cloud Engineering", boardId: 8147 },
+    { name: "Cloud Production Engineering", boardId: 8148 },
     { name: "Cloud Security", boardId: 1462 },
     { name: "Code Data Storage", boardId: 1610 },
     { name: "Code Generation", boardId: 1569 },
+    { name: "Data & ML Platform", boardId: 7875 },
     { name: "DTL Taint", boardId: 4146 },
     { name: "Organization & Reporting Squad", boardId: 1555 },
     { name: "DBD Squad", boardId: 1638 },
@@ -44,7 +45,6 @@ exports.TeamConfigurationData = [
     { name: "Identity Squad", boardId: 1448 },
     { name: "Integrations Squad", boardId: 1438 },
     { name: "JVM Squad", boardId: 1671 },
-    { name: "Mobile Security", boardId: 1608 },
     { name: "On-Prem squad", boardId: 1548 },
     { name: "Python / Data-ML Squad", boardId: 1572 },
     { name: "RAD Squad", boardId: 1770 },

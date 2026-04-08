@@ -53,7 +53,7 @@ describe('RequestReview', () => {
         };
     });
     afterEach(() => {
-        logTester.afterEach();
+        logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
     });
     // This is just a smoke test to make sure the other components works together. Details are tested in their respective classes
     it('Processes all issues in title', async () => {

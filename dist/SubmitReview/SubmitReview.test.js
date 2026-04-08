@@ -65,7 +65,7 @@ describe('SubmitReview', () => {
         process.env['INPUT_GITHUB-TOKEN'] = 'fake';
     });
     afterEach(() => {
-        logTester.afterEach();
+        logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
     });
     it('Commented does nothing', async () => {
         await runAction('commented');

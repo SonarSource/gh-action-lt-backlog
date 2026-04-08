@@ -42,7 +42,7 @@ beforeAll(async () => {
     else {
         (0, node_assert_1.fail)("JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.");
     }
-});
+}, 20000); // 20s timeout
 async function findFirstActiveSprintId() {
     for (const team of TeamConfiguration_1.TeamConfigurationData) {
         const sprintId = await sut.findSprintId(team.boardId);
@@ -65,7 +65,7 @@ describe('JiraClient', () => {
         logTester = new LogTester_1.LogTester();
     });
     afterEach(() => {
-        logTester.afterEach();
+        logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
     });
     it('handles errors', async () => {
         const withoutToken = new JiraClient_1.JiraClient(sandboxDomain, sandboxSiteId, sandboxOrganizationId, 'wrong', 'token');
@@ -79,7 +79,8 @@ describe('JiraClient', () => {
   "errors": {}
 }`);
     });
-    it('createIssue', async () => {
+    // ToDo: Remove skip once Sandbox is restored from Prod and .NET Squad exists again
+    it.skip('createIssue', async () => {
         const summary = `JiraClient unit test createIssue ${crypto.randomUUID()}`;
         const sprintId = await findFirstActiveSprintId();
         // The GHA project needs to have all of these on it's create screen in production and sandbox, as production overrides the sandbox once in a while
@@ -223,11 +224,13 @@ describe('JiraClient', () => {
         const boardId = Configuration_1.Config.findTeam(TeamConfiguration_1.EngineeringExperienceSquad.name).boardId;
         expect(await sut.findSprintId(boardId)).toBeGreaterThan(0);
     });
-    it('findTeamByUser', async () => {
+    // ToDo: Remove skip once Sandbox is restored from Prod and EngXpSquad exists again
+    it.skip('findTeamByUser', async () => {
         const accountId = '557058:f82b4ae5-78e0-4689-9f9e-419b773bf121'; // Thomas Vérin The Greatest, it can be any member of Eng Xp squad Jira team
         expect(await sut.findTeamByUser(accountId)).toMatchObject(TeamConfiguration_1.EngineeringExperienceSquad); // Eng Xp, because we maintain hardcoded value for it
     });
-    it('findTeamByName', async () => {
+    // ToDo: Remove skip once Sandbox is restored from Prod and EngXpSquad exists again
+    it.skip('findTeamByName', async () => {
         expect(await sut.findTeamByName(TeamConfiguration_1.EngineeringExperienceSquad.name)).toMatchObject(TeamConfiguration_1.EngineeringExperienceSquad); // Eng Xp, because we maintain hardcoded value for it
     });
 });
