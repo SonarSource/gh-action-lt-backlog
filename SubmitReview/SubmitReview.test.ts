@@ -69,7 +69,7 @@ describe('SubmitReview', () => {
   });
 
   afterEach(() => {
-    logTester.afterEach();
+    logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
   });
 
   it('Commented does nothing', async () => {

@@ -48,7 +48,7 @@ describe('ImportIssue', () => {
         process.env['INPUT_GITHUB-TOKEN'] = 'fake';
     });
     afterEach(() => {
-        logTester.afterEach();
+        logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
     });
     it('Already imported skips the action', async () => {
         await runAction('GHA-42 Already imported', 'Irrelevant label');

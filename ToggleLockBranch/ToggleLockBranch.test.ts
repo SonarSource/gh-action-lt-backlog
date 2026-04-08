@@ -209,7 +209,7 @@ describe('ToggleLockBranch', () => {
   });
 
   afterEach(() => {
-    logTester.afterEach();
+    logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
   });
 
   it('Missing branch protection', async () => {

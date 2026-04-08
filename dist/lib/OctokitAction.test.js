@@ -58,7 +58,7 @@ describe('OctokitAction', () => {
         }
     });
     afterEach(() => {
-        logTester.afterEach();
+        logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
     });
     it('isEngXpSquad is true', async () => {
         process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';

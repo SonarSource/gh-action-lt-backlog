@@ -29,9 +29,13 @@ let jira: JiraClient;
 
 // All teams that exist in Jira, but do not create PRs and do not need boardId configured:
 const ignoredTeams = [
+  ".NET Squad",
+  "[Deprecated] Cloud Platform",
   "1.SC_Project Mgmt.",
   "2.SCE_GTM",
   "3.Stripe_Project Mgmt.",
+  "Accounts Payable",
+  "Agentic Security",
   "AICoreTeam",
   "BizTech - FrontOffice",
   "BizTech - SolutionEnablement",
@@ -39,8 +43,8 @@ const ignoredTeams = [
   "Business Projects",
   "Cloud ARB",
   "CodeNext Bravo Squad",
-  "CodeNextTeam",                 // Not using sprints
-  "Code Review Incubator Squad",  // Not using sprints
+  "CodeNextTeam",             // Not using sprints
+  "Code Review Squad",        // Not using sprints
   "Core Squad",
   "Customer Marketing",
   "Customer Onboarding Squad",
@@ -55,30 +59,40 @@ const ignoredTeams = [
   "Engineering Project Management",
   "Enterprise Acquisition - North America ",
   "Enterprise Architecture Squad",
+  "EUT - First Level Support",
   "Events",
   "FieldOps",
+  "Finance Netsuite",
+  "Finance Payroll",
   "Finance Team",
   "FP&A",
+  "FP&A GTM",
+  "FP&A MC&Product",
   "Front-Office Squad (Stripe)",
+  "Growth",
   "Growth & New Ventures",
   "Growth Marketing",
   "GTM - Web Development Squad",
   "HR Operations",
+  "HR Business Partner",
   "Identity UX",
   "Identity Triage",
   "Incident & Problem Management",
   "InfoSec",
   "Infrastructure",
+  "Internal Events",
   "IST",
   "IST-PST",
   "IST-SECGOV",
   "ITOPS",
   "ITOPS-EUT",
   "ITOPS-ISE",
+  "ITOPS-NETENG",
   "ITOPS-MIM",
   "ITOPS-SM",
   "ITOPS-SOC",
   "ITOPS-SYSENG",
+  "L2 IT Support",
   "Legal Team",
   "ManishKTest",
   "Marketing",
@@ -134,7 +148,7 @@ describe('TeamConfiguration', () => {
   });
 
   afterEach(() => {
-    logTester.afterEach();
+    logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
   });
 
   it('EngineeringExperienceSquad is valid', async () => {

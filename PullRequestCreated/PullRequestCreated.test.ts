@@ -78,7 +78,7 @@ describe('PullRequestCreated', () => {
   });
 
   afterEach(() => {
-    logTester.afterEach();
+    logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
   });
 
   it('is-eng-xp-squad and jira-project fails', async () => {
@@ -136,7 +136,8 @@ describe('PullRequestCreated', () => {
       "No mentioned issues found",
       "Looking for a non-Sub-task ticket",
       "No parent issue found",
-      "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":42})",
+      "No boardId is configured for team .NET Squad",
+      "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":null})",
       "Updating PR #42 title to: KEY-4242 Standalone PR",
       "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"KEY-4242 Standalone PR\"})",
       "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
@@ -157,7 +158,8 @@ describe('PullRequestCreated', () => {
       "No mentioned issues found",
       "Looking for a non-Sub-task ticket",
       "No parent issue found",
-      "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":42})",
+      "No boardId is configured for team .NET Squad",
+      "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":null})",
       "Updating PR #42 title to: KEY-4242 Standalone PR",
       "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"KEY-4242 Standalone PR\"})",
       "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
@@ -175,7 +177,8 @@ describe('PullRequestCreated', () => {
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
       "Invoked rest.issues.listComments({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42})",
-      "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":42})",
+      "No boardId is configured for team .NET Squad",
+      "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":null})",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Renovate Jira issue ID: [KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
       "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
       "Invoked jira.moveIssue('KEY-4242', 'Commit', null)",
@@ -193,7 +196,8 @@ describe('PullRequestCreated', () => {
       "No mentioned issues found",
       "Looking for a non-Sub-task ticket",
       "No parent issue found",
-      "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":42})",
+      "No boardId is configured for team .NET Squad",
+      "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":null})",
       "Updating PR #42 title to: KEY-4242 Standalone PR",
       "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"KEY-4242 Standalone PR\"})",
       "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
