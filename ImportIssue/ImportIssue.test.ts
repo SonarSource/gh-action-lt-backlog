@@ -52,7 +52,7 @@ describe('ImportIssue', () => {
   });
 
   afterEach(() => {
-    logTester.afterEach();
+    logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
   });
 
   it('Already imported skips the action', async () => {

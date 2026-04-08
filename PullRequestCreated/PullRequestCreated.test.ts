@@ -78,7 +78,7 @@ describe('PullRequestCreated', () => {
   });
 
   afterEach(() => {
-    logTester.afterEach();
+    logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
   });
 
   it('is-eng-xp-squad and jira-project fails', async () => {

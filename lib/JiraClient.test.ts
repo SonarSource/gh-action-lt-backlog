@@ -71,7 +71,7 @@ describe('JiraClient', () => {
   });
 
   afterEach(() => {
-    logTester.afterEach();
+    logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
   });
 
   it('handles errors', async () => {
