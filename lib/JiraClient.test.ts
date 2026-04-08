@@ -87,7 +87,8 @@ describe('JiraClient', () => {
 }`);
   });
 
-  it('createIssue', async () => {
+  // ToDo: Remove skip once Sandbox is restored from Prod and .NET Squad exists again
+  it.skip('createIssue', async () => {
     const summary = `JiraClient unit test createIssue ${crypto.randomUUID()}`;
     const sprintId = await findFirstActiveSprintId()
     // The GHA project needs to have all of these on it's create screen in production and sandbox, as production overrides the sandbox once in a while
@@ -252,12 +253,14 @@ describe('JiraClient', () => {
     expect(await sut.findSprintId(boardId)).toBeGreaterThan(0);
   });
 
-  it('findTeamByUser', async () => {
+  // ToDo: Remove skip once Sandbox is restored from Prod and EngXpSquad exists again
+  it.skip('findTeamByUser', async () => {
     const accountId = '557058:f82b4ae5-78e0-4689-9f9e-419b773bf121';                        // Thomas Vérin The Greatest, it can be any member of Eng Xp squad Jira team
     expect(await sut.findTeamByUser(accountId)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
   });
-
-  it('findTeamByName', async () => {
+  
+  // ToDo: Remove skip once Sandbox is restored from Prod and EngXpSquad exists again
+  it.skip('findTeamByName', async () => {
     expect(await sut.findTeamByName(EngineeringExperienceSquad.name)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
   });
 });
