@@ -43,7 +43,7 @@ beforeAll(async () => {
   } else {
     fail("JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.");
   }
-});
+}, 20000);  // 20s timeout
 
 async function findFirstActiveSprintId(): Promise<number> {
   for (const team of TeamConfigurationData) {
