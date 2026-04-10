@@ -29,7 +29,7 @@ let jira: JiraClient;
 
 // All teams that exist in Jira, but do not create PRs and do not need boardId configured:
 const ignoredTeams = [
-  ".NET Squad",
+  ".NET Squad",               // Not using sprints
   "[Deprecated] Cloud Platform",
   "1.SC_Project Mgmt.",
   "2.SCE_GTM",
@@ -60,6 +60,9 @@ const ignoredTeams = [
   "Enterprise Acquisition - North America ",
   "Enterprise Architecture Squad",
   "EUT - First Level Support",
+  "EUT L1 Support",
+  "EUT L2 Support",
+  "EUT L3 Support",
   "Events",
   "FieldOps",
   "Finance Netsuite",
