@@ -50,6 +50,10 @@ class NewIssueData {
                     parameters.customfield_10001 = team.id;
                     parameters.customfield_10020 = sprintId;
                 }
+                if (!parent) {
+                    const evergreenEpic = await this.findEvergreenEpic(jira, team);
+                    parameters.parent = evergreenEpic ? { key: evergreenEpic } : null;
+                }
             }
             return new NewIssueData(projectKey, accountId, accountId, { ...additionalFields, ...parameters });
         }
@@ -163,6 +167,23 @@ class NewIssueData {
         }
         else {
             console.log(`No boardId is configured for team ${teamName}`);
+            return null;
+        }
+    }
+    static async findEvergreenEpic(jira, team) {
+        if (team) {
+            const epics = await jira.findIssues(`issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=${team.id} ORDER BY key`);
+            if (epics.length === 0) {
+                console.log(`Could not find Evergreen Epic parent for team ${team.name} with ID ${team.id} and Start/Due date in Jira`);
+                return null;
+            }
+            else {
+                console.log(`Found ${epics.length} Evergreen Epic(s), using ${epics[0].key} ${epics[0].fields.summary}`);
+                return epics[0].key;
+            }
+        }
+        else {
+            console.log('Team was not found, can not search for parent Evergreen Epic');
             return null;
         }
     }

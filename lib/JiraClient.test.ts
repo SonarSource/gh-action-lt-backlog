@@ -263,4 +263,10 @@ describe('JiraClient', () => {
   it.skip('findTeamByName', async () => {
     expect(await sut.findTeamByName(EngineeringExperienceSquad.name)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
   });
+
+  it('findIssues', async () => {
+    expect(await sut.findIssues('key IN (GHA-1, NET-5) ORDER BY key')).toMatchObject([
+      { key: 'GHA-1', fields: { summary: 'Add Jira automation Dogfood' } },
+      { key: 'NET-5', fields: { summary: 'Hardening' } }]);
+  });
 });

@@ -19,7 +19,7 @@
  */
 
 import { EngineeringExperienceSquad } from "../Data/TeamConfiguration";
-import { JiraClient } from '../lib/JiraClient';
+import { JiraClient, Issue } from '../lib/JiraClient';
 import { Team } from '../lib/Team';
 
 export const jiraClientStub = {
@@ -43,6 +43,7 @@ export const jiraClientStub = {
     switch (email) {
       case 'user@sonarsource.com': return '1234-account';
       case 'eng.exp@sonarsource.com': return '3333-eng-exp-account';
+      case 'team.without.evergreen.epics@sonarsource.com': return '4444-no-epics-account';
       case 'renovate@renovate.com': return null;
       case 'dependabot@dependabot.com': return null;
       default: throw new Error(`Scaffolding did not expect email ${email}`);
@@ -53,6 +54,7 @@ export const jiraClientStub = {
       case '1234-account': return { name: '.NET Squad', id: 'dot-neeet-team' };
       case '2222-no-team': return null;
       case '3333-eng-exp-account': return EngineeringExperienceSquad;
+      case '4444-no-epics-account': return { name: 'No Epics Squad', id: 'no-epics-team' };
       default: throw new Error(`Scaffolding did not expect accountId ${accountId}`);
     };
   },
@@ -73,6 +75,20 @@ export const jiraClientStub = {
   },
   async findSprintId(boardId: number): Promise<number> {
     return 42;
+  },
+  async findIssues(jql: string): Promise<Issue[]> {
+    switch (jql) {
+      case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=dot-neeet-team ORDER BY key':
+        return [
+          { key: 'NET-1000', fields: { summary: '.NET KTLO Epic'} } as Issue,
+          { key: 'NET-0000', fields: { summary: 'Duplicate epic from same period that should not be used' } } as Issue];
+      case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=fallback-team ORDER BY key':
+        return [];
+      case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=no-epics-team ORDER BY key':
+        return [];
+      default:
+        throw new Error(`Scaffolding did not expect JQL: ${jql}`);
+    }
   },
   async createIssue(projectKey: string, summary: string, additionalFields: any): Promise<string> {
     console.log(`Invoked jira.createIssue('${projectKey}', '${summary}', ${JSON.stringify(additionalFields)})`);
