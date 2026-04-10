@@ -110,7 +110,7 @@ class JiraClient {
     async createComponent(projectKey, name, description) {
         console.log(`Searching for component '${name}' in project ${projectKey}`);
         const { total, values } = await this.sendRestGetApi(`project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`);
-        if (values.find(x => x.name === name)) { // values contains matches on partial names and descriptions
+        if (values.some(x => x.name === name)) { // values contains matches on partial names and descriptions
             console.log(`Component found in ${total} result(s)`);
             return true;
         }
@@ -183,6 +183,11 @@ class JiraClient {
     async findTeamByName(teamName) {
         console.log(`Searching for team ${teamName}`);
         return this.findTeam(`query: "${teamName}"`, x => x.name === teamName); // Query returns also partial matches. We need to post-filter them
+    }
+    async findIssues(jql) {
+        console.log(`Searching for issues: ${jql}`);
+        const response = await this.sendRestGetApi(`search/jql?fields=key,summary,customfield_10015,duedate&jql=${encodeURIComponent(jql)}`); // // Only first page of results
+        return response?.issues ?? [];
     }
     async findTeam(queryFilter, resultFilter) {
         const nodes = (await this.findTeams(queryFilter)).filter(resultFilter);

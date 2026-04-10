@@ -40,7 +40,8 @@ function createExpected() {
         additionalFields: {
             customfield_10001: 'dot-neeet-team',
             customfield_10020: null,
-            issuetype: { name: 'Maintenance' }
+            issuetype: { name: 'Maintenance' },
+            parent: { key: 'NET-1000' }
         },
         projectKey: 'KEY'
     };
@@ -52,7 +53,8 @@ function createExpectedWithoutAccount() {
         additionalFields: {
             customfield_10001: 'dot-neeet-team',
             customfield_10020: null,
-            issuetype: { name: 'Maintenance' }
+            issuetype: { name: 'Maintenance' },
+            parent: { key: 'NET-1000' }
         },
         projectKey: 'KEY'
     };
@@ -135,6 +137,34 @@ describe('NewIssueData', () => {
         };
         (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Part of work item KEY-1234'), '', '', 'user@sonarsource.com', '')).toEqual(expected);
     });
+    it('create parent Evergreen Epic is null without team', async () => {
+        const expected = {
+            accountId: null,
+            assigneeId: null,
+            additionalFields: {
+                // No team, no EverGreen Epic parent
+                issuetype: { name: 'Maintenance' },
+                parent: null // No Evergreen Epic
+            },
+            projectKey: 'NOPROJECTLEAD'
+        };
+        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Body'), 'NOPROJECTLEAD', '', 'renovate@renovate.com', 'nonexistent-fallback-team')).toEqual(expected);
+    });
+    it('create parent Evergreen Epic is null without epics', async () => {
+        const expected = {
+            accountId: '4444-no-epics-account',
+            assigneeId: '4444-no-epics-account',
+            additionalFields: {
+                // No parent, this team does not have epics
+                customfield_10001: 'no-epics-team',
+                customfield_10020: null,
+                issuetype: { name: 'Maintenance' },
+                parent: null // No Evergreen Epic
+            },
+            projectKey: 'KEY'
+        };
+        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '', 'team.without.evergreen.epics@sonarsource.com', '')).toEqual(expected);
+    });
     it('create with additional fields', async () => {
         const expected = {
             accountId: '1234-account',
@@ -144,7 +174,8 @@ describe('NewIssueData', () => {
                 customfield_10001: 'dot-neeet-team',
                 customfield_10020: null,
                 labels: ['SomeLabel'],
-                issuetype: { name: 'Maintenance' }
+                issuetype: { name: 'Maintenance' },
+                parent: { key: 'NET-1000' }
             },
             projectKey: 'KEY'
         };
@@ -168,7 +199,8 @@ describe('NewIssueData', () => {
             additionalFields: {
                 customfield_10001: 'fallback-team',
                 customfield_10020: 42,
-                issuetype: { name: 'Maintenance' }
+                issuetype: { name: 'Maintenance' },
+                parent: null // No Evergreen Epic
             },
             projectKey: 'KEY'
         };
@@ -186,7 +218,8 @@ describe('NewIssueData', () => {
             assigneeId: null,
             additionalFields: {
                 // No team, no sprint
-                issuetype: { name: 'Maintenance' }
+                issuetype: { name: 'Maintenance' },
+                parent: null // No Evergreen Epic
             },
             projectKey: 'NOTEAM'
         };
