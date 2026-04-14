@@ -25,6 +25,13 @@ import { OctokitAction } from './OctokitAction';
 import { fail } from 'node:assert';
 import { OctokitActionStub } from '../tests/OctokitActionStub';
 
+interface TestableAction {
+  findEmail(login: string): Promise<string | null>;
+  sendGraphQL(query: string): Promise<unknown>;
+  processRequestReview(issueId: string, requested_reviewer: { type?: string; login?: string } | null): Promise<void>;
+  updatePullRequestDescription(prNumber: number, body: string): Promise<void>;
+}
+
 class TestOctokitAction extends OctokitAction {
 
   constructor() {
@@ -214,7 +221,7 @@ describe('OctokitAction', () => {
 
   it('findEmail uses enterprise GraphQL when github-enterprise-slug is set', async () => {
     process.env['INPUT_GITHUB-ENTERPRISE-SLUG'] = 'AcmeCorp';
-    const action = new TestOctokitAction() as any;
+    const action = new TestOctokitAction() as unknown as TestableAction;
     const sendSpy = jest.spyOn(action, 'sendGraphQL').mockResolvedValue({
       enterprise: {
         ownerInfo: {
@@ -235,7 +242,7 @@ describe('OctokitAction', () => {
 
   it('findEmail escapes quotes in login for GraphQL', async () => {
     process.env['INPUT_GITHUB-ENTERPRISE-SLUG'] = 'Ent';
-    const action = new TestOctokitAction() as any;
+    const action = new TestOctokitAction() as unknown as TestableAction;
     const sendSpy = jest.spyOn(action, 'sendGraphQL').mockResolvedValue({
       enterprise: {
         ownerInfo: {

@@ -153,7 +153,7 @@ export abstract class OctokitAction extends Action {
     return JSON.stringify(value);
   }
 
-  private async findExternalIdentities(login: string): Promise<any[]> {
+  private async findExternalIdentities(login: string): Promise<{samlIdentity: {nameId: string}}[]> {
     const enterpriseSlug = this.inputString('github-enterprise-slug').trim();
     if (enterpriseSlug) {
       return this.findExternalIdentitiesForEnterprise(enterpriseSlug, login);
@@ -161,7 +161,7 @@ export abstract class OctokitAction extends Action {
     return this.findExternalIdentitiesForOrganization(login);
   }
 
-  private async findExternalIdentitiesForEnterprise(slug: string, login: string): Promise<any[]> {
+  private async findExternalIdentitiesForEnterprise(slug: string, login: string): Promise<{samlIdentity: {nameId: string}}[]> {
     try {
       const data: GraphQlQueryResponseData = await this.sendGraphQL(`
           query {
@@ -181,10 +181,10 @@ export abstract class OctokitAction extends Action {
       if (provider?.externalIdentities?.nodes) {
         return provider.externalIdentities.nodes;
       }
-      if (!data.enterprise) {
-        this.log('ERROR: enterprise(slug) returned null — check github-enterprise-slug and that github-token includes read:enterprise.');
-      } else {
+      if (data.enterprise) {
         this.log('ERROR: Provided GitHub token may lack read:enterprise, or enterprise SAML / external identities are unavailable.');
+      } else {
+        this.log('ERROR: enterprise(slug) returned null — check github-enterprise-slug and that github-token includes read:enterprise.');
       }
       return [];
     } catch (error) {
@@ -194,7 +194,7 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  private async findExternalIdentitiesForOrganization(login: string): Promise<any[]> {
+  private async findExternalIdentitiesForOrganization(login: string): Promise<{samlIdentity: {nameId: string}}[]> {
     try {
       const data: GraphQlQueryResponseData = await this.sendGraphQL(`
           query {

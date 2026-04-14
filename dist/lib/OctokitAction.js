@@ -165,11 +165,11 @@ class OctokitAction extends Action_1.Action {
             if (provider?.externalIdentities?.nodes) {
                 return provider.externalIdentities.nodes;
             }
-            if (!data.enterprise) {
-                this.log('ERROR: enterprise(slug) returned null — check github-enterprise-slug and that github-token includes read:enterprise.');
+            if (data.enterprise) {
+                this.log('ERROR: Provided GitHub token may lack read:enterprise, or enterprise SAML / external identities are unavailable.');
             }
             else {
-                this.log('ERROR: Provided GitHub token may lack read:enterprise, or enterprise SAML / external identities are unavailable.');
+                this.log('ERROR: enterprise(slug) returned null — check github-enterprise-slug and that github-token includes read:enterprise.');
             }
             return [];
         }
