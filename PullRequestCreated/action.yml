@@ -20,6 +20,10 @@ inputs:
     description: 'Repo is owned by Engineering Experience Squad'
     required: false
     default: 'false'
+  saml-level:
+    description: 'SAML identity provider level: "enterprise" or "organization"'
+    required: false
+    default: 'enterprise'
   fallback-team:
     description: 'Jira Team name to be used as a default fallback'
     required: false

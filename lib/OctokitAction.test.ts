@@ -223,6 +223,72 @@ describe('OctokitAction', () => {
     expect(await sut.findEmail('renovate[bot]')).toBeNull();
   });
 
+  it('findEmail uses enterprise SAML by default', async () => {
+    sut.sendGraphQL = jest.fn().mockResolvedValueOnce({
+      organization: {
+        enterprise: {
+          ownerInfo: {
+            samlIdentityProvider: {
+              externalIdentities: {
+                nodes: [{ samlIdentity: { nameId: 'user@company.com' } }]
+              }
+            }
+          }
+        }
+      }
+    });
+    expect(await sut.findEmail('test-user')).toBe('user@company.com');
+    expect(sut.sendGraphQL.mock.calls[0][0]).toContain('enterprise');
+  });
+
+  it('findEmail uses organization SAML when configured', async () => {
+    process.env['INPUT_SAML-LEVEL'] = 'organization';
+    sut.sendGraphQL = jest.fn().mockResolvedValueOnce({
+      organization: {
+        samlIdentityProvider: {
+          externalIdentities: {
+            nodes: [{ samlIdentity: { nameId: 'user@company.com' } }]
+          }
+        }
+      }
+    });
+    expect(await sut.findEmail('test-user')).toBe('user@company.com');
+    expect(sut.sendGraphQL.mock.calls[0][0]).not.toContain('enterprise');
+  });
+
+  it('findEmail enterprise SAML no results', async () => {
+    sut.sendGraphQL = jest.fn().mockResolvedValueOnce({
+      organization: {
+        enterprise: {
+          ownerInfo: {
+            samlIdentityProvider: {
+              externalIdentities: {
+                nodes: []
+              }
+            }
+          }
+        }
+      }
+    });
+    expect(await sut.findEmail('unknown-user')).toBeNull();
+    expect(logTester.logsParams).toStrictEqual([
+      "Searching for SAML identity of unknown-user",
+      "No SAML identity found for unknown-user",
+    ]);
+  });
+
+  it('findEmail enterprise SAML no permissions', async () => {
+    sut.sendGraphQL = jest.fn().mockResolvedValueOnce({
+      organization: {
+        enterprise: null
+      }
+    });
+    expect(await sut.findEmail('test-user')).toBeNull();
+    expect(logTester.logsParams).toContainEqual(
+      'ERROR: Provided GitHub token does not have permissions to query enterprise/ownerInfo/samlIdentityProvider/externalIdentities.'
+    );
+  });
+
   // Local token is difficult to craft
   itRunsOnlyInCI('sendSlackMessage succeeds', async () => {
     process.env['INPUT_SLACK-TOKEN'] = process.env.SLACK_TOKEN;

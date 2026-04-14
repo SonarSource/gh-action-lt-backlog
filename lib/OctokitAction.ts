@@ -150,6 +150,13 @@ export abstract class OctokitAction extends Action {
   }
 
   private async findExternalIdentities(login: string): Promise<any[]> {
+    if (this.inputString('saml-level') === 'organization') {
+      return this.findOrgExternalIdentities(login);
+    }
+    return this.findEnterpriseExternalIdentities(login);
+  }
+
+  private async findOrgExternalIdentities(login: string): Promise<any[]> {
     const {
       organization: {
         samlIdentityProvider,
@@ -170,6 +177,35 @@ export abstract class OctokitAction extends Action {
       return samlIdentityProvider.externalIdentities.nodes;
     } else {
       this.log('ERROR: Provided GitHub token does not have permissions to query organization/samlIdentityProvider/externalIdentities.');
+      return [];
+    }
+  }
+
+  private async findEnterpriseExternalIdentities(login: string): Promise<any[]> {
+    const {
+      organization: {
+        enterprise,
+      },
+    }: GraphQlQueryResponseData = await this.sendGraphQL(`
+          query {
+              organization(login: "${this.repo.owner}") {
+                  enterprise {
+                      ownerInfo {
+                          samlIdentityProvider {
+                              externalIdentities(first: 10, login: "${login}") {
+                                  nodes {
+                                      samlIdentity { nameId }
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          }`);
+    if (enterprise?.ownerInfo?.samlIdentityProvider?.externalIdentities) {
+      return enterprise.ownerInfo.samlIdentityProvider.externalIdentities.nodes;
+    } else {
+      this.log('ERROR: Provided GitHub token does not have permissions to query enterprise/ownerInfo/samlIdentityProvider/externalIdentities.');
       return [];
     }
   }
