@@ -14,6 +14,10 @@ Versioned release branches. Always use the latest. Extensions are allowed; break
 
 All actions should be consumed from these branches.
 
+### Enterprise SAML and reviewer email
+
+When the organization uses **enterprise-level SAML** (org-level SAML identity provider is disabled), resolving a reviewer’s SAML `NameID` to email must use the **enterprise** GraphQL API. For [RequestReview](RequestReview), [SubmitReview](SubmitReview), and [PullRequestCreated](PullRequestCreated), set optional input **`github-enterprise-slug`** to your enterprise slug (for example the slug shown in enterprise settings URLs). The **`github-token`** used by the workflow must include the **`read:enterprise`** OAuth scope (fine-grained PATs: enterprise permission to read enterprise profile / SAML metadata as required by GitHub). Without that scope, `enterprise(slug: …)` queries return scope errors.
+
 ## Actions
 
 [LogPayload](LogPayload) - Log payload to console

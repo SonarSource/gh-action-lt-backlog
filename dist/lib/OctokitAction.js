@@ -135,12 +135,57 @@ class OctokitAction extends Action_1.Action {
         }
         return identities[0].samlIdentity.nameId;
     }
+    graphqlString(value) {
+        return JSON.stringify(value);
+    }
     async findExternalIdentities(login) {
-        const { organization: { samlIdentityProvider, }, } = await this.sendGraphQL(`
+        const enterpriseSlug = this.inputString('github-enterprise-slug').trim();
+        if (enterpriseSlug) {
+            return this.findExternalIdentitiesForEnterprise(enterpriseSlug, login);
+        }
+        return this.findExternalIdentitiesForOrganization(login);
+    }
+    async findExternalIdentitiesForEnterprise(slug, login) {
+        try {
+            const data = await this.sendGraphQL(`
           query {
-              organization(login: "${this.repo.owner}") {
+              enterprise(slug: ${this.graphqlString(slug)}) {
+                  ownerInfo {
+                      samlIdentityProvider {
+                          externalIdentities(first: 10, login: ${this.graphqlString(login)}) {
+                              nodes {
+                                  samlIdentity { nameId }
+                              }
+                          }
+                      }
+                  }
+              }
+          }`);
+            const provider = data.enterprise?.ownerInfo?.samlIdentityProvider;
+            if (provider?.externalIdentities?.nodes) {
+                return provider.externalIdentities.nodes;
+            }
+            if (!data.enterprise) {
+                this.log('ERROR: enterprise(slug) returned null — check github-enterprise-slug and that github-token includes read:enterprise.');
+            }
+            else {
+                this.log('ERROR: Provided GitHub token may lack read:enterprise, or enterprise SAML / external identities are unavailable.');
+            }
+            return [];
+        }
+        catch (error) {
+            const msg = String(error?.message ?? error);
+            this.log(`ERROR: Enterprise SAML identity query failed: ${msg}`);
+            return [];
+        }
+    }
+    async findExternalIdentitiesForOrganization(login) {
+        try {
+            const data = await this.sendGraphQL(`
+          query {
+              organization(login: ${this.graphqlString(this.repo.owner)}) {
                   samlIdentityProvider {
-                      externalIdentities(first: 10, login: "${login}") {
+                      externalIdentities(first: 10, login: ${this.graphqlString(login)}) {
                           nodes {
                               samlIdentity { nameId }
                           }
@@ -148,11 +193,19 @@ class OctokitAction extends Action_1.Action {
                   }
               }
           }`);
-        if (samlIdentityProvider?.externalIdentities) {
-            return samlIdentityProvider.externalIdentities.nodes;
+            const samlIdentityProvider = data.organization?.samlIdentityProvider;
+            if (samlIdentityProvider?.externalIdentities?.nodes) {
+                return samlIdentityProvider.externalIdentities.nodes;
+            }
+            this.log('ERROR: Provided GitHub token does not have permissions to query organization/samlIdentityProvider/externalIdentities, or no identities were returned.');
+            return [];
         }
-        else {
-            this.log('ERROR: Provided GitHub token does not have permissions to query organization/samlIdentityProvider/externalIdentities.');
+        catch (error) {
+            const msg = String(error?.message ?? error);
+            if (msg.includes('SAML identity provider is disabled')) {
+                this.log('Hint: Enterprise SAML is enabled for this org. Set input github-enterprise-slug to your enterprise slug and grant github-token the read:enterprise scope.');
+            }
+            this.log(`ERROR: Organization SAML identity query failed: ${msg}`);
             return [];
         }
     }

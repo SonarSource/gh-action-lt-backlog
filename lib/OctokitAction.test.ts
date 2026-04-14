@@ -212,6 +212,47 @@ describe('OctokitAction', () => {
     ]);
   });
 
+  it('findEmail uses enterprise GraphQL when github-enterprise-slug is set', async () => {
+    process.env['INPUT_GITHUB-ENTERPRISE-SLUG'] = 'AcmeCorp';
+    const action = new TestOctokitAction() as any;
+    const sendSpy = jest.spyOn(action, 'sendGraphQL').mockResolvedValue({
+      enterprise: {
+        ownerInfo: {
+          samlIdentityProvider: {
+            externalIdentities: {
+              nodes: [{ samlIdentity: { nameId: 'user@acme.com' } }],
+            },
+          },
+        },
+      },
+    });
+    expect(await action.findEmail('someone')).toBe('user@acme.com');
+    expect(sendSpy.mock.calls[0][0]).toContain('enterprise(slug:');
+    expect(sendSpy.mock.calls[0][0]).toContain('"AcmeCorp"');
+    sendSpy.mockRestore();
+    delete process.env['INPUT_GITHUB-ENTERPRISE-SLUG'];
+  });
+
+  it('findEmail escapes quotes in login for GraphQL', async () => {
+    process.env['INPUT_GITHUB-ENTERPRISE-SLUG'] = 'Ent';
+    const action = new TestOctokitAction() as any;
+    const sendSpy = jest.spyOn(action, 'sendGraphQL').mockResolvedValue({
+      enterprise: {
+        ownerInfo: {
+          samlIdentityProvider: {
+            externalIdentities: {
+              nodes: [],
+            },
+          },
+        },
+      },
+    });
+    await action.findEmail('evil"login');
+    expect(sendSpy.mock.calls[0][0]).toMatch(/login: "evil\\"login"/);
+    sendSpy.mockRestore();
+    delete process.env['INPUT_GITHUB-ENTERPRISE-SLUG'];
+  });
+
   // Local token is impossible to craft with required permissions
   itRunsOnlyInCI('findEmail succeeds', async () => {
     // Preferably choose someone from https://github.com/orgs/SonarSource/people when visited in incognito mode, not to leak any information

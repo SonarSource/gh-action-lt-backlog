@@ -23,6 +23,9 @@ inputs:
   fallback-team:
     description: 'Jira Team name to be used as a default fallback'
     required: false
+  github-enterprise-slug:
+    description: 'When GitHub Enterprise Managed User (EMU) / enterprise SAML is used, set the enterprise slug so reviewer email can be resolved via enterprise external identities. The github-token must include the read:enterprise scope.'
+    required: false
 runs:
   using: 'node20'
   main: '../dist/PullRequestCreated/Index.js'

@@ -14,6 +14,9 @@ inputs:
     description: 'Repo is owned by Engineering Experience Squad'
     required: false
     default: 'false'
+  github-enterprise-slug:
+    description: 'When GitHub Enterprise Managed User (EMU) / enterprise SAML is used, set the enterprise slug so reviewer email can be resolved via enterprise external identities. The github-token must include the read:enterprise scope.'
+    required: false
 runs:
   using: 'node20'
   main: '../dist/SubmitReview/Index.js'
