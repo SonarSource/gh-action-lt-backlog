@@ -215,7 +215,9 @@ describe('OctokitAction', () => {
   // Local token is impossible to craft with required permissions
   itRunsOnlyInCI('findEmail succeeds', async () => {
     // Preferably choose someone from https://github.com/orgs/SonarSource/people when visited in incognito mode, not to leak any information
-    expect(await sut.findEmail('agigleux')).toContain('sonar'); // Do not write the full email address here to avoid its exposure
+    // ToDo: GHA-235 Re-enable SAML identity search
+    expect(await sut.findEmail('agigleux')).toBeNull();
+    //expect(await sut.findEmail('agigleux')).toContain('sonar'); // Do not write the full email address here to avoid its exposure
   });
 
   // Local token is impossible to craft with required permissions
