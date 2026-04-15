@@ -233,6 +233,7 @@ describe('NewIssueData', () => {
                 customfield_10001: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6',
                 customfield_10020: 42,
                 issuetype: { name: 'Maintenance' },
+                parent: { "key": "BUILD-1000" },
                 labels: ['dvi-created-by-automation'],
                 reporter: { id: '3333-eng-exp-account' }
             },
@@ -261,6 +262,7 @@ describe('NewIssueData', () => {
             additionalFields: {
                 customfield_10001: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6',
                 issuetype: { name: 'Maintenance' },
+                parent: { "key": "BUILD-1000" },
                 labels: ['dvi-created-by-automation', 'dvi-renovate']
             },
             projectKey: 'BUILD'

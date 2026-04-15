@@ -77,6 +77,10 @@ class NewIssueData {
         parameters.labels = pr.isRenovate()
             ? ['dvi-created-by-automation', 'dvi-renovate']
             : ['dvi-created-by-automation'];
+        if (projectKey === 'BUILD') { // PREQ is handled by in-Jira automation, with hardcoded value
+            const evergreenEpic = await this.findEvergreenEpic(jira, TeamConfiguration_1.EngineeringExperienceSquad);
+            parameters.parent = evergreenEpic ? { key: evergreenEpic } : null;
+        }
         return new NewIssueData(projectKey, accountId, projectKey === 'PREQ' ? null : accountId, parameters); // GHA-86 Leave PREQ unassigned
     }
     static computeProjectKey(inputJiraProject, parent) {

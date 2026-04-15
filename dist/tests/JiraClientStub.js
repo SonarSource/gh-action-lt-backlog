@@ -87,6 +87,8 @@ exports.jiraClientStub = {
                 return [];
             case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=no-epics-team ORDER BY key':
                 return [];
+            case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=eb40f25e-3596-4541-b661-cf83e7bc4fa6 ORDER BY key':
+                return [{ key: 'BUILD-1000', fields: { summary: 'Eng Exp KTLO Epic' } }];
             default:
                 throw new Error(`Scaffolding did not expect JQL: ${jql}`);
         }
