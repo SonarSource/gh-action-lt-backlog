@@ -127,13 +127,16 @@ class OctokitAction extends Action_1.Action {
         }
     }
     async findEmail(login) {
-        this.log(`Searching for SAML identity of ${login}`);
-        const identities = await this.findExternalIdentities(login);
-        if (identities.length === 0) {
-            this.log(`No SAML identity found for ${login}`);
-            return null;
-        }
-        return identities[0].samlIdentity.nameId;
+        // ToDo: GHA-235 Re-enable SAML identity search
+        this.log(`Searching for SAML identity of ${login} is temporarily unavailable, see BUILD-11028`);
+        return null;
+        //  this.log(`Searching for SAML identity of ${login}`);
+        //  const identities = await this.findExternalIdentities(login);
+        //  if (identities.length === 0) {
+        //    this.log(`No SAML identity found for ${login}`);
+        //    return null;
+        //  }
+        //  return identities[0].samlIdentity.nameId;
     }
     async findExternalIdentities(login) {
         const { organization: { samlIdentityProvider, }, } = await this.sendGraphQL(`
