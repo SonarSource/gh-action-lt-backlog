@@ -151,9 +151,31 @@ describe('PullRequestCreated', () => {
     ]);
   });
 
+  it('Standalone PR with USER ticket in title', async () => {
+    await runAction('KEY', 'Reproducer for USER-1234 should ignore issue ID');
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "No mentioned issues found",
+      "Looking for a non-Sub-task ticket",
+      "No parent issue found",
+      "No boardId is configured for team .NET Squad",
+      "Found 2 Evergreen Epic(s), using NET-1000 .NET KTLO Epic",
+      "Invoked jira.createIssue('KEY', 'Reproducer for USER-1234 should ignore issue ID', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":null,\"parent\":{\"key\":\"NET-1000\"}})",
+      "Updating PR #42 title to: KEY-4242 Reproducer for USER-1234 should ignore issue ID",
+      "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"KEY-4242 Reproducer for USER-1234 should ignore issue ID\"})",
+      "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
+      "Invoked jira.moveIssue('KEY-4242', 'Commit', null)",
+      "Invoked jira.moveIssue('KEY-4242', 'Start', null)",
+      "Invoked jira.assignIssueToAccount('KEY-4242', '1234-account')",
+      "Adding the following ticket as comment: KEY-4242",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
+      "Done"
+    ]);
+  });
+
   it('Standalone PR with description', async () => {
     github.context.payload.pull_request.requested_teams = { type: 'Team', name: 'test-team' }; // Action does nothing additional when team is (auto)requested for review
-    await runAction('KEY', 'Standalone PR', 'Original description');
+    await runAction('KEY', 'Standalone PR', 'Original description, this ignores USER-1234 tickets as those should not be parents');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
       "No mentioned issues found",
