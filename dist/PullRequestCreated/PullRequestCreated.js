@@ -59,6 +59,9 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
             if (!pr.isRenovate()) { // Renovate already has a comment with issue ID to persist the actual issue
                 await this.addLinkedIssuesAsComment(pr, fixedIssues);
             }
+            for (const issue of fixedIssues) {
+                await this.jira.addIssueRemoteLink(issue, pr.html_url);
+            }
             if (this.isEngXpSquad) {
                 for (const issue of fixedIssues.filter(x => x.startsWith('BUILD-'))) { // BUILD-9328: No component for PREQ tickets
                     await this.addJiraComponent(issue, this.repo.repo, this.payload.repository.html_url);
@@ -78,7 +81,6 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
             }
             else {
                 await this.persistIssueId(pr, issueId);
-                await this.jira.addIssueRemoteLink(issueId, pr.html_url);
                 await this.jira.moveIssue(issueId, 'Commit'); // OPEN  -> TO DO
                 if (data.accountId) {
                     await this.jira.moveIssue(issueId, 'Start'); // TO DO -> IN PROGRESS only for real accounts, no bots GHA-8
