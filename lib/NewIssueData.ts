@@ -56,8 +56,7 @@ export class NewIssueData {
           parameters.customfield_10020 = sprintId;
         }
         if (!parent) {
-          const evergreenEpic = await this.findEvergreenEpic(jira, team);
-          parameters.parent = evergreenEpic ? { key: evergreenEpic } : null;
+          parameters.parent = await this.findEvergreenEpic(jira, team);
         }
       }
       return new NewIssueData(projectKey, accountId, accountId, { ...additionalFields, ...parameters });
@@ -83,8 +82,7 @@ export class NewIssueData {
       ? ['dvi-created-by-automation', 'dvi-renovate']
       : ['dvi-created-by-automation'];
     if (projectKey === 'BUILD') { // PREQ is handled by in-Jira automation, with hardcoded value
-      const evergreenEpic = await this.findEvergreenEpic(jira, EngineeringExperienceSquad);
-      parameters.parent = evergreenEpic ? { key: evergreenEpic } : null;
+      parameters.parent = await this.findEvergreenEpic(jira, EngineeringExperienceSquad);
     }
     return new NewIssueData(projectKey, accountId, projectKey === 'PREQ' ? null : accountId, parameters); // GHA-86 Leave PREQ unassigned
   }
@@ -184,7 +182,7 @@ export class NewIssueData {
     }
   }
 
-  private static async findEvergreenEpic(jira: JiraClient, team: Team): Promise<string> {
+  private static async findEvergreenEpic(jira: JiraClient, team: Team): Promise<{ key: string } | null> {
     if (team) {
       const epics = await jira.findIssues(`issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=${team.id} ORDER BY key`);
       if (epics.length === 0) {
@@ -193,7 +191,7 @@ export class NewIssueData {
       }
       else {
         console.log(`Found ${epics.length} Evergreen Epic(s), using ${epics[0].key} ${epics[0].fields.summary}`);
-        return epics[0].key;
+        return { key: epics[0].key };
       }
     } else {
       console.log('Team was not found, can not search for parent Evergreen Epic');
