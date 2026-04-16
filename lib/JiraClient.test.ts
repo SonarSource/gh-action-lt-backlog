@@ -33,6 +33,8 @@ let sut: JiraClient;
 let issueId: string;
 let preqIssueId: string;
 
+jest.setTimeout(20000); // 20s
+
 beforeAll(async () => {
   const user = process.env["JIRA_USER"];    // Can't use the same name as environment variables read by Octokit actions, because the dash is not propagated from shell to node
   const token = process.env["JIRA_TOKEN"];
@@ -43,7 +45,7 @@ beforeAll(async () => {
   } else {
     fail("JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.");
   }
-}, 20000);  // 20s timeout
+});
 
 async function findFirstActiveSprintId(): Promise<number> {
   for (const team of TeamConfigurationData) {
@@ -130,7 +132,7 @@ describe('JiraClient', () => {
       customfield_10001: { id: '3ca60b21-53c7-48e2-a2e2-6e85b39551d0' },        // Why would the same field have same structure everywhere anyway?
       customfield_10020: [{ id: sprintId }],                                    // Why would the same field have same structure everywhere anyway?
     });
-  }, 20000);  // 20s timeout
+  });
 
   it('loadIssue', async () => {
     const result = await sut.loadIssue('GHA-42');
@@ -196,7 +198,7 @@ describe('JiraClient', () => {
     await sut.addReviewer(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
     issue = await sut.loadIssue(issueId);
     expect(issue.fields.customfield_11227).toMatchObject([{ emailAddress: 'helpdesk+jira-githubtech@sonarsource.com' }]);
-  }, 10000);  // 10s timeout
+  });
 
   it('addReviewedBy', async () => {
     const issueId = await ensurePreqIssueId();
@@ -207,7 +209,7 @@ describe('JiraClient', () => {
     await sut.addReviewedBy(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
     issue = await sut.loadIssue(issueId);
     expect(issue.fields.customfield_11228).toMatchObject([{ emailAddress: 'helpdesk+jira-githubtech@sonarsource.com' }]);
-  }, 10000);  // 10s timeout
+  });
 
   it('createComponent existing', async () => {
     const name = 'JiraClient UT';
