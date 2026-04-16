@@ -97,7 +97,7 @@ describe('PullRequestCreated', () => {
             repository: {
                 html_url: "https://github.com/test-owner/test-repo",
                 name: 'test-repo',
-                owner: null
+                owner: { login: 'SonarSource' }
             },
             sender: {
                 login: 'test-user',
@@ -144,7 +144,7 @@ describe('PullRequestCreated', () => {
     });
     it('No PR skips the action', async () => {
         class TestPullRequestCreated extends PullRequestCreated_1.PullRequestCreated {
-            loadPullRequest() {
+            async loadPullRequest(pull_number) {
                 return null;
             }
         }

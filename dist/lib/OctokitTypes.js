@@ -24,10 +24,10 @@ function addPullRequestExtensions(pr) {
     return {
         ...pr,
         isRenovate() {
-            return this.user.login === "renovate[bot]";
+            return this.user?.login === "renovate[bot]";
         },
         isDependabot() {
-            return this.user.login === "dependabot[bot]";
+            return this.user?.login === "dependabot[bot]";
         }
     };
 }

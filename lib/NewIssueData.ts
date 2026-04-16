@@ -28,18 +28,18 @@ import { Team } from "./Team";
 
 export class NewIssueData {
   public readonly projectKey: string;
-  public readonly accountId: string;
-  public readonly assigneeId: string;
+  public readonly accountId: string | null;
+  public readonly assigneeId: string | null;
   public readonly additionalFields: any;
 
-  private constructor(projectKey: string, accountId: string, assigneeId: string, additionalFields: any) {
+  private constructor(projectKey: string, accountId: string | null, assigneeId: string | null, additionalFields: any) {
     this.projectKey = projectKey;
     this.accountId = accountId;
     this.assigneeId = assigneeId;
     this.additionalFields = additionalFields;
   }
 
-  public static async create(jira: JiraClient, pr: PullRequest, inputJiraProject: string, inputAdditionalFields: string, userEmail: string, fallbackTeam: string): Promise<NewIssueData> {
+  public static async create(jira: JiraClient, pr: PullRequest, inputJiraProject: string, inputAdditionalFields: string, userEmail: string | null, fallbackTeam: string): Promise<NewIssueData | null> {
     const parent = pr.isRenovate() || pr.isDependabot()
       ? null  // Description contains release notes with irrelevant issue IDs
       : await this.findNonSubTaskParent(jira, this.findMentionedIssues(pr));
@@ -66,7 +66,7 @@ export class NewIssueData {
     }
   }
 
-  public static async createForEngExp(jira: JiraClient, pr: PullRequest, userEmail: string): Promise<NewIssueData> {
+  public static async createForEngExp(jira: JiraClient, pr: PullRequest, userEmail: string | null): Promise<NewIssueData> {
     const accountId = await jira.findAccountId(userEmail);
     const projectKey = await this.computeProjectKeyForEngExp(jira, pr, accountId);
     const parameters = this.newIssueParameters(projectKey, null, 'Maintenance');
@@ -93,7 +93,7 @@ export class NewIssueData {
       : inputJiraProject;         // Can be null. Like in rspec where we want only to create Sub-tasks in other tasks (not Epics).
   }
 
-  private static async computeProjectKeyForEngExp(jira: JiraClient, pr: PullRequest, accountId: string): Promise<string> {
+  private static async computeProjectKeyForEngExp(jira: JiraClient, pr: PullRequest, accountId: string | null): Promise<string> {
     if (pr.base.repo.name === 'parent-oss') {
       return 'PARENTOSS';
     } else if (accountId) {
@@ -153,7 +153,7 @@ export class NewIssueData {
     return new Set(mentionedIssues);
   }
 
-  private static async findTeam(jira: JiraClient, userAccountId: string, projectKey: string, fallbackTeam: string): Promise<Team> {
+  private static async findTeam(jira: JiraClient, userAccountId: string | null, projectKey: string, fallbackTeam: string): Promise<Team | null> {
     if (userAccountId) {
       const team = await jira.findTeamByUser(userAccountId);
       if (team) {
@@ -171,7 +171,7 @@ export class NewIssueData {
     return jira.findTeamByUser(project.lead.accountId);
   }
 
-  private static async findSprintId(jira: JiraClient, teamName: string): Promise<number> {
+  private static async findSprintId(jira: JiraClient, teamName: string): Promise<number | null> {
     const team = Config.findTeam(teamName);
     if (team?.boardId) {
       return jira.findSprintId(team.boardId);
@@ -182,7 +182,7 @@ export class NewIssueData {
     }
   }
 
-  private static async findEvergreenEpic(jira: JiraClient, team: Team): Promise<{ key: string } | null> {
+  private static async findEvergreenEpic(jira: JiraClient, team: Team | null): Promise<{ key: string } | null> {
     if (team) {
       const epics = await jira.findIssues(`issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=${team.id} ORDER BY key`);
       if (epics.length === 0) {

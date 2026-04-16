@@ -20,7 +20,7 @@
 
 import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types';
 
-export function createOctokitRestStub(title: string, body?: string, login: string = 'test-user'): RestEndpointMethods {
+export function createOctokitRestStub(title: string, body?: string | null, login: string = 'test-user'): RestEndpointMethods {
   return {
     issues: {
       createComment(params: any): void {

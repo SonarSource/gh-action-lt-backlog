@@ -31,7 +31,7 @@ export class MarkdownParser {
     this.lines = markdown.split('\n').map(line => line.trimEnd());
   }
 
-  public readBlock(): Block {
+  public readBlock(): Block | null {
     if (!this.canRead()) {
       return null;
     }

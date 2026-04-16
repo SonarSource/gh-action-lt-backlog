@@ -80,8 +80,8 @@ describe('PullRequestClosed', () => {
 
   it('is-eng-xp-squad Bot PR merged PR moves issue to Done', async () => {
     process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
-    github.context.payload.pull_request.merged = true;
-    github.context.payload.pull_request.base = { ref: 'master' };
+    github.context.payload.pull_request!.merged = true;
+    github.context.payload.pull_request!.base = { ref: 'master' };
     await runAction('Title', "renovate[bot]");
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
@@ -132,8 +132,8 @@ describe('PullRequestClosed', () => {
   it('PR merged into release branch', async () => {
     const releaseBranches = ['master', 'main', 'branch-0.0.0'];
     for (const branchName of releaseBranches) {
-      github.context.payload.pull_request.merged = true;
-      github.context.payload.pull_request.base = { ref: branchName };
+      github.context.payload.pull_request!.merged = true;
+      github.context.payload.pull_request!.base = { ref: branchName };
       await runAction('KEY-1234 Title');
       expect(logTester.logsParams).toStrictEqual([
         "Loading PR #42",
@@ -145,8 +145,8 @@ describe('PullRequestClosed', () => {
   });
 
   it('PR merged into non-release branch', async () => {
-    github.context.payload.pull_request.merged = true;
-    github.context.payload.pull_request.base = { ref: 'user/branch' };
+    github.context.payload.pull_request!.merged = true;
+    github.context.payload.pull_request!.base = { ref: 'user/branch' };
     await runAction('KEY-5678 Title');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
@@ -156,8 +156,8 @@ describe('PullRequestClosed', () => {
   });
 
   it('Merge PR for workflow without feature branches', async () => {
-    github.context.payload.pull_request.merged = true;
-    github.context.payload.pull_request.base = { ref: 'master' };
+    github.context.payload.pull_request!.merged = true;
+    github.context.payload.pull_request!.base = { ref: 'master' };
     await runAction('KEY-1111 Title');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",

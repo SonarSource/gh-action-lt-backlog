@@ -234,7 +234,7 @@ class JiraClient {
                 console.log(`ERROR: Failed to search for teams. ${JSON.stringify(response.errors, null, 2)}`);
                 return [];
             }
-            else {
+            else if (response.data.team) {
                 const teamData = response.data.team.teamSearchV2;
                 for (const team of teamData.nodes) {
                     const id = team.team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
@@ -242,6 +242,9 @@ class JiraClient {
                 }
                 hasNextPage = teamData.pageInfo.hasNextPage;
                 after = teamData.pageInfo.endCursor;
+            }
+            else {
+                hasNextPage = false;
             }
         }
         return allTeams;

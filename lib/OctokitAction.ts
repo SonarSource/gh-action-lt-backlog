@@ -34,7 +34,7 @@ export abstract class OctokitAction extends Action {
   protected readonly octokit: InstanceType<typeof GitHub>;
   protected readonly jira: JiraClient;
   protected readonly isEngXpSquad: boolean;
-  private graphqlWithAuth: graphqlTypes.graphql;
+  private graphqlWithAuth: graphqlTypes.graphql | null = null;
 
   constructor() {
     super();
@@ -45,13 +45,11 @@ export abstract class OctokitAction extends Action {
   }
 
   public sendGraphQL(query: string): Promise<GraphQlQueryResponseData> {
-    if (!this.graphqlWithAuth) {
-      this.graphqlWithAuth = graphql.defaults({
-        headers: {
-          authorization: `token ${this.inputString('github-token')}`,
-        },
-      });
-    }
+    this.graphqlWithAuth ??= graphql.defaults({
+      headers: {
+        authorization: `token ${this.inputString('github-token')}`,
+      },
+    });
     return this.graphqlWithAuth(query);
   }
 
@@ -73,7 +71,7 @@ export abstract class OctokitAction extends Action {
     return this.inputString(name).toLowerCase() === 'true';
   }
 
-  protected async loadPullRequest(pull_number: number): Promise<PullRequest> {
+  protected async loadPullRequest(pull_number: number): Promise<PullRequest | null> {
     try {
       this.log(`Loading PR #${pull_number}`);
       return addPullRequestExtensions((await this.rest.pulls.get(this.addRepo({ pull_number }))).data);
@@ -83,7 +81,7 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected async loadIssue(issue_number: number): Promise<Issue> {
+  protected async loadIssue(issue_number: number): Promise<Issue | null> {
     try {
       this.log(`Loading issue #${issue_number}`);
       return (await this.rest.issues.get(this.addRepo({ issue_number }))).data;
@@ -93,7 +91,7 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected async findFixedIssues(pr: PullRequest): Promise<string[]> {
+  protected async findFixedIssues(pr: PullRequest): Promise<string[] | null> {
     const text = pr.isRenovate() // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
       ? (await this.listComments(pr.number)).filter(x => x.body?.startsWith(RENOVATE_PREFIX)).pop()?.body
       : pr.title;
@@ -139,7 +137,7 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected async findEmail(login: string): Promise<string> {
+  protected async findEmail(login: string): Promise<string | null> {
     // ToDo: GHA-235 Re-enable SAML identity search
     this.log(`Searching for SAML identity of ${login} is temporarily unavailable, see BUILD-11028`);
     return null;
@@ -235,7 +233,7 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected async addJiraComponent(issueId: string, name: string, description: string = null): Promise<void> {
+  protected async addJiraComponent(issueId: string, name: string, description: string | null = null): Promise<void> {
     if (!await this.jira.createComponent(issueId.split('-')[0], name, description)) {   // Same PR can have multiple issues from different projects
       this.setFailed('Failed to create component');
       return;

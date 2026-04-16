@@ -25,9 +25,10 @@ import { LogTester } from '../tests/LogTester';
 import { jiraClientStub } from '../tests/JiraClientStub';
 import { createOctokitRestStub } from '../tests/OctokitRestStub';
 import { OctokitActionStub } from '../tests/OctokitActionStub';
+import { PullRequest } from '../lib/OctokitTypes';
 
 class TestPullRequestCreated extends PullRequestCreated {
-  protected async findEmail(login: string): Promise<string> {
+  protected async findEmail(login: string): Promise<string | null> {
     switch (login) {
       case 'test-user': return 'user@sonarsource.com';
       case 'renovate[bot]': return null;
@@ -36,7 +37,7 @@ class TestPullRequestCreated extends PullRequestCreated {
   }
 }
 
-async function runAction(jiraProject: string, title: string, body?: string, user: string = 'test-user') {
+async function runAction(jiraProject: string, title: string, body?: string | null, user: string = 'test-user') {
   process.env['INPUT_JIRA-PROJECT'] = jiraProject;
   const action = new TestPullRequestCreated() as TestPullRequestCreated & OctokitActionStub;
   action.jira = jiraClientStub;
@@ -68,7 +69,7 @@ describe('PullRequestCreated', () => {
       repository: {
         html_url: "https://github.com/test-owner/test-repo",
         name: 'test-repo',
-        owner: null
+        owner: { login: 'SonarSource' }
       },
       sender: {
         login: 'test-user',
@@ -108,7 +109,7 @@ describe('PullRequestCreated', () => {
   });
 
   it('DO NOT MERGE PR title skips the action', async () => {
-    github.context.payload.pull_request.title = "Prefix [DO not MeRGe{: Test PR";
+    github.context.payload.pull_request!.title = "Prefix [DO not MeRGe{: Test PR";
     const action = new PullRequestCreated();
     action.log = jest.fn();
     await action.run();
@@ -118,7 +119,7 @@ describe('PullRequestCreated', () => {
 
   it('No PR skips the action', async () => {
     class TestPullRequestCreated extends PullRequestCreated {
-      protected loadPullRequest() {
+      protected async loadPullRequest(pull_number: number): Promise<PullRequest | null> {
         return null;
       }
     }
@@ -174,7 +175,7 @@ describe('PullRequestCreated', () => {
   });
 
   it('Standalone PR with description', async () => {
-    github.context.payload.pull_request.requested_teams = { type: 'Team', name: 'test-team' }; // Action does nothing additional when team is (auto)requested for review
+    github.context.payload.pull_request!.requested_teams = { type: 'Team', name: 'test-team' }; // Action does nothing additional when team is (auto)requested for review
     await runAction('KEY', 'Standalone PR', 'Original description, this ignores USER-1234 tickets as those should not be parents');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
@@ -214,7 +215,7 @@ describe('PullRequestCreated', () => {
   });
 
   it('Standalone PR with reviewer', async () => {
-    github.context.payload.pull_request.requested_reviewers = [{ type: "User", login: "test-user" }];
+    github.context.payload.pull_request!.requested_reviewers = [{ type: "User", login: "test-user" }];
     await runAction('KEY', 'Standalone PR');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",

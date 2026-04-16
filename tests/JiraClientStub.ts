@@ -27,8 +27,8 @@ export const jiraClientStub = {
     switch (issueId) {
       case 'MMF-1111': return { key: 'MMF-1111', fields: { project: { key: 'MMF' }, issuetype: { name: 'Epic' } } };
       case 'KEY-1111': return { key: 'KEY-1111', fields: { project: { key: 'KEY' }, issuetype: { name: 'Epic' } } };
-      case 'KEY-1234': return { key: 'KEY-1234', fields: { project: { key: 'KEY' }, issuetype: { name: 'Maintenance' }, creator: {displayName: "Creator of KEY-1234"} } };
-      case 'KEY-5678': return { key: 'KEY-5678', fields: { project: { key: 'KEY' }, issuetype: { name: 'Maintenance' }, creator: { displayName: "Jira Tech User GitHub"} } };
+      case 'KEY-1234': return { key: 'KEY-1234', fields: { project: { key: 'KEY' }, issuetype: { name: 'Maintenance' }, creator: { displayName: "Creator of KEY-1234" } } };
+      case 'KEY-5678': return { key: 'KEY-5678', fields: { project: { key: 'KEY' }, issuetype: { name: 'Maintenance' }, creator: { displayName: "Jira Tech User GitHub" } } };
       case 'KEY-5555': return { key: 'KEY-5555', fields: { project: { key: 'KEY' }, issuetype: { name: 'Sub-task' } } };
       case 'FAKE-1234': return null;
       default: throw new Error(`Scaffolding did not expect ${issueId}`);
@@ -39,7 +39,7 @@ export const jiraClientStub = {
       ? { lead: { accountId: '1234-account', displayName: 'Project Lead' } }
       : { lead: { accountId: '2222-no-team', displayName: 'Project Lead Without team' } };
   },
-  async findAccountId(email: string): Promise<string> {
+  async findAccountId(email: string): Promise<string | null> {
     switch (email) {
       case 'user@sonarsource.com': return '1234-account';
       case 'eng.exp@sonarsource.com': return '3333-eng-exp-account';
@@ -49,7 +49,7 @@ export const jiraClientStub = {
       default: throw new Error(`Scaffolding did not expect email ${email}`);
     }
   },
-  async findTeamByUser(accountId: string): Promise<Team> {
+  async findTeamByUser(accountId: string): Promise<Team | null> {
     switch (accountId) {
       case '1234-account': return { name: '.NET Squad', id: 'dot-neeet-team' };
       case '2222-no-team': return null;
@@ -58,29 +58,29 @@ export const jiraClientStub = {
       default: throw new Error(`Scaffolding did not expect accountId ${accountId}`);
     };
   },
-  async findTeamByName(accountId: string): Promise<Team> {
+  async findTeamByName(accountId: string): Promise<Team | null> {
     switch (accountId) {
       case 'fallback-team': return { name: 'Analysis Processing Squad', id: 'fallback-team' };
       case 'nonexistent-fallback-team': return null;
       default: throw new Error(`Scaffolding did not expect team name ${accountId}`);
     }
   },
-  async findTransition(issueId: string, transitionName: string) {
+  async findTransition(issueId: string, transitionName: string): Promise<{ id: string, name: string } | null> {
     switch (transitionName) {
       case 'Merge into master': return issueId === "KEY-1111" ? null : { id: '10000', name: transitionName };
       case 'Merge into branch': return issueId === "KEY-1111" ? null : { id: '10001', name: transitionName };
-      case 'Merge': return { id: '10002', name: transitionName }
+      case 'Merge': return { id: '10002', name: transitionName };
       default: return null; // No transition found
     }
   },
-  async findSprintId(boardId: number): Promise<number> {
+  async findSprintId(boardId: number): Promise<number | null> {
     return 42;
   },
   async findIssues(jql: string): Promise<Issue[]> {
     switch (jql) {
       case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=dot-neeet-team ORDER BY key':
         return [
-          { key: 'NET-1000', fields: { summary: '.NET KTLO Epic'} } as Issue,
+          { key: 'NET-1000', fields: { summary: '.NET KTLO Epic' } } as Issue,
           { key: 'NET-0000', fields: { summary: 'Duplicate epic from same period that should not be used' } } as Issue];
       case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=fallback-team ORDER BY key':
         return [];
@@ -96,7 +96,7 @@ export const jiraClientStub = {
     console.log(`Invoked jira.createIssue('${projectKey}', '${summary}', ${JSON.stringify(additionalFields)})`);
     return `${projectKey}-4242`;
   },
-  async addIssueRemoteLink(issueId: string, url: string, title: string = null): Promise<void> {
+  async addIssueRemoteLink(issueId: string, url: string, title: string | null = null): Promise<void> {
     title = title ? `'${title}'` : 'null';
     console.log(`Invoked jira.addIssueRemoteLink('${issueId}'', '${url}', ${title})`);
   },

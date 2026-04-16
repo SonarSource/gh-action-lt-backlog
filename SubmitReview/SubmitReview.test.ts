@@ -25,7 +25,7 @@ import { SubmitReview } from './SubmitReview';
 import { jiraClientStub } from '../tests/JiraClientStub';
 import { OctokitActionStub } from '../tests/OctokitActionStub';
 
-async function runAction(state: string, findEmailResult: string = null) {
+async function runAction(state: string, findEmailResult: string | null = null) {
   github.context.payload = {
     pull_request: {
       number: 42,
@@ -46,7 +46,7 @@ async function runAction(state: string, findEmailResult: string = null) {
   const action = new SubmitReview() as SubmitReview & OctokitActionStub;
   action.jira = jiraClientStub;
   action.rest = createOctokitRestStub('GHA-42 and GHA-43 are processed');
-  action.findEmail = async function (login: string): Promise<string> {
+  action.findEmail = async function (login: string): Promise<string | null> {
     return findEmailResult;
   };
   await action.run();

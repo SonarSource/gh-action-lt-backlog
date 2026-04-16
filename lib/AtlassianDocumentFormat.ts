@@ -33,7 +33,7 @@ export class AtlassianDocument {
   static fromMarkdown(markdown: string): AtlassianDocument {
     const contents: AdfNode[] = [];
     const parser = new MarkdownParser(markdown);
-    let block: Block;
+    let block: Block | null;
     while (block = parser.readBlock()) {
       contents.push(new AdfNode(block));
     }
@@ -44,9 +44,9 @@ export class AtlassianDocument {
   static normalizeHeadings(nodes: AdfNode[]): void {
     const headings = nodes.filter(x => x.type === 'heading');
     if (headings.length > 0) {
-      const min = headings.reduce((min, x) => Math.min(min, x.attrs.level), 6);
+      const min = headings.reduce((min, x) => Math.min(min, x.attrs!.level), 6);
       for (const node of headings) {
-        node.attrs.level -= min - 1; // Normalize to start from 1
+        node.attrs!.level -= min - 1; // Normalize to start from 1
       }
     }
   }
@@ -124,8 +124,7 @@ export class AdfNode {
   private static parseText(text: string): AdfNode[] {
     const nodes: AdfNode[] = [];
     const parser = new MarkdownTextParser(text);
-    let block: TextBlock;
-
+    let block: TextBlock | null;
     while (block = parser.readBlock()) {
       switch (block.type) {
         case 'code': {
