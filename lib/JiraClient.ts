@@ -203,7 +203,7 @@ export class JiraClient {
 
   public async createComponent(projectKey: string, name: string, description: string): Promise<boolean> {
     console.log(`Searching for component '${name}' in project ${projectKey}`);
-    const { total, values } = await this.sendRestGetApi(`project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`);
+    const { total, values }: { total: number, values: NamedItem[] } = await this.sendRestGetApi(`project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`);
     if (values.some(x => x.name === name)) {  // values contains matches on partial names and descriptions
       console.log(`Component found in ${total} result(s)`);
       return true;
