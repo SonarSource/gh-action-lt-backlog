@@ -70,9 +70,10 @@ class Action {
             this.log('Done');
         }
         catch (ex) {
-            core.setFailed(ex.message);
+            const error = ex;
+            core.setFailed(error.message);
             console.log();
-            console.log(ex.stack);
+            console.log(error.stack);
         }
     }
     log(line) {
