@@ -25,11 +25,13 @@ import { NewIssueParameters } from './NewIssueParameters';
 import { EngineeringExperienceSquad, TeamConfigurationData } from '../Data/TeamConfiguration';
 import { Config } from './Configuration';
 import { LogTester } from '../tests/LogTester';
+import { JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID } from './Constants';
 
 const sandboxDomain = 'https://sonarsource-sandbox-608.atlassian.net';
 const sandboxSiteId = '5ea71b8c-f3d5-4b61-b038-001c50df1666';
 const sandboxOrganizationId = '78eed3e4-84ad-4374-b777-a3b4ba5d9516';
 let sut: JiraClient;
+let productionSut: JiraClient;
 let issueId: string;
 let preqIssueId: string;
 
@@ -40,6 +42,7 @@ beforeAll(async () => {
   const token = process.env["JIRA_TOKEN"];
   if (user && token) {
     sut = new JiraClient(sandboxDomain, sandboxSiteId, sandboxOrganizationId, user, token);
+    productionSut = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, user, token);
     const parameters: NewIssueParameters = { issuetype: { name: 'Feature' } };
     issueId = await sut.createIssue('GHA', `JiraClient unit test shared ${crypto.randomUUID()}`, parameters);
   } else {
@@ -255,15 +258,15 @@ describe('JiraClient', () => {
     expect(await sut.findSprintId(boardId)).toBeGreaterThan(0);
   });
 
-  // ToDo: Remove skip once Sandbox is restored from Prod and EngXpSquad exists again
-  it.skip('findTeamByUser', async () => {
-    const accountId = '557058:f82b4ae5-78e0-4689-9f9e-419b773bf121';                        // Thomas Vérin The Greatest, it can be any member of Eng Xp squad Jira team
-    expect(await sut.findTeamByUser(accountId)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
+  it('findTeamByUser', async () => {
+    // This UT needs productionSut, because team IDs are different in sandbox
+    const accountId = '557058:f82b4ae5-78e0-4689-9f9e-419b773bf121';                                  // Thomas Vérin The Greatest, it can be any member of Eng Xp squad Jira team
+    expect(await productionSut.findTeamByUser(accountId)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
   });
   
-  // ToDo: Remove skip once Sandbox is restored from Prod and EngXpSquad exists again
-  it.skip('findTeamByName', async () => {
-    expect(await sut.findTeamByName(EngineeringExperienceSquad.name)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
+  it('findTeamByName', async () => {
+    // This UT needs productionSut, because team IDs are different in sandbox
+    expect(await productionSut.findTeamByName(EngineeringExperienceSquad.name)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
   });
 
   it('findIssues', async () => {
