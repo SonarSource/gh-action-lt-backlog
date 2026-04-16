@@ -25,6 +25,7 @@ const LogTester_1 = require("../tests/LogTester");
 const TeamConfiguration_1 = require("./TeamConfiguration");
 const node_assert_1 = require("node:assert");
 let jira;
+jest.setTimeout(20000); // 20s
 // All teams that exist in Jira, but do not create PRs and do not need boardId configured:
 const ignoredTeams = [
     ".NET Squad", // Not using sprints
@@ -161,7 +162,7 @@ describe('TeamConfiguration', () => {
                 (0, node_assert_1.fail)(`Configured team does not exist in Jira: ${teamData.name}`);
             }
         }
-    }, 20000); // 20s timeout
+    });
     it('teams have valid boardId', async () => {
         expect(TeamConfiguration_1.TeamConfigurationData.length).toBeGreaterThan(0); // Having at least one assertion prevents logTester from dumping console logs
         for (const team of TeamConfiguration_1.TeamConfigurationData) {
@@ -170,7 +171,7 @@ describe('TeamConfiguration', () => {
                 (0, node_assert_1.fail)(`Configured team ${team.name} does not have a valid boardId: ${team.boardId}`);
             }
         }
-    }, 20000); // 20s timeout
+    });
     it('list new teams', async () => {
         const knownTeams = new Set();
         for (const team of TeamConfiguration_1.TeamConfigurationData) {
@@ -202,6 +203,6 @@ describe('TeamConfiguration', () => {
                 (0, node_assert_1.fail)(`Team "${team.name}" with boardId ${team.boardId} findSprintId failed: ${error}`);
             }
         }
-    }, 20000); // 20s timeout
+    });
 });
 //# sourceMappingURL=TeamConfiguration.test.js.map

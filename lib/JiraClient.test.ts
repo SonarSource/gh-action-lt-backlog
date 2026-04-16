@@ -25,25 +25,30 @@ import { NewIssueParameters } from './NewIssueParameters';
 import { EngineeringExperienceSquad, TeamConfigurationData } from '../Data/TeamConfiguration';
 import { Config } from './Configuration';
 import { LogTester } from '../tests/LogTester';
+import { JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID } from './Constants';
 
 const sandboxDomain = 'https://sonarsource-sandbox-608.atlassian.net';
 const sandboxSiteId = '5ea71b8c-f3d5-4b61-b038-001c50df1666';
 const sandboxOrganizationId = '78eed3e4-84ad-4374-b777-a3b4ba5d9516';
 let sut: JiraClient;
+let productionSut: JiraClient;
 let issueId: string;
 let preqIssueId: string;
+
+jest.setTimeout(20000); // 20s
 
 beforeAll(async () => {
   const user = process.env["JIRA_USER"];    // Can't use the same name as environment variables read by Octokit actions, because the dash is not propagated from shell to node
   const token = process.env["JIRA_TOKEN"];
   if (user && token) {
     sut = new JiraClient(sandboxDomain, sandboxSiteId, sandboxOrganizationId, user, token);
+    productionSut = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, user, token);
     const parameters: NewIssueParameters = { issuetype: { name: 'Feature' } };
     issueId = await sut.createIssue('GHA', `JiraClient unit test shared ${crypto.randomUUID()}`, parameters);
   } else {
     fail("JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.");
   }
-}, 20000);  // 20s timeout
+});
 
 async function findFirstActiveSprintId(): Promise<number> {
   for (const team of TeamConfigurationData) {
@@ -87,10 +92,10 @@ describe('JiraClient', () => {
 }`);
   });
 
-  // ToDo: Remove skip once Sandbox is restored from Prod and .NET Squad exists again
-  it.skip('createIssue', async () => {
+  it('createIssue', async () => {
     const summary = `JiraClient unit test createIssue ${crypto.randomUUID()}`;
-    const sprintId = await findFirstActiveSprintId()
+    const sprintId = await findFirstActiveSprintId();
+    const team = await sut.findTeamByName('.NET Squad');  // Sandbox has different team IDs than production instance
     // The GHA project needs to have all of these on it's create screen in production and sandbox, as production overrides the sandbox once in a while
     const parameters: NewIssueParameters = {
       issuetype: { name: 'Feature' },
@@ -98,7 +103,7 @@ describe('JiraClient', () => {
       parent: { key: 'GHA-37' },
       reporter: { id: '712020:7dcfc909-3fa9-496f-9127-163d8cd0e30f' },  // "Jira Automation". Any user except the "Jira Tech User GitHub" that would be used as a default user assigned by the token 
       description: AtlassianDocument.fromMarkdown('Lorem ipsum'),
-      customfield_10001: '3ca60b21-53c7-48e2-a2e2-6e85b39551d0',  // Patlassian* Team ID - .NET Squad 
+      customfield_10001: team.id,
       customfield_10020: sprintId,                                // Patlassian* Sprint IT - needs an active sprint
     };
     const result = await sut.createIssue('GHA', summary, parameters);
@@ -127,10 +132,10 @@ describe('JiraClient', () => {
           }
         ]
       },
-      customfield_10001: { id: '3ca60b21-53c7-48e2-a2e2-6e85b39551d0' },        // Why would the same field have same structure everywhere anyway?
+      customfield_10001: { id: team.id },        // Why would the same field have same structure everywhere anyway?
       customfield_10020: [{ id: sprintId }],                                    // Why would the same field have same structure everywhere anyway?
     });
-  }, 20000);  // 20s timeout
+  });
 
   it('loadIssue', async () => {
     const result = await sut.loadIssue('GHA-42');
@@ -196,7 +201,7 @@ describe('JiraClient', () => {
     await sut.addReviewer(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
     issue = await sut.loadIssue(issueId);
     expect(issue.fields.customfield_11227).toMatchObject([{ emailAddress: 'helpdesk+jira-githubtech@sonarsource.com' }]);
-  }, 10000);  // 10s timeout
+  });
 
   it('addReviewedBy', async () => {
     const issueId = await ensurePreqIssueId();
@@ -207,7 +212,7 @@ describe('JiraClient', () => {
     await sut.addReviewedBy(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
     issue = await sut.loadIssue(issueId);
     expect(issue.fields.customfield_11228).toMatchObject([{ emailAddress: 'helpdesk+jira-githubtech@sonarsource.com' }]);
-  }, 10000);  // 10s timeout
+  });
 
   it('createComponent existing', async () => {
     const name = 'JiraClient UT';
@@ -253,15 +258,15 @@ describe('JiraClient', () => {
     expect(await sut.findSprintId(boardId)).toBeGreaterThan(0);
   });
 
-  // ToDo: Remove skip once Sandbox is restored from Prod and EngXpSquad exists again
-  it.skip('findTeamByUser', async () => {
-    const accountId = '557058:f82b4ae5-78e0-4689-9f9e-419b773bf121';                        // Thomas Vérin The Greatest, it can be any member of Eng Xp squad Jira team
-    expect(await sut.findTeamByUser(accountId)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
+  it('findTeamByUser', async () => {
+    // This UT needs productionSut, because team IDs are different in sandbox
+    const accountId = '557058:f82b4ae5-78e0-4689-9f9e-419b773bf121';                                  // Thomas Vérin The Greatest, it can be any member of Eng Xp squad Jira team
+    expect(await productionSut.findTeamByUser(accountId)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
   });
   
-  // ToDo: Remove skip once Sandbox is restored from Prod and EngXpSquad exists again
-  it.skip('findTeamByName', async () => {
-    expect(await sut.findTeamByName(EngineeringExperienceSquad.name)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
+  it('findTeamByName', async () => {
+    // This UT needs productionSut, because team IDs are different in sandbox
+    expect(await productionSut.findTeamByName(EngineeringExperienceSquad.name)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
   });
 
   it('findIssues', async () => {
