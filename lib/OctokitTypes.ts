@@ -32,10 +32,10 @@ export function addPullRequestExtensions(pr: components['schemas']['pull-request
   return {
     ...pr,
     isRenovate(): boolean {
-      return this.user.login === "renovate[bot]";
+      return this.user?.login === "renovate[bot]";
     },
     isDependabot(): boolean {
-      return this.user.login === "dependabot[bot]";
+      return this.user?.login === "dependabot[bot]";
     }
   };
 }

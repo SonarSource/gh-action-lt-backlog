@@ -53,7 +53,7 @@ export class ToggleLockBranch extends OctokitAction {
     }
   }
 
-  private async findRule(pattern: string): Promise<ProtectionRule> {
+  private async findRule(pattern: string): Promise<ProtectionRule | null> {
     const rules = (await this.loadRules()).filter(x => x.pattern === pattern);
     if (rules.length === 0) {
       this.log(`Branch protection rule with pattern '${pattern}' does not exist.`);

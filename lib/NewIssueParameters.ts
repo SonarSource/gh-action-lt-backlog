@@ -24,9 +24,9 @@ import { AtlassianDocument } from "./AtlassianDocumentFormat";
 export interface NewIssueParameters {
     issuetype: { name: string; };
     labels?: string[];
-    parent?: { key: string; };
+    parent?: { key: string; } | null;
     reporter?: { id: string; };
     description?: AtlassianDocument;
     customfield_10001?: string; // This is how Patlassian* named teamId in Jira
-    customfield_10020?: number; // How would you name a sprintId? Oh, I know...
+    customfield_10020?: number | null; // How would you name a sprintId? Oh, I know...
 }

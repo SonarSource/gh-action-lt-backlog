@@ -62,7 +62,7 @@ class MarkdownTextParser {
                 return next.token;
             }
             else if (next.link >= 0) {
-                if (this.matchLink(next.link) != null) {
+                if (this.matchLink(next.link)) {
                     return next.link;
                 }
                 else {

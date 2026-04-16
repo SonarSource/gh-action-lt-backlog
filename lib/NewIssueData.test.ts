@@ -24,7 +24,7 @@ import { PullRequest } from './OctokitTypes';
 import { jiraClientStub } from '../tests/JiraClientStub';
 import { LogTester } from '../tests/LogTester';
 
-function createPullRequest(title: string, body: string, repo: string = 'repo'): PullRequest {
+function createPullRequest(title: string, body: string | null, repo: string = 'repo'): PullRequest {
   return {
     number: 42,
     title,

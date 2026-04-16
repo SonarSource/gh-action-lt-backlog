@@ -37,7 +37,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
                 return;
             }
         }
-        if (/DO NOT MERGE/i.test(this.payload.pull_request.title)) {
+        if (/DO NOT MERGE/i.test(this.payload.pull_request?.title)) {
             this.log("'DO NOT MERGE' found in the PR title, skipping the action.");
             return;
         }
@@ -64,15 +64,15 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
             }
             if (this.isEngXpSquad) {
                 for (const issue of fixedIssues.filter(x => x.startsWith('BUILD-'))) { // BUILD-9328: No component for PREQ tickets
-                    await this.addJiraComponent(issue, this.repo.repo, this.payload.repository.html_url);
+                    await this.addJiraComponent(issue, this.repo.repo, this.payload.repository?.html_url);
                 }
             }
         }
     }
     async processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields) {
         const data = this.isEngXpSquad
-            ? await NewIssueData_1.NewIssueData.createForEngExp(this.jira, pr, await this.findEmail(this.payload.sender.login))
-            : await NewIssueData_1.NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, await this.findEmail(this.payload.sender.login), this.inputString('fallback-team'));
+            ? await NewIssueData_1.NewIssueData.createForEngExp(this.jira, pr, await this.findEmail(this.payload.sender?.login))
+            : await NewIssueData_1.NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, await this.findEmail(this.payload.sender?.login), this.inputString('fallback-team'));
         if (data) {
             const issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
             if (issueId == null) {
@@ -88,8 +88,8 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
                 if (data.assigneeId) {
                     await this.jira.assignIssueToAccount(issueId, data.assigneeId); // Even if there's already a reviewer, we need this first to populate the lastAssignee field in Jira.
                 }
-                if (this.payload.pull_request.requested_reviewers.length > 0) { // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
-                    await this.processRequestReview(issueId, this.payload.pull_request.requested_reviewers[0]);
+                if (this.payload.pull_request?.requested_reviewers.length > 0) { // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
+                    await this.processRequestReview(issueId, this.payload.pull_request?.requested_reviewers[0]);
                 }
                 return issueId;
             }

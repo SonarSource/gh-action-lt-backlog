@@ -159,7 +159,7 @@ describe('TeamConfiguration', () => {
   it('EngineeringExperienceSquad is valid', async () => {
     const team = await jira.findTeamByName(EngineeringExperienceSquad.name);
     expect(team).not.toBeNull();
-    expect(team.id).toBe(EngineeringExperienceSquad.id);
+    expect(team!.id).toBe(EngineeringExperienceSquad.id);
   });
 
   it('teams have valid names', async () => {

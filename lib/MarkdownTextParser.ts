@@ -32,7 +32,7 @@ export class MarkdownTextParser {
     this.text = text;
   }
 
-  public readBlock(): TextBlock {
+  public readBlock(): TextBlock | null {
     if (this.nextIndex >= this.text.length) {
       return null;
     } else if (this.text[this.nextIndex] === '`') {
@@ -46,7 +46,7 @@ export class MarkdownTextParser {
         return { type: 'text', text: this.readText() };
       } else {
         this.nextIndex += match[0].length;
-        return { type: 'link', text: match.groups.title, href: match.groups.href };
+        return { type: 'link', text: match.groups!.title, href: match.groups!.href };
       }
     }
   }
@@ -65,7 +65,7 @@ export class MarkdownTextParser {
       if (next.token > 0 && (next.link < 0 || next.token < next.link)) {
         return next.token;
       } else if (next.link >= 0) {
-        if (this.matchLink(next.link) != null) {
+        if (this.matchLink(next.link)) {
           return next.link;
         } else {
           index = next.link + 1;
@@ -86,7 +86,7 @@ export class MarkdownTextParser {
     return result;
   }
 
-  private matchLink(index: number): RegExpMatchArray {
+  private matchLink(index: number): RegExpMatchArray | null {
     return this.text[index] === '['
       ? this.text.substring(index).match(/^\[(?<title>[^\]]+)\]\((?<href>[^) ]+)\)/)
       : null;
@@ -94,7 +94,7 @@ export class MarkdownTextParser {
 
   private readHref(): string {
     const match = this.text.substring(this.nextIndex).match(/^https?:\/\/[^\s,;)]*/);
-    let text = match[0];
+    let text = match![0];
     while (text.endsWith('?') || text.endsWith('.')) {
       text = text.substring(0, text.length - 1);
     }

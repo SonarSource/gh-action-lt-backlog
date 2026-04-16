@@ -22,7 +22,7 @@ import { Team } from "../lib/Team";
 
 export interface TeamConfiguration {
   name: string;
-  boardId?: number;
+  boardId: number;
 }
 
 export const EngineeringExperienceSquad: Team = { id: "eb40f25e-3596-4541-b661-cf83e7bc4fa6", name: "Engineering Experience Squad" };

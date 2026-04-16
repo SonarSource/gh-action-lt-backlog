@@ -65,7 +65,7 @@ class OctokitAction extends Action_1.Action {
     octokit;
     jira;
     isEngXpSquad;
-    graphqlWithAuth;
+    graphqlWithAuth = null;
     constructor() {
         super();
         this.jira = new JiraClient_1.JiraClient(Constants_1.JIRA_DOMAIN, Constants_1.JIRA_SITE_ID, Constants_1.JIRA_ORGANIZATION_ID, this.inputString('jira-user'), this.inputString('jira-token'));
@@ -74,13 +74,11 @@ class OctokitAction extends Action_1.Action {
         this.isEngXpSquad = this.inputBoolean('is-eng-xp-squad');
     }
     sendGraphQL(query) {
-        if (!this.graphqlWithAuth) {
-            this.graphqlWithAuth = graphql_1.graphql.defaults({
-                headers: {
-                    authorization: `token ${this.inputString('github-token')}`,
-                },
-            });
-        }
+        this.graphqlWithAuth ??= graphql_1.graphql.defaults({
+            headers: {
+                authorization: `token ${this.inputString('github-token')}`,
+            },
+        });
         return this.graphqlWithAuth(query);
     }
     inputString(name) {

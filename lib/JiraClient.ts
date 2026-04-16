@@ -149,7 +149,7 @@ export class JiraClient {
     }
   }
 
-  public async findTransition(issueId: string, transitionName: string): Promise<Transition> {
+  public async findTransition(issueId: string, transitionName: string): Promise<Transition | null> {
     const transitions: Transition[] = (await this.sendRestGetApi(`issue/${issueId}/transitions`))?.transitions ?? [];
     return transitions.find((x) => x.name === transitionName) || null;
   }
@@ -201,7 +201,7 @@ export class JiraClient {
     }
   }
 
-  public async createComponent(projectKey: string, name: string, description: string): Promise<boolean> {
+  public async createComponent(projectKey: string, name: string, description: string | null): Promise<boolean> {
     console.log(`Searching for component '${name}' in project ${projectKey}`);
     const { total, values }: { total: number, values: NamedItem[] } = await this.sendRestGetApi(`project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`);
     if (values.some(x => x.name === name)) {  // values contains matches on partial names and descriptions
@@ -225,7 +225,7 @@ export class JiraClient {
     return await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request) != null;
   }
 
-  public async addIssueRemoteLink(issueId: string, url: string, title: string = null): Promise<void> {
+  public async addIssueRemoteLink(issueId: string, url: string, title: string | null = null): Promise<void> {
     console.log(`${issueId}: Adding remote link ${url}`);
     await this.sendRestPostApi(`issue/${issueId}/remotelink`, { object: { url, title: title ?? url } });
   }
@@ -235,7 +235,7 @@ export class JiraClient {
     return this.sendRestGetApi(`issue/${issueId}/remotelink`);
   }
 
-  public async findAccountId(email: string): Promise<string> {
+  public async findAccountId(email: string | null): Promise<string | null> {
     if (email == null) {
       console.log('Could not find accountId, email is null');
       return null;
@@ -259,7 +259,7 @@ export class JiraClient {
     return this.sendRestGetAgile(`board/${boardId}`);
   }
 
-  public async findSprintId(boardId: number): Promise<number> {
+  public async findSprintId(boardId: number): Promise<number | null> {
     console.log(`Searching for active sprint in board ${boardId}`);
     let { values }: { values: Sprint[] } = await this.sendRestGetAgile(`board/${boardId}/sprint?state=active`);
     values = values.filter((x: Sprint) => x.originBoardId === boardId); // Board filter can contain sprints from other boards
@@ -269,18 +269,18 @@ export class JiraClient {
     }
     else {
       const originalLength = values.length; // .pop() below removes an item from the array
-      const sprint = values.sort((a, b) => a.endDate.localeCompare(b.endDate)).pop();  // There should be exactly one. If not, use the one ending later in case previous iteration was not closed yet.
+      const sprint = values.sort((a, b) => a.endDate.localeCompare(b.endDate)).pop()!;  // There should be exactly one. If not, use the one ending later in case previous iteration was not closed yet.
       console.log(`Found ${originalLength} active sprint(s), using ${sprint.id} ${sprint.name}`);
       return sprint.id;
     }
   }
 
-  public async findTeamByUser(accountId: string): Promise<Team> {
+  public async findTeamByUser(accountId: string): Promise<Team | null> {
     console.log(`Searching for teams of account ${accountId}`);
     return this.findTeam(`membership: { memberIds: "${accountId}" }`, x => true); // No post-filtering
   }
 
-  public async findTeamByName(teamName: string): Promise<Team> {
+  public async findTeamByName(teamName: string): Promise<Team | null> {
     console.log(`Searching for team ${teamName}`);
     return this.findTeam(`query: "${teamName}"`, x => x.name === teamName); // Query returns also partial matches. We need to post-filter them
   }
@@ -291,7 +291,7 @@ export class JiraClient {
     return response?.issues ?? [];
   }
 
-  private async findTeam(queryFilter: string, resultFilter: (x: Team) => boolean): Promise<Team> {
+  private async findTeam(queryFilter: string, resultFilter: (x: Team) => boolean): Promise<Team | null> {
     const nodes = (await this.findTeams(queryFilter)).filter(resultFilter);
     if (nodes.length === 0) {
       console.log(`Could not find team in Jira`);
@@ -306,7 +306,7 @@ export class JiraClient {
 
   private async findTeams(queryFilter: string): Promise<Team[]> {
     const allTeams: Team[] = [];
-    let after: string = null;     // Must be serialized to 'after: null' in the string, because 'after: ""' does not work.
+    let after: string | null = null;     // Must be serialized to 'after: null' in the string, because 'after: ""' does not work.
     let hasNextPage: boolean = true;
     while (hasNextPage) {
       const response: TeamSearchV2Response = await this.sendGraphQL(`
@@ -335,14 +335,16 @@ export class JiraClient {
       } else if (response.errors) {
         console.log(`ERROR: Failed to search for teams. ${JSON.stringify(response.errors, null, 2)}`);
         return [];
-      } else {
+      } else if (response.data.team) {
         const teamData = response.data.team.teamSearchV2;
         for (const team of teamData.nodes) {
-          const id = team.team.id.split('/').pop(); // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
+          const id = team.team.id.split('/').pop()!; // id has format of "ari:cloud:identity::team/3ca60b21-53c7-48e2-a2e2-6e85b39551d0"
           allTeams.push({ id, name: team.team.displayName });
         }
         hasNextPage = teamData.pageInfo.hasNextPage;
         after = teamData.pageInfo.endCursor;
+      } else {
+        hasNextPage = false;
       }
     }
     return allTeams;
