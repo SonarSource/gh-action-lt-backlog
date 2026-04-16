@@ -46,9 +46,10 @@ export abstract class Action {
       await this.execute();
       this.log('Done');
     } catch (ex) {
-      core.setFailed(ex.message);
+      const error = ex as Error;
+      core.setFailed(error.message);
       console.log();
-      console.log(ex.stack);
+      console.log(error.stack);
     }
   }
 

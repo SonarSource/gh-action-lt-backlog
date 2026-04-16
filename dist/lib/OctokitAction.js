@@ -228,7 +228,7 @@ class OctokitAction extends Action_1.Action {
         }
         catch (ex) {
             this.log("Failed to send Slack request");
-            this.log(ex);
+            this.log(ex.toString());
             return null;
         }
     }
