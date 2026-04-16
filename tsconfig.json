@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "nodenext",
     "target": "es2024",
-    "lib": ["es6", "dom"],
+    "lib": [ "es6", "dom" ],
     "sourceMap": true,
-    "newLine":  "lf",
-    "outDir": "./dist",
+    "newLine": "lf",
+    "outDir": "./dist"
   },
   "exclude": [
     "node_modules"
