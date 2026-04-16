@@ -89,10 +89,10 @@ describe('JiraClient', () => {
 }`);
   });
 
-  // ToDo: Remove skip once Sandbox is restored from Prod and .NET Squad exists again
-  it.skip('createIssue', async () => {
+  it('createIssue', async () => {
     const summary = `JiraClient unit test createIssue ${crypto.randomUUID()}`;
-    const sprintId = await findFirstActiveSprintId()
+    const sprintId = await findFirstActiveSprintId();
+    const team = await sut.findTeamByName('.NET Squad');  // Sandbox has different team IDs than production instance
     // The GHA project needs to have all of these on it's create screen in production and sandbox, as production overrides the sandbox once in a while
     const parameters: NewIssueParameters = {
       issuetype: { name: 'Feature' },
@@ -100,7 +100,7 @@ describe('JiraClient', () => {
       parent: { key: 'GHA-37' },
       reporter: { id: '712020:7dcfc909-3fa9-496f-9127-163d8cd0e30f' },  // "Jira Automation". Any user except the "Jira Tech User GitHub" that would be used as a default user assigned by the token 
       description: AtlassianDocument.fromMarkdown('Lorem ipsum'),
-      customfield_10001: '3ca60b21-53c7-48e2-a2e2-6e85b39551d0',  // Patlassian* Team ID - .NET Squad 
+      customfield_10001: team.id,
       customfield_10020: sprintId,                                // Patlassian* Sprint IT - needs an active sprint
     };
     const result = await sut.createIssue('GHA', summary, parameters);
@@ -129,7 +129,7 @@ describe('JiraClient', () => {
           }
         ]
       },
-      customfield_10001: { id: '3ca60b21-53c7-48e2-a2e2-6e85b39551d0' },        // Why would the same field have same structure everywhere anyway?
+      customfield_10001: { id: team.id },        // Why would the same field have same structure everywhere anyway?
       customfield_10020: [{ id: sprintId }],                                    // Why would the same field have same structure everywhere anyway?
     });
   });
