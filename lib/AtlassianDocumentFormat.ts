@@ -90,36 +90,34 @@ export class AdfNode {
   marks?: AdfMark[];
   text?: string;
 
-  public constructor(block: Block = null) {
-    if (block) {
-      this.type = block.type;
-      switch (block.type) {
-        case 'heading': {
-          const level = block.text.indexOf(' ');
-          this.attrs = { level };
-          this.content = AdfNode.parseText(block.text.substring(level + 1));
-          break;
-        }
-        case 'blockquote': {
-          this.content = [
-            {
-              type: 'paragraph',
-              content: AdfNode.parseText(block.text)
-            }
-          ];
-          break;
-        }
-        case 'codeBlock': {
-          this.content = [{ type: 'text', text: block.text }];  // No inner parsing
-          break;
-        }
-        case 'paragraph': {
-          this.content = AdfNode.parseText(block.text);
-          break;
-        }
-        default:
-          throw new Error(`Unsupported block type: ${block.type}`);
+  public constructor(block: Block) {
+    this.type = block.type;
+    switch (block.type) {
+      case 'heading': {
+        const level = block.text.indexOf(' ');
+        this.attrs = { level };
+        this.content = AdfNode.parseText(block.text.substring(level + 1));
+        break;
       }
+      case 'blockquote': {
+        this.content = [
+          {
+            type: 'paragraph',
+            content: AdfNode.parseText(block.text)
+          }
+        ];
+        break;
+      }
+      case 'codeBlock': {
+        this.content = [{ type: 'text', text: block.text }];  // No inner parsing
+        break;
+      }
+      case 'paragraph': {
+        this.content = AdfNode.parseText(block.text);
+        break;
+      }
+      default:
+        throw new Error(`Unsupported block type: ${block.type}`);
     }
   }
 
