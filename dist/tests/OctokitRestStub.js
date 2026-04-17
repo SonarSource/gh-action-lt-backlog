@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,9 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createOctokitRestStub = createOctokitRestStub;
-function createOctokitRestStub(title, body, login = 'test-user') {
+export function createOctokitRestStub(title, body, login = 'test-user') {
     return {
         issues: {
             createComment(params) {

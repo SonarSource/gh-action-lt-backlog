@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,12 +17,10 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.TeamConfigurationData = exports.EngineeringExperienceSquad = void 0;
-exports.EngineeringExperienceSquad = { id: "eb40f25e-3596-4541-b661-cf83e7bc4fa6", name: "Engineering Experience Squad" };
+export const EngineeringExperienceSquad = { id: "eb40f25e-3596-4541-b661-cf83e7bc4fa6", name: "Engineering Experience Squad" };
 // If a new Jira issue is created for a standalone PR, it will be assigned to a sprint from a board defined by this file.
 // If a new team or default board is created, this file should be updated accordingly.
-exports.TeamConfigurationData = [
+export const TeamConfigurationData = [
     { name: "Architecture Squad", boardId: 1561 },
     { name: "Analysis as a Service", boardId: 5313 },
     { name: "Analysis Processing Squad", boardId: 1443 },
@@ -40,7 +37,7 @@ exports.TeamConfigurationData = [
     { name: "DTL Taint", boardId: 4146 },
     { name: "Organization & Reporting Squad", boardId: 1555 },
     { name: "DBD Squad", boardId: 1638 },
-    { name: exports.EngineeringExperienceSquad.name, boardId: 1551 },
+    { name: EngineeringExperienceSquad.name, boardId: 1551 },
     { name: "Front-End Engineering", boardId: 1444 },
     { name: "IDE Experience Squad", boardId: 1527 },
     { name: "Identity Squad", boardId: 1448 },

@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,14 +17,14 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-const Configuration_1 = require("./Configuration");
+import { describe, expect, it } from '@jest/globals';
+import { Config } from './Configuration.js';
 describe('Configuration', () => {
     it('findTeam finds team by name', () => {
-        expect(Configuration_1.Config.findTeam('Architecture Squad')).toEqual({ name: 'Architecture Squad', boardId: 1561 }); // Any squad with boardId
+        expect(Config.findTeam('Architecture Squad')).toEqual({ name: 'Architecture Squad', boardId: 1561 }); // Any squad with boardId
     });
     it('findTeam returns null', () => {
-        expect(Configuration_1.Config.findTeam('Nonexistent')).toBeNull();
+        expect(Config.findTeam('Nonexistent')).toBeNull();
     });
 });
 //# sourceMappingURL=Configuration.test.js.map

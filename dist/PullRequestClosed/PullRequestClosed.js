@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,10 +17,8 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.PullRequestClosed = void 0;
-const PullRequestAction_1 = require("../lib/PullRequestAction");
-class PullRequestClosed extends PullRequestAction_1.PullRequestAction {
+import { PullRequestAction } from '../lib/PullRequestAction.js';
+export class PullRequestClosed extends PullRequestAction {
     async processJiraIssue(issueId) {
         if (this.isEngXpSquad) { // Can't auto-close auto-created issues, the reporter is set to the actual user
             const pr = await this.loadPullRequest(this.payload.pull_request.number);
@@ -67,5 +64,4 @@ class PullRequestClosed extends PullRequestAction_1.PullRequestAction {
             : '10001'; // "Won't do"
     }
 }
-exports.PullRequestClosed = PullRequestClosed;
 //# sourceMappingURL=PullRequestClosed.js.map

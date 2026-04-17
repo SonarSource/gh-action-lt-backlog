@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,12 +17,10 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.NewIssueData = void 0;
-const TeamConfiguration_1 = require("../Data/TeamConfiguration");
-const Configuration_1 = require("./Configuration");
-const Constants_1 = require("./Constants");
-class NewIssueData {
+import { EngineeringExperienceSquad } from "../Data/TeamConfiguration.js";
+import { Config } from "./Configuration.js";
+import { JIRA_ISSUE_PATTERN } from "./Constants.js";
+export class NewIssueData {
     projectKey;
     accountId;
     assigneeId;
@@ -68,16 +65,16 @@ class NewIssueData {
         if (accountId) {
             parameters.reporter = { id: accountId };
         }
-        parameters.customfield_10001 = TeamConfiguration_1.EngineeringExperienceSquad.id;
+        parameters.customfield_10001 = EngineeringExperienceSquad.id;
         if (!pr.isRenovate() && projectKey !== "PREQ") {
-            const sprintId = await this.findSprintId(jira, TeamConfiguration_1.EngineeringExperienceSquad.name);
+            const sprintId = await this.findSprintId(jira, EngineeringExperienceSquad.name);
             parameters.customfield_10020 = sprintId;
         }
         parameters.labels = pr.isRenovate()
             ? ['dvi-created-by-automation', 'dvi-renovate']
             : ['dvi-created-by-automation'];
         if (projectKey === 'BUILD') { // PREQ is handled by in-Jira automation, with hardcoded value
-            parameters.parent = await this.findEvergreenEpic(jira, TeamConfiguration_1.EngineeringExperienceSquad);
+            parameters.parent = await this.findEvergreenEpic(jira, EngineeringExperienceSquad);
         }
         return new NewIssueData(projectKey, accountId, projectKey === 'PREQ' ? null : accountId, parameters); // GHA-86 Leave PREQ unassigned
     }
@@ -92,7 +89,7 @@ class NewIssueData {
         }
         else if (accountId) {
             const team = await jira.findTeamByUser(accountId);
-            return team?.name === TeamConfiguration_1.EngineeringExperienceSquad.name ? 'BUILD' : 'PREQ';
+            return team?.name === EngineeringExperienceSquad.name ? 'BUILD' : 'PREQ';
         }
         else { // renovate and similar bots
             return 'BUILD';
@@ -141,7 +138,7 @@ class NewIssueData {
         return null;
     }
     static findMentionedIssues(pr) {
-        const mentionedIssues = pr.body?.match(Constants_1.JIRA_ISSUE_PATTERN) ?? [];
+        const mentionedIssues = pr.body?.match(JIRA_ISSUE_PATTERN) ?? [];
         console.log(mentionedIssues.length > 0 ? `Found mentioned issues: ${mentionedIssues}` : 'No mentioned issues found');
         return new Set(mentionedIssues);
     }
@@ -163,7 +160,7 @@ class NewIssueData {
         return jira.findTeamByUser(project.lead.accountId);
     }
     static async findSprintId(jira, teamName) {
-        const team = Configuration_1.Config.findTeam(teamName);
+        const team = Config.findTeam(teamName);
         if (team?.boardId) {
             return jira.findSprintId(team.boardId);
         }
@@ -190,5 +187,4 @@ class NewIssueData {
         }
     }
 }
-exports.NewIssueData = NewIssueData;
 //# sourceMappingURL=NewIssueData.js.map

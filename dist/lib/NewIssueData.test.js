@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,11 +17,11 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-const expect_1 = require("expect");
-const NewIssueData_1 = require("../lib/NewIssueData");
-const JiraClientStub_1 = require("../tests/JiraClientStub");
-const LogTester_1 = require("../tests/LogTester");
+import { afterEach, beforeEach, describe, it } from '@jest/globals';
+import { expect } from 'expect';
+import { NewIssueData } from '../lib/NewIssueData.js';
+import { jiraClientStub } from '../tests/JiraClientStub.js';
+import { LogTester } from '../tests/LogTester.js';
 function createPullRequest(title, body, repo = 'repo') {
     return {
         number: 42,
@@ -62,19 +61,19 @@ function createExpectedWithoutAccount() {
 describe('NewIssueData', () => {
     let logTester;
     beforeEach(() => {
-        logTester = new LogTester_1.LogTester();
+        logTester = new LogTester();
     });
     afterEach(() => {
         logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
     });
     it('create standalone PR', async () => {
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
     });
     it('create standalone PR with body null', async () => {
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', null), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', null), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
     });
     it('create fixed issue', async () => {
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('KEY-1234 Title', 'Body'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('KEY-1234 Title', 'Body'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
     });
     it('create projectKey parent Epic MMF', async () => {
         const expected = {
@@ -88,7 +87,7 @@ describe('NewIssueData', () => {
             },
             projectKey: 'KEY'
         };
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Part of Epic MMF-1111'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(expected);
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of Epic MMF-1111'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(expected);
     });
     it('create projectKey parent Epic project', async () => {
         const expected = {
@@ -102,10 +101,10 @@ describe('NewIssueData', () => {
             },
             projectKey: 'KEY'
         };
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Part of Epic KEY-1111'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(expected);
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of Epic KEY-1111'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(expected);
     });
     it('create projectKey parent Sub-task', async () => {
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Part of Sub-task KEY-5555'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of Sub-task KEY-5555'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
     });
     it('create projectKey parent Issue', async () => {
         const expected = {
@@ -118,11 +117,11 @@ describe('NewIssueData', () => {
             },
             projectKey: 'KEY'
         };
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Part of work item KEY-1234'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(expected);
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of work item KEY-1234'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(expected);
     });
     it('create projectKey not configured standalone PR', async () => {
         // RSPEC repo without parent ticket
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Body'), '', '', 'user@sonarsource.com', '')).toBeNull();
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Body'), '', '', 'user@sonarsource.com', '')).toBeNull();
     });
     it('create projectKey not configured with parent', async () => {
         const expected = {
@@ -135,7 +134,7 @@ describe('NewIssueData', () => {
             },
             projectKey: 'KEY'
         };
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Part of work item KEY-1234'), '', '', 'user@sonarsource.com', '')).toEqual(expected);
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of work item KEY-1234'), '', '', 'user@sonarsource.com', '')).toEqual(expected);
     });
     it('create parent Evergreen Epic is null without team', async () => {
         const expected = {
@@ -148,7 +147,7 @@ describe('NewIssueData', () => {
             },
             projectKey: 'NOPROJECTLEAD'
         };
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Body'), 'NOPROJECTLEAD', '', 'renovate@renovate.com', 'nonexistent-fallback-team')).toEqual(expected);
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Body'), 'NOPROJECTLEAD', '', 'renovate@renovate.com', 'nonexistent-fallback-team')).toEqual(expected);
     });
     it('create parent Evergreen Epic is null without epics', async () => {
         const expected = {
@@ -163,7 +162,7 @@ describe('NewIssueData', () => {
             },
             projectKey: 'KEY'
         };
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '', 'team.without.evergreen.epics@sonarsource.com', '')).toEqual(expected);
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '', 'team.without.evergreen.epics@sonarsource.com', '')).toEqual(expected);
     });
     it('create with additional fields', async () => {
         const expected = {
@@ -179,18 +178,18 @@ describe('NewIssueData', () => {
             },
             projectKey: 'KEY'
         };
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '{ "components": [ { "name": "Some Component" } ], "labels": ["SomeLabel"] }', 'user@sonarsource.com', '')).toEqual(expected);
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '{ "components": [ { "name": "Some Component" } ], "labels": ["SomeLabel"] }', 'user@sonarsource.com', '')).toEqual(expected);
     });
     it('create with additional fields custom issue type', async () => {
         const expected = createExpected();
         expected.additionalFields.issuetype.name = 'Custom Issue Type';
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '{ "issuetype": { "name": "Custom Issue Type" } }', 'user@sonarsource.com', '')).toEqual(expected);
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '{ "issuetype": { "name": "Custom Issue Type" } }', 'user@sonarsource.com', '')).toEqual(expected);
     });
     it('create renovate ignores parent', async () => {
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Renovate PR', 'FOREIGN-1234 and NET-1111'), 'KEY', '', 'renovate@renovate.com', '')).toEqual(createExpectedWithoutAccount());
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'FOREIGN-1234 and NET-1111'), 'KEY', '', 'renovate@renovate.com', '')).toEqual(createExpectedWithoutAccount());
     });
     it('create dependabot ignores parent', async () => {
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Dependabot PR', 'FOREIGN-1234 and NET-1111'), 'KEY', '', 'dependabot@dependabot.com', '')).toEqual(createExpectedWithoutAccount());
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Dependabot PR', 'FOREIGN-1234 and NET-1111'), 'KEY', '', 'dependabot@dependabot.com', '')).toEqual(createExpectedWithoutAccount());
     });
     it('create with fallbackTeam valid', async () => {
         const expected = {
@@ -204,13 +203,13 @@ describe('NewIssueData', () => {
             },
             projectKey: 'KEY'
         };
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', 'renovate@renovate.com', 'fallback-team')).toEqual(expected);
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', 'renovate@renovate.com', 'fallback-team')).toEqual(expected);
     });
     it('create with fallbackTeam nonexistent', async () => {
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', 'renovate@renovate.com', 'nonexistent-fallback-team')).toEqual(createExpectedWithoutAccount());
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', 'renovate@renovate.com', 'nonexistent-fallback-team')).toEqual(createExpectedWithoutAccount());
     });
     it('create with project lead team', async () => {
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', 'renovate@renovate.com', '')).toEqual(createExpectedWithoutAccount());
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', 'renovate@renovate.com', '')).toEqual(createExpectedWithoutAccount());
     });
     it('create with no team', async () => {
         const expected = {
@@ -223,7 +222,7 @@ describe('NewIssueData', () => {
             },
             projectKey: 'NOTEAM'
         };
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.create(JiraClientStub_1.jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'NOTEAM', '', 'renovate@renovate.com', '')).toEqual(expected);
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'NOTEAM', '', 'renovate@renovate.com', '')).toEqual(expected);
     });
     it('createForEngExp internal contributor', async () => {
         const expected = {
@@ -239,7 +238,7 @@ describe('NewIssueData', () => {
             },
             projectKey: 'BUILD'
         };
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.createForEngExp(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Body'), 'eng.exp@sonarsource.com')).toEqual(expected);
+        expect(await NewIssueData.createForEngExp(jiraClientStub, createPullRequest('Title', 'Body'), 'eng.exp@sonarsource.com')).toEqual(expected);
     });
     it('createForEngExp external contributor', async () => {
         const expected = {
@@ -253,7 +252,7 @@ describe('NewIssueData', () => {
             },
             projectKey: 'PREQ'
         };
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.createForEngExp(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Body'), 'user@sonarsource.com')).toEqual(expected);
+        expect(await NewIssueData.createForEngExp(jiraClientStub, createPullRequest('Title', 'Body'), 'user@sonarsource.com')).toEqual(expected);
     });
     it('createForEngExp renovate', async () => {
         const expected = {
@@ -267,7 +266,7 @@ describe('NewIssueData', () => {
             },
             projectKey: 'BUILD'
         };
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.createForEngExp(JiraClientStub_1.jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'renovate@renovate.com')).toEqual(expected);
+        expect(await NewIssueData.createForEngExp(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'renovate@renovate.com')).toEqual(expected);
     });
     it('createForEngExp parent-oss project', async () => {
         const expected = {
@@ -282,7 +281,7 @@ describe('NewIssueData', () => {
             },
             projectKey: 'PARENTOSS'
         };
-        (0, expect_1.expect)(await NewIssueData_1.NewIssueData.createForEngExp(JiraClientStub_1.jiraClientStub, createPullRequest('Title', 'Body', 'parent-oss'), 'user@sonarsource.com')).toEqual(expected);
+        expect(await NewIssueData.createForEngExp(jiraClientStub, createPullRequest('Title', 'Body', 'parent-oss'), 'user@sonarsource.com')).toEqual(expected);
     });
 });
 //# sourceMappingURL=NewIssueData.test.js.map

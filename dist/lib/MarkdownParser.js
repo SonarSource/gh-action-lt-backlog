@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,9 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.MarkdownParser = void 0;
-class MarkdownParser {
+export class MarkdownParser {
     lines;
     nextIndex = 0;
     constructor(markdown) {
@@ -88,5 +85,4 @@ class MarkdownParser {
         return line.startsWith('>');
     }
 }
-exports.MarkdownParser = MarkdownParser;
 //# sourceMappingURL=MarkdownParser.js.map

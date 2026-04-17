@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,10 +17,8 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.PullRequestAction = void 0;
-const OctokitAction_1 = require("./OctokitAction");
-class PullRequestAction extends OctokitAction_1.OctokitAction {
+import { OctokitAction } from './OctokitAction.js';
+export class PullRequestAction extends OctokitAction {
     async execute() {
         const issueIds = await this.fixedJiraIssues();
         if (issueIds.length === 0) {
@@ -46,5 +43,4 @@ class PullRequestAction extends OctokitAction_1.OctokitAction {
             : [];
     }
 }
-exports.PullRequestAction = PullRequestAction;
 //# sourceMappingURL=PullRequestAction.js.map

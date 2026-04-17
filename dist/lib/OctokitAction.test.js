@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,17 +17,17 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-const LogTester_1 = require("../tests/LogTester");
-const JiraClientStub_1 = require("../tests/JiraClientStub");
-const OctokitRestStub_1 = require("../tests/OctokitRestStub");
-const OctokitAction_1 = require("./OctokitAction");
-const node_assert_1 = require("node:assert");
-class TestOctokitAction extends OctokitAction_1.OctokitAction {
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { LogTester } from '../tests/LogTester.js';
+import { jiraClientStub } from '../tests/JiraClientStub.js';
+import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
+import { OctokitAction } from './OctokitAction.js';
+import { fail } from 'node:assert';
+class TestOctokitAction extends OctokitAction {
     constructor() {
         super();
-        this.jira = { ...JiraClientStub_1.jiraClientStub }; // Expanded copy, we'll be modifying it in these tests
-        this.rest = (0, OctokitRestStub_1.createOctokitRestStub)('PR title');
+        this.jira = { ...jiraClientStub }; // Expanded copy, we'll be modifying it in these tests
+        this.rest = createOctokitRestStub('PR title');
     }
     async execute() {
         this.log('Invoked execute()');
@@ -40,7 +39,7 @@ describe('OctokitAction', () => {
     let logTester;
     let sut; // TestOctokitAction, but with access to protected methods
     beforeEach(() => {
-        logTester = new LogTester_1.LogTester();
+        logTester = new LogTester();
         const token = process.env["GITHUB_TOKEN"];
         if (token) {
             for (const key of Object.keys(process.env)) {
@@ -54,7 +53,7 @@ describe('OctokitAction', () => {
             sut = new TestOctokitAction();
         }
         else {
-            (0, node_assert_1.fail)("OctokitAction tests require GITHUB_TOKEN environment variables to be set.");
+            fail("OctokitAction tests require GITHUB_TOKEN environment variables to be set.");
         }
     });
     afterEach(() => {

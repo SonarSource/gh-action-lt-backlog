@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,10 +17,10 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-const ToggleLockBranch_1 = require("./ToggleLockBranch");
-const LogTester_1 = require("../tests/LogTester");
-const OctokitRestStub_1 = require("../tests/OctokitRestStub");
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
+import { ToggleLockBranch } from './ToggleLockBranch.js';
+import { LogTester } from '../tests/LogTester.js';
+import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
 function sendGraphQLStub(query) {
     const graphQL = [
         {
@@ -188,9 +187,9 @@ function sendGraphQLStub(query) {
     }
 }
 async function runAction() {
-    const action = new ToggleLockBranch_1.ToggleLockBranch();
+    const action = new ToggleLockBranch();
     action.sendGraphQL = sendGraphQLStub;
-    action.rest = (0, OctokitRestStub_1.createOctokitRestStub)("Irrelevant");
+    action.rest = createOctokitRestStub("Irrelevant");
     action.sendSlackPost = async function (url, jsonRequest) {
         console.log(`Invoked sendSlackPost('${url}', ${JSON.stringify(jsonRequest)}`);
         return {};
@@ -200,7 +199,7 @@ async function runAction() {
 describe('ToggleLockBranch', () => {
     let logTester;
     beforeEach(() => {
-        logTester = new LogTester_1.LogTester();
+        logTester = new LogTester();
         process.env['GITHUB_REPOSITORY'] = 'test-owner/test-repo';
         process.env['INPUT_GITHUB-TOKEN'] = 'fake';
     });

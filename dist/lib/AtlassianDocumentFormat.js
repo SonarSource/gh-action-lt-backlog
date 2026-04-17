@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,11 +17,9 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AdfNode = exports.AtlassianDocument = void 0;
-const MarkdownParser_1 = require("./MarkdownParser");
-const MarkdownTextParser_1 = require("./MarkdownTextParser");
-class AtlassianDocument {
+import { MarkdownParser } from "./MarkdownParser.js";
+import { MarkdownTextParser } from "./MarkdownTextParser.js";
+export class AtlassianDocument {
     type = 'doc';
     version = 1;
     content;
@@ -31,7 +28,7 @@ class AtlassianDocument {
     }
     static fromMarkdown(markdown) {
         const contents = [];
-        const parser = new MarkdownParser_1.MarkdownParser(markdown);
+        const parser = new MarkdownParser(markdown);
         let block;
         while (block = parser.readBlock()) {
             contents.push(new AdfNode(block));
@@ -49,8 +46,7 @@ class AtlassianDocument {
         }
     }
 }
-exports.AtlassianDocument = AtlassianDocument;
-class AdfNode {
+export class AdfNode {
     type;
     content;
     attrs;
@@ -88,7 +84,7 @@ class AdfNode {
     }
     static parseText(text) {
         const nodes = [];
-        const parser = new MarkdownTextParser_1.MarkdownTextParser(text);
+        const parser = new MarkdownTextParser(text);
         let block;
         while (block = parser.readBlock()) {
             switch (block.type) {
@@ -122,5 +118,4 @@ class AdfNode {
         return nodes;
     }
 }
-exports.AdfNode = AdfNode;
 //# sourceMappingURL=AtlassianDocumentFormat.js.map

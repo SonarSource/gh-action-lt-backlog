@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,8 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-const LogPayload_1 = require("./LogPayload");
-const action = new LogPayload_1.LogPayload();
+import { LogPayload } from "./LogPayload.js";
+const action = new LogPayload();
 action.run();
 //# sourceMappingURL=Index.js.map

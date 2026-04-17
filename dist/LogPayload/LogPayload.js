@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,15 +17,12 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.LogPayload = void 0;
-const Action_1 = require("../lib/Action");
-class LogPayload extends Action_1.Action {
+import { Action } from '../lib/Action.js';
+export class LogPayload extends Action {
     async execute() {
         this.log('--- Event payload ---');
         this.logSerialized(this.payload);
         this.log('----------');
     }
 }
-exports.LogPayload = LogPayload;
 //# sourceMappingURL=LogPayload.js.map

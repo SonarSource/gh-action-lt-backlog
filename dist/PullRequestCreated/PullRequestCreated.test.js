@@ -1,4 +1,3 @@
-"use strict";
 /*
 * Backlog Automation
 * Copyright (C) SonarSource Sàrl
@@ -18,47 +17,14 @@
 * along with this program; if not, write to the Free Software Foundation,
 * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-const core = __importStar(require("@actions/core"));
-const github = __importStar(require("@actions/github"));
-const PullRequestCreated_1 = require("./PullRequestCreated");
-const LogTester_1 = require("../tests/LogTester");
-const JiraClientStub_1 = require("../tests/JiraClientStub");
-const OctokitRestStub_1 = require("../tests/OctokitRestStub");
-class TestPullRequestCreated extends PullRequestCreated_1.PullRequestCreated {
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import * as core from '@actions/core';
+import * as github from '@actions/github';
+import { PullRequestCreated } from './PullRequestCreated.js';
+import { LogTester } from '../tests/LogTester.js';
+import { jiraClientStub } from '../tests/JiraClientStub.js';
+import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
+class TestPullRequestCreated extends PullRequestCreated {
     async findEmail(login) {
         switch (login) {
             case 'test-user': return 'user@sonarsource.com';
@@ -70,15 +36,15 @@ class TestPullRequestCreated extends PullRequestCreated_1.PullRequestCreated {
 async function runAction(jiraProject, title, body, user = 'test-user') {
     process.env['INPUT_JIRA-PROJECT'] = jiraProject;
     const action = new TestPullRequestCreated();
-    action.jira = JiraClientStub_1.jiraClientStub;
-    action.rest = (0, OctokitRestStub_1.createOctokitRestStub)(title, body, user);
+    action.jira = jiraClientStub;
+    action.rest = createOctokitRestStub(title, body, user);
     await action.run();
 }
 describe('PullRequestCreated', () => {
     const originalKeys = Object.keys(process.env);
     let logTester;
     beforeEach(() => {
-        logTester = new LogTester_1.LogTester();
+        logTester = new LogTester();
         for (const key of Object.keys(process.env)) {
             if (!originalKeys.includes(key)) {
                 // Otherwise, changes form previous UT are propagated to the next one
@@ -113,7 +79,7 @@ describe('PullRequestCreated', () => {
         process.env['INPUT_JIRA-PROJECT'] = 'FORBIDDEN';
         const logSpy = jest.spyOn(core, 'setFailed').mockImplementation(() => { });
         try {
-            const action = new PullRequestCreated_1.PullRequestCreated();
+            const action = new PullRequestCreated();
             await action.run();
             expect(logSpy).toHaveBeenCalledWith('Action failed: jira-project input is not supported when is-eng-xp-squad is set.');
         }
@@ -126,7 +92,7 @@ describe('PullRequestCreated', () => {
         process.env['INPUT_ADDITIONAL-FIELDS'] = '{ "Field": "Value" }';
         const logSpy = jest.spyOn(core, 'setFailed').mockImplementation(() => { });
         try {
-            const action = new PullRequestCreated_1.PullRequestCreated();
+            const action = new PullRequestCreated();
             await action.run();
             expect(logSpy).toHaveBeenCalledWith('Action failed: additional-fields input is not supported when is-eng-xp-squad is set.');
         }
@@ -136,14 +102,14 @@ describe('PullRequestCreated', () => {
     });
     it('DO NOT MERGE PR title skips the action', async () => {
         github.context.payload.pull_request.title = "Prefix [DO not MeRGe{: Test PR";
-        const action = new PullRequestCreated_1.PullRequestCreated();
+        const action = new PullRequestCreated();
         action.log = jest.fn();
         await action.run();
         expect(action.log).toHaveBeenCalledWith("Done");
         expect(action.log).toHaveBeenCalledWith("'DO NOT MERGE' found in the PR title, skipping the action.");
     });
     it('No PR skips the action', async () => {
-        class TestPullRequestCreated extends PullRequestCreated_1.PullRequestCreated {
+        class TestPullRequestCreated extends PullRequestCreated {
             async loadPullRequest(pull_number) {
                 return null;
             }

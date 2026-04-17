@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,25 +17,23 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ImportIssue = void 0;
-const AtlassianDocumentFormat_1 = require("../lib/AtlassianDocumentFormat");
-const Constants_1 = require("../lib/Constants");
-const OctokitAction_1 = require("../lib/OctokitAction");
-class ImportIssue extends OctokitAction_1.OctokitAction {
+import { AtlassianDocument } from '../lib/AtlassianDocumentFormat.js';
+import { JIRA_DOMAIN } from '../lib/Constants.js';
+import { OctokitAction } from '../lib/OctokitAction.js';
+export class ImportIssue extends OctokitAction {
     async execute() {
         const jiraProject = this.inputString('jira-project');
         const issue = this.payload.issue;
         if (!issue.title.startsWith(`${jiraProject}-`)) {
             const id = await this.importIssue(jiraProject, issue);
-            await this.addComment(issue.number, `Internal ticket [${id}](${Constants_1.JIRA_DOMAIN}/browse/${id})`);
+            await this.addComment(issue.number, `Internal ticket [${id}](${JIRA_DOMAIN}/browse/${id})`);
         }
     }
     async importIssue(jiraProject, issue) {
         console.log(`Importing #${issue.number}`);
         const parameters = {
             issuetype: { name: this.issueType(issue) },
-            description: AtlassianDocumentFormat_1.AtlassianDocument.fromMarkdown(issue.body ?? ''),
+            description: AtlassianDocument.fromMarkdown(issue.body ?? ''),
         };
         const id = await this.jira.createIssue(jiraProject, issue.title, parameters);
         console.log(`Created ${id}`);
@@ -63,5 +60,4 @@ class ImportIssue extends OctokitAction_1.OctokitAction {
         return issue.labels.some(x => typeof x === 'object' && x.name === label);
     }
 }
-exports.ImportIssue = ImportIssue;
 //# sourceMappingURL=ImportIssue.js.map

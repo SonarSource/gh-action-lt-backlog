@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,8 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-const PullRequestClosed_1 = require("./PullRequestClosed");
-const action = new PullRequestClosed_1.PullRequestClosed();
+import { PullRequestClosed } from "./PullRequestClosed.js";
+const action = new PullRequestClosed();
 action.run();
 //# sourceMappingURL=Index.js.map

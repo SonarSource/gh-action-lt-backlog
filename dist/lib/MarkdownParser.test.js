@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,21 +17,21 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-const MarkdownParser_1 = require("./MarkdownParser");
+import { describe, expect, it } from '@jest/globals';
+import { MarkdownParser } from './MarkdownParser.js';
 describe('MarkdownParser', () => {
     it('parses paragraph', () => {
-        const parser = new MarkdownParser_1.MarkdownParser('Lorem ipsum\nDolor sit amet');
+        const parser = new MarkdownParser('Lorem ipsum\nDolor sit amet');
         expect(parser.readBlock()).toEqual({ type: 'paragraph', text: 'Lorem ipsum\nDolor sit amet' });
         expect(parser.readBlock()).toBeNull();
     });
     it('parses paragraph with inner content', () => {
-        const parser = new MarkdownParser_1.MarkdownParser('Text `snippet` and [link](#url).');
+        const parser = new MarkdownParser('Text `snippet` and [link](#url).');
         expect(parser.readBlock()).toEqual({ type: 'paragraph', text: 'Text `snippet` and [link](#url).' });
         expect(parser.readBlock()).toBeNull();
     });
     it('parses headings', () => {
-        const parser = new MarkdownParser_1.MarkdownParser(`
+        const parser = new MarkdownParser(`
 # Heading 1
 ## Heading 2
 ### Heading 3
@@ -53,7 +52,7 @@ describe('MarkdownParser', () => {
         expect(parser.readBlock()).toBeNull();
     });
     it('parses code block', () => {
-        const parser = new MarkdownParser_1.MarkdownParser(`
+        const parser = new MarkdownParser(`
 \`\`\`vbnet
 VB.NET
 \`\`\`
@@ -77,7 +76,7 @@ No language
         expect(parser.readBlock()).toBeNull();
     });
     it('parses blockquote', () => {
-        const parser = new MarkdownParser_1.MarkdownParser(`
+        const parser = new MarkdownParser(`
 > Single line
 
 > Two
@@ -98,7 +97,7 @@ No language
         expect(parser.readBlock()).toBeNull();
     });
     it('parses mixed content', () => {
-        const parser = new MarkdownParser_1.MarkdownParser(`
+        const parser = new MarkdownParser(`
 # Heading 1
 
 Intro \`snippet\` and [link](#url).
@@ -129,7 +128,7 @@ Code comment
         expect(parser.readBlock()).toBeNull();
     });
     it('skips empty lines before blocks', () => {
-        const parser = new MarkdownParser_1.MarkdownParser(`
+        const parser = new MarkdownParser(`
 
 
 # Heading preceded by empty lines
@@ -144,7 +143,7 @@ Paragraph text preceded and followed by empty lines.
         expect(parser.readBlock()).toBeNull();
     });
     it('handles empty string', () => {
-        const parser = new MarkdownParser_1.MarkdownParser('');
+        const parser = new MarkdownParser('');
         expect(parser.readBlock()).toEqual({ type: 'paragraph', text: '' });
         expect(parser.readBlock()).toBeNull();
     });
