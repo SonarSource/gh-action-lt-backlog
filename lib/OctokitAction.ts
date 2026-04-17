@@ -20,21 +20,19 @@
 
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import * as graphqlTypes from '@octokit/graphql/dist-types/types.js';
-import { GitHub } from '@actions/github/lib/utils.js';
+import type { Api } from '@octokit/plugin-rest-endpoint-methods';
 import { Action } from './Action.js';
-import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types.js';
 import { PullRequest, IssueComment, addPullRequestExtensions, Issue } from './OctokitTypes.js';
 import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
 import { JiraClient } from './JiraClient.js';
 import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN } from './Constants.js';
 
 export abstract class OctokitAction extends Action {
-  public readonly rest: RestEndpointMethods;
-  protected readonly octokit: InstanceType<typeof GitHub>;
+  public readonly rest: Api['rest'];
+  protected readonly octokit: ReturnType<typeof github.getOctokit>;
   protected readonly jira: JiraClient;
   protected readonly isEngXpSquad: boolean;
-  private graphqlWithAuth: graphqlTypes.graphql | null = null;
+  private graphqlWithAuth: typeof graphql | null = null;
 
   constructor() {
     super();

@@ -18,9 +18,9 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types.js';
+import type { Api } from '@octokit/plugin-rest-endpoint-methods';
 
-export function createOctokitRestStub(title: string, body?: string | null, login: string = 'test-user'): RestEndpointMethods {
+export function createOctokitRestStub(title: string, body?: string | null, login: string = 'test-user'): Api['rest'] {
   return {
     issues: {
       createComment(params: any): void {
@@ -68,5 +68,5 @@ export function createOctokitRestStub(title: string, body?: string | null, login
         console.log(`Invoked rest.pulls.update(${JSON.stringify(params)})`);
       }
     }
-  } as RestEndpointMethods;
+  } as Api['rest'];
 }
