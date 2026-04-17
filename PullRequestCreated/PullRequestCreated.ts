@@ -107,7 +107,7 @@ export class PullRequestCreated extends OctokitAction {
   }
 
   private cleanupWhitespace(value: string): string {
-    return value.replace(/\s\s+/g, " ").trim();  // Mainly remove triple space between issue ID and title when copying from Jira
+    return value.replaceAll(/\s\s+/g, " ").trim();  // Mainly remove triple space between issue ID and title when copying from Jira
   }
 
   private async addLinkedIssuesAsComment(pr: PullRequest, linkedIssues: string[]): Promise<void> {

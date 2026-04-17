@@ -176,8 +176,8 @@ function sendGraphQLStub(query) {
             response: {}
         },
     ];
-    const trimmedQuery = query.replace(/^\s+/gm, '');
-    const request = graphQL.find(x => x.query.replace(/^\s+/gm, '') === trimmedQuery);
+    const trimmedQuery = query.replaceAll(/^\s+/gm, '');
+    const request = graphQL.find(x => x.query.replaceAll(/^\s+/gm, '') === trimmedQuery);
     if (request) {
         console.log(`Invoked sendGraphQL ${request.name}`);
         return request.response;

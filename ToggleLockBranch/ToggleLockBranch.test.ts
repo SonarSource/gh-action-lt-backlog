@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { afterEach, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 import { ToggleLockBranch } from './ToggleLockBranch.js';
 import { LogTester } from '../tests/LogTester.js';
 import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
@@ -179,8 +179,8 @@ function sendGraphQLStub(query: string): any {
       response: {}
     },
   ];
-  const trimmedQuery = query.replace(/^\s+/gm, '');
-  const request = graphQL.find(x => x.query.replace(/^\s+/gm, '') === trimmedQuery);
+  const trimmedQuery = query.replaceAll(/^\s+/gm, '');
+  const request = graphQL.find(x => x.query.replaceAll(/^\s+/gm, '') === trimmedQuery);
   if (request) {
     console.log(`Invoked sendGraphQL ${request.name}`);
     return request.response;
