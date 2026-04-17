@@ -18,7 +18,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { MarkdownParser } from './MarkdownParser';
+import { describe, expect, it } from '@jest/globals';
+import { MarkdownParser } from './MarkdownParser.js';
 
 describe('MarkdownParser', () => {
   it('parses paragraph', () => {

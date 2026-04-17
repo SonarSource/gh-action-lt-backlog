@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { Team } from "../lib/Team";
+import { Team } from "../lib/Team.js";
 
 export interface TeamConfiguration {
   name: string;

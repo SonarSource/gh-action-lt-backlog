@@ -18,11 +18,11 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { AtlassianDocument } from '../lib/AtlassianDocumentFormat';
-import { JIRA_DOMAIN } from '../lib/Constants';
-import { NewIssueParameters } from '../lib/NewIssueParameters';
-import { OctokitAction } from '../lib/OctokitAction';
-import { Issue } from '../lib/OctokitTypes';
+import { AtlassianDocument } from '../lib/AtlassianDocumentFormat.js';
+import { JIRA_DOMAIN } from '../lib/Constants.js';
+import { NewIssueParameters } from '../lib/NewIssueParameters.js';
+import { OctokitAction } from '../lib/OctokitAction.js';
+import { Issue } from '../lib/OctokitTypes.js';
 
 export class ImportIssue extends OctokitAction {
   protected async execute(): Promise<void> {

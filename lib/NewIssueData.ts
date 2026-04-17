@@ -18,13 +18,13 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { EngineeringExperienceSquad } from "../Data/TeamConfiguration";
-import { Config } from "./Configuration";
-import { JIRA_ISSUE_PATTERN } from "./Constants";
-import { NewIssueParameters } from "./NewIssueParameters";
-import { JiraClient } from "./JiraClient";
-import { PullRequest } from "./OctokitTypes";
-import { Team } from "./Team";
+import { EngineeringExperienceSquad } from "../Data/TeamConfiguration.js";
+import { Config } from "./Configuration.js";
+import { JIRA_ISSUE_PATTERN } from "./Constants.js";
+import { NewIssueParameters } from "./NewIssueParameters.js";
+import { JiraClient } from "./JiraClient.js";
+import { PullRequest } from "./OctokitTypes.js";
+import { Team } from "./Team.js";
 
 export class NewIssueData {
   public readonly projectKey: string;

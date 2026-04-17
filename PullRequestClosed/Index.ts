@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { PullRequestClosed } from "./PullRequestClosed";
+import { PullRequestClosed } from "./PullRequestClosed.js";
 
 const action = new PullRequestClosed();
 action.run();

@@ -18,7 +18,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { Config } from './Configuration';
+import { describe, expect, it } from '@jest/globals';
+import { Config } from './Configuration.js';
 
 describe('Configuration', () => {
   it('findTeam finds team by name', () => {

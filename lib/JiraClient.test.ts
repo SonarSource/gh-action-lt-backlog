@@ -18,14 +18,15 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { AtlassianDocument } from './AtlassianDocumentFormat';
-import { JiraClient } from './JiraClient';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { AtlassianDocument } from './AtlassianDocumentFormat.js';
+import { JiraClient } from './JiraClient.js';
 import { fail } from 'node:assert';
-import { NewIssueParameters } from './NewIssueParameters';
-import { EngineeringExperienceSquad, TeamConfigurationData } from '../Data/TeamConfiguration';
-import { Config } from './Configuration';
-import { LogTester } from '../tests/LogTester';
-import { JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID } from './Constants';
+import { NewIssueParameters } from './NewIssueParameters.js';
+import { EngineeringExperienceSquad, TeamConfigurationData } from '../Data/TeamConfiguration.js';
+import { Config } from './Configuration.js';
+import { LogTester } from '../tests/LogTester.js';
+import { JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID } from './Constants.js';
 
 const sandboxDomain = 'https://sonarsource-sandbox-608.atlassian.net';
 const sandboxSiteId = '5ea71b8c-f3d5-4b61-b038-001c50df1666';

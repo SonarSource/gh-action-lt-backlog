@@ -18,10 +18,10 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { OctokitAction } from '../lib/OctokitAction';
-import { PullRequest } from '../lib/OctokitTypes';
-import { JIRA_DOMAIN, RENOVATE_PREFIX } from '../lib/Constants';
-import { NewIssueData } from '../lib/NewIssueData';
+import { OctokitAction } from '../lib/OctokitAction.js';
+import { PullRequest } from '../lib/OctokitTypes.js';
+import { JIRA_DOMAIN, RENOVATE_PREFIX } from '../lib/Constants.js';
+import { NewIssueData } from '../lib/NewIssueData.js';
 
 export class PullRequestCreated extends OctokitAction {
   protected async execute(): Promise<void> {

@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { PullRequestCreated } from "./PullRequestCreated";
+import { PullRequestCreated } from "./PullRequestCreated.js";
 
 const action = new PullRequestCreated();
 action.run();

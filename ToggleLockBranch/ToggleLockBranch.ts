@@ -19,7 +19,7 @@
  */
 
 import type { GraphQlQueryResponseData } from '@octokit/graphql';
-import { OctokitAction } from '../lib/OctokitAction';
+import { OctokitAction } from '../lib/OctokitAction.js';
 
 type ProtectionRule = {
   id: string;

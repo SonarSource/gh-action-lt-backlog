@@ -18,6 +18,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+import { expect, jest } from '@jest/globals';
+
 // This should be created `beforeEach` unit test to:
 // * Unify console.log assertions
 // * Suppress console.log noise from successful tests. Each console.log produces 5 lines in UT output, making it too hard to work with.

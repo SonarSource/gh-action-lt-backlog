@@ -18,12 +18,13 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 import * as github from '@actions/github';
-import { LogTester } from '../tests/LogTester';
-import { createOctokitRestStub } from '../tests/OctokitRestStub';
-import { SubmitReview } from './SubmitReview';
-import { jiraClientStub } from '../tests/JiraClientStub';
-import { OctokitActionStub } from '../tests/OctokitActionStub';
+import { LogTester } from '../tests/LogTester.js';
+import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
+import { SubmitReview } from './SubmitReview.js';
+import { jiraClientStub } from '../tests/JiraClientStub.js';
+import { OctokitActionStub } from '../tests/OctokitActionStub.js';
 
 async function runAction(state: string, findEmailResult: string | null = null) {
   github.context.payload = {

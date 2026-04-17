@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { Action } from '../lib/Action';
+import { Action } from '../lib/Action.js';
 
 export class LogPayload extends Action {
   protected async execute(): Promise<void> {

@@ -20,8 +20,6 @@
 
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { Context } from '@actions/github/lib/context';
-import { WebhookPayload } from '@actions/github/lib/interfaces';
 
 export type Repo = {
   owner: string;
@@ -30,8 +28,8 @@ export type Repo = {
 
 export abstract class Action {
   public readonly repo: Repo;
-  protected readonly context: Context;
-  protected readonly payload: WebhookPayload;
+  protected readonly context: typeof github.context;
+  protected readonly payload: typeof github.context.payload;
 
   protected abstract execute(): Promise<void>;
 

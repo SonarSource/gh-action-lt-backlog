@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { AtlassianDocument } from "./AtlassianDocumentFormat";
+import { AtlassianDocument } from "./AtlassianDocumentFormat.js";
 
 // New fields of this interface should be tested via JiraClient.test.ts / createIssue
 export interface NewIssueParameters {

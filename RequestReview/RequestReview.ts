@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { PullRequestAction } from '../lib/PullRequestAction';
+import { PullRequestAction } from '../lib/PullRequestAction.js';
 
 export class RequestReview extends PullRequestAction {
   protected async processJiraIssue(issueId: string): Promise<void> {

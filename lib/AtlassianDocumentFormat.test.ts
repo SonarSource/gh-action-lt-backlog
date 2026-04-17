@@ -18,7 +18,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { AtlassianDocument, AdfNode } from './AtlassianDocumentFormat';
+import { describe, expect, it } from '@jest/globals';
+import { AtlassianDocument, AdfNode } from './AtlassianDocumentFormat.js';
 
 describe('AtlassianDocument', () => {
   describe('fromMarkdown', () => {

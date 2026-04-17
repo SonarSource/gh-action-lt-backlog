@@ -18,9 +18,9 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { EngineeringExperienceSquad } from "../Data/TeamConfiguration";
-import { JiraClient, Issue } from '../lib/JiraClient';
-import { Team } from '../lib/Team';
+import { EngineeringExperienceSquad } from "../Data/TeamConfiguration.js";
+import { JiraClient, Issue } from '../lib/JiraClient.js';
+import { Team } from '../lib/Team.js';
 
 export const jiraClientStub = {
   async loadIssue(issueId: string): Promise<any> {

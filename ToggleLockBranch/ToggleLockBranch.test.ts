@@ -18,10 +18,11 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { ToggleLockBranch } from './ToggleLockBranch';
-import { LogTester } from '../tests/LogTester';
-import { createOctokitRestStub } from '../tests/OctokitRestStub';
-import { OctokitActionStub } from '../tests/OctokitActionStub';
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
+import { ToggleLockBranch } from './ToggleLockBranch.js';
+import { LogTester } from '../tests/LogTester.js';
+import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
+import { OctokitActionStub } from '../tests/OctokitActionStub.js';
 
 function sendGraphQLStub(query: string): any {
   const graphQL: { name: string, query: string, response: any }[] = [
