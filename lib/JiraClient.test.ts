@@ -104,7 +104,7 @@ describe('JiraClient', () => {
       parent: { key: 'GHA-37' },
       reporter: { id: '712020:7dcfc909-3fa9-496f-9127-163d8cd0e30f' },  // "Jira Automation". Any user except the "Jira Tech User GitHub" that would be used as a default user assigned by the token 
       description: AtlassianDocument.fromMarkdown('Lorem ipsum'),
-      customfield_10001: team.id,
+      customfield_10001: team!.id,
       customfield_10020: sprintId,                                // Patlassian* Sprint IT - needs an active sprint
     };
     const result = await sut.createIssue('GHA', summary, parameters);
@@ -133,8 +133,8 @@ describe('JiraClient', () => {
           }
         ]
       },
-      customfield_10001: { id: team.id },        // Why would the same field have same structure everywhere anyway?
-      customfield_10020: [{ id: sprintId }],                                    // Why would the same field have same structure everywhere anyway?
+      customfield_10001: { id: team!.id },        // Why would the same field have same structure everywhere anyway?
+      customfield_10020: [{ id: sprintId }],      // Why would the same field have same structure everywhere anyway?
     });
   });
 
@@ -262,12 +262,12 @@ describe('JiraClient', () => {
   it('findTeamByUser', async () => {
     // This UT needs productionSut, because team IDs are different in sandbox
     const accountId = '557058:f82b4ae5-78e0-4689-9f9e-419b773bf121';                                  // Thomas Vérin The Greatest, it can be any member of Eng Xp squad Jira team
-    expect(await productionSut.findTeamByUser(accountId)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
+    expect(await productionSut.findTeamByUser(accountId)).toMatchObject({ ...EngineeringExperienceSquad });  // Eng Xp, because we maintain hardcoded value for it
   });
-  
+
   it('findTeamByName', async () => {
     // This UT needs productionSut, because team IDs are different in sandbox
-    expect(await productionSut.findTeamByName(EngineeringExperienceSquad.name)).toMatchObject(EngineeringExperienceSquad);  // Eng Xp, because we maintain hardcoded value for it
+    expect(await productionSut.findTeamByName(EngineeringExperienceSquad.name)).toMatchObject({ ...EngineeringExperienceSquad });  // Eng Xp, because we maintain hardcoded value for it
   });
 
   it('findIssues', async () => {
