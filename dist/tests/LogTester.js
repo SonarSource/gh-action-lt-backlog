@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,13 +17,12 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.LogTester = void 0;
+import { expect, jest } from '@jest/globals';
 // This should be created `beforeEach` unit test to:
 // * Unify console.log assertions
 // * Suppress console.log noise from successful tests. Each console.log produces 5 lines in UT output, making it too hard to work with.
 // `afterEach` should be called to restore mocking and to dump logs for failed UTs.
-class LogTester {
+export class LogTester {
     logSpy;
     logsParams = [];
     constructor() {
@@ -50,5 +48,4 @@ class LogTester {
         this.logSpy.mockRestore();
     }
 }
-exports.LogTester = LogTester;
 //# sourceMappingURL=LogTester.js.map

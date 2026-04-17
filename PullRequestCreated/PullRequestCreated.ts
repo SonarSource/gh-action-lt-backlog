@@ -18,10 +18,10 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { OctokitAction } from '../lib/OctokitAction';
-import { PullRequest } from '../lib/OctokitTypes';
-import { JIRA_DOMAIN, RENOVATE_PREFIX } from '../lib/Constants';
-import { NewIssueData } from '../lib/NewIssueData';
+import { OctokitAction } from '../lib/OctokitAction.js';
+import { PullRequest } from '../lib/OctokitTypes.js';
+import { JIRA_DOMAIN, RENOVATE_PREFIX } from '../lib/Constants.js';
+import { NewIssueData } from '../lib/NewIssueData.js';
 
 export class PullRequestCreated extends OctokitAction {
   protected async execute(): Promise<void> {
@@ -107,7 +107,7 @@ export class PullRequestCreated extends OctokitAction {
   }
 
   private cleanupWhitespace(value: string): string {
-    return value.replace(/\s\s+/g, " ").trim();  // Mainly remove triple space between issue ID and title when copying from Jira
+    return value.replaceAll(/\s\s+/g, " ").trim();  // Mainly remove triple space between issue ID and title when copying from Jira
   }
 
   private async addLinkedIssuesAsComment(pr: PullRequest, linkedIssues: string[]): Promise<void> {

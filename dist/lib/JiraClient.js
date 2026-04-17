@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,10 +17,8 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.JiraClient = void 0;
-const Configuration_1 = require("./Configuration");
-class JiraClient {
+import { Config } from './Configuration.js';
+export class JiraClient {
     domain;
     siteId;
     organizationId;
@@ -196,7 +193,7 @@ class JiraClient {
             return null;
         }
         else {
-            const match = nodes.find((x) => Configuration_1.Config.findTeam(x.name) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
+            const match = nodes.find((x) => Config.findTeam(x.name) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
             console.log(`Found ${nodes.length} team(s), using ${match.id} ${match.name}`);
             return match;
         }
@@ -293,5 +290,4 @@ class JiraClient {
         }
     }
 }
-exports.JiraClient = JiraClient;
 //# sourceMappingURL=JiraClient.js.map

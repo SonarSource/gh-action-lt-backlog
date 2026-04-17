@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { ImportIssue } from "./ImportIssue";
+import { ImportIssue } from "./ImportIssue.js";
 
 const action = new ImportIssue();
 action.run();

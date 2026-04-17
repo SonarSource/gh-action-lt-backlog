@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { components } from '@octokit/openapi-types/types.d';
+import { components } from '@octokit/openapi-types';
 
 export type IssueComment = components["schemas"]["issue-comment"];
 export type Issue = components["schemas"]["issue"];

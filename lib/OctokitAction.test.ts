@@ -18,12 +18,13 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { LogTester } from '../tests/LogTester';
-import { jiraClientStub } from '../tests/JiraClientStub';
-import { createOctokitRestStub } from '../tests/OctokitRestStub';
-import { OctokitAction } from './OctokitAction';
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { LogTester } from '../tests/LogTester.js';
+import { jiraClientStub } from '../tests/JiraClientStub.js';
+import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
+import { OctokitAction } from './OctokitAction.js';
 import { fail } from 'node:assert';
-import { OctokitActionStub } from '../tests/OctokitActionStub';
+import { OctokitActionStub } from '../tests/OctokitActionStub.js';
 
 class TestOctokitAction extends OctokitAction {
 

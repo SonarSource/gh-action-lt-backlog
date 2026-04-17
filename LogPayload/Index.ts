@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { LogPayload } from "./LogPayload";
+import { LogPayload } from "./LogPayload.js";
 
 const action = new LogPayload();
 action.run();

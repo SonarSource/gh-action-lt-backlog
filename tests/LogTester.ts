@@ -18,12 +18,14 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+import { expect, jest } from '@jest/globals';
+
 // This should be created `beforeEach` unit test to:
 // * Unify console.log assertions
 // * Suppress console.log noise from successful tests. Each console.log produces 5 lines in UT output, making it too hard to work with.
 // `afterEach` should be called to restore mocking and to dump logs for failed UTs.
 export class LogTester {
-  public readonly logSpy: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]], any>;
+  public readonly logSpy: ReturnType<typeof jest.spyOn>;
   public logsParams: [message?: any, ...optionalParams: any[]][] = [];
 
   constructor() {
@@ -31,7 +33,7 @@ export class LogTester {
   }
 
   public afterEach() {
-    const console = jest.requireActual('console');
+    const console = jest.requireActual('console') as Console;
     const state = expect.getState();
     if (state.assertionCalls === 0 || state.numPassingAsserts !== state.assertionCalls) {
       console.log(`--- Console log for: ${state.currentTestName} ---`);
@@ -42,7 +44,7 @@ export class LogTester {
   }
 
   public dump(): void {
-    const console = jest.requireActual('console');
+    const console = jest.requireActual('console') as Console;
     for (const params of this.logsParams) {
       console.log(params);
     }

@@ -18,14 +18,15 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { PullRequestCreated } from './PullRequestCreated';
-import { LogTester } from '../tests/LogTester';
-import { jiraClientStub } from '../tests/JiraClientStub';
-import { createOctokitRestStub } from '../tests/OctokitRestStub';
-import { OctokitActionStub } from '../tests/OctokitActionStub';
-import { PullRequest } from '../lib/OctokitTypes';
+import { PullRequestCreated } from './PullRequestCreated.js';
+import { LogTester } from '../tests/LogTester.js';
+import { jiraClientStub } from '../tests/JiraClientStub.js';
+import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
+import { OctokitActionStub } from '../tests/OctokitActionStub.js';
+import { PullRequest } from '../lib/OctokitTypes.js';
 
 class TestPullRequestCreated extends PullRequestCreated {
   protected async findEmail(login: string): Promise<string | null> {

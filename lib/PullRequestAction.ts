@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { OctokitAction } from './OctokitAction';
+import { OctokitAction } from './OctokitAction.js';
 
 export abstract class PullRequestAction extends OctokitAction {
   protected abstract processJiraIssue(issueId: string): Promise<void>;

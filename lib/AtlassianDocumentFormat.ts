@@ -18,8 +18,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { Block, MarkdownParser } from "./MarkdownParser";
-import { MarkdownTextParser, TextBlock } from "./MarkdownTextParser";
+import { Block, MarkdownParser } from "./MarkdownParser.js";
+import { MarkdownTextParser, TextBlock } from "./MarkdownTextParser.js";
 
 export class AtlassianDocument {
   type: string = 'doc';

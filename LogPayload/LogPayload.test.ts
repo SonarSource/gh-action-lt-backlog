@@ -18,9 +18,10 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 import * as github from '@actions/github';
-import { LogTester } from '../tests/LogTester';
-import { LogPayload } from './LogPayload';
+import { LogTester } from '../tests/LogTester.js';
+import { LogPayload } from './LogPayload.js';
 
 describe('LogPayload', () => {
   let logTester: LogTester;

@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,49 +17,14 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.OctokitAction = void 0;
-const core = __importStar(require("@actions/core"));
-const github = __importStar(require("@actions/github"));
-const Action_1 = require("./Action");
-const OctokitTypes_1 = require("./OctokitTypes");
-const graphql_1 = require("@octokit/graphql");
-const JiraClient_1 = require("./JiraClient");
-const Constants_1 = require("./Constants");
-class OctokitAction extends Action_1.Action {
+import * as core from '@actions/core';
+import * as github from '@actions/github';
+import { Action } from './Action.js';
+import { addPullRequestExtensions } from './OctokitTypes.js';
+import { graphql } from '@octokit/graphql';
+import { JiraClient } from './JiraClient.js';
+import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN } from './Constants.js';
+export class OctokitAction extends Action {
     rest;
     octokit;
     jira;
@@ -68,13 +32,13 @@ class OctokitAction extends Action_1.Action {
     graphqlWithAuth = null;
     constructor() {
         super();
-        this.jira = new JiraClient_1.JiraClient(Constants_1.JIRA_DOMAIN, Constants_1.JIRA_SITE_ID, Constants_1.JIRA_ORGANIZATION_ID, this.inputString('jira-user'), this.inputString('jira-token'));
+        this.jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, this.inputString('jira-user'), this.inputString('jira-token'));
         this.octokit = github.getOctokit(this.inputString('github-token'));
         this.rest = this.octokit.rest;
         this.isEngXpSquad = this.inputBoolean('is-eng-xp-squad');
     }
     sendGraphQL(query) {
-        this.graphqlWithAuth ??= graphql_1.graphql.defaults({
+        this.graphqlWithAuth ??= graphql.defaults({
             headers: {
                 authorization: `token ${this.inputString('github-token')}`,
             },
@@ -100,7 +64,7 @@ class OctokitAction extends Action_1.Action {
     async loadPullRequest(pull_number) {
         try {
             this.log(`Loading PR #${pull_number}`);
-            return (0, OctokitTypes_1.addPullRequestExtensions)((await this.rest.pulls.get(this.addRepo({ pull_number }))).data);
+            return addPullRequestExtensions((await this.rest.pulls.get(this.addRepo({ pull_number }))).data);
         }
         catch (error) {
             this.log(`Pull Request #${pull_number} not found: ${error}`);
@@ -119,9 +83,9 @@ class OctokitAction extends Action_1.Action {
     }
     async findFixedIssues(pr) {
         const text = pr.isRenovate() // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
-            ? (await this.listComments(pr.number)).filter(x => x.body?.startsWith(Constants_1.RENOVATE_PREFIX)).pop()?.body
+            ? (await this.listComments(pr.number)).findLast(x => x.body?.startsWith(RENOVATE_PREFIX))?.body
             : pr.title;
-        return text?.match(Constants_1.JIRA_ISSUE_PATTERN) ?? null;
+        return text?.match(JIRA_ISSUE_PATTERN) ?? null;
     }
     async addComment(issue_number, body) {
         await this.rest.issues.createComment(this.addRepo({ issue_number, body }));
@@ -259,5 +223,4 @@ class OctokitAction extends Action_1.Action {
         }
     }
 }
-exports.OctokitAction = OctokitAction;
 //# sourceMappingURL=OctokitAction.js.map

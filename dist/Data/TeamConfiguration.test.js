@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,12 +17,12 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-const Constants_1 = require("../lib/Constants");
-const JiraClient_1 = require("../lib/JiraClient");
-const LogTester_1 = require("../tests/LogTester");
-const TeamConfiguration_1 = require("./TeamConfiguration");
-const node_assert_1 = require("node:assert");
+import { afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { JIRA_DOMAIN, JIRA_ORGANIZATION_ID, JIRA_SITE_ID } from "../lib/Constants.js";
+import { JiraClient } from "../lib/JiraClient.js";
+import { LogTester } from "../tests/LogTester.js";
+import { EngineeringExperienceSquad, TeamConfigurationData } from "./TeamConfiguration.js";
+import { fail } from 'node:assert';
 let jira;
 jest.setTimeout(20000); // 20s
 // All teams that exist in Jira, but do not create PRs and do not need boardId configured:
@@ -135,46 +134,46 @@ beforeAll(() => {
     const user = process.env["JIRA_USER"]; // Can't use the same name as environment variables read by Octokit actions, because the dash is not propagated from shell to node
     const token = process.env["JIRA_TOKEN"];
     if (user && token) {
-        jira = new JiraClient_1.JiraClient(Constants_1.JIRA_DOMAIN, Constants_1.JIRA_SITE_ID, Constants_1.JIRA_ORGANIZATION_ID, user, token);
+        jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, user, token);
     }
     else {
-        (0, node_assert_1.fail)("JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.");
+        fail("JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.");
     }
 });
 describe('TeamConfiguration', () => {
     let logTester;
     beforeEach(() => {
-        logTester = new LogTester_1.LogTester();
+        logTester = new LogTester();
     });
     afterEach(() => {
         logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
     });
     it('EngineeringExperienceSquad is valid', async () => {
-        const team = await jira.findTeamByName(TeamConfiguration_1.EngineeringExperienceSquad.name);
+        const team = await jira.findTeamByName(EngineeringExperienceSquad.name);
         expect(team).not.toBeNull();
-        expect(team.id).toBe(TeamConfiguration_1.EngineeringExperienceSquad.id);
+        expect(team.id).toBe(EngineeringExperienceSquad.id);
     });
     it('teams have valid names', async () => {
-        expect(TeamConfiguration_1.TeamConfigurationData.length).toBeGreaterThan(0); // Having at least one assertion prevents logTester from dumping console logs
-        for (const teamData of TeamConfiguration_1.TeamConfigurationData) {
+        expect(TeamConfigurationData.length).toBeGreaterThan(0); // Having at least one assertion prevents logTester from dumping console logs
+        for (const teamData of TeamConfigurationData) {
             const team = await jira.findTeamByName(teamData.name);
             if (!team) {
-                (0, node_assert_1.fail)(`Configured team does not exist in Jira: ${teamData.name}`);
+                fail(`Configured team does not exist in Jira: ${teamData.name}`);
             }
         }
     });
     it('teams have valid boardId', async () => {
-        expect(TeamConfiguration_1.TeamConfigurationData.length).toBeGreaterThan(0); // Having at least one assertion prevents logTester from dumping console logs
-        for (const team of TeamConfiguration_1.TeamConfigurationData) {
+        expect(TeamConfigurationData.length).toBeGreaterThan(0); // Having at least one assertion prevents logTester from dumping console logs
+        for (const team of TeamConfigurationData) {
             const board = await jira.findBoard(team.boardId);
             if (!board) {
-                (0, node_assert_1.fail)(`Configured team ${team.name} does not have a valid boardId: ${team.boardId}`);
+                fail(`Configured team ${team.name} does not have a valid boardId: ${team.boardId}`);
             }
         }
     });
     it('list new teams', async () => {
         const knownTeams = new Set();
-        for (const team of TeamConfiguration_1.TeamConfigurationData) {
+        for (const team of TeamConfigurationData) {
             knownTeams.add(team.name);
         }
         for (const team of ignoredTeams) {
@@ -195,12 +194,12 @@ describe('TeamConfiguration', () => {
         }
     });
     it('boardId uses sprints', async () => {
-        for (const team of TeamConfiguration_1.TeamConfigurationData) {
+        for (const team of TeamConfigurationData) {
             try {
                 await jira.findSprintId(team.boardId); // Can fail with 400 (Bad Request): The board does not support sprints
             }
             catch (error) {
-                (0, node_assert_1.fail)(`Team "${team.name}" with boardId ${team.boardId} findSprintId failed: ${error}`);
+                fail(`Team "${team.name}" with boardId ${team.boardId} findSprintId failed: ${error}`);
             }
         }
     });

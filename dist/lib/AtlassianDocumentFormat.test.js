@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,12 +17,12 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-const AtlassianDocumentFormat_1 = require("./AtlassianDocumentFormat");
+import { describe, expect, it } from '@jest/globals';
+import { AtlassianDocument, AdfNode } from './AtlassianDocumentFormat.js';
 describe('AtlassianDocument', () => {
     describe('fromMarkdown', () => {
         it('parses all blocks', () => {
-            const doc = AtlassianDocumentFormat_1.AtlassianDocument.fromMarkdown(`
+            const doc = AtlassianDocument.fromMarkdown(`
 # Heading 1
 
 Text 1
@@ -44,7 +43,7 @@ Text 2
             });
         });
         it('parses mixed content', () => {
-            const doc = AtlassianDocumentFormat_1.AtlassianDocument.fromMarkdown(`
+            const doc = AtlassianDocument.fromMarkdown(`
 # Heading 1
 
 Intro \`snippet\` and [link](#url).
@@ -133,7 +132,7 @@ Code comment
             });
         });
         it('normalize heading levels', () => {
-            const doc = AtlassianDocumentFormat_1.AtlassianDocument.fromMarkdown(`
+            const doc = AtlassianDocument.fromMarkdown(`
 ### Should be 1
 #### Should be 2
 ### Should be 1
@@ -161,27 +160,27 @@ describe('AdfNode', () => {
         { type: 'text', text: '.' }
     ];
     it('creates heading with level', () => {
-        expect(new AtlassianDocumentFormat_1.AdfNode({ type: 'heading', text: '# Heading' })).toEqual({ type: 'heading', attrs: { level: 1 }, 'content': [{ 'type': 'text', 'text': 'Heading' }] });
-        expect(new AtlassianDocumentFormat_1.AdfNode({ type: 'heading', text: '## Heading' })).toEqual({ type: 'heading', attrs: { level: 2 }, 'content': [{ 'type': 'text', 'text': 'Heading' }] });
-        expect(new AtlassianDocumentFormat_1.AdfNode({ type: 'heading', text: '### Heading' })).toEqual({ type: 'heading', attrs: { level: 3 }, 'content': [{ 'type': 'text', 'text': 'Heading' }] });
-        expect(new AtlassianDocumentFormat_1.AdfNode({ type: 'heading', text: '#### Heading' })).toEqual({ type: 'heading', attrs: { level: 4 }, 'content': [{ 'type': 'text', 'text': 'Heading' }] });
-        expect(new AtlassianDocumentFormat_1.AdfNode({ type: 'heading', text: '##### Heading' })).toEqual({ type: 'heading', attrs: { level: 5 }, 'content': [{ 'type': 'text', 'text': 'Heading' }] });
-        expect(new AtlassianDocumentFormat_1.AdfNode({ type: 'heading', text: '###### Heading' })).toEqual({ type: 'heading', attrs: { level: 6 }, 'content': [{ 'type': 'text', 'text': 'Heading' }] });
+        expect(new AdfNode({ type: 'heading', text: '# Heading' })).toEqual({ type: 'heading', attrs: { level: 1 }, 'content': [{ 'type': 'text', 'text': 'Heading' }] });
+        expect(new AdfNode({ type: 'heading', text: '## Heading' })).toEqual({ type: 'heading', attrs: { level: 2 }, 'content': [{ 'type': 'text', 'text': 'Heading' }] });
+        expect(new AdfNode({ type: 'heading', text: '### Heading' })).toEqual({ type: 'heading', attrs: { level: 3 }, 'content': [{ 'type': 'text', 'text': 'Heading' }] });
+        expect(new AdfNode({ type: 'heading', text: '#### Heading' })).toEqual({ type: 'heading', attrs: { level: 4 }, 'content': [{ 'type': 'text', 'text': 'Heading' }] });
+        expect(new AdfNode({ type: 'heading', text: '##### Heading' })).toEqual({ type: 'heading', attrs: { level: 5 }, 'content': [{ 'type': 'text', 'text': 'Heading' }] });
+        expect(new AdfNode({ type: 'heading', text: '###### Heading' })).toEqual({ type: 'heading', attrs: { level: 6 }, 'content': [{ 'type': 'text', 'text': 'Heading' }] });
     });
     it('creates heading with parsed text', () => {
-        expect(new AtlassianDocumentFormat_1.AdfNode({ type: 'heading', text: `# ${textToParse}` })).toEqual({ type: 'heading', content: expectedParsedContent, attrs: { level: 1 } });
+        expect(new AdfNode({ type: 'heading', text: `# ${textToParse}` })).toEqual({ type: 'heading', content: expectedParsedContent, attrs: { level: 1 } });
     });
     it('creates blockquote with parsed text', () => {
-        expect(new AtlassianDocumentFormat_1.AdfNode({ type: 'blockquote', text: textToParse })).toEqual({ type: 'blockquote', content: [{ type: 'paragraph', content: expectedParsedContent }] });
+        expect(new AdfNode({ type: 'blockquote', text: textToParse })).toEqual({ type: 'blockquote', content: [{ type: 'paragraph', content: expectedParsedContent }] });
     });
     it('creates codeblock without parsed text', () => {
-        expect(new AtlassianDocumentFormat_1.AdfNode({ type: 'codeBlock', text: textToParse })).toEqual({ type: 'codeBlock', content: [{ type: 'text', text: 'Text with `snippet` and [link title](#url).' }] });
+        expect(new AdfNode({ type: 'codeBlock', text: textToParse })).toEqual({ type: 'codeBlock', content: [{ type: 'text', text: 'Text with `snippet` and [link title](#url).' }] });
     });
     it('creates paragraph with parsed text', () => {
-        expect(new AtlassianDocumentFormat_1.AdfNode({ type: 'paragraph', text: textToParse })).toEqual({ type: 'paragraph', content: expectedParsedContent });
+        expect(new AdfNode({ type: 'paragraph', text: textToParse })).toEqual({ type: 'paragraph', content: expectedParsedContent });
     });
     it('throws on unsupported block type', () => {
-        expect(() => new AtlassianDocumentFormat_1.AdfNode({ type: 'surprise', text: 'Not supported' })).toThrow('Unsupported block type: surprise');
+        expect(() => new AdfNode({ type: 'surprise', text: 'Not supported' })).toThrow('Unsupported block type: surprise');
     });
 });
 //# sourceMappingURL=AtlassianDocumentFormat.test.js.map

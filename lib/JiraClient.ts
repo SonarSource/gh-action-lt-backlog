@@ -18,8 +18,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { Config } from './Configuration';
-import { Team } from './Team';
+import { Config } from './Configuration.js';
+import { Team } from './Team.js';
 
 type TeamSearchV2NodeTeam = {
   id: string;

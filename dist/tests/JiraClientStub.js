@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,10 +17,8 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.jiraClientStub = void 0;
-const TeamConfiguration_1 = require("../Data/TeamConfiguration");
-exports.jiraClientStub = {
+import { EngineeringExperienceSquad } from "../Data/TeamConfiguration.js";
+export const jiraClientStub = {
     async loadIssue(issueId) {
         switch (issueId) {
             case 'MMF-1111': return { key: 'MMF-1111', fields: { project: { key: 'MMF' }, issuetype: { name: 'Epic' } } };
@@ -52,7 +49,7 @@ exports.jiraClientStub = {
         switch (accountId) {
             case '1234-account': return { name: '.NET Squad', id: 'dot-neeet-team' };
             case '2222-no-team': return null;
-            case '3333-eng-exp-account': return TeamConfiguration_1.EngineeringExperienceSquad;
+            case '3333-eng-exp-account': return EngineeringExperienceSquad;
             case '4444-no-epics-account': return { name: 'No Epics Squad', id: 'no-epics-team' };
             default: throw new Error(`Scaffolding did not expect accountId ${accountId}`);
         }

@@ -18,12 +18,13 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 import * as github from '@actions/github';
-import { PullRequestClosed } from './PullRequestClosed';
-import { LogTester } from '../tests/LogTester';
-import { jiraClientStub } from '../tests/JiraClientStub';
-import { createOctokitRestStub } from '../tests/OctokitRestStub';
-import { OctokitActionStub } from '../tests/OctokitActionStub';
+import { PullRequestClosed } from './PullRequestClosed.js';
+import { LogTester } from '../tests/LogTester.js';
+import { jiraClientStub } from '../tests/JiraClientStub.js';
+import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
+import { OctokitActionStub } from '../tests/OctokitActionStub.js';
 
 async function runAction(title: string, user: string = 'test-user') {
   process.env['INPUT_JIRA-PROJECT'] = 'KEY';

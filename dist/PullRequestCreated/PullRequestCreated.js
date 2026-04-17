@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,12 +17,10 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.PullRequestCreated = void 0;
-const OctokitAction_1 = require("../lib/OctokitAction");
-const Constants_1 = require("../lib/Constants");
-const NewIssueData_1 = require("../lib/NewIssueData");
-class PullRequestCreated extends OctokitAction_1.OctokitAction {
+import { OctokitAction } from '../lib/OctokitAction.js';
+import { JIRA_DOMAIN, RENOVATE_PREFIX } from '../lib/Constants.js';
+import { NewIssueData } from '../lib/NewIssueData.js';
+export class PullRequestCreated extends OctokitAction {
     async execute() {
         const inputJiraProject = this.inputString('jira-project');
         const inputAdditionalFields = this.inputString('additional-fields');
@@ -71,8 +68,8 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
     }
     async processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields) {
         const data = this.isEngXpSquad
-            ? await NewIssueData_1.NewIssueData.createForEngExp(this.jira, pr, await this.findEmail(this.payload.sender?.login))
-            : await NewIssueData_1.NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, await this.findEmail(this.payload.sender?.login), this.inputString('fallback-team'));
+            ? await NewIssueData.createForEngExp(this.jira, pr, await this.findEmail(this.payload.sender?.login))
+            : await NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, await this.findEmail(this.payload.sender?.login), this.inputString('fallback-team'));
         if (data) {
             const issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
             if (issueId == null) {
@@ -100,7 +97,7 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
     }
     async persistIssueId(pr, issueId) {
         if (pr.isRenovate()) { // Renovate overrides the PR title back to the original https://github.com/renovatebot/renovate/issues/26833
-            await this.addComment(pr.number, Constants_1.RENOVATE_PREFIX + this.issueLink(issueId)); // We'll store the ID in comment as a workaround
+            await this.addComment(pr.number, RENOVATE_PREFIX + this.issueLink(issueId)); // We'll store the ID in comment as a workaround
         }
         else {
             pr.title = this.cleanupWhitespace(`${issueId} ${pr.title}`);
@@ -108,15 +105,14 @@ class PullRequestCreated extends OctokitAction_1.OctokitAction {
         }
     }
     cleanupWhitespace(value) {
-        return value.replace(/\s\s+/g, " ").trim(); // Mainly remove triple space between issue ID and title when copying from Jira
+        return value.replaceAll(/\s\s+/g, " ").trim(); // Mainly remove triple space between issue ID and title when copying from Jira
     }
     async addLinkedIssuesAsComment(pr, linkedIssues) {
         console.log(`Adding the following ticket as comment: ${linkedIssues}`);
         await this.addComment(pr.number, linkedIssues.map(x => this.issueLink(x)).join('\n'));
     }
     issueLink(issue) {
-        return `[${issue}](${Constants_1.JIRA_DOMAIN}/browse/${issue})`;
+        return `[${issue}](${JIRA_DOMAIN}/browse/${issue})`;
     }
 }
-exports.PullRequestCreated = PullRequestCreated;
 //# sourceMappingURL=PullRequestCreated.js.map

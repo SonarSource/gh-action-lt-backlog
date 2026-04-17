@@ -18,12 +18,13 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { JIRA_DOMAIN, JIRA_ORGANIZATION_ID, JIRA_SITE_ID } from "../lib/Constants";
-import { JiraClient } from "../lib/JiraClient";
-import { LogTester } from "../tests/LogTester";
-import { EngineeringExperienceSquad, TeamConfigurationData } from "./TeamConfiguration";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { JIRA_DOMAIN, JIRA_ORGANIZATION_ID, JIRA_SITE_ID } from "../lib/Constants.js";
+import { JiraClient } from "../lib/JiraClient.js";
+import { LogTester } from "../tests/LogTester.js";
+import { EngineeringExperienceSquad, TeamConfigurationData } from "./TeamConfiguration.js";
 import { fail } from 'node:assert';
-import { Team } from '../lib/Team';
+import { Team } from '../lib/Team.js';
 
 let jira: JiraClient;
 

@@ -2,6 +2,7 @@
   "name": "backlog-automation",
   "version": "1.0.0",
   "description": "BacklogAutomation",
+  "type": "module",
   "scripts": {
     "build": "tsc --build",
     "clean": "tsc --build --clean",

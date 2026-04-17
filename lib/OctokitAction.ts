@@ -20,14 +20,14 @@
 
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import * as graphqlTypes from '@octokit/graphql/dist-types/types';
-import { GitHub } from '@actions/github/lib/utils';
-import { Action } from './Action';
-import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types';
-import { PullRequest, IssueComment, addPullRequestExtensions, Issue } from './OctokitTypes';
+import * as graphqlTypes from '@octokit/graphql/dist-types/types.js';
+import { GitHub } from '@actions/github/lib/utils.js';
+import { Action } from './Action.js';
+import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types.js';
+import { PullRequest, IssueComment, addPullRequestExtensions, Issue } from './OctokitTypes.js';
 import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
-import { JiraClient } from './JiraClient';
-import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN } from './Constants';
+import { JiraClient } from './JiraClient.js';
+import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN } from './Constants.js';
 
 export abstract class OctokitAction extends Action {
   public readonly rest: RestEndpointMethods;
@@ -93,7 +93,7 @@ export abstract class OctokitAction extends Action {
 
   protected async findFixedIssues(pr: PullRequest): Promise<string[] | null> {
     const text = pr.isRenovate() // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
-      ? (await this.listComments(pr.number)).filter(x => x.body?.startsWith(RENOVATE_PREFIX)).pop()?.body
+      ? (await this.listComments(pr.number)).findLast(x => x.body?.startsWith(RENOVATE_PREFIX))?.body
       : pr.title;
     return text?.match(JIRA_ISSUE_PATTERN) ?? null;
   }

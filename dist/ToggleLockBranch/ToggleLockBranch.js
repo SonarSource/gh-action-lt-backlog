@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,10 +17,8 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ToggleLockBranch = void 0;
-const OctokitAction_1 = require("../lib/OctokitAction");
-class ToggleLockBranch extends OctokitAction_1.OctokitAction {
+import { OctokitAction } from '../lib/OctokitAction.js';
+export class ToggleLockBranch extends OctokitAction {
     async execute() {
         const pattern = this.inputString('branch-pattern');
         let rule = await this.findRule(pattern);
@@ -129,5 +126,4 @@ class ToggleLockBranch extends OctokitAction_1.OctokitAction {
       }`);
     }
 }
-exports.ToggleLockBranch = ToggleLockBranch;
 //# sourceMappingURL=ToggleLockBranch.js.map

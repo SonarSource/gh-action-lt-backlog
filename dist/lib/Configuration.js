@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
@@ -18,13 +17,11 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Config = void 0;
-const TeamConfiguration_1 = require("../Data/TeamConfiguration");
+import { TeamConfigurationData } from "../Data/TeamConfiguration.js";
 class Configuration {
     teams = {};
     constructor() {
-        for (const team of TeamConfiguration_1.TeamConfigurationData) {
+        for (const team of TeamConfigurationData) {
             this.teams[team.name] = team;
         }
     }
@@ -32,5 +29,5 @@ class Configuration {
         return this.teams[name] || null;
     }
 }
-exports.Config = new Configuration();
+export const Config = new Configuration();
 //# sourceMappingURL=Configuration.js.map

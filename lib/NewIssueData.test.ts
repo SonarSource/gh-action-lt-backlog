@@ -18,11 +18,12 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+import { afterEach, beforeEach, describe, it } from '@jest/globals';
 import { expect } from 'expect';
-import { NewIssueData } from '../lib/NewIssueData';
-import { PullRequest } from './OctokitTypes';
-import { jiraClientStub } from '../tests/JiraClientStub';
-import { LogTester } from '../tests/LogTester';
+import { NewIssueData } from '../lib/NewIssueData.js';
+import { PullRequest } from './OctokitTypes.js';
+import { jiraClientStub } from '../tests/JiraClientStub.js';
+import { LogTester } from '../tests/LogTester.js';
 
 function createPullRequest(title: string, body: string | null, repo: string = 'repo'): PullRequest {
   return {
