@@ -1,4 +1,4 @@
-﻿﻿/*
+﻿/*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
  * mailto: info AT sonarsource DOT com
@@ -19,7 +19,6 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { PullRequestCreated } from './PullRequestCreated.js';
 import { LogTester } from '../tests/LogTester.js';
@@ -86,27 +85,21 @@ describe('PullRequestCreated', () => {
   it('is-eng-xp-squad and jira-project fails', async () => {
     process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
     process.env['INPUT_JIRA-PROJECT'] = 'FORBIDDEN';
-    const logSpy = vi.spyOn(core, 'setFailed').mockImplementation(() => { });
-    try {
-      const action = new PullRequestCreated();
-      await action.run();
-      expect(logSpy).toHaveBeenCalledWith('Action failed: jira-project input is not supported when is-eng-xp-squad is set.');
-    } finally {
-      logSpy.mockRestore();
-    }
+    const action = new PullRequestCreated();
+    const setFailedCore = vi.fn();
+    (action as unknown as { setFailedCore: (message: string) => void }).setFailedCore = setFailedCore;
+    await action.run();
+    expect(setFailedCore).toHaveBeenCalledWith('Action failed: jira-project input is not supported when is-eng-xp-squad is set.');
   });
 
   it('is-eng-xp-squad and additional-fields fails', async () => {
     process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
     process.env['INPUT_ADDITIONAL-FIELDS'] = '{ "Field": "Value" }';
-    const logSpy = vi.spyOn(core, 'setFailed').mockImplementation(() => { });
-    try {
-      const action = new PullRequestCreated();
-      await action.run();
-      expect(logSpy).toHaveBeenCalledWith('Action failed: additional-fields input is not supported when is-eng-xp-squad is set.');
-    } finally {
-      logSpy.mockRestore();
-    }
+    const action = new PullRequestCreated();
+    const setFailedCore = vi.fn();
+    (action as unknown as { setFailedCore: (message: string) => void }).setFailedCore = setFailedCore;
+    await action.run();
+    expect(setFailedCore).toHaveBeenCalledWith('Action failed: additional-fields input is not supported when is-eng-xp-squad is set.');
   });
 
   it('DO NOT MERGE PR title skips the action', async () => {
@@ -236,7 +229,7 @@ describe('PullRequestCreated', () => {
       "Adding the following ticket as comment: KEY-4242",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
       "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
-       "Done"
+      "Done"
     ]);
   });
 
