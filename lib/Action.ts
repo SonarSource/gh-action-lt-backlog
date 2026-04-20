@@ -64,7 +64,11 @@ export abstract class Action {
   }
 
   protected setFailed(message: string) {
-    core.setFailed(`Action failed: ${message}`);
+    this.setFailedCore(`Action failed: ${message}`);
+  }
+
+  private setFailedCore(message: string) {
+    core.setFailed(message);
   }
 
   private serializeToString(value: any): string {

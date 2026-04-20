@@ -50,7 +50,10 @@ export class Action {
         return { ...this.repo, ...other };
     }
     setFailed(message) {
-        core.setFailed(`Action failed: ${message}`);
+        this.setFailedCore(`Action failed: ${message}`);
+    }
+    setFailedCore(message) {
+        core.setFailed(message);
     }
     serializeToString(value) {
         return JSON.stringify(value, undefined, 2);

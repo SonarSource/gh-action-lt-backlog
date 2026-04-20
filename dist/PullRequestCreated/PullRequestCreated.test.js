@@ -1,24 +1,23 @@
 /*
-* Backlog Automation
-* Copyright (C) SonarSource Sàrl
-* mailto: info AT sonarsource DOT com
-*
-* This program is free software; you can redistribute it and/or
-* modify it under the terms of the GNU Lesser General Public
-* License as published by the Free Software Foundation; either
-* version 3 of the License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-* Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public License
-* along with this program; if not, write to the Free Software Foundation,
-* Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ * Backlog Automation
+ * Copyright (C) SonarSource Sàrl
+ * mailto: info AT sonarsource DOT com
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { PullRequestCreated } from './PullRequestCreated.js';
 import { LogTester } from '../tests/LogTester.js';
@@ -77,28 +76,20 @@ describe('PullRequestCreated', () => {
     it('is-eng-xp-squad and jira-project fails', async () => {
         process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
         process.env['INPUT_JIRA-PROJECT'] = 'FORBIDDEN';
-        const logSpy = vi.spyOn(core, 'setFailed').mockImplementation(() => { });
-        try {
-            const action = new PullRequestCreated();
-            await action.run();
-            expect(logSpy).toHaveBeenCalledWith('Action failed: jira-project input is not supported when is-eng-xp-squad is set.');
-        }
-        finally {
-            logSpy.mockRestore();
-        }
+        const action = new PullRequestCreated();
+        const setFailedCore = vi.fn();
+        action.setFailedCore = setFailedCore;
+        await action.run();
+        expect(setFailedCore).toHaveBeenCalledWith('Action failed: jira-project input is not supported when is-eng-xp-squad is set.');
     });
     it('is-eng-xp-squad and additional-fields fails', async () => {
         process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
         process.env['INPUT_ADDITIONAL-FIELDS'] = '{ "Field": "Value" }';
-        const logSpy = vi.spyOn(core, 'setFailed').mockImplementation(() => { });
-        try {
-            const action = new PullRequestCreated();
-            await action.run();
-            expect(logSpy).toHaveBeenCalledWith('Action failed: additional-fields input is not supported when is-eng-xp-squad is set.');
-        }
-        finally {
-            logSpy.mockRestore();
-        }
+        const action = new PullRequestCreated();
+        const setFailedCore = vi.fn();
+        action.setFailedCore = setFailedCore;
+        await action.run();
+        expect(setFailedCore).toHaveBeenCalledWith('Action failed: additional-fields input is not supported when is-eng-xp-squad is set.');
     });
     it('DO NOT MERGE PR title skips the action', async () => {
         github.context.payload.pull_request.title = "Prefix [DO not MeRGe{: Test PR";
