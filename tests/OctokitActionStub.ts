@@ -18,13 +18,13 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { RestEndpointMethods } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/method-types.js';
+import type { Api } from '@octokit/plugin-rest-endpoint-methods';
 import { GraphQlQueryResponseData } from '@octokit/graphql';
 
 // This provides typed access to the internal members of OctokitAction for unit testing
 export type OctokitActionStub = {
   jira: any;
-  rest: RestEndpointMethods;
+  rest: Api['rest'];
   isEngXpSquad: boolean;
   sendGraphQL(query: string): Promise<GraphQlQueryResponseData>;
   findEmail(login: string): Promise<string | null>;
