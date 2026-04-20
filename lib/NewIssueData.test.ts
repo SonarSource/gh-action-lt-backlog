@@ -18,8 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { afterEach, beforeEach, describe, it } from '@jest/globals';
-import { expect } from 'expect';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { NewIssueData } from '../lib/NewIssueData.js';
 import { PullRequest } from './OctokitTypes.js';
 import { jiraClientStub } from '../tests/JiraClientStub.js';

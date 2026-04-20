@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AtlassianDocument } from './AtlassianDocumentFormat.js';
 import { JiraClient } from './JiraClient.js';
 import { fail } from 'node:assert';
@@ -36,7 +36,7 @@ let productionSut: JiraClient;
 let issueId: string;
 let preqIssueId: string;
 
-jest.setTimeout(20000); // 20s
+vi.setConfig({ testTimeout: 20000 }); // 20s
 
 beforeAll(async () => {
   const user = process.env["JIRA_USER"];    // Can't use the same name as environment variables read by Octokit actions, because the dash is not propagated from shell to node
