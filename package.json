@@ -6,16 +6,14 @@
   "scripts": {
     "build": "tsc --build",
     "clean": "tsc --build --clean",
-    "test": "jest",
-    "test-uts": "jest --testPathIgnorePatterns='/Data/'",
-    "test-data": "jest /Data/",
+    "test": "vitest run",
+    "test-uts": "vitest run --exclude 'Data/*'",
+    "test-data": "vitest run Data/",
     "format": "prettier --write \"**/*.ts\""
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.29.2",
-    "@babel/preset-typescript": "^7.28.5",
     "@types/node": "^25.6.0",
-    "jest": "^30.0.0",
+    "vitest": "^4.1.4",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3"
   },
