@@ -164,7 +164,6 @@ describe('TeamConfiguration', () => {
   });
 
   it('teams have valid names', async () => {
-    expect(TeamConfigurationData.length).toBeGreaterThan(0);  // Having at least one assertion prevents logTester from dumping console logs
     for (const teamData of TeamConfigurationData) {
       const team = await jira.findTeamByName(teamData.name);
       if (!team) {
@@ -174,7 +173,6 @@ describe('TeamConfiguration', () => {
   });
 
   it('teams have valid boardId', async () => {
-    expect(TeamConfigurationData.length).toBeGreaterThan(0);  // Having at least one assertion prevents logTester from dumping console logs
     for (const team of TeamConfigurationData) {
       const board = await jira.findBoard(team.boardId);
       if (!board) {
@@ -199,10 +197,10 @@ describe('TeamConfiguration', () => {
         newTeams += `"${jiraTeam.name}",\n`;
       }
     }
-    expect(knownTeams.size).toBeGreaterThan(0);  // Having at least one assertion prevents logTester from dumping console logs
+    expect(knownTeams.size).toBeGreaterThan(0);
     expect(jiraTeams.length).toBeGreaterThan(0);
     if (newTeams) {
-      console.warn(`New teams found in Jira. Add them to TeamConfigurationData or ignoredTeams:\n${newTeams}`);
+      logTester.originalLog(`New teams found in Jira. Add them to TeamConfigurationData or ignoredTeams:\n${newTeams}`);
     }
   });
 
