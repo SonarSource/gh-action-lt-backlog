@@ -17,7 +17,7 @@
 * along with this program; if not, write to the Free Software Foundation,
 * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { PullRequestCreated } from './PullRequestCreated.js';
@@ -77,7 +77,7 @@ describe('PullRequestCreated', () => {
     it('is-eng-xp-squad and jira-project fails', async () => {
         process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
         process.env['INPUT_JIRA-PROJECT'] = 'FORBIDDEN';
-        const logSpy = jest.spyOn(core, 'setFailed').mockImplementation(() => { });
+        const logSpy = vi.spyOn(core, 'setFailed').mockImplementation(() => { });
         try {
             const action = new PullRequestCreated();
             await action.run();
@@ -90,7 +90,7 @@ describe('PullRequestCreated', () => {
     it('is-eng-xp-squad and additional-fields fails', async () => {
         process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
         process.env['INPUT_ADDITIONAL-FIELDS'] = '{ "Field": "Value" }';
-        const logSpy = jest.spyOn(core, 'setFailed').mockImplementation(() => { });
+        const logSpy = vi.spyOn(core, 'setFailed').mockImplementation(() => { });
         try {
             const action = new PullRequestCreated();
             await action.run();
@@ -103,7 +103,7 @@ describe('PullRequestCreated', () => {
     it('DO NOT MERGE PR title skips the action', async () => {
         github.context.payload.pull_request.title = "Prefix [DO not MeRGe{: Test PR";
         const action = new PullRequestCreated();
-        action.log = jest.fn();
+        action.log = vi.fn();
         await action.run();
         expect(action.log).toHaveBeenCalledWith("Done");
         expect(action.log).toHaveBeenCalledWith("'DO NOT MERGE' found in the PR title, skipping the action.");
@@ -115,7 +115,7 @@ describe('PullRequestCreated', () => {
             }
         }
         const action = new TestPullRequestCreated();
-        action.log = jest.fn();
+        action.log = vi.fn();
         await action.run();
         expect(action.log).toHaveBeenCalledWith('Done');
         expect(action.log).toHaveBeenCalledTimes(1);

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import { expect, jest } from '@jest/globals';
+import { expect, onTestFailed, vi } from 'vitest';
 // This should be created `beforeEach` unit test to:
 // * Unify console.log assertions
 // * Suppress console.log noise from successful tests. Each console.log produces 5 lines in UT output, making it too hard to work with.
@@ -25,23 +25,21 @@ import { expect, jest } from '@jest/globals';
 export class LogTester {
     logSpy;
     logsParams = [];
+    originalLog = console.log.bind(console);
     constructor() {
-        this.logSpy = jest.spyOn(console, 'log').mockImplementation((...args) => this.logsParams.push(...args));
+        this.logSpy = vi.spyOn(console, 'log').mockImplementation((...args) => this.logsParams.push(...args));
+        onTestFailed(() => {
+            this.originalLog(`--- Console log for: ${expect.getState().currentTestName} ---`);
+            this.dump();
+            this.originalLog();
+        });
     }
     afterEach() {
-        const console = jest.requireActual('console');
-        const state = expect.getState();
-        if (state.assertionCalls === 0 || state.numPassingAsserts !== state.assertionCalls) {
-            console.log(`--- Console log for: ${state.currentTestName} ---`);
-            this.dump();
-            console.log();
-        }
         this.mockRestore();
     }
     dump() {
-        const console = jest.requireActual('console');
         for (const params of this.logsParams) {
-            console.log(params);
+            this.originalLog(params);
         }
     }
     mockRestore() {

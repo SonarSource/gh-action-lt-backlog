@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { JIRA_DOMAIN, JIRA_ORGANIZATION_ID, JIRA_SITE_ID } from "../lib/Constants.js";
 import { JiraClient } from "../lib/JiraClient.js";
 import { LogTester } from "../tests/LogTester.js";
@@ -28,7 +28,7 @@ import { Team } from '../lib/Team.js';
 
 let jira: JiraClient;
 
-jest.setTimeout(20000); // 20s
+vi.setConfig({ testTimeout: 20000 }); // 20s
 
 // All teams that exist in Jira, but do not create PRs and do not need boardId configured:
 const ignoredTeams = [
@@ -164,7 +164,6 @@ describe('TeamConfiguration', () => {
   });
 
   it('teams have valid names', async () => {
-    expect(TeamConfigurationData.length).toBeGreaterThan(0);  // Having at least one assertion prevents logTester from dumping console logs
     for (const teamData of TeamConfigurationData) {
       const team = await jira.findTeamByName(teamData.name);
       if (!team) {
@@ -174,7 +173,6 @@ describe('TeamConfiguration', () => {
   });
 
   it('teams have valid boardId', async () => {
-    expect(TeamConfigurationData.length).toBeGreaterThan(0);  // Having at least one assertion prevents logTester from dumping console logs
     for (const team of TeamConfigurationData) {
       const board = await jira.findBoard(team.boardId);
       if (!board) {
@@ -199,10 +197,10 @@ describe('TeamConfiguration', () => {
         newTeams += `"${jiraTeam.name}",\n`;
       }
     }
-    expect(knownTeams.size).toBeGreaterThan(0);  // Having at least one assertion prevents logTester from dumping console logs
+    expect(knownTeams.size).toBeGreaterThan(0);
     expect(jiraTeams.length).toBeGreaterThan(0);
     if (newTeams) {
-      console.warn(`New teams found in Jira. Add them to TeamConfigurationData or ignoredTeams:\n${newTeams}`);
+      logTester.originalLog(`New teams found in Jira. Add them to TeamConfigurationData or ignoredTeams:\n${newTeams}`);
     }
   });
 

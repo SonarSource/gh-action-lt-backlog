@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LogTester } from '../tests/LogTester.js';
 import { jiraClientStub } from '../tests/JiraClientStub.js';
 import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
@@ -294,7 +294,7 @@ describe('OctokitAction', () => {
       console.log('Invoked jira.createComponent returning false');
       return false;
     }
-    sut.setFailed = jest.fn();
+    sut.setFailed = vi.fn();
     await sut.addJiraComponent('GHA-42', 'Component Name', 'Component Description');
     expect(sut.setFailed).toHaveBeenCalledWith('Failed to create component');
     expect(logTester.logsParams).toStrictEqual(["Invoked jira.createComponent returning false"]);
@@ -305,7 +305,7 @@ describe('OctokitAction', () => {
       console.log('Invoked jira.addIssueComponent returning false');
       return false;
     }
-    sut.setFailed = jest.fn();
+    sut.setFailed = vi.fn();
     await sut.addJiraComponent('GHA-42', 'Component Name', 'Component Description');
     expect(sut.setFailed).toHaveBeenCalledWith('Failed to add component');
     expect(logTester.logsParams).toStrictEqual([
