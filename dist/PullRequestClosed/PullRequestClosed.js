@@ -22,7 +22,7 @@ export class PullRequestClosed extends PullRequestAction {
     async processJiraIssue(issueId) {
         if (this.isEngXpSquad) { // Can't auto-close auto-created issues, the reporter is set to the actual user
             const pr = await this.loadPullRequest(this.payload.pull_request.number);
-            if (pr?.user?.type === "Bot") {
+            if (pr?.isRenovate() || pr?.isDependabot()) {
                 await this.jira.moveIssue(issueId, 'Resolve issue', { resolution: { id: this.resolutionId() } });
             }
             else {

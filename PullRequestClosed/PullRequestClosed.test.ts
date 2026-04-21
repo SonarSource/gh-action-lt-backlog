@@ -31,7 +31,7 @@ async function runAction(title: string, user: string = 'test-user') {
   const action = new PullRequestClosed() as PullRequestClosed & OctokitActionStub;
   action.jira = jiraClientStub;
   action.rest = createOctokitRestStub(title, null, user);
-  if (user === "renovate[bot]") {
+  if (user === "renovate[bot]" || user === "hashicorp-vault-sonar-prod[bot]") {
     (action as any).rest.issues.listComments = function () {
       return {
         data: [
@@ -79,7 +79,7 @@ describe('PullRequestClosed', () => {
     ]);
   });
 
-  it('is-eng-xp-squad Bot PR merged PR moves issue to Done', async () => {
+  it('is-eng-xp-squad PR moves issue to Done - renovate', async () => {
     process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
     github.context.payload.pull_request!.merged = true;
     github.context.payload.pull_request!.base = { ref: 'master' };
@@ -91,6 +91,20 @@ describe('PullRequestClosed', () => {
       "Done",
     ]);
   });
+
+  it('is-eng-xp-squad PR moves issue to Done - dependabot', async () => {
+    process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
+    github.context.payload.pull_request!.merged = true;
+    github.context.payload.pull_request!.base = { ref: 'master' };
+    await runAction('KEY-1234 Title', "dependabot[bot]");
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Loading PR #42",
+      "Invoked jira.moveIssue('KEY-1234', 'Resolve issue', {\"resolution\":{\"id\":\"10000\"}})",
+      "Done",
+    ]);
+  });
+
 
   it('is-eng-xp-squad Bot PR unmerged PR cancels issue', async () => {
     process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
