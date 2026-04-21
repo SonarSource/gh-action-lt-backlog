@@ -75,7 +75,7 @@ ${env:INPUT_PARAM-NAME-WITH-HYPHEN}="Value"
 clear; node .\dist\ActionName\ActionName.js
 ```
 
-Development commands
+### Development commands
 
 ```
 Prepare environment variables for UTs:
