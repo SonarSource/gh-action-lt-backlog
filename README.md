@@ -63,12 +63,11 @@ Dependency update:
 1. Run `npm install` to get all remaining files for local development.
 1. Commit changes to `.package-lock.json` file.
 
-### Run Octokit action from PowerShell:
+### Run Octokit action from PowerShell
 
 This syntax allows setting environment variables with hyphens in the name:
 
 ```
-${env:NODE_TLS_REJECT_UNAUTHORIZED}="0"
 ${env:GITHUB_REPOSITORY}="SonarSource/<YourRepoName>"
 ${env:INPUT_GITHUB-TOKEN}="ghp_...."
 ${env:INPUT_PARAM}="True"
@@ -76,7 +75,26 @@ ${env:INPUT_PARAM-NAME-WITH-HYPHEN}="Value"
 clear; node .\dist\ActionName\ActionName.js
 ```
 
-`NODE_TLS_REJECT_UNAUTHORIZED` is unsafe and needed due to custom certificate in our network chain. It should be used only in short-lived console session.
+### Development commands
+
+```
+Prepare environment variables for UTs:
+${env:GITHUB_TOKEN}="ghp_..."
+${env:JIRA_USER}="...@sonarsource.com"
+${env:JIRA_TOKEN}="..."
+
+# Rebuild
+npm run build
+
+# Run all UTs
+npm test
+
+# Run UTs from single file
+npm test TeamConfiguration
+
+# Run single UT
+npm test TeamConfiguration -- -t "list new teams"
+```
 
 ### Local debugging
 
