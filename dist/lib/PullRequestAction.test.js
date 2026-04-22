@@ -27,7 +27,7 @@ class TestPullRequestAction extends PullRequestAction {
         super();
         this.rest = createOctokitRestStub(title, null, login);
     }
-    async processJiraIssue(issueId) {
+    async processJiraIssue(pr, issueId) {
         this.log(`Invoked processJiraIssue(${issueId})`);
     }
 }

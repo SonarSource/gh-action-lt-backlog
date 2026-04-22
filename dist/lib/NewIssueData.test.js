@@ -28,7 +28,7 @@ function createPullRequest(title, body, repo = 'repo') {
         body,
         base: { repo: { name: repo } },
         isRenovate() { return title === 'Renovate PR'; },
-        isDependabot() { return title === 'Dependabot PR'; }
+        isBot() { return title === 'Renovate PR' || title === 'Dependabot PR'; }
     };
 }
 function createExpected() {

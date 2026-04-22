@@ -78,7 +78,6 @@ describe('PullRequestClosed', () => {
         await runAction('Title', "renovate[bot]");
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
-            "Loading PR #42",
             "Invoked jira.moveIssue('KEY-1234', 'Resolve issue', {\"resolution\":{\"id\":\"10000\"}})",
             "Done",
         ]);
@@ -90,7 +89,6 @@ describe('PullRequestClosed', () => {
         await runAction('KEY-1234 Title', "dependabot[bot]");
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
-            "Loading PR #42",
             "Invoked jira.moveIssue('KEY-1234', 'Resolve issue', {\"resolution\":{\"id\":\"10000\"}})",
             "Done",
         ]);
@@ -99,7 +97,6 @@ describe('PullRequestClosed', () => {
         process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
         await runAction('Title', "renovate[bot]");
         expect(logTester.logsParams).toStrictEqual([
-            "Loading PR #42",
             "Loading PR #42",
             "Invoked jira.moveIssue('KEY-1234', 'Resolve issue', {\"resolution\":{\"id\":\"10001\"}})",
             "Done",

@@ -19,8 +19,11 @@
  */
 import { PullRequestAction } from '../lib/PullRequestAction.js';
 export class SubmitReview extends PullRequestAction {
-    async processJiraIssue(issueId) {
+    async processJiraIssue(pr, issueId) {
         if (this.payload.review.state === 'approved') {
+            if (pr.isBot()) {
+                await this.assignCurrentUser(issueId); // When these start by approving PR instead of moving the card, they end up without a face
+            }
             if (this.isEngXpSquad) {
                 const userEmail = await this.findEmail(this.payload.sender?.login);
                 if (userEmail) {
@@ -33,6 +36,15 @@ export class SubmitReview extends PullRequestAction {
         }
         else if (this.payload.review.state === 'changes_requested') {
             await this.jira.moveIssue(issueId, 'Request Changes');
+        }
+    }
+    async assignCurrentUser(issueId) {
+        const issue = await this.jira.loadIssue(issueId);
+        if (!issue.fields.assignee) {
+            const userEmail = await this.findEmail(this.payload.sender?.login);
+            if (userEmail) {
+                await this.jira.assignIssueToEmail(issueId, userEmail);
+            }
         }
     }
 }
