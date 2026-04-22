@@ -24,7 +24,7 @@ import { PullRequest } from '../lib/OctokitTypes.js';
 export class PullRequestClosed extends PullRequestAction {
   protected async processJiraIssue(pr: PullRequest, issueId: string): Promise<void> {
     if (this.isEngXpSquad) { // Can't auto-close auto-created issues, the reporter is set to the actual user
-      if (pr.isRenovate() || pr.isDependabot()) {
+      if (pr.isBot()) {
         await this.jira.moveIssue(issueId, 'Resolve issue', { resolution: { id: this.resolutionId() } });
       } else {
         this.log(`Skipping issue resolution for non-Bot PR`);

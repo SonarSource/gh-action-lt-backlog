@@ -31,7 +31,7 @@ function createPullRequest(title: string, body: string | null, repo: string = 'r
     body,
     base: { repo: { name: repo } },
     isRenovate(): boolean { return title === 'Renovate PR' },
-    isDependabot(): boolean { return title === 'Dependabot PR' }
+    isBot(): boolean { return title === 'Renovate PR' || title === 'Dependabot PR' }
   } as unknown as PullRequest;
 }
 
