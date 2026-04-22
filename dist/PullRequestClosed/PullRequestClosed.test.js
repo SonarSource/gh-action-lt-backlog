@@ -28,7 +28,7 @@ async function runAction(title, user = 'test-user') {
     const action = new PullRequestClosed();
     action.jira = jiraClientStub;
     action.rest = createOctokitRestStub(title, null, user);
-    if (user === "renovate[bot]" || user === "hashicorp-vault-sonar-prod[bot]") {
+    if (user === "renovate[bot]") {
         action.rest.issues.listComments = function () {
             return {
                 data: [
