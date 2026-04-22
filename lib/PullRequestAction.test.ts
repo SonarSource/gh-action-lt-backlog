@@ -22,6 +22,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import * as github from '@actions/github';
 import { LogTester } from '../tests/LogTester.js';
 import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
+import { PullRequest } from './OctokitTypes.js';
 import { PullRequestAction } from './PullRequestAction.js';
 import { OctokitActionStub } from '../tests/OctokitActionStub.js';
 
@@ -32,7 +33,7 @@ class TestPullRequestAction extends PullRequestAction {
     (this as unknown as OctokitActionStub).rest = createOctokitRestStub(title, null, login);
   }
 
-  async processJiraIssue(issueId: string): Promise<void> {
+  async processJiraIssue(pr: PullRequest, issueId: string): Promise<void> {
     this.log(`Invoked processJiraIssue(${issueId})`);
   }
 }

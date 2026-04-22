@@ -18,11 +18,12 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+import { PullRequest } from '../lib/OctokitTypes.js';
 import { PullRequestAction } from '../lib/PullRequestAction.js';
 
 export class SubmitReview extends PullRequestAction {
 
-  protected async processJiraIssue(issueId: string): Promise<void> {
+  protected async processJiraIssue(pr: PullRequest, issueId: string): Promise<void> {
     if (this.payload.review.state === 'approved') {
       if (this.isEngXpSquad) {
         const userEmail = await this.findEmail(this.payload.sender?.login);

@@ -19,31 +19,28 @@
  */
 
 import { OctokitAction } from './OctokitAction.js';
+import { PullRequest } from './OctokitTypes.js';
 
 export abstract class PullRequestAction extends OctokitAction {
-  protected abstract processJiraIssue(issueId: string): Promise<void>;
+  protected abstract processJiraIssue(pr: PullRequest, issueId: string): Promise<void>;
 
   protected async execute(): Promise<void> {
-    const issueIds = await this.fixedJiraIssues();
-    if (issueIds.length === 0) {
-      console.log('No Jira issue found in the PR title.');
-    } else {
-      for (const issueId of issueIds) {
-        // BUILD/PREQ tickets are processed only when they are from Engineering Experience Squad repos. They should be ignored in any other repo, not to interfere with their process.
-        if ((issueId.startsWith('BUILD-') || issueId.startsWith('PREQ-')) && !this.isEngXpSquad) {
-          this.log(`Skipping ${issueId}`);
-        }
-        else {
-          await this.processJiraIssue(issueId);
+    const pr = await this.loadPullRequest(this.payload.pull_request!.number);
+    if (pr) {
+      const issueIds = (await this.findFixedIssues(pr)) ?? [];
+      if (issueIds.length === 0) {
+        console.log('No Jira issue found in the PR title.');
+      } else {
+        for (const issueId of issueIds) {
+          // BUILD/PREQ tickets are processed only when they are from Engineering Experience Squad repos. They should be ignored in any other repo, not to interfere with their process.
+          if ((issueId.startsWith('BUILD-') || issueId.startsWith('PREQ-')) && !this.isEngXpSquad) {
+            this.log(`Skipping ${issueId}`);
+          }
+          else {
+            await this.processJiraIssue(pr, issueId);
+          }
         }
       }
     }
-  }
-
-  private async fixedJiraIssues(): Promise<string[]> {
-    const pr = await this.loadPullRequest(this.payload.pull_request!.number);
-    return pr
-      ? (await this.findFixedIssues(pr)) ?? []
-      : [];
   }
 }
