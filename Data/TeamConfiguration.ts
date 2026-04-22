@@ -48,7 +48,7 @@ export const TeamConfigurationData: TeamConfiguration[] = [
   { name: "DBD Squad", boardId: 1638 },
   { name: EngineeringExperienceSquad.name, boardId: 1551 },
   { name: "Front-End Engineering", boardId: 1444 },
-  { name: "IDE Experience Squad", boardId: 1527 },
+  { name: "Development Experience Squad", boardId: 1527 },
   { name: "Identity Squad", boardId: 1448 },
   { name: "Integrations Squad", boardId: 1438 },
   { name: "JVM Squad", boardId: 1671 },
