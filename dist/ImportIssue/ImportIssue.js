@@ -52,9 +52,9 @@ export class ImportIssue extends OctokitAction {
             { name: 'CFG/SE FPs', type: 'False Positive' },
             { name: 'False Negative', type: 'False Negative' },
             { name: 'False Positive', type: 'False Positive' },
-            { name: 'Rule Idea', type: 'New Feature' },
+            { name: 'Rule Idea', type: 'Feature' },
         ];
-        return data.find(x => this.hasLabel(issue, x.name))?.type ?? "Improvement";
+        return data.find(x => this.hasLabel(issue, x.name))?.type ?? "Feature";
     }
     hasLabel(issue, label) {
         return issue.labels.some(x => typeof x === 'object' && x.name === label);
