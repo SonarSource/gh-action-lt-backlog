@@ -58,8 +58,7 @@ export function createOctokitRestStub(title: string, body?: string | null, login
               }
             },
             user: {
-              login,
-              type: login === 'renovate[bot]' ? 'Bot' : 'User'
+              login
             }
           }
         };

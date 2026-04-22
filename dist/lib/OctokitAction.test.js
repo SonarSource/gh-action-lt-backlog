@@ -24,10 +24,10 @@ import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
 import { OctokitAction } from './OctokitAction.js';
 import { fail } from 'node:assert';
 class TestOctokitAction extends OctokitAction {
-    constructor() {
+    constructor(login = undefined) {
         super();
         this.jira = { ...jiraClientStub }; // Expanded copy, we'll be modifying it in these tests
-        this.rest = createOctokitRestStub('PR title');
+        this.rest = createOctokitRestStub('PR title', null, login);
     }
     async execute() {
         this.log('Invoked execute()');
@@ -109,7 +109,27 @@ describe('OctokitAction', () => {
     it('loadPullRequest', async () => {
         const pr = await sut.loadPullRequest(42);
         expect(pr).toMatchObject({ number: 42, title: "PR title" }); // Plus the remaining properties from scaffolding
+        expect(pr.isRenovate()).toBe(false);
+        expect(pr.isDependabot()).toBe(false);
         expect(logTester.logsParams).toStrictEqual(["Loading PR #42"]);
+    });
+    it('loadPullRequest isRenovate cloud', async () => {
+        const sut = new TestOctokitAction('renovate[bot]');
+        const pr = await sut.loadPullRequest(42);
+        expect(pr.isRenovate()).toBe(true);
+        expect(pr.isDependabot()).toBe(false);
+    });
+    it('loadPullRequest isRenovate self-hosted', async () => {
+        const sut = new TestOctokitAction('hashicorp-vault-sonar-prod[bot]');
+        const pr = await sut.loadPullRequest(42);
+        expect(pr.isRenovate()).toBe(true);
+        expect(pr.isDependabot()).toBe(false);
+    });
+    it('loadPullRequest isDependabot', async () => {
+        const sut = new TestOctokitAction('dependabot[bot]');
+        const pr = await sut.loadPullRequest(42);
+        expect(pr.isRenovate()).toBe(false);
+        expect(pr.isDependabot()).toBe(true);
     });
     it('loadIssue', async () => {
         const issue = await sut.loadIssue(24);

@@ -32,7 +32,8 @@ export function addPullRequestExtensions(pr: components['schemas']['pull-request
   return {
     ...pr,
     isRenovate(): boolean {
-      return this.user?.login === "renovate[bot]";
+      // GHA-122 hashicorp-vault-sonar-prod is used by self-hosted renovate instance
+      return this.user?.login === "renovate[bot]" || this.user?.login === "hashicorp-vault-sonar-prod[bot]";
     },
     isDependabot(): boolean {
       return this.user?.login === "dependabot[bot]";
