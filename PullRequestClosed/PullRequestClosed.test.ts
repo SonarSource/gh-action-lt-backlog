@@ -73,7 +73,6 @@ describe('PullRequestClosed', () => {
     await runAction('KEY-1234 Title');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
-      "Loading PR #42",
       "Skipping issue resolution for non-Bot PR",
       "Done"
     ]);
