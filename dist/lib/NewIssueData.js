@@ -155,6 +155,10 @@ export class NewIssueData {
                 return team;
             }
         }
+        // ToDo: GHA-235 Reenable team fallback
+        if (projectKey === 'SC') {
+            return null;
+        }
         const project = await jira.loadProject(projectKey);
         console.log(`No team found for current user, using ${projectKey} lead ${project.lead.displayName}`);
         return jira.findTeamByUser(project.lead.accountId);
