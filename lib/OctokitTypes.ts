@@ -25,7 +25,7 @@ export type Issue = components["schemas"]["issue"];
 export type PullRequest = components['schemas']['pull-request'] & {
   // Declare extensions for the underlaying type. We can't modify the prototype, unfortunately. 
   isRenovate(): boolean;
-  isDependabot(): boolean;
+  isBot(): boolean;
 };
 
 export function addPullRequestExtensions(pr: components['schemas']['pull-request']): PullRequest {  // Adds implementation of declared extensions
@@ -35,8 +35,8 @@ export function addPullRequestExtensions(pr: components['schemas']['pull-request
       // GHA-122 hashicorp-vault-sonar-prod is used by self-hosted renovate instance
       return this.user?.login === "renovate[bot]" || this.user?.login === "hashicorp-vault-sonar-prod[bot]";
     },
-    isDependabot(): boolean {
-      return this.user?.login === "dependabot[bot]";
+    isBot(): boolean {
+      return this.isRenovate() || this.user?.login === "dependabot[bot]";
     }
   };
 }

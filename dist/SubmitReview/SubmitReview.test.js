@@ -23,11 +23,11 @@ import { LogTester } from '../tests/LogTester.js';
 import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
 import { SubmitReview } from './SubmitReview.js';
 import { jiraClientStub } from '../tests/JiraClientStub.js';
-async function runAction(state, findEmailResult = null) {
+async function runAction(state, findEmailResult = null, prAuthor = "test-user", title = "GHA-42 and GHA-43 are processed") {
     github.context.payload = {
         pull_request: {
             number: 42,
-            title: "GHA-42 and GHA-43 are processed",
+            title,
         },
         requested_reviewer: {
             login: "test-user",
@@ -43,7 +43,7 @@ async function runAction(state, findEmailResult = null) {
     };
     const action = new SubmitReview();
     action.jira = jiraClientStub;
-    action.rest = createOctokitRestStub('GHA-42 and GHA-43 are processed');
+    action.rest = createOctokitRestStub(title, null, prAuthor);
     action.findEmail = async function (login) {
         return findEmailResult;
     };
@@ -88,6 +88,31 @@ describe('SubmitReview', () => {
             "Loading PR #42",
             "Invoked jira.moveIssue('GHA-42', 'Approve', null)",
             "Invoked jira.moveIssue('GHA-43', 'Approve', null)",
+            "Done",
+        ]);
+    });
+    it('Approved move issue and assign - bot', async () => {
+        await runAction('approved', 'user@sonarsource.com', 'dependabot[bot]', 'SUBMIT-1 Issue without assignee');
+        expect(logTester.logsParams).toStrictEqual([
+            "Loading PR #42",
+            "Invoked jira.assignIssueToEmail('SUBMIT-1', 'user@sonarsource.com')",
+            "Invoked jira.moveIssue('SUBMIT-1', 'Approve', null)",
+            "Done",
+        ]);
+    });
+    it('Approved move issue and assign - bot - unknown email', async () => {
+        await runAction('approved', null, 'dependabot[bot]', 'SUBMIT-1 Issue without assignee');
+        expect(logTester.logsParams).toStrictEqual([
+            "Loading PR #42",
+            "Invoked jira.moveIssue('SUBMIT-1', 'Approve', null)",
+            "Done",
+        ]);
+    });
+    it('Approved move issue and assign - bot - had assignee', async () => {
+        await runAction('approved', 'user@sonarsource.com', 'dependabot[bot]', 'SUBMIT-2 Issue with assignee not re-assigned');
+        expect(logTester.logsParams).toStrictEqual([
+            "Loading PR #42",
+            "Invoked jira.moveIssue('SUBMIT-2', 'Approve', null)",
             "Done",
         ]);
     });

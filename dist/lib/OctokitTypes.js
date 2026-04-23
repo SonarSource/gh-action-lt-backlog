@@ -24,8 +24,8 @@ export function addPullRequestExtensions(pr) {
             // GHA-122 hashicorp-vault-sonar-prod is used by self-hosted renovate instance
             return this.user?.login === "renovate[bot]" || this.user?.login === "hashicorp-vault-sonar-prod[bot]";
         },
-        isDependabot() {
-            return this.user?.login === "dependabot[bot]";
+        isBot() {
+            return this.isRenovate() || this.user?.login === "dependabot[bot]";
         }
     };
 }

@@ -110,26 +110,26 @@ describe('OctokitAction', () => {
         const pr = await sut.loadPullRequest(42);
         expect(pr).toMatchObject({ number: 42, title: "PR title" }); // Plus the remaining properties from scaffolding
         expect(pr.isRenovate()).toBe(false);
-        expect(pr.isDependabot()).toBe(false);
+        expect(pr.isBot()).toBe(false);
         expect(logTester.logsParams).toStrictEqual(["Loading PR #42"]);
     });
-    it('loadPullRequest isRenovate cloud', async () => {
+    it('loadPullRequest Renovate cloud', async () => {
         const sut = new TestOctokitAction('renovate[bot]');
         const pr = await sut.loadPullRequest(42);
         expect(pr.isRenovate()).toBe(true);
-        expect(pr.isDependabot()).toBe(false);
+        expect(pr.isBot()).toBe(true);
     });
-    it('loadPullRequest isRenovate self-hosted', async () => {
+    it('loadPullRequest Renovate self-hosted', async () => {
         const sut = new TestOctokitAction('hashicorp-vault-sonar-prod[bot]');
         const pr = await sut.loadPullRequest(42);
         expect(pr.isRenovate()).toBe(true);
-        expect(pr.isDependabot()).toBe(false);
+        expect(pr.isBot()).toBe(true);
     });
-    it('loadPullRequest isDependabot', async () => {
+    it('loadPullRequest Dependabot', async () => {
         const sut = new TestOctokitAction('dependabot[bot]');
         const pr = await sut.loadPullRequest(42);
         expect(pr.isRenovate()).toBe(false);
-        expect(pr.isDependabot()).toBe(true);
+        expect(pr.isBot()).toBe(true);
     });
     it('loadIssue', async () => {
         const issue = await sut.loadIssue(24);

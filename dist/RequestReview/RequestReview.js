@@ -19,7 +19,7 @@
  */
 import { PullRequestAction } from '../lib/PullRequestAction.js';
 export class RequestReview extends PullRequestAction {
-    async processJiraIssue(issueId) {
+    async processJiraIssue(pr, issueId) {
         await this.processRequestReview(issueId, this.payload.requested_reviewer); // When team is requested for a review, it has this.payload.requested_team
     }
 }

@@ -18,12 +18,16 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+import { PullRequest } from '../lib/OctokitTypes.js';
 import { PullRequestAction } from '../lib/PullRequestAction.js';
 
 export class SubmitReview extends PullRequestAction {
 
-  protected async processJiraIssue(issueId: string): Promise<void> {
+  protected async processJiraIssue(pr: PullRequest, issueId: string): Promise<void> {
     if (this.payload.review.state === 'approved') {
+      if (pr.isBot()) {
+        await this.assignCurrentUser(issueId);  // When these start by approving PR instead of moving the card, they end up without a face
+      }
       if (this.isEngXpSquad) {
         const userEmail = await this.findEmail(this.payload.sender?.login);
         if (userEmail) {
@@ -34,6 +38,16 @@ export class SubmitReview extends PullRequestAction {
       }
     } else if (this.payload.review.state === 'changes_requested') {
       await this.jira.moveIssue(issueId, 'Request Changes');
+    }
+  }
+
+  private async assignCurrentUser(issueId: string): Promise<void> {
+    const issue = await this.jira.loadIssue(issueId);
+    if (!issue.fields.assignee) {
+      const userEmail = await this.findEmail(this.payload.sender?.login);
+      if (userEmail) {
+        await this.jira.assignIssueToEmail(issueId, userEmail);
+      }
     }
   }
 }
