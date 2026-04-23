@@ -18,6 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+import { NIGEL_ACCOUNT_ID } from '../lib/Constants.js';
 import { PullRequest } from '../lib/OctokitTypes.js';
 import { PullRequestAction } from '../lib/PullRequestAction.js';
 
@@ -25,7 +26,7 @@ export class SubmitReview extends PullRequestAction {
 
   protected async processJiraIssue(pr: PullRequest, issueId: string): Promise<void> {
     if (this.payload.review.state === 'approved') {
-      if (pr.isBot()) {
+      if (pr.isBot()) { // Including Nigel
         await this.assignCurrentUser(issueId);  // When these start by approving PR instead of moving the card, they end up without a face
       }
       if (this.isEngXpSquad) {
@@ -43,7 +44,7 @@ export class SubmitReview extends PullRequestAction {
 
   private async assignCurrentUser(issueId: string): Promise<void> {
     const issue = await this.jira.loadIssue(issueId);
-    if (!issue.fields.assignee) {
+    if (!issue.fields.assignee || issue.fields.assignee.accountId === NIGEL_ACCOUNT_ID) {
       const userEmail = await this.findEmail(this.payload.sender?.login);
       if (userEmail) {
         await this.jira.assignIssueToEmail(issueId, userEmail);

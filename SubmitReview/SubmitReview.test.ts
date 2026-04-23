@@ -129,6 +129,16 @@ describe('SubmitReview', () => {
     ]);
   });
 
+  it('Approved move issue and assign - bot - was assigned to Nigel', async () => {
+    await runAction('approved', 'user@sonarsource.com', 'sonar-nigel[bot]', 'SUBMIT-3 Issue assigned to Nigel');
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Invoked jira.assignIssueToEmail('SUBMIT-3', 'user@sonarsource.com')",
+      "Invoked jira.moveIssue('SUBMIT-3', 'Approve', null)",
+      "Done",
+    ]);
+  });
+
   it('Approved is-eng-xp-squad adds ReviewedBy', async () => {
     process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
     await runAction('approved', 'user@sonarsource.com');

@@ -21,6 +21,7 @@
 export const RENOVATE_PREFIX: string = 'Renovate Jira issue ID: ';  // Workaround for https://github.com/renovatebot/renovate/issues/26833
 export const JIRA_ISSUE_PATTERN: RegExp = /\b(?!USER-)[A-Z][A-Z0-9]*-\d+/g;
 export const JIRA_DOMAIN = 'https://sonarsource.atlassian.net';
+export const NIGEL_ACCOUNT_ID = '712020:9c105dc5-0493-4d71-83a6-ed21c4ba03c0';
 
 // To find values for these constants, you can use the following query, update Jira domain, and post it here: https://developer.atlassian.com/platform/teams/graphql/explorer/
 // To avoid consistency of having a single name for the same thing everywhere, wise developers of Patlassian* named the redundant `siteId` form teamSearchV2 a `cloudId` here.
