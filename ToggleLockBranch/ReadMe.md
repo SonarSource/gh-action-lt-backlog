@@ -34,6 +34,12 @@ Slack channel name or ID to send the notification to. When set, requires `slack-
 
 This parameter is optional. 
 
+### `additional-message`
+
+Additional Slack message text to be added to the default message.
+
+This parameter is optional. 
+
 ## Outputs
 
 None
@@ -61,6 +67,10 @@ name: Toggle lock branch
 
 on:
   workflow_dispatch:    # Triggered manually from the GitHub UI / Actions
+    inputs:
+      additional-message:
+        description: 'Additional Slack message text'
+        required: false
 
 jobs:
   ToggleLockBranch_job:
@@ -79,6 +89,7 @@ jobs:
         with:
           github-token: ${{ fromJSON(steps.secrets.outputs.vault).lock_token }}
           slack-token: ${{ fromJSON(steps.secrets.outputs.vault).slack_api_token }} # Optional, needed only when slack-channel is set
+          additional-message: ${{ github.event.inputs.additional-message }}         # Optional, useful only when slack-channel is set
           branch-pattern: "master"              # Optional
           slack-channel: public-channel-name    # Optional
 

@@ -229,18 +229,20 @@ describe('ToggleLockBranch', () => {
     it('Lock unlocked with slack', async () => {
         process.env['INPUT_BRANCH-PATTERN'] = 'unlocked';
         process.env['INPUT_SLACK-CHANNEL'] = 'channel-name';
+        process.env['INPUT_ADDITIONAL-MESSAGE'] = 'This is because ABC';
         await runAction();
         expect(logTester.logsParams).toStrictEqual([
             "Invoked sendGraphQL list branch protection rules",
-            "Invoked sendGraphQL updateBranchProtectionRule to lock id-of-unlocked-3", "Done: test-repo: The branch `unlocked` was locked :ice_cube:",
+            "Invoked sendGraphQL updateBranchProtectionRule to lock id-of-unlocked-3", "Done: test-repo: The branch `unlocked` was locked :ice_cube:\n\nThis is because ABC",
             "Sending Slack message",
-            "Invoked sendSlackPost('https://slack.com/api/chat.postMessage', {\"channel\":\"channel-name\",\"text\":\"test-repo: The branch `unlocked` was locked :ice_cube:\"}",
+            "Invoked sendSlackPost('https://slack.com/api/chat.postMessage', {\"channel\":\"channel-name\",\"text\":\"test-repo: The branch `unlocked` was locked :ice_cube:\\n\\nThis is because ABC\"}",
             "Done"
         ]);
     });
     it('Unlock locked and cancel auto-merge', async () => {
         process.env['INPUT_BRANCH-PATTERN'] = 'locked';
         process.env['INPUT_SLACK-CHANNEL'] = 'channel-name';
+        process.env['INPUT_ADDITIONAL-MESSAGE'] = '';
         await runAction();
         expect(logTester.logsParams).toStrictEqual([
             "Invoked sendGraphQL list branch protection rules",
