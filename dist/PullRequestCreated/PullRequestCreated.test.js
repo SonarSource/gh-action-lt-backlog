@@ -116,7 +116,7 @@ describe('PullRequestCreated', () => {
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
             "No mentioned issues found",
-            "Looking for a non-Sub-task ticket",
+            "Looking for valid parent ticket",
             "No parent issue found",
             "No boardId is configured for team .NET Squad",
             "Found 2 Evergreen Epic(s), using NET-1000 .NET KTLO Epic",
@@ -137,7 +137,7 @@ describe('PullRequestCreated', () => {
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
             "No mentioned issues found",
-            "Looking for a non-Sub-task ticket",
+            "Looking for valid parent ticket",
             "No parent issue found",
             "No boardId is configured for team .NET Squad",
             "Found 2 Evergreen Epic(s), using NET-1000 .NET KTLO Epic",
@@ -159,7 +159,7 @@ describe('PullRequestCreated', () => {
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
             "No mentioned issues found",
-            "Looking for a non-Sub-task ticket",
+            "Looking for valid parent ticket",
             "No parent issue found",
             "No boardId is configured for team .NET Squad",
             "Found 2 Evergreen Epic(s), using NET-1000 .NET KTLO Epic",
@@ -197,7 +197,7 @@ describe('PullRequestCreated', () => {
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
             "No mentioned issues found",
-            "Looking for a non-Sub-task ticket",
+            "Looking for valid parent ticket",
             "No parent issue found",
             "No boardId is configured for team .NET Squad",
             "Found 2 Evergreen Epic(s), using NET-1000 .NET KTLO Epic",

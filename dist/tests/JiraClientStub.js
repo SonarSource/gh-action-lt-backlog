@@ -21,13 +21,14 @@ import { EngineeringExperienceSquad } from "../Data/TeamConfiguration.js";
 export const jiraClientStub = {
     async loadIssue(issueId) {
         switch (issueId) {
-            case 'MMF-1111': return { key: 'MMF-1111', fields: { project: { key: 'MMF' }, issuetype: { name: 'Epic' } } };
-            case 'KEY-1111': return { key: 'KEY-1111', fields: { project: { key: 'KEY' }, issuetype: { name: 'Epic' } } };
+            case 'MMF-1111': return { key: 'MMF-1111', fields: { project: { key: 'MMF' }, issuetype: { name: 'Initiative' } } };
+            case 'EPIC-111': return { key: 'EPIC-111', fields: { project: { key: 'EPIC' }, issuetype: { name: 'Epic' } } };
             case 'KEY-1234': return { key: 'KEY-1234', fields: { project: { key: 'KEY' }, issuetype: { name: 'Maintenance' }, creator: { displayName: "Creator of KEY-1234" } } };
             case 'KEY-5678': return { key: 'KEY-5678', fields: { project: { key: 'KEY' }, issuetype: { name: 'Maintenance' }, creator: { displayName: "Jira Tech User GitHub" } } };
             case 'KEY-5555': return { key: 'KEY-5555', fields: { project: { key: 'KEY' }, issuetype: { name: 'Sub-task' } } };
             case 'SUBMIT-1': return { key: 'SUBMIT-1', fields: { project: { key: 'SUBMIT' }, issuetype: { name: 'Maintenance' }, assignee: null } };
             case 'SUBMIT-2': return { key: 'SUBMIT-2', fields: { project: { key: 'SUBMIT' }, issuetype: { name: 'Maintenance' }, assignee: { accountId: '4242-4242', emailAddress: 'user@sonarsource.com', displayName: 'User' } } };
+            case 'THEME-42': return { key: 'THEME-42', fields: { project: { key: 'THEME' }, issuetype: { name: 'Theme' } } };
             case 'FAKE-1234': return null;
             default: throw new Error(`Scaffolding did not expect ${issueId}`);
         }

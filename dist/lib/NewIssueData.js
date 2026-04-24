@@ -34,7 +34,7 @@ export class NewIssueData {
     static async create(jira, pr, inputJiraProject, inputAdditionalFields, userEmail, fallbackTeam) {
         const parent = pr.isBot()
             ? null // Description contains release notes with irrelevant issue IDs
-            : await this.findNonSubTaskParent(jira, this.findMentionedIssues(pr));
+            : await this.findValidParent(jira, this.findMentionedIssues(pr));
         const projectKey = this.computeProjectKey(inputJiraProject, parent);
         if (projectKey) {
             const accountId = await jira.findAccountId(userEmail);
@@ -79,9 +79,17 @@ export class NewIssueData {
         return new NewIssueData(projectKey, accountId, projectKey === 'PREQ' ? null : accountId, parameters); // GHA-86 Leave PREQ unassigned
     }
     static computeProjectKey(inputJiraProject, parent) {
-        return parent && !["Epic", "Sub-task"].includes(parent.fields.issuetype.name)
-            ? parent.fields.project.key // If someone takes the explicit effort of specifying "Part of XYZ-123", it should take precedence.
-            : inputJiraProject; // Can be null. Like in rspec where we want only to create Sub-tasks in other tasks (not Epics).
+        if (!parent) {
+            return inputJiraProject; // Can be null => no new ticket. Like in rspec where we want to create child work items only when parent is set.
+        }
+        else if (parent.fields.issuetype.name === 'Epic') {
+            // Parent Epic should prefer repo-project and use itself only as a fallback when repo is not set (like rspec).
+            return inputJiraProject || parent.fields.project.key;
+        }
+        else {
+            // This will create Sub-task that needs to follow the mentioned parent issue
+            return parent.fields.project.key;
+        }
     }
     static async computeProjectKeyForEngExp(jira, pr, accountId) {
         if (pr.base.repo.name === 'parent-oss') {
@@ -120,15 +128,15 @@ export class NewIssueData {
                     : { issuetype: { name: issueType } };
         }
     }
-    static async findNonSubTaskParent(jira, issues) {
-        console.log('Looking for a non-Sub-task ticket');
+    static async findValidParent(jira, issues) {
+        console.log('Looking for valid parent ticket');
         for (const issueKey of issues) {
             if (issueKey.startsWith("BUILD-") || issueKey.startsWith("PREQ-")) {
                 console.log(`Ignoring Eng. Xp Squad project: ${issueKey}`);
             }
             else {
                 const issue = await jira.loadIssue(issueKey);
-                if (issue && issue.fields.issuetype.name !== 'Sub-task') {
+                if (issue && !["Theme", "Initiative", "Sub-task"].includes(issue.fields.issuetype.name)) {
                     console.log(`Parent issue: ${issue.key} ${issue.fields.issuetype.name}`);
                     return issue;
                 }

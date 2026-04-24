@@ -22,7 +22,7 @@ import { EngineeringExperienceSquad } from "../Data/TeamConfiguration.js";
 import { Config } from "./Configuration.js";
 import { JIRA_ISSUE_PATTERN } from "./Constants.js";
 import { NewIssueParameters } from "./NewIssueParameters.js";
-import { JiraClient } from "./JiraClient.js";
+import { JiraClient, Issue } from "./JiraClient.js";
 import { PullRequest } from "./OctokitTypes.js";
 import { Team } from "./Team.js";
 
@@ -42,7 +42,7 @@ export class NewIssueData {
   public static async create(jira: JiraClient, pr: PullRequest, inputJiraProject: string, inputAdditionalFields: string, userEmail: string | null, fallbackTeam: string): Promise<NewIssueData | null> {
     const parent = pr.isBot()
       ? null  // Description contains release notes with irrelevant issue IDs
-      : await this.findNonSubTaskParent(jira, this.findMentionedIssues(pr));
+      : await this.findValidParent(jira, this.findMentionedIssues(pr));
     const projectKey = this.computeProjectKey(inputJiraProject, parent);
     if (projectKey) {
       const accountId = await jira.findAccountId(userEmail);
@@ -88,9 +88,15 @@ export class NewIssueData {
   }
 
   private static computeProjectKey(inputJiraProject: string, parent: any): string {
-    return parent && !["Epic", "Sub-task"].includes(parent.fields.issuetype.name)
-      ? parent.fields.project.key // If someone takes the explicit effort of specifying "Part of XYZ-123", it should take precedence.
-      : inputJiraProject;         // Can be null. Like in rspec where we want only to create Sub-tasks in other tasks (not Epics).
+    if (!parent) {
+      return inputJiraProject;  // Can be null => no new ticket. Like in rspec where we want to create child work items only when parent is set.
+    } else if (parent.fields.issuetype.name === 'Epic') {
+      // Parent Epic should prefer repo-project and use itself only as a fallback when repo is not set (like rspec).
+      return inputJiraProject || parent.fields.project.key;
+    } else {
+      // This will create Sub-task that needs to follow the mentioned parent issue
+      return parent.fields.project.key;
+    }
   }
 
   private static async computeProjectKeyForEngExp(jira: JiraClient, pr: PullRequest, accountId: string | null): Promise<string> {
@@ -130,14 +136,14 @@ export class NewIssueData {
     }
   }
 
-  private static async findNonSubTaskParent(jira: JiraClient, issues: Set<string>): Promise<any> {
-    console.log('Looking for a non-Sub-task ticket');
+  private static async findValidParent(jira: JiraClient, issues: Set<string>): Promise<Issue | null> {
+    console.log('Looking for valid parent ticket');
     for (const issueKey of issues) {
       if (issueKey.startsWith("BUILD-") || issueKey.startsWith("PREQ-")) {
         console.log(`Ignoring Eng. Xp Squad project: ${issueKey}`);
       } else {
         const issue = await jira.loadIssue(issueKey);
-        if (issue && issue.fields.issuetype.name !== 'Sub-task') {
+        if (issue && !["Theme", "Initiative", "Sub-task"].includes(issue.fields.issuetype.name)) {
           console.log(`Parent issue: ${issue.key} ${issue.fields.issuetype.name}`);
           return issue;
         }
