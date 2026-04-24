@@ -23,9 +23,17 @@ import * as github from '@actions/github';
 import type { Api } from '@octokit/plugin-rest-endpoint-methods';
 import { Action } from './Action.js';
 import { PullRequest, IssueComment, addPullRequestExtensions, Issue } from './OctokitTypes.js';
-import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
+import { graphql, GraphQlQueryResponseData, GraphqlResponseError } from '@octokit/graphql';
 import { JiraClient } from './JiraClient.js';
 import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN } from './Constants.js';
+
+type VerifiedEmailsUser = {
+  organizationVerifiedDomainEmails: string[];
+}
+
+type VerifiedEmailsResponse = {
+  user: VerifiedEmailsUser;
+}
 
 export abstract class OctokitAction extends Action {
   public readonly rest: Api['rest'];
@@ -42,13 +50,13 @@ export abstract class OctokitAction extends Action {
     this.isEngXpSquad = this.inputBoolean('is-eng-xp-squad');
   }
 
-  public sendGraphQL(query: string): Promise<GraphQlQueryResponseData> {
+  public sendGraphQL<T = GraphQlQueryResponseData>(query: string): Promise<T> {
     this.graphqlWithAuth ??= graphql.defaults({
       headers: {
         authorization: `token ${this.inputString('github-token')}`,
       },
     });
-    return this.graphqlWithAuth(query);
+    return this.graphqlWithAuth<T>(query);
   }
 
   protected inputString(name: string): string {
@@ -136,40 +144,22 @@ export abstract class OctokitAction extends Action {
   }
 
   protected async findEmail(login: string): Promise<string | null> {
-    // ToDo: GHA-235 Re-enable SAML identity search
-    this.log(`Searching for SAML identity of ${login} is temporarily unavailable, see BUILD-11028`);
-    return null;
-  //  this.log(`Searching for SAML identity of ${login}`);
-  //  const identities = await this.findExternalIdentities(login);
-  //  if (identities.length === 0) {
-  //    this.log(`No SAML identity found for ${login}`);
-  //    return null;
-  //  }
-  //  return identities[0].samlIdentity.nameId;
-  }
-
-  private async findExternalIdentities(login: string): Promise<any[]> {
-    const {
-      organization: {
-        samlIdentityProvider,
-      },
-    }: GraphQlQueryResponseData = await this.sendGraphQL(`
-          query {
-              organization(login: "${this.repo.owner}") {
-                  samlIdentityProvider {
-                      externalIdentities(first: 10, login: "${login}") {
-                          nodes {
-                              samlIdentity { nameId }
-                          }
-                      }
-                  }
-              }
-          }`);
-    if (samlIdentityProvider?.externalIdentities) {
-      return samlIdentityProvider.externalIdentities.nodes;
-    } else {
-      this.log('ERROR: Provided GitHub token does not have permissions to query organization/samlIdentityProvider/externalIdentities.');
-      return [];
+    this.log(`Searching for email of ${login}`);
+    try {
+      const { user: { organizationVerifiedDomainEmails: emails } } = await this.sendGraphQL<VerifiedEmailsResponse>(`
+        query {
+          user(login: "${login}") {
+            organizationVerifiedDomainEmails(login: "${this.repo.owner}")
+          }
+        }`);
+      this.log(`Found ${emails.length} email(s) for ${login}`);
+      return emails.find(x => x.toLowerCase().includes('@sonar')) ?? emails[0] ?? null;
+    } catch (error) {
+      if (error instanceof GraphqlResponseError && error.errors?.length === 1 && error.errors[0].type === 'NOT_FOUND') {
+        this.log(`No email found for ${login}: ${error.errors[0].message}`);
+        return null;
+      }
+      throw error;
     }
   }
 

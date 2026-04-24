@@ -21,7 +21,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Action } from './Action.js';
 import { addPullRequestExtensions } from './OctokitTypes.js';
-import { graphql } from '@octokit/graphql';
+import { graphql, GraphqlResponseError } from '@octokit/graphql';
 import { JiraClient } from './JiraClient.js';
 import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN } from './Constants.js';
 export class OctokitAction extends Action {
@@ -122,36 +122,23 @@ export class OctokitAction extends Action {
         }
     }
     async findEmail(login) {
-        // ToDo: GHA-235 Re-enable SAML identity search
-        this.log(`Searching for SAML identity of ${login} is temporarily unavailable, see BUILD-11028`);
-        return null;
-        //  this.log(`Searching for SAML identity of ${login}`);
-        //  const identities = await this.findExternalIdentities(login);
-        //  if (identities.length === 0) {
-        //    this.log(`No SAML identity found for ${login}`);
-        //    return null;
-        //  }
-        //  return identities[0].samlIdentity.nameId;
-    }
-    async findExternalIdentities(login) {
-        const { organization: { samlIdentityProvider, }, } = await this.sendGraphQL(`
-          query {
-              organization(login: "${this.repo.owner}") {
-                  samlIdentityProvider {
-                      externalIdentities(first: 10, login: "${login}") {
-                          nodes {
-                              samlIdentity { nameId }
-                          }
-                      }
-                  }
-              }
-          }`);
-        if (samlIdentityProvider?.externalIdentities) {
-            return samlIdentityProvider.externalIdentities.nodes;
+        this.log(`Searching for email of ${login}`);
+        try {
+            const { user: { organizationVerifiedDomainEmails: emails } } = await this.sendGraphQL(`
+        query {
+          user(login: "${login}") {
+            organizationVerifiedDomainEmails(login: "${this.repo.owner}")
+          }
+        }`);
+            this.log(`Found ${emails.length} email(s) for ${login}`);
+            return emails.find(x => x.toLowerCase().includes('@sonar')) ?? emails[0] ?? null;
         }
-        else {
-            this.log('ERROR: Provided GitHub token does not have permissions to query organization/samlIdentityProvider/externalIdentities.');
-            return [];
+        catch (error) {
+            if (error instanceof GraphqlResponseError && error.errors?.length === 1 && error.errors[0].type === 'NOT_FOUND') {
+                this.log(`No email found for ${login}: ${error.errors[0].message}`);
+                return null;
+            }
+            throw error;
         }
     }
     async sendSlackMessage(text) {
