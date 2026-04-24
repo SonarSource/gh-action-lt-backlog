@@ -28,7 +28,7 @@ import { OctokitActionStub } from '../tests/OctokitActionStub.js';
 
 class TestOctokitAction extends OctokitAction {
 
-  constructor(login : string | undefined = undefined) {
+  constructor(login: string | undefined = undefined) {
     super();
     (this as unknown as OctokitActionStub).jira = { ...jiraClientStub }; // Expanded copy, we'll be modifying it in these tests
     (this as unknown as OctokitActionStub).rest = createOctokitRestStub('PR title', null, login);
@@ -135,21 +135,21 @@ describe('OctokitAction', () => {
     expect(pr.isRenovate()).toBe(true);
     expect(pr.isBot()).toBe(true);
   });
-  
+
   it('loadPullRequest Renovate self-hosted', async () => {
     const sut = new TestOctokitAction('hashicorp-vault-sonar-prod[bot]') as any;
     const pr = await sut.loadPullRequest(42);
     expect(pr.isRenovate()).toBe(true);
     expect(pr.isBot()).toBe(true);
   });
-  
+
   it('loadPullRequest Dependabot', async () => {
     const sut = new TestOctokitAction('dependabot[bot]') as any;
     const pr = await sut.loadPullRequest(42);
     expect(pr.isRenovate()).toBe(false);
     expect(pr.isBot()).toBe(true);
   });
-  
+
   it('loadIssue', async () => {
     const issue = await sut.loadIssue(24);
     expect(issue).toMatchObject({ number: 24, title: "Issue title" });  // Plus the remaining properties from scaffolding
@@ -239,14 +239,20 @@ describe('OctokitAction', () => {
   // Local token is impossible to craft with required permissions
   itRunsOnlyInCI('findEmail succeeds', async () => {
     // Preferably choose someone from https://github.com/orgs/SonarSource/people when visited in incognito mode, not to leak any information
-    // ToDo: GHA-235 Re-enable SAML identity search
-    expect(await sut.findEmail('agigleux')).toBeNull();
-    //expect(await sut.findEmail('agigleux')).toContain('sonar'); // Do not write the full email address here to avoid its exposure
+    expect(await sut.findEmail('agigleux')).toContain('sonar'); // Do not write the full email address here to avoid its exposure
+    expect(logTester.logsParams).toStrictEqual([
+      "Searching for email of agigleux",
+      "Found 1 email(s) for agigleux"
+    ]);
   });
 
   // Local token is impossible to craft with required permissions
   itRunsOnlyInCI('findEmail no results', async () => {
     expect(await sut.findEmail('renovate[bot]')).toBeNull();
+    expect(logTester.logsParams).toStrictEqual([
+      "Searching for email of renovate[bot]",
+      "No email found for renovate[bot]: Could not resolve to a User with the login of 'renovate[bot]'.",
+    ]);
   });
 
   // Local token is difficult to craft
