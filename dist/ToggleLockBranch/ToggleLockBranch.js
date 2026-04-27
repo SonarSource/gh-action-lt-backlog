@@ -21,6 +21,7 @@ import { OctokitAction } from '../lib/OctokitAction.js';
 export class ToggleLockBranch extends OctokitAction {
     async execute() {
         const pattern = this.inputString('branch-pattern');
+        let additionalMessage = this.inputString('additional-message');
         let rule = await this.findRule(pattern);
         if (rule) {
             const lockBranch = !rule.lockBranch;
@@ -29,7 +30,9 @@ export class ToggleLockBranch extends OctokitAction {
             }
             rule = await this.updateRule(rule.id, lockBranch);
             if (rule.lockBranch === lockBranch) {
-                const message = `${this.repo.repo}: The branch \`${pattern}\` was ${lockBranch ? 'locked :ice_cube:' : 'unlocked and is now open for changes :sunny:'}`;
+                const action = lockBranch ? 'locked :ice_cube:' : 'unlocked and is now open for changes :sunny:';
+                additionalMessage = additionalMessage ? `\n\n${additionalMessage}` : '';
+                const message = `${this.repo.repo}: The branch \`${pattern}\` was ${action}${additionalMessage}`;
                 this.log(`Done: ${message}`);
                 this.sendSlackMessage(message);
             }
