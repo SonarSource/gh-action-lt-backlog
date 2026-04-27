@@ -44,6 +44,20 @@ function createExpected() {
         projectKey: 'KEY'
     };
 }
+function createExpectedParent(projectKey, parent, issueType) {
+    return {
+        accountId: '1234-account',
+        assigneeId: '1234-account',
+        additionalFields: {
+            // No team or sprintId for Sub-task
+            customfield_10001: issueType === 'Sub-task' ? undefined : 'dot-neeet-team',
+            customfield_10020: issueType === 'Sub-task' ? undefined : null,
+            issuetype: { name: issueType },
+            parent: parent ? { key: parent } : undefined
+        },
+        projectKey
+    };
+}
 function createExpectedWithoutAccount() {
     return {
         accountId: null,
@@ -74,66 +88,30 @@ describe('NewIssueData', () => {
     it('create fixed issue', async () => {
         expect(await NewIssueData.create(jiraClientStub, createPullRequest('KEY-1234 Title', 'Body'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
     });
-    it('create projectKey parent Epic MMF', async () => {
-        const expected = {
-            accountId: '1234-account',
-            assigneeId: '1234-account',
-            additionalFields: {
-                customfield_10001: 'dot-neeet-team',
-                customfield_10020: null,
-                issuetype: { name: 'Maintenance' },
-                parent: { key: 'MMF-1111' },
-            },
-            projectKey: 'KEY'
-        };
-        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of Epic MMF-1111'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(expected);
+    it('create projectKey parent Theme', async () => {
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of Epic THEME-42'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpectedParent('KEY', "NET-1000", 'Maintenance')); // NET-1000 is Evergreen fallback
     });
-    it('create projectKey parent Epic project', async () => {
-        const expected = {
-            accountId: '1234-account',
-            assigneeId: '1234-account',
-            additionalFields: {
-                customfield_10001: 'dot-neeet-team',
-                customfield_10020: null,
-                issuetype: { name: 'Maintenance' },
-                parent: { key: 'KEY-1111' },
-            },
-            projectKey: 'KEY'
-        };
-        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of Epic KEY-1111'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(expected);
+    it('create projectKey parent Initiative', async () => {
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of Epic MMF-1111'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpectedParent('KEY', "NET-1000", 'Maintenance')); // NET-1000 is Evergreen fallback
+    });
+    it('create projectKey parent Epic with configured project', async () => {
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of Epic EPIC-111'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpectedParent('KEY', 'EPIC-111', 'Maintenance'));
+    });
+    it('create projectKey parent Epic without configured project', async () => {
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of Epic EPIC-111'), '', '', 'user@sonarsource.com', '')).toEqual(createExpectedParent('EPIC', 'EPIC-111', 'Maintenance'));
+    });
+    it('create projectKey parent Issue with configured project', async () => {
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of work item KEY-1234'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpectedParent('KEY', 'KEY-1234', 'Sub-task'));
+    });
+    it('create projectKey parent Issue without configured project', async () => {
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of work item KEY-1234'), '', '', 'user@sonarsource.com', '')).toEqual(createExpectedParent('KEY', 'KEY-1234', 'Sub-task'));
     });
     it('create projectKey parent Sub-task', async () => {
-        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of Sub-task KEY-5555'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpected());
-    });
-    it('create projectKey parent Issue', async () => {
-        const expected = {
-            accountId: '1234-account',
-            assigneeId: '1234-account',
-            additionalFields: {
-                // No team or sprint for Sub=task
-                issuetype: { name: 'Sub-task' },
-                parent: { key: 'KEY-1234' },
-            },
-            projectKey: 'KEY'
-        };
-        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of work item KEY-1234'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(expected);
+        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of Sub-task KEY-5555'), 'KEY', '', 'user@sonarsource.com', '')).toEqual(createExpectedParent('KEY', 'NET-1000', 'Maintenance')); // NET-1000 is Evergreen fallback
     });
     it('create projectKey not configured standalone PR', async () => {
         // RSPEC repo without parent ticket
         expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Body'), '', '', 'user@sonarsource.com', '')).toBeNull();
-    });
-    it('create projectKey not configured with parent', async () => {
-        const expected = {
-            accountId: '1234-account',
-            assigneeId: '1234-account',
-            additionalFields: {
-                // No team or sprint for Sub-task
-                issuetype: { name: 'Sub-task' },
-                parent: { key: 'KEY-1234' },
-            },
-            projectKey: 'KEY'
-        };
-        expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Part of work item KEY-1234'), '', '', 'user@sonarsource.com', '')).toEqual(expected);
     });
     it('create parent Evergreen Epic is null without team', async () => {
         const expected = {
