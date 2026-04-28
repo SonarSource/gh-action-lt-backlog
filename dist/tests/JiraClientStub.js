@@ -28,6 +28,7 @@ export const jiraClientStub = {
             case 'KEY-5555': return { key: 'KEY-5555', fields: { project: { key: 'KEY' }, issuetype: { name: 'Sub-task' } } };
             case 'SUBMIT-1': return { key: 'SUBMIT-1', fields: { project: { key: 'SUBMIT' }, issuetype: { name: 'Maintenance' }, assignee: null } };
             case 'SUBMIT-2': return { key: 'SUBMIT-2', fields: { project: { key: 'SUBMIT' }, issuetype: { name: 'Maintenance' }, assignee: { accountId: '4242-4242', emailAddress: 'user@sonarsource.com', displayName: 'User' } } };
+            case 'SUBMIT-3': return { key: 'SUBMIT-3', fields: { project: { key: 'SUBMIT' }, issuetype: { name: 'Maintenance' }, assignee: { accountId: '712020:9c105dc5-0493-4d71-83a6-ed21c4ba03c0', emailAddress: 'nigel@sonarsource.com', displayName: 'Jira False Positive Bot' } } };
             case 'THEME-42': return { key: 'THEME-42', fields: { project: { key: 'THEME' }, issuetype: { name: 'Theme' } } };
             case 'FAKE-1234': return null;
             default: throw new Error(`Scaffolding did not expect ${issueId}`);

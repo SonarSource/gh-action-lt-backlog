@@ -25,7 +25,9 @@ export function addPullRequestExtensions(pr) {
             return this.user?.login === "renovate[bot]" || this.user?.login === "hashicorp-vault-sonar-prod[bot]";
         },
         isBot() {
-            return this.isRenovate() || this.user?.login === "dependabot[bot]";
+            return this.isRenovate()
+                || this.user?.login === "dependabot[bot]"
+                || this.user?.login === "sonar-nigel[bot]";
         }
     };
 }

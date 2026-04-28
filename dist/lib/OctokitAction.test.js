@@ -131,6 +131,12 @@ describe('OctokitAction', () => {
         expect(pr.isRenovate()).toBe(false);
         expect(pr.isBot()).toBe(true);
     });
+    it('loadPullRequest Nigel', async () => {
+        const sut = new TestOctokitAction('sonar-nigel[bot]');
+        const pr = await sut.loadPullRequest(42);
+        expect(pr.isRenovate()).toBe(false);
+        expect(pr.isBot()).toBe(true);
+    });
     it('loadIssue', async () => {
         const issue = await sut.loadIssue(24);
         expect(issue).toMatchObject({ number: 24, title: "Issue title" }); // Plus the remaining properties from scaffolding
