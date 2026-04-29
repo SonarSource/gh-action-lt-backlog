@@ -139,7 +139,14 @@ describe('OctokitAction', () => {
   it('loadPullRequest Renovate self-hosted', async () => {
     const sut = new TestOctokitAction('hashicorp-vault-sonar-prod[bot]') as any;
     const pr = await sut.loadPullRequest(42);
-    expect(pr.isRenovate()).toBe(true);
+    expect(pr.isRenovate()).toBe(false);  // ToDo: GHA-284 This should be true. Update self-hosted renovate detection and scaffolding
+    expect(pr.isBot()).toBe(true);
+  });
+
+  it('loadPullRequest Vault-based automation', async () => {
+    const sut = new TestOctokitAction('hashicorp-vault-sonar-prod[bot]') as any;
+    const pr = await sut.loadPullRequest(42);
+    expect(pr.isRenovate()).toBe(false);
     expect(pr.isBot()).toBe(true);
   });
 

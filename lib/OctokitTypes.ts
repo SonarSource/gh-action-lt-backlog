@@ -32,13 +32,13 @@ export function addPullRequestExtensions(pr: components['schemas']['pull-request
   return {
     ...pr,
     isRenovate(): boolean {
-      // GHA-122 hashicorp-vault-sonar-prod is used by self-hosted renovate instance
-      return this.user?.login === "renovate[bot]" || this.user?.login === "hashicorp-vault-sonar-prod[bot]";
+      return this.user?.login === "renovate[bot]";
     },
     isBot(): boolean {
       return this.isRenovate()
         || this.user?.login === "dependabot[bot]"
-        || this.user?.login === "sonar-nigel[bot]";
+        || this.user?.login === "sonar-nigel[bot]"
+        || this.user?.login === "hashicorp-vault-sonar-prod[bot]";  // Self-hosted renovate, release automation and other Vault-token-based scripts
     }
   };
 }
