@@ -65,16 +65,16 @@ describe('RequestReview', () => {
     const sut = new RequestReview() as RequestReview & OctokitActionStub;
     sut.jira = jiraClientStub;
     sut.rest = createOctokitRestStub("GHA-42 and GHA-43");
-    sut.findEmails = async function (login: string): Promise<string> {
-      return "user@sonarsource.com";
+    sut.findEmails = async function (login: string): Promise<string[]> {
+      return ["user@sonarsource.com"];
     }
     await sut.run();
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
       "Invoked jira.moveIssue('GHA-42', 'Request Review', null)",
-      "Invoked jira.assignIssueToEmail('GHA-42', 'user@sonarsource.com')",
+      "Invoked jira.assignIssueToEmail('GHA-42', ['user@sonarsource.com'])",
       "Invoked jira.moveIssue('GHA-43', 'Request Review', null)",
-      "Invoked jira.assignIssueToEmail('GHA-43', 'user@sonarsource.com')",
+      "Invoked jira.assignIssueToEmail('GHA-43', ['user@sonarsource.com'])",
       "Done",
     ]);
   });

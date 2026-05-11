@@ -114,8 +114,8 @@ export const jiraClientStub = {
   async assignIssueToAccount(issueId: string, accountId: string): Promise<void> {
     console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);
   },
-  async assignIssueToEmail(issueId: string, userEmail: string): Promise<void> {
-    console.log(`Invoked jira.assignIssueToEmail('${issueId}', '${userEmail}')`);
+  async assignIssueToEmail(issueId: string, userEmails: string[]): Promise<void> {
+    console.log(`Invoked jira.assignIssueToEmail('${issueId}', ['${userEmails.join("', '")}'])`);
   },
   async createComponent(projectKey: string, name: string, description: string): Promise<boolean> {
     console.log(`Invoked jira.createComponent('${projectKey}', '${name}', '${description}')`);
@@ -125,10 +125,10 @@ export const jiraClientStub = {
     console.log(`Invoked jira.addIssueComponent('${issueId}', '${name}')`);
     return true;
   },
-  async addReviewer(issueId: string, userEmail: string): Promise<void> {
-    console.log(`Invoked jira.addReviewer('${issueId}', '${userEmail}')`);
+  async addReviewer(issueId: string, userEmails: string[]): Promise<void> {
+    console.log(`Invoked jira.addReviewer('${issueId}', ['${userEmails.join("', '")}'])`);
   },
-  async addReviewedBy(issueId: string, userEmail: string): Promise<void> {
-    console.log(`Invoked jira.addReviewedBy('${issueId}', '${userEmail}')`);
+  async addReviewedBy(issueId: string, userEmails: string[]): Promise<void> {
+    console.log(`Invoked jira.addReviewedBy('${issueId}', ['${userEmails.join("', '")}'])`);
   }
 } as unknown as JiraClient;

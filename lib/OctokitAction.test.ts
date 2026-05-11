@@ -292,25 +292,25 @@ describe('OctokitAction', () => {
   });
 
   it('processRequestReview', async () => {
-    sut.findEmails = async function (login: string): Promise<string> {
-      return "test.user@sonarsource.com";
+    sut.findEmails = async function (login: string): Promise<string[]> {
+      return ["test.user@sonarsource.com"];
     }
     await sut.processRequestReview("42", { login: 'test-user', type: 'User' });
     expect(logTester.logsParams).toStrictEqual([
       "Invoked jira.moveIssue('42', 'Request Review', null)",
-      "Invoked jira.assignIssueToEmail('42', 'test.user@sonarsource.com')"
+      "Invoked jira.assignIssueToEmail('42', ['test.user@sonarsource.com'])"
     ]);
   });
 
   it('processRequestReview is-eng-xp-squad', async () => {
     sut.isEngXpSquad = true;
-    sut.findEmails = async function (login: string): Promise<string> {
-      return "test.user@sonarsource.com";
+    sut.findEmails = async function (login: string): Promise<string[]> {
+      return ["test.user@sonarsource.com"];
     }
     await sut.processRequestReview("42", { login: 'test-user', type: 'User' });
     expect(logTester.logsParams).toStrictEqual([
       "Invoked jira.moveIssue('42', 'Request Review', null)",
-      "Invoked jira.addReviewer('42', 'test.user@sonarsource.com')"
+      "Invoked jira.addReviewer('42', ['test.user@sonarsource.com'])"
     ]);
   });
 

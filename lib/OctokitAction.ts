@@ -143,7 +143,7 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected async findEmails(login: string): Promise<string | null> {
+  protected async findEmails(login: string): Promise<string[]> {
     this.log(`Searching for email of ${login}`);
     try {
       const { user: { organizationVerifiedDomainEmails: emails } } = await this.sendGraphQL<VerifiedEmailsResponse>(`
@@ -153,11 +153,12 @@ export abstract class OctokitAction extends Action {
           }
         }`);
       this.log(`Found ${emails.length} email(s) for ${login}`);
-      return emails.find(x => x.toLowerCase().includes('@sonar')) ?? emails[0] ?? null;
+      const email = emails.find(x => x.toLowerCase().includes('@sonar')) ?? emails[0] ?? null;
+      return email ? [email] : [];
     } catch (error) {
       if (error instanceof GraphqlResponseError && error.errors?.length === 1 && error.errors[0].type === 'NOT_FOUND') {
         this.log(`No email found for ${login}: ${error.errors[0].message}`);
-        return null;
+        return [];
       }
       throw error;
     }
@@ -209,12 +210,12 @@ export abstract class OctokitAction extends Action {
     } else {
       await this.jira.moveIssue(issueId, 'Request Review');
       if (requested_reviewer) {
-        const userEmail = await this.findEmails(requested_reviewer.login);
-        if (userEmail != null) {
+        const userEmails = await this.findEmails(requested_reviewer.login);
+        if (userEmails.length > 0) {
           if (this.isEngXpSquad) {
-            await this.jira.addReviewer(issueId, userEmail);
+            await this.jira.addReviewer(issueId, userEmails);
           } else {
-            await this.jira.assignIssueToEmail(issueId, userEmail);
+            await this.jira.assignIssueToEmail(issueId, userEmails);
           }
         }
       }

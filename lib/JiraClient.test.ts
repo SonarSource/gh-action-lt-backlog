@@ -180,7 +180,7 @@ describe('JiraClient', () => {
   it('assignIssueToEmail', async () => {
     let issue = await sut.loadIssue(issueId);
     const email = issue.fields.assignee?.emailAddress === 'helpdesk+jira-githubtech@sonarsource.com' ? 'pavel.mikula@sonarsource.com' : 'helpdesk+jira-githubtech@sonarsource.com';
-    await sut.assignIssueToEmail(issueId, email);
+    await sut.assignIssueToEmail(issueId, [email]);
     issue = await sut.loadIssue(issueId);
     expect(issue.fields.assignee?.emailAddress).toBe(email);
   });
@@ -195,22 +195,22 @@ describe('JiraClient', () => {
 
   it('addReviewer', async () => {
     const issueId = await ensurePreqIssueId();
-    await sut.addReviewer(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
+    await sut.addReviewer(issueId, ['helpdesk+jira-githubtech@sonarsource.com']);
     let issue = await sut.loadIssue(issueId);
     expect(issue.fields.customfield_11227).toMatchObject([{ emailAddress: 'helpdesk+jira-githubtech@sonarsource.com' }]);
     // Second call does not change anything
-    await sut.addReviewer(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
+    await sut.addReviewer(issueId, ['helpdesk+jira-githubtech@sonarsource.com']);
     issue = await sut.loadIssue(issueId);
     expect(issue.fields.customfield_11227).toMatchObject([{ emailAddress: 'helpdesk+jira-githubtech@sonarsource.com' }]);
   });
 
   it('addReviewedBy', async () => {
     const issueId = await ensurePreqIssueId();
-    await sut.addReviewedBy(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
+    await sut.addReviewedBy(issueId, ['helpdesk+jira-githubtech@sonarsource.com']);
     let issue = await sut.loadIssue(issueId);
     expect(issue.fields.customfield_11228).toMatchObject([{ emailAddress: 'helpdesk+jira-githubtech@sonarsource.com' }]);
     // Second call does not change anything
-    await sut.addReviewedBy(issueId, 'helpdesk+jira-githubtech@sonarsource.com');
+    await sut.addReviewedBy(issueId, ['helpdesk+jira-githubtech@sonarsource.com']);
     issue = await sut.loadIssue(issueId);
     expect(issue.fields.customfield_11228).toMatchObject([{ emailAddress: 'helpdesk+jira-githubtech@sonarsource.com' }]);
   });

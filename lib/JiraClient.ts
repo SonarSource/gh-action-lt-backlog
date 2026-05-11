@@ -159,8 +159,8 @@ export class JiraClient {
     await this.sendRestPostApi(`issue/${issueId}/transitions`, { transition: { id: transition.id }, fields });
   }
 
-  public async assignIssueToEmail(issueId: string, userEmail: string): Promise<void> {
-    const accountId = await this.findAccountId(userEmail);
+  public async assignIssueToEmail(issueId: string, userEmails: string[]): Promise<void> {
+    const accountId = await this.findAccountId(userEmails[0] ?? null);
     if (accountId != null) {
       await this.assignIssueToAccount(issueId, accountId);
     }
@@ -171,8 +171,8 @@ export class JiraClient {
     await this.sendRestPutApi(`issue/${issueId}/assignee`, { accountId });
   }
 
-  public async addReviewer(issueId: string, userEmail: string): Promise<void> {
-    const accountId = await this.findAccountId(userEmail);
+  public async addReviewer(issueId: string, userEmails: string[]): Promise<void> {
+    const accountId = await this.findAccountId(userEmails[0] ?? null);
     if (accountId != null) {
       console.log(`${issueId}: Adding Reviewer ${accountId}`);
       const request = {
@@ -186,8 +186,8 @@ export class JiraClient {
     }
   }
 
-  public async addReviewedBy(issueId: string, userEmail: string): Promise<void> {
-    const accountId = await this.findAccountId(userEmail);
+  public async addReviewedBy(issueId: string, userEmails: string[]): Promise<void> {
+    const accountId = await this.findAccountId(userEmails[0] ?? null);
     if (accountId != null) {
       console.log(`${issueId}: Adding Reviewed by ${accountId}`);
       const request = {

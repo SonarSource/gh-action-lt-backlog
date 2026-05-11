@@ -28,10 +28,10 @@ import { OctokitActionStub } from '../tests/OctokitActionStub.js';
 import { PullRequest } from '../lib/OctokitTypes.js';
 
 class TestPullRequestCreated extends PullRequestCreated {
-  protected async findEmails(login: string): Promise<string | null> {
+  protected async findEmails(login: string): Promise<string[]> {
     switch (login) {
-      case 'test-user': return 'user@sonarsource.com';
-      case 'renovate[bot]': return null;
+      case 'test-user': return ['user@sonarsource.com'];
+      case 'renovate[bot]': return [];
       default: throw new Error(`Scaffolding did not expect login ${login}`);
     }
   }
@@ -225,7 +225,7 @@ describe('PullRequestCreated', () => {
       "Invoked jira.moveIssue('KEY-4242', 'Start', null)",
       "Invoked jira.assignIssueToAccount('KEY-4242', '1234-account')",
       "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
-      "Invoked jira.assignIssueToEmail('KEY-4242', 'user@sonarsource.com')",
+      "Invoked jira.assignIssueToEmail('KEY-4242', ['user@sonarsource.com'])",
       "Adding the following ticket as comment: KEY-4242",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
       "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
