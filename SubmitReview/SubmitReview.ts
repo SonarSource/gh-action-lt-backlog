@@ -31,9 +31,7 @@ export class SubmitReview extends PullRequestAction {
       }
       if (this.isEngXpSquad) {
         const userEmails = await this.findEmails(this.payload.sender?.login);
-        if (userEmails.length > 0) {
-          await this.jira.addReviewedBy(issueId, userEmails);
-        }
+        await this.jira.addReviewedBy(issueId, userEmails);
       } else {
         await this.jira.moveIssue(issueId, 'Approve');
       }
@@ -46,9 +44,7 @@ export class SubmitReview extends PullRequestAction {
     const issue = await this.jira.loadIssue(issueId);
     if (!issue.fields.assignee || issue.fields.assignee.accountId === NIGEL_ACCOUNT_ID) {
       const userEmails = await this.findEmails(this.payload.sender?.login);
-      if (userEmails.length > 0) {
-        await this.jira.assignIssueToEmail(issueId, userEmails);
-      }
+      await this.jira.assignIssueToEmail(issueId, userEmails);
     }
   }
 }

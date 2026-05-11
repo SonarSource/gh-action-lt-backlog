@@ -48,6 +48,8 @@ export const jiraClientStub = {
       case 'user@sonarsource.com': return '1234-account';
       case 'eng.exp@sonarsource.com': return '3333-eng-exp-account';
       case 'team.without.evergreen.epics@sonarsource.com': return '4444-no-epics-account';
+      case 'jo.smith@sonarsource.com': return null;           // pre-name-change, removed from Jira
+      case 'jo.lee@sonarsource.com': return 'jo-lee-account'; // post-name-change, active in Jira
       case 'renovate@renovate.com': return null;
       case 'dependabot@dependabot.com': return null;
       default: throw new Error(`Scaffolding did not expect email ${email}`);
@@ -59,6 +61,7 @@ export const jiraClientStub = {
       case '2222-no-team': return null;
       case '3333-eng-exp-account': return EngineeringExperienceSquad;
       case '4444-no-epics-account': return { name: 'No Epics Squad', id: 'no-epics-team' };
+      case 'jo-lee-account': return { name: 'A Team', id: 'a-team' };
       default: throw new Error(`Scaffolding did not expect accountId ${accountId}`);
     };
   },
@@ -90,6 +93,8 @@ export const jiraClientStub = {
         return [];
       case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=no-epics-team ORDER BY key':
         return [];
+      case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=a-team ORDER BY key':
+        return [];
       case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=eb40f25e-3596-4541-b661-cf83e7bc4fa6 ORDER BY key':
         return [{ key: 'BUILD-1000', fields: { summary: 'Eng Exp KTLO Epic' } } as Issue];
       default:
@@ -114,7 +119,15 @@ export const jiraClientStub = {
   async assignIssueToAccount(issueId: string, accountId: string): Promise<void> {
     console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);
   },
+  async findAccountIdFromEmails(emails: string[]): Promise<string | null> {
+    for (const email of emails) {
+      const accountId = await jiraClientStub.findAccountId(email);
+      if (accountId !== null) return accountId;
+    }
+    return null;
+  },
   async assignIssueToEmail(issueId: string, userEmails: string[]): Promise<void> {
+    if (userEmails.length === 0) return;
     console.log(`Invoked jira.assignIssueToEmail('${issueId}', ['${userEmails.join("', '")}'])`);
   },
   async createComponent(projectKey: string, name: string, description: string): Promise<boolean> {
@@ -126,9 +139,11 @@ export const jiraClientStub = {
     return true;
   },
   async addReviewer(issueId: string, userEmails: string[]): Promise<void> {
+    if (userEmails.length === 0) return;
     console.log(`Invoked jira.addReviewer('${issueId}', ['${userEmails.join("', '")}'])`);
   },
   async addReviewedBy(issueId: string, userEmails: string[]): Promise<void> {
+    if (userEmails.length === 0) return;
     console.log(`Invoked jira.addReviewedBy('${issueId}', ['${userEmails.join("', '")}'])`);
   }
 } as unknown as JiraClient;

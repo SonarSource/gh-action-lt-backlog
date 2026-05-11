@@ -124,6 +124,23 @@ describe('PullRequestCreated', () => {
     expect(action.log).toHaveBeenCalledTimes(1);
   });
 
+  it('Standalone PR user first email not linked to Jira', async () => {
+    // Employee changed last name and got a new email.
+    // GitHub preserves both emails, Jira only has the new one.
+    class TestPullRequestCreatedNameChange extends PullRequestCreated {
+      protected async findEmails(_login: string): Promise<string[]> {
+        return ['jo.smith@sonarsource.com', 'jo.lee@sonarsource.com'];
+      }
+    }
+    process.env['INPUT_JIRA-PROJECT'] = 'KEY';
+    const action = new TestPullRequestCreatedNameChange() as TestPullRequestCreatedNameChange & OctokitActionStub;
+    action.jira = jiraClientStub;
+    action.rest = createOctokitRestStub('Standalone PR');
+    await action.run();
+    // jo.smith resolves to null in Jira; jo.lee resolves to jo-lee-account.
+    expect(logTester.logsParams).toContain("Invoked jira.assignIssueToAccount('KEY-4242', 'jo-lee-account')");
+  });
+
   it('Standalone PR no description', async () => {
     await runAction('KEY', 'Standalone PR');
     expect(logTester.logsParams).toStrictEqual([

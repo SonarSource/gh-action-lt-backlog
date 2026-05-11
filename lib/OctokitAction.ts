@@ -153,8 +153,9 @@ export abstract class OctokitAction extends Action {
           }
         }`);
       this.log(`Found ${emails.length} email(s) for ${login}`);
-      const email = emails.find(x => x.toLowerCase().includes('@sonar')) ?? emails[0] ?? null;
-      return email ? [email] : [];
+      const sonar = emails.filter((x: string) => x.toLowerCase().includes('@sonar'));
+      const other = emails.filter((x: string) => !x.toLowerCase().includes('@sonar'));
+      return [...sonar, ...other];
     } catch (error) {
       if (error instanceof GraphqlResponseError && error.errors?.length === 1 && error.errors[0].type === 'NOT_FOUND') {
         this.log(`No email found for ${login}: ${error.errors[0].message}`);
@@ -211,12 +212,10 @@ export abstract class OctokitAction extends Action {
       await this.jira.moveIssue(issueId, 'Request Review');
       if (requested_reviewer) {
         const userEmails = await this.findEmails(requested_reviewer.login);
-        if (userEmails.length > 0) {
-          if (this.isEngXpSquad) {
-            await this.jira.addReviewer(issueId, userEmails);
-          } else {
-            await this.jira.assignIssueToEmail(issueId, userEmails);
-          }
+        if (this.isEngXpSquad) {
+          await this.jira.addReviewer(issueId, userEmails);
+        } else {
+          await this.jira.assignIssueToEmail(issueId, userEmails);
         }
       }
     }
