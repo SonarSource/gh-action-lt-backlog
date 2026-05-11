@@ -292,7 +292,7 @@ describe('OctokitAction', () => {
   });
 
   it('processRequestReview', async () => {
-    sut.findEmail = async function (login: string): Promise<string> {
+    sut.findEmails = async function (login: string): Promise<string> {
       return "test.user@sonarsource.com";
     }
     await sut.processRequestReview("42", { login: 'test-user', type: 'User' });
@@ -304,7 +304,7 @@ describe('OctokitAction', () => {
 
   it('processRequestReview is-eng-xp-squad', async () => {
     sut.isEngXpSquad = true;
-    sut.findEmail = async function (login: string): Promise<string> {
+    sut.findEmails = async function (login: string): Promise<string> {
       return "test.user@sonarsource.com";
     }
     await sut.processRequestReview("42", { login: 'test-user', type: 'User' });

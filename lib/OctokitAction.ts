@@ -143,7 +143,7 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected async findEmail(login: string): Promise<string | null> {
+  protected async findEmails(login: string): Promise<string | null> {
     this.log(`Searching for email of ${login}`);
     try {
       const { user: { organizationVerifiedDomainEmails: emails } } = await this.sendGraphQL<VerifiedEmailsResponse>(`
@@ -209,7 +209,7 @@ export abstract class OctokitAction extends Action {
     } else {
       await this.jira.moveIssue(issueId, 'Request Review');
       if (requested_reviewer) {
-        const userEmail = await this.findEmail(requested_reviewer.login);
+        const userEmail = await this.findEmails(requested_reviewer.login);
         if (userEmail != null) {
           if (this.isEngXpSquad) {
             await this.jira.addReviewer(issueId, userEmail);

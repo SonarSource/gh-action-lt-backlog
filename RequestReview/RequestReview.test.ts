@@ -65,7 +65,7 @@ describe('RequestReview', () => {
     const sut = new RequestReview() as RequestReview & OctokitActionStub;
     sut.jira = jiraClientStub;
     sut.rest = createOctokitRestStub("GHA-42 and GHA-43");
-    sut.findEmail = async function (login: string): Promise<string> {
+    sut.findEmails = async function (login: string): Promise<string> {
       return "user@sonarsource.com";
     }
     await sut.run();

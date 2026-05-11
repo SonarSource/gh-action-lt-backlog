@@ -28,7 +28,7 @@ import { OctokitActionStub } from '../tests/OctokitActionStub.js';
 import { PullRequest } from '../lib/OctokitTypes.js';
 
 class TestPullRequestCreated extends PullRequestCreated {
-  protected async findEmail(login: string): Promise<string | null> {
+  protected async findEmails(login: string): Promise<string | null> {
     switch (login) {
       case 'test-user': return 'user@sonarsource.com';
       case 'renovate[bot]': return null;
