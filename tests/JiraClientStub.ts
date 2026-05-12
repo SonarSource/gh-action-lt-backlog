@@ -120,11 +120,7 @@ export const jiraClientStub = {
     console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);
   },
   async findAccountIdFromEmails(emails: string[]): Promise<string | null> {
-    for (const email of emails) {
-      const accountId = await jiraClientStub.findAccountId(email);
-      if (accountId !== null) return accountId;
-    }
-    return null;
+    return JiraClient.prototype.findAccountIdFromEmails.call(jiraClientStub, emails);
   },
   async assignIssueToEmail(issueId: string, userEmails: string[]): Promise<void> {
     if (userEmails.length === 0) return;
