@@ -50,9 +50,9 @@ export class OctokitAction extends Action {
     }
     inputNumber(name) {
         const input = this.inputString(name);
-        const value = parseInt(input);
-        if (isNaN(value)) {
-            throw new Error(`Value of input '${name}' is not a number: ${input}`);
+        const value = Number.parseInt(input);
+        if (Number.isNaN(value)) {
+            throw new TypeError(`Value of input '${name}' is not a number: ${input}`);
         }
         else {
             return value;
