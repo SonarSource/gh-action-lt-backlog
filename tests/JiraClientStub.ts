@@ -22,6 +22,10 @@ import { EngineeringExperienceSquad } from "../Data/TeamConfiguration.js";
 import { JiraClient, Issue } from '../lib/JiraClient.js';
 import { Team } from '../lib/Team.js';
 
+function serializeStrings(values: string[]): string {
+  return '[' + values.map(x => `'${x}'`).join(', ') + ']';
+}
+
 export const jiraClientStub = {
   async loadIssue(issueId: string): Promise<any> {
     switch (issueId) {
@@ -119,7 +123,7 @@ export const jiraClientStub = {
     console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);
   },
   async assignIssueToEmail(issueId: string, userEmails: string[]): Promise<void> {
-    console.log(`Invoked jira.assignIssueToEmail('${issueId}', ['${userEmails.join("', '")}'])`);
+    console.log(`Invoked jira.assignIssueToEmail('${issueId}', ${serializeStrings(userEmails)})`);
   },
   async createComponent(projectKey: string, name: string, description: string): Promise<boolean> {
     console.log(`Invoked jira.createComponent('${projectKey}', '${name}', '${description}')`);
@@ -130,9 +134,9 @@ export const jiraClientStub = {
     return true;
   },
   async addReviewer(issueId: string, userEmails: string[]): Promise<void> {
-    console.log(`Invoked jira.addReviewer('${issueId}', ['${userEmails.join("', '")}'])`);
+    console.log(`Invoked jira.addReviewer('${issueId}', ${serializeStrings(userEmails)})`);
   },
   async addReviewedBy(issueId: string, userEmails: string[]): Promise<void> {
-    console.log(`Invoked jira.addReviewedBy('${issueId}', ['${userEmails.join("', '")}'])`);
+    console.log(`Invoked jira.addReviewedBy('${issueId}', ${serializeStrings(userEmails)})`);
   }
 } as unknown as JiraClient;

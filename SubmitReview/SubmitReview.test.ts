@@ -115,7 +115,7 @@ describe('SubmitReview', () => {
     await runAction('approved', [], 'dependabot[bot]', 'SUBMIT-1 Issue without assignee');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
-      "Invoked jira.assignIssueToEmail('SUBMIT-1', [''])",
+      "Invoked jira.assignIssueToEmail('SUBMIT-1', [])",
       "Invoked jira.moveIssue('SUBMIT-1', 'Approve', null)",
       "Done",
     ]);
@@ -156,8 +156,8 @@ describe('SubmitReview', () => {
     await runAction('approved', []);
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
-      "Invoked jira.addReviewedBy('GHA-42', [''])",
-      "Invoked jira.addReviewedBy('GHA-43', [''])",
+      "Invoked jira.addReviewedBy('GHA-42', [])",
+      "Invoked jira.addReviewedBy('GHA-43', [])",
       "Done",
     ]);
   });
