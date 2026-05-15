@@ -31,6 +31,7 @@ class TestPullRequestCreated extends PullRequestCreated {
   protected async findEmails(login: string): Promise<string[]> {
     switch (login) {
       case 'test-user': return ['user@sonarsource.com'];
+      case 'renamed': return ['unknown@sonarsource.com', 'user@sonarsource.com'];
       case 'renovate[bot]': return [];
       default: throw new Error(`Scaffolding did not expect login ${login}`);
     }
@@ -126,16 +127,7 @@ describe('PullRequestCreated', () => {
 
   it('Standalone PR user first email not linked to Jira', async () => {
     // Employee changed name and got a new email. GitHub preserves both emails, Jira only has the new one.
-    class TestPullRequestCreatedNameChange extends PullRequestCreated {
-      protected async findEmails(_login: string): Promise<string[]> {
-        return ['unknown@sonarsource.com', 'user@sonarsource.com'];
-      }
-    }
-    process.env['INPUT_JIRA-PROJECT'] = 'KEY';
-    const action = new TestPullRequestCreatedNameChange() as TestPullRequestCreatedNameChange & OctokitActionStub;
-    action.jira = jiraClientStub;
-    action.rest = createOctokitRestStub('Standalone PR');
-    await action.run();
+    await runAction('KEY', 'Title', null, 'renamed');
     expect(logTester.logsParams).toContain("Invoked jira.assignIssueToAccount('KEY-4242', '1234-account')");
   });
 
