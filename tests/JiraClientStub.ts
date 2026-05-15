@@ -57,8 +57,7 @@ export const jiraClientStub = {
       case 'user@sonarsource.com': return '1234-account';
       case 'eng.exp@sonarsource.com': return '3333-eng-exp-account';
       case 'team.without.evergreen.epics@sonarsource.com': return '4444-no-epics-account';
-      case 'jo.smith@sonarsource.com': return null;           // pre-name-change, removed from Jira
-      case 'jo.lee@sonarsource.com': return 'jo-lee-account'; // post-name-change, active in Jira
+      case 'unknown@sonarsource.com': return null;
       case 'renovate@renovate.com': return null;
       case 'dependabot@dependabot.com': return null;
       default: throw new Error(`Scaffolding did not expect email ${email}`);
@@ -70,7 +69,6 @@ export const jiraClientStub = {
       case '2222-no-team': return null;
       case '3333-eng-exp-account': return EngineeringExperienceSquad;
       case '4444-no-epics-account': return { name: 'No Epics Squad', id: 'no-epics-team' };
-      case 'jo-lee-account': return { name: 'A Team', id: 'a-team' };
       default: throw new Error(`Scaffolding did not expect accountId ${accountId}`);
     };
   },
@@ -101,8 +99,6 @@ export const jiraClientStub = {
       case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=fallback-team ORDER BY key':
         return [];
       case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=no-epics-team ORDER BY key':
-        return [];
-      case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=a-team ORDER BY key':
         return [];
       case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=eb40f25e-3596-4541-b661-cf83e7bc4fa6 ORDER BY key':
         return [{ key: 'BUILD-1000', fields: { summary: 'Eng Exp KTLO Epic' } } as Issue];

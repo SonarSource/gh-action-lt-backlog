@@ -64,22 +64,6 @@ function createExpectedParent(projectKey: string, parent: string | null, issueTy
   };
 }
 
-function createExpectedForJoLee(): NewIssueData {
-  // jo.smith resolves to null (pre-name-change, removed from Jira)
-  // jo.lee resolves to jo-lee-account → A Team (post-name-change, active in Jira)
-  return {
-    accountId: 'jo-lee-account',
-    assigneeId: 'jo-lee-account',
-    additionalFields: {
-      customfield_10001: 'a-team',
-      customfield_10020: null,
-      issuetype: { name: 'Maintenance' },
-      parent: null
-    },
-    projectKey: 'KEY'
-  };
-}
-
 function createExpectedWithoutAccount(): NewIssueData {
   return {
     accountId: null,
@@ -146,11 +130,11 @@ describe('NewIssueData', () => {
   });
 
   it('create standalone PR - first email not in Jira, fallback to second', async () => {
-    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '', ['jo.smith@sonarsource.com', 'jo.lee@sonarsource.com'], '')).toEqual(createExpectedForJoLee());
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '', ['unknown@sonarsource.com', 'user@sonarsource.com'], '')).toEqual(createExpected());
   });
 
   it('create standalone PR - first email in Jira, no fallback needed', async () => {
-    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '', ['jo.lee@sonarsource.com', 'jo.smith@sonarsource.com'], '')).toEqual(createExpectedForJoLee());
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '', ['user@sonarsource.com', 'unknown@sonarsource.com'], '')).toEqual(createExpected());
   });
 
   it('create standalone PR - no emails', async () => {
