@@ -246,7 +246,13 @@ describe('JiraClient', () => {
   });
 
   it('findAccountId', async () => {
-    expect(await sut.findAccountId('helpdesk+jira-githubtech@sonarsource.com')).toBe('712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4');
+    expect(await sut.findAccountId(['unknown@sonarsource.com', 'helpdesk+jira-githubtech@sonarsource.com'])).toBe('712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4');
+    expect(logTester.logsParams).toStrictEqual([
+      "Searching for user: unknown",
+      "Could not find user unknown in Jira",
+      "Searching for user: helpdesk+jira-githubtech",
+      "Found 1 account(s), using 712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4 Jira Tech User GitHub",
+    ]);
   });
 
   it('findBoard', async () => {

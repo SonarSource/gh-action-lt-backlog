@@ -159,16 +159,8 @@ export class JiraClient {
     await this.sendRestPostApi(`issue/${issueId}/transitions`, { transition: { id: transition.id }, fields });
   }
 
-  public async findAccountIdFromEmails(emails: string[]): Promise<string | null> {
-    for (const email of emails) {
-      const accountId = await this.findAccountId(email);
-      if (accountId !== null) return accountId;
-    }
-    return null;
-  }
-
   public async assignIssueToEmail(issueId: string, userEmails: string[]): Promise<void> {
-    const accountId = await this.findAccountIdFromEmails(userEmails);
+    const accountId = await this.findAccountId(userEmails);
     if (accountId != null) {
       await this.assignIssueToAccount(issueId, accountId);
     }
@@ -180,7 +172,7 @@ export class JiraClient {
   }
 
   public async addReviewer(issueId: string, userEmails: string[]): Promise<void> {
-    const accountId = await this.findAccountIdFromEmails(userEmails);
+    const accountId = await this.findAccountId(userEmails);
     if (accountId != null) {
       console.log(`${issueId}: Adding Reviewer ${accountId}`);
       const request = {
@@ -195,7 +187,7 @@ export class JiraClient {
   }
 
   public async addReviewedBy(issueId: string, userEmails: string[]): Promise<void> {
-    const accountId = await this.findAccountIdFromEmails(userEmails);
+    const accountId = await this.findAccountId(userEmails);
     if (accountId != null) {
       console.log(`${issueId}: Adding Reviewed by ${accountId}`);
       const request = {
@@ -243,7 +235,17 @@ export class JiraClient {
     return this.sendRestGetApi(`issue/${issueId}/remotelink`);
   }
 
-  public async findAccountId(email: string | null): Promise<string | null> {
+  public async findAccountId(emails: string[]): Promise<string | null> {
+    for (const email of emails) {
+      const accountId = await this.findAccountIdFromEmail(email);
+      if (accountId) {
+        return accountId;
+      }
+    }
+    return null;
+  }
+
+  private async findAccountIdFromEmail(email: string | null): Promise<string | null> {
     if (email == null) {
       console.log('Could not find accountId, email is null');
       return null;

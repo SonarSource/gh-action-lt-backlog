@@ -43,7 +43,16 @@ export const jiraClientStub = {
       ? { lead: { accountId: '1234-account', displayName: 'Project Lead' } }
       : { lead: { accountId: '2222-no-team', displayName: 'Project Lead Without team' } };
   },
-  async findAccountId(email: string): Promise<string | null> {
+  async findAccountId(emails: string[]): Promise<string | null> {
+    for (const email of emails) {
+      const accountId = await this.findAccountIdFromEmail(email);
+      if (accountId) {
+        return accountId;
+      }
+    }
+    return null;
+  },
+  async findAccountIdFromEmail(email: string): Promise<string | null> {
     switch (email) {
       case 'user@sonarsource.com': return '1234-account';
       case 'eng.exp@sonarsource.com': return '3333-eng-exp-account';
@@ -120,7 +129,7 @@ export const jiraClientStub = {
     console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);
   },
   async findAccountIdFromEmails(emails: string[]): Promise<string | null> {
-    return JiraClient.prototype.findAccountIdFromEmails.call(jiraClientStub, emails);
+    return JiraClient.prototype.findAccountId.call(jiraClientStub, emails);
   },
   async assignIssueToEmail(issueId: string, userEmails: string[]): Promise<void> {
     if (userEmails.length === 0) return;
