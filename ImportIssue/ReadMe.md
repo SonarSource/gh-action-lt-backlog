@@ -40,7 +40,7 @@ on:
 jobs:
   CreateJiraIssue_job:
     name: Create Jira issue
-    runs-on: github-ubuntu-latest-s
+    runs-on: sonar-xs
     permissions:
       id-token: write
       issues: write

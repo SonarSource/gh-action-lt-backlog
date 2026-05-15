@@ -41,7 +41,7 @@ jobs:
 
   test:
     name: Run tests
-    runs-on: github-ubuntu-latest-s
+    runs-on: sonar-xs
     permissions:
       id-token: write
       contents: read
@@ -78,7 +78,7 @@ jobs:
 
   data-consistency-check:
     name: Data Consistency Check
-    runs-on: github-ubuntu-latest-s
+    runs-on: sonar-xs
     permissions:
       id-token: write
       contents: read

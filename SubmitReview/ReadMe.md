@@ -37,8 +37,6 @@ Ask Engineering Experience Squad to "Add Jira GitHub tokens" to the Vault config
 
 ## Example usage
 
-:warning: Use `runs-on: sonar-runner` in private repos.
-
 ```yaml
 name: Submit Review
 
@@ -49,7 +47,7 @@ on:
 jobs:
   SubmitReview_job:
     name: Submit Review
-    runs-on: github-ubuntu-latest-s
+    runs-on: sonar-xs
     permissions:
       id-token: write
     # For external PR, ticket should be moved manually

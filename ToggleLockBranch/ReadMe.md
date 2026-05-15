@@ -60,8 +60,6 @@ Update your IaC branch protection to ignore changes of `lock_branch`. [Example](
 
 ## Example usage
 
-:warning: Use `runs-on: sonar-runner` in private repos.
-
 ```yaml
 name: Toggle lock branch
 
@@ -75,7 +73,7 @@ on:
 jobs:
   ToggleLockBranch_job:
     name: Toggle lock branch
-    runs-on: github-ubuntu-latest-s
+    runs-on: sonar-xs
     permissions:
       id-token: write
     steps:
