@@ -17,11 +17,10 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
-import { LockBranchAction, ProtectionRule } from '../lib/LockBranchAction.js';
-
-export class ToggleLockBranch extends LockBranchAction {
-  protected resolveLockBranch(rule: ProtectionRule): boolean {
-    return !rule.lockBranch;
-  }
+import { LockBranchAction } from '../lib/LockBranchAction.js';
+export class LockBranch extends LockBranchAction {
+    resolveLockBranch() {
+        return this.inputBoolean('lock-branch');
+    }
 }
+//# sourceMappingURL=LockBranch.js.map

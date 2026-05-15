@@ -19,7 +19,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { ToggleLockBranch } from './ToggleLockBranch.js';
+import { LockBranch } from './LockBranch.js';
 import { LogTester } from '../tests/LogTester.js';
 import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
 import { OctokitActionStub } from '../tests/OctokitActionStub.js';
@@ -27,7 +27,7 @@ import { LockBranchActionStub } from '../tests/LockBranchActionStub.js';
 
 async function runAction(currentLockBranch: boolean): Promise<void> {
   const pattern = process.env['INPUT_BRANCH-PATTERN']!;
-  const action = new ToggleLockBranch() as unknown as LockBranchActionStub & OctokitActionStub & { run(): Promise<void> };
+  const action = new LockBranch() as unknown as LockBranchActionStub & OctokitActionStub & { run(): Promise<void> };
   action.findRule = async (pattern) => {
     console.log(`Invoked findRule(${pattern})`);
     return { id: 'rule-id', lockBranch: currentLockBranch, pattern };
@@ -47,7 +47,7 @@ async function runAction(currentLockBranch: boolean): Promise<void> {
   await action.run();
 }
 
-describe('ToggleLockBranch', () => {
+describe('LockBranch', () => {
   let logTester: LogTester;
 
   beforeEach(() => {
@@ -63,7 +63,8 @@ describe('ToggleLockBranch', () => {
     logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
   });
 
-  it('Toggle unlocked to locked', async () => {
+  it('Lock', async () => {
+    process.env['INPUT_LOCK-BRANCH'] = 'true';
     await runAction(false);
     expect(logTester.logsParams).toStrictEqual([
       "Invoked findRule(master)",
@@ -74,7 +75,8 @@ describe('ToggleLockBranch', () => {
     ]);
   });
 
-  it('Toggle locked to unlocked', async () => {
+  it('Unlock', async () => {
+    process.env['INPUT_LOCK-BRANCH'] = 'false';
     await runAction(true);
     expect(logTester.logsParams).toStrictEqual([
       "Invoked findRule(master)",
