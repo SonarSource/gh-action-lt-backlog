@@ -22,6 +22,10 @@ import { EngineeringExperienceSquad } from "../Data/TeamConfiguration.js";
 import { JiraClient, Issue } from '../lib/JiraClient.js';
 import { Team } from '../lib/Team.js';
 
+function serializeStrings(values: string[]): string {
+  return '[' + values.map(x => `'${x}'`).join(', ') + ']';
+}
+
 export const jiraClientStub = {
   async loadIssue(issueId: string): Promise<any> {
     switch (issueId) {
@@ -43,11 +47,15 @@ export const jiraClientStub = {
       ? { lead: { accountId: '1234-account', displayName: 'Project Lead' } }
       : { lead: { accountId: '2222-no-team', displayName: 'Project Lead Without team' } };
   },
-  async findAccountId(email: string): Promise<string | null> {
+  async findAccountId(emails: string[]): Promise<string | null> {
+    return JiraClient.prototype.findAccountId.call(jiraClientStub, emails);
+  },
+  async findAccountIdFromEmail(email: string): Promise<string | null> {
     switch (email) {
       case 'user@sonarsource.com': return '1234-account';
       case 'eng.exp@sonarsource.com': return '3333-eng-exp-account';
       case 'team.without.evergreen.epics@sonarsource.com': return '4444-no-epics-account';
+      case 'unknown@sonarsource.com': return null;
       case 'renovate@renovate.com': return null;
       case 'dependabot@dependabot.com': return null;
       default: throw new Error(`Scaffolding did not expect email ${email}`);
@@ -114,8 +122,8 @@ export const jiraClientStub = {
   async assignIssueToAccount(issueId: string, accountId: string): Promise<void> {
     console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);
   },
-  async assignIssueToEmail(issueId: string, userEmail: string): Promise<void> {
-    console.log(`Invoked jira.assignIssueToEmail('${issueId}', '${userEmail}')`);
+  async assignIssueToEmail(issueId: string, userEmails: string[]): Promise<void> {
+    console.log(`Invoked jira.assignIssueToEmail('${issueId}', ${serializeStrings(userEmails)})`);
   },
   async createComponent(projectKey: string, name: string, description: string): Promise<boolean> {
     console.log(`Invoked jira.createComponent('${projectKey}', '${name}', '${description}')`);
@@ -125,10 +133,10 @@ export const jiraClientStub = {
     console.log(`Invoked jira.addIssueComponent('${issueId}', '${name}')`);
     return true;
   },
-  async addReviewer(issueId: string, userEmail: string): Promise<void> {
-    console.log(`Invoked jira.addReviewer('${issueId}', '${userEmail}')`);
+  async addReviewer(issueId: string, userEmails: string[]): Promise<void> {
+    console.log(`Invoked jira.addReviewer('${issueId}', ${serializeStrings(userEmails)})`);
   },
-  async addReviewedBy(issueId: string, userEmail: string): Promise<void> {
-    console.log(`Invoked jira.addReviewedBy('${issueId}', '${userEmail}')`);
+  async addReviewedBy(issueId: string, userEmails: string[]): Promise<void> {
+    console.log(`Invoked jira.addReviewedBy('${issueId}', ${serializeStrings(userEmails)})`);
   }
 } as unknown as JiraClient;

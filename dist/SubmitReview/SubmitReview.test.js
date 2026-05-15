@@ -23,7 +23,7 @@ import { LogTester } from '../tests/LogTester.js';
 import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
 import { SubmitReview } from './SubmitReview.js';
 import { jiraClientStub } from '../tests/JiraClientStub.js';
-async function runAction(state, findEmailResult = null, prAuthor = "test-user", title = "GHA-42 and GHA-43 are processed") {
+async function runAction(state, findEmailsResult = [], prAuthor = "test-user", title = "GHA-42 and GHA-43 are processed") {
     github.context.payload = {
         pull_request: {
             number: 42,
@@ -44,8 +44,8 @@ async function runAction(state, findEmailResult = null, prAuthor = "test-user", 
     const action = new SubmitReview();
     action.jira = jiraClientStub;
     action.rest = createOctokitRestStub(title, null, prAuthor);
-    action.findEmail = async function (login) {
-        return findEmailResult;
+    action.findEmails = async function (login) {
+        return findEmailsResult;
     };
     await action.run();
 }
@@ -92,24 +92,25 @@ describe('SubmitReview', () => {
         ]);
     });
     it('Approved move issue and assign - bot', async () => {
-        await runAction('approved', 'user@sonarsource.com', 'dependabot[bot]', 'SUBMIT-1 Issue without assignee');
+        await runAction('approved', ['user@sonarsource.com'], 'dependabot[bot]', 'SUBMIT-1 Issue without assignee');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
-            "Invoked jira.assignIssueToEmail('SUBMIT-1', 'user@sonarsource.com')",
+            "Invoked jira.assignIssueToEmail('SUBMIT-1', ['user@sonarsource.com'])",
             "Invoked jira.moveIssue('SUBMIT-1', 'Approve', null)",
             "Done",
         ]);
     });
     it('Approved move issue and assign - bot - unknown email', async () => {
-        await runAction('approved', null, 'dependabot[bot]', 'SUBMIT-1 Issue without assignee');
+        await runAction('approved', [], 'dependabot[bot]', 'SUBMIT-1 Issue without assignee');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
+            "Invoked jira.assignIssueToEmail('SUBMIT-1', [])",
             "Invoked jira.moveIssue('SUBMIT-1', 'Approve', null)",
             "Done",
         ]);
     });
     it('Approved move issue and assign - bot - had assignee', async () => {
-        await runAction('approved', 'user@sonarsource.com', 'dependabot[bot]', 'SUBMIT-2 Issue with assignee not re-assigned');
+        await runAction('approved', ['user@sonarsource.com'], 'dependabot[bot]', 'SUBMIT-2 Issue with assignee not re-assigned');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
             "Invoked jira.moveIssue('SUBMIT-2', 'Approve', null)",
@@ -117,29 +118,31 @@ describe('SubmitReview', () => {
         ]);
     });
     it('Approved move issue and assign - bot - was assigned to Nigel', async () => {
-        await runAction('approved', 'user@sonarsource.com', 'sonar-nigel[bot]', 'SUBMIT-3 Issue assigned to Nigel');
+        await runAction('approved', ['user@sonarsource.com'], 'sonar-nigel[bot]', 'SUBMIT-3 Issue assigned to Nigel');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
-            "Invoked jira.assignIssueToEmail('SUBMIT-3', 'user@sonarsource.com')",
+            "Invoked jira.assignIssueToEmail('SUBMIT-3', ['user@sonarsource.com'])",
             "Invoked jira.moveIssue('SUBMIT-3', 'Approve', null)",
             "Done",
         ]);
     });
     it('Approved is-eng-xp-squad adds ReviewedBy', async () => {
         process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
-        await runAction('approved', 'user@sonarsource.com');
+        await runAction('approved', ['user@sonarsource.com']);
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
-            "Invoked jira.addReviewedBy('GHA-42', 'user@sonarsource.com')",
-            "Invoked jira.addReviewedBy('GHA-43', 'user@sonarsource.com')",
+            "Invoked jira.addReviewedBy('GHA-42', ['user@sonarsource.com'])",
+            "Invoked jira.addReviewedBy('GHA-43', ['user@sonarsource.com'])",
             "Done",
         ]);
     });
     it('Approved is-eng-xp-squad unknown email', async () => {
         process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
-        await runAction('approved', null);
+        await runAction('approved', []);
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
+            "Invoked jira.addReviewedBy('GHA-42', [])",
+            "Invoked jira.addReviewedBy('GHA-43', [])",
             "Done",
         ]);
     });

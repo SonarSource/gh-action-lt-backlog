@@ -27,6 +27,6 @@ export type OctokitActionStub = {
   rest: Api['rest'];
   isEngXpSquad: boolean;
   sendGraphQL(query: string): Promise<GraphQlQueryResponseData>;
-  findEmail(login: string): Promise<string | null>;
+  findEmails(login: string): Promise<string[]>;
   sendSlackPost(url: string, jsonRequest: any): Promise<any>;
 };

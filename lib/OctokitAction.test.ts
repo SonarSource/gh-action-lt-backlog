@@ -55,7 +55,7 @@ describe('OctokitAction', () => {
           delete process.env[key];
         }
       }
-      process.env['GITHUB_REPOSITORY'] = 'SonarSource/test-repo'; // Owner needs to be correct for findEmail to work properly
+      process.env['GITHUB_REPOSITORY'] = 'SonarSource/test-repo'; // Owner needs to be correct for findEmails to work properly
       process.env['INPUT_GITHUB-TOKEN'] = token;
       sut = new TestOctokitAction();
     } else {
@@ -251,9 +251,9 @@ describe('OctokitAction', () => {
   });
 
   // Local token is impossible to craft with required permissions
-  itRunsOnlyInCI('findEmail succeeds', async () => {
+  itRunsOnlyInCI('findEmails succeeds', async () => {
     // Preferably choose someone from https://github.com/orgs/SonarSource/people when visited in incognito mode, not to leak any information
-    expect(await sut.findEmail('agigleux')).toContain('sonar'); // Do not write the full email address here to avoid its exposure
+    expect((await sut.findEmails('agigleux'))[0]).toContain('sonar'); // Do not write the full email address here to avoid its exposure
     expect(logTester.logsParams).toStrictEqual([
       "Searching for email of agigleux",
       "Found 1 email(s) for agigleux"
@@ -261,8 +261,8 @@ describe('OctokitAction', () => {
   });
 
   // Local token is impossible to craft with required permissions
-  itRunsOnlyInCI('findEmail no results', async () => {
-    expect(await sut.findEmail('renovate[bot]')).toBeNull();
+  itRunsOnlyInCI('findEmails no results', async () => {
+    expect(await sut.findEmails('renovate[bot]')).toEqual([]);
     expect(logTester.logsParams).toStrictEqual([
       "Searching for email of renovate[bot]",
       "No email found for renovate[bot]: Could not resolve to a User with the login of 'renovate[bot]'.",
@@ -292,25 +292,25 @@ describe('OctokitAction', () => {
   });
 
   it('processRequestReview', async () => {
-    sut.findEmail = async function (login: string): Promise<string> {
-      return "test.user@sonarsource.com";
+    sut.findEmails = async function (login: string): Promise<string[]> {
+      return ["test.user@sonarsource.com"];
     }
     await sut.processRequestReview("42", { login: 'test-user', type: 'User' });
     expect(logTester.logsParams).toStrictEqual([
       "Invoked jira.moveIssue('42', 'Request Review', null)",
-      "Invoked jira.assignIssueToEmail('42', 'test.user@sonarsource.com')"
+      "Invoked jira.assignIssueToEmail('42', ['test.user@sonarsource.com'])"
     ]);
   });
 
   it('processRequestReview is-eng-xp-squad', async () => {
     sut.isEngXpSquad = true;
-    sut.findEmail = async function (login: string): Promise<string> {
-      return "test.user@sonarsource.com";
+    sut.findEmails = async function (login: string): Promise<string[]> {
+      return ["test.user@sonarsource.com"];
     }
     await sut.processRequestReview("42", { login: 'test-user', type: 'User' });
     expect(logTester.logsParams).toStrictEqual([
       "Invoked jira.moveIssue('42', 'Request Review', null)",
-      "Invoked jira.addReviewer('42', 'test.user@sonarsource.com')"
+      "Invoked jira.addReviewer('42', ['test.user@sonarsource.com'])"
     ]);
   });
 
