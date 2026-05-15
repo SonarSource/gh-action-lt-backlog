@@ -43,8 +43,10 @@ export class ImportIssue extends OctokitAction {
     const id = await this.jira.createIssue(jiraProject, issue.title, parameters);
     console.log(`Created ${id}`);
     const promises: Promise<void>[] = [];
-    promises.push(this.jira.addIssueRemoteLink(id, issue.html_url));
-    promises.push(this.updateIssueTitle(issue.number, `${id} ${issue.title}`));
+    promises.push(
+      this.jira.addIssueRemoteLink(id, issue.html_url),
+      this.updateIssueTitle(issue.number, `${id} ${issue.title}`),
+    );
     for (const component of issue.labels.map(x => typeof x === 'string' ? x : x.name!)) {
       promises.push(this.addJiraComponent(id, component));
     }
