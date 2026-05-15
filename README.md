@@ -26,6 +26,8 @@ All actions should be consumed from these branches.
 
 [SubmitReview](SubmitReview) - Move card after submitting a review
 
+[LockBranch](LockBranch) - Lock or Unlock branch to a specific state.
+
 [ToggleLockBranch](ToggleLockBranch) - Lock or Unlock branch to prevent merge of PRs.
 
 ## Development notes
