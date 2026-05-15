@@ -119,7 +119,6 @@ export const jiraClientStub = {
     console.log(`Invoked jira.assignIssueToAccount('${issueId}', '${accountId}')`);
   },
   async assignIssueToEmail(issueId: string, userEmails: string[]): Promise<void> {
-    if (userEmails.length === 0) return;
     console.log(`Invoked jira.assignIssueToEmail('${issueId}', ['${userEmails.join("', '")}'])`);
   },
   async createComponent(projectKey: string, name: string, description: string): Promise<boolean> {
@@ -131,11 +130,9 @@ export const jiraClientStub = {
     return true;
   },
   async addReviewer(issueId: string, userEmails: string[]): Promise<void> {
-    if (userEmails.length === 0) return;
     console.log(`Invoked jira.addReviewer('${issueId}', ['${userEmails.join("', '")}'])`);
   },
   async addReviewedBy(issueId: string, userEmails: string[]): Promise<void> {
-    if (userEmails.length === 0) return;
     console.log(`Invoked jira.addReviewedBy('${issueId}', ['${userEmails.join("', '")}'])`);
   }
 } as unknown as JiraClient;
