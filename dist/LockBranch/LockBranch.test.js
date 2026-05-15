@@ -18,12 +18,12 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { ToggleLockBranch } from './ToggleLockBranch.js';
+import { LockBranch } from './LockBranch.js';
 import { LogTester } from '../tests/LogTester.js';
 import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
 async function runAction(currentLockBranch) {
     const pattern = process.env['INPUT_BRANCH-PATTERN'];
-    const action = new ToggleLockBranch();
+    const action = new LockBranch();
     action.findRule = async (pattern) => {
         console.log(`Invoked findRule(${pattern})`);
         return { id: 'rule-id', lockBranch: currentLockBranch, pattern };
@@ -42,7 +42,7 @@ async function runAction(currentLockBranch) {
     };
     await action.run();
 }
-describe('ToggleLockBranch', () => {
+describe('LockBranch', () => {
     let logTester;
     beforeEach(() => {
         logTester = new LogTester();
@@ -55,7 +55,8 @@ describe('ToggleLockBranch', () => {
     afterEach(() => {
         logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
     });
-    it('Toggle unlocked to locked', async () => {
+    it('Lock', async () => {
+        process.env['INPUT_LOCK-BRANCH'] = 'true';
         await runAction(false);
         expect(logTester.logsParams).toStrictEqual([
             "Invoked findRule(master)",
@@ -65,7 +66,8 @@ describe('ToggleLockBranch', () => {
             "Done"
         ]);
     });
-    it('Toggle locked to unlocked', async () => {
+    it('Unlock', async () => {
+        process.env['INPUT_LOCK-BRANCH'] = 'false';
         await runAction(true);
         expect(logTester.logsParams).toStrictEqual([
             "Invoked findRule(master)",
@@ -77,4 +79,4 @@ describe('ToggleLockBranch', () => {
         ]);
     });
 });
-//# sourceMappingURL=ToggleLockBranch.test.js.map
+//# sourceMappingURL=LockBranch.test.js.map

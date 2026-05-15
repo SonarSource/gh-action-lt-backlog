@@ -18,9 +18,9 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import { LockBranchAction } from '../lib/LockBranchAction.js';
-export class ToggleLockBranch extends LockBranchAction {
-    resolveLockBranch(rule) {
-        return !rule.lockBranch;
+export class LockBranch extends LockBranchAction {
+    resolveLockBranch() {
+        return this.inputBoolean('lock-branch');
     }
 }
-//# sourceMappingURL=ToggleLockBranch.js.map
+//# sourceMappingURL=LockBranch.js.map
