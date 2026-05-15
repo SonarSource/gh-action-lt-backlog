@@ -30,7 +30,7 @@ export type ProtectionRule = {
 type PullRequest = {
   id: string;
   number: number;
-  autoMergeRequest: { commitHeadLine: string };
+  autoMergeRequest: { commitHeadline: string };
 };
 
 export abstract class LockBranchAction extends OctokitAction {
