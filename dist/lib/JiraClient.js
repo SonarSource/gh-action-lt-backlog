@@ -66,8 +66,8 @@ export class JiraClient {
         console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
         await this.sendRestPostApi(`issue/${issueId}/transitions`, { transition: { id: transition.id }, fields });
     }
-    async assignIssueToEmail(issueId, userEmail) {
-        const accountId = await this.findAccountId(userEmail);
+    async assignIssueToEmail(issueId, userEmails) {
+        const accountId = await this.findAccountId(userEmails);
         if (accountId != null) {
             await this.assignIssueToAccount(issueId, accountId);
         }
@@ -76,8 +76,8 @@ export class JiraClient {
         console.log(`${issueId}: Assigning to ${accountId}`);
         await this.sendRestPutApi(`issue/${issueId}/assignee`, { accountId });
     }
-    async addReviewer(issueId, userEmail) {
-        const accountId = await this.findAccountId(userEmail);
+    async addReviewer(issueId, userEmails) {
+        const accountId = await this.findAccountId(userEmails);
         if (accountId != null) {
             console.log(`${issueId}: Adding Reviewer ${accountId}`);
             const request = {
@@ -90,8 +90,8 @@ export class JiraClient {
             await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request);
         }
     }
-    async addReviewedBy(issueId, userEmail) {
-        const accountId = await this.findAccountId(userEmail);
+    async addReviewedBy(issueId, userEmails) {
+        const accountId = await this.findAccountId(userEmails);
         if (accountId != null) {
             console.log(`${issueId}: Adding Reviewed by ${accountId}`);
             const request = {
@@ -135,7 +135,16 @@ export class JiraClient {
         console.log(`${issueId}: Load remote links for ${issueId}`);
         return this.sendRestGetApi(`issue/${issueId}/remotelink`);
     }
-    async findAccountId(email) {
+    async findAccountId(emails) {
+        for (const email of emails) {
+            const accountId = await this.findAccountIdFromEmail(email);
+            if (accountId) {
+                return accountId;
+            }
+        }
+        return null;
+    }
+    async findAccountIdFromEmail(email) {
         if (email == null) {
             console.log('Could not find accountId, email is null');
             return null;

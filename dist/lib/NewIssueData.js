@@ -31,13 +31,13 @@ export class NewIssueData {
         this.assigneeId = assigneeId;
         this.additionalFields = additionalFields;
     }
-    static async create(jira, pr, inputJiraProject, inputAdditionalFields, userEmail, fallbackTeam) {
+    static async create(jira, pr, inputJiraProject, inputAdditionalFields, userEmails, fallbackTeam) {
         const parent = pr.isBot()
             ? null // Description contains release notes with irrelevant issue IDs
             : await this.findValidParent(jira, this.findMentionedIssues(pr));
         const projectKey = this.computeProjectKey(inputJiraProject, parent);
         if (projectKey) {
-            const accountId = await jira.findAccountId(userEmail);
+            const accountId = await jira.findAccountId(userEmails);
             const additionalFields = this.parseAdditionalFields(inputAdditionalFields);
             const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Maintenance'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
             if (parameters.issuetype.name !== 'Sub-task') { // These fields cannot be set on Sub-task. Their values are inherited from the parent issue.
@@ -58,8 +58,8 @@ export class NewIssueData {
             return null;
         }
     }
-    static async createForEngExp(jira, pr, userEmail) {
-        const accountId = await jira.findAccountId(userEmail);
+    static async createForEngExp(jira, pr, userEmails) {
+        const accountId = await jira.findAccountId(userEmails);
         const projectKey = await this.computeProjectKeyForEngExp(jira, pr, accountId);
         const parameters = this.newIssueParameters(projectKey, null, 'Maintenance');
         if (accountId) {

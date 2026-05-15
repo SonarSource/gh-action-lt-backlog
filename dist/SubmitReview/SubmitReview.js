@@ -26,10 +26,8 @@ export class SubmitReview extends PullRequestAction {
                 await this.assignCurrentUser(issueId); // When these start by approving PR instead of moving the card, they end up without a face
             }
             if (this.isEngXpSquad) {
-                const userEmail = await this.findEmail(this.payload.sender?.login);
-                if (userEmail) {
-                    await this.jira.addReviewedBy(issueId, userEmail);
-                }
+                const userEmails = await this.findEmails(this.payload.sender?.login);
+                await this.jira.addReviewedBy(issueId, userEmails);
             }
             else {
                 await this.jira.moveIssue(issueId, 'Approve');
@@ -42,10 +40,8 @@ export class SubmitReview extends PullRequestAction {
     async assignCurrentUser(issueId) {
         const issue = await this.jira.loadIssue(issueId);
         if (!issue.fields.assignee || issue.fields.assignee.accountId === NIGEL_ACCOUNT_ID) {
-            const userEmail = await this.findEmail(this.payload.sender?.login);
-            if (userEmail) {
-                await this.jira.assignIssueToEmail(issueId, userEmail);
-            }
+            const userEmails = await this.findEmails(this.payload.sender?.login);
+            await this.jira.assignIssueToEmail(issueId, userEmails);
         }
     }
 }
