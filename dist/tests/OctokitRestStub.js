@@ -55,7 +55,8 @@ export function createOctokitRestStub(title, body, login = 'test-user') {
                             }
                         },
                         user: {
-                            login
+                            login,
+                            type: login.includes("[bot]") ? 'Bot' : 'User'
                         }
                     }
                 };
