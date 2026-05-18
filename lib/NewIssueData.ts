@@ -25,6 +25,7 @@ import { NewIssueParameters } from "./NewIssueParameters.js";
 import { JiraClient, Issue } from "./JiraClient.js";
 import { PullRequest } from "./OctokitTypes.js";
 import { Team } from "./Team.js";
+import { TeamReviewData } from "./TeamReviewData.js";
 
 export class NewIssueData {
   public readonly projectKey: string;
@@ -85,6 +86,17 @@ export class NewIssueData {
       parameters.parent = await this.findEvergreenEpic(jira, EngineeringExperienceSquad);
     }
     return new NewIssueData(projectKey, accountId, projectKey === 'PREQ' ? null : accountId, parameters); // GHA-86 Leave PREQ unassigned
+  }
+
+  public static async createForPreqReview(jira: JiraClient, teamReview: TeamReviewData): Promise<NewIssueData> {
+    const parameters = this.newIssueParameters('PREQ', null, 'Maintenance');
+    if (teamReview.accountId) {
+      parameters.reporter = { id: teamReview.accountId };
+    }
+    parameters.customfield_10001 = teamReview.team.id;
+    parameters.labels = ['preq-review-code'];
+    parameters.parent = await this.findEvergreenEpic(jira, teamReview.team);
+    return new NewIssueData('PREQ', teamReview.accountId, null, parameters); 
   }
 
   private static computeProjectKey(inputJiraProject: string, parent: any): string {

@@ -22,6 +22,7 @@ import { OctokitAction } from '../lib/OctokitAction.js';
 import { PullRequest } from '../lib/OctokitTypes.js';
 import { JIRA_DOMAIN, RENOVATE_PREFIX } from '../lib/Constants.js';
 import { NewIssueData } from '../lib/NewIssueData.js';
+import { TeamReviewData } from '../lib/TeamReviewData.js';
 
 export class PullRequestCreated extends OctokitAction {
   protected async execute(): Promise<void> {
@@ -87,9 +88,8 @@ export class PullRequestCreated extends OctokitAction {
         if (data.assigneeId) {
           await this.jira.assignIssueToAccount(issueId, data.assigneeId);  // Even if there's already a reviewer, we need this first to populate the lastAssignee field in Jira.
         }
-        if (this.payload.pull_request?.requested_reviewers.length > 0) { // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
-          await this.processRequestReview(issueId, this.payload.pull_request?.requested_reviewers[0]);
-        }
+        // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
+        await this.processRequestReview(issueId, this.payload.pull_request?.requested_reviewers[0] ?? null, TeamReviewData.createFromAccount(this.payload.pull_request?.requested_teams[0] ?? null, data.accountId));
         return issueId;
       }
     } else {

@@ -20,9 +20,11 @@
 
 import { PullRequestAction } from '../lib/PullRequestAction.js';
 import { PullRequest } from '../lib/OctokitTypes.js';
+import { TeamReviewData } from '../lib/TeamReviewData.js';
 
 export class RequestReview extends PullRequestAction {
   protected async processJiraIssue(pr: PullRequest, issueId: string): Promise<void> {
-    await this.processRequestReview(issueId, this.payload.requested_reviewer); // When team is requested for a review, it has this.payload.requested_team
+    const teamReview = await TeamReviewData.createFromUser(this.jira, this.payload.requested_team ?? null, this.payload.sender?.login, this.findEmails);
+    await this.processRequestReview(issueId, this.payload.requested_reviewer ?? null, teamReview);
   }
 }

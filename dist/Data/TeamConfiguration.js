@@ -18,6 +18,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 export const EngineeringExperienceSquad = { id: "eb40f25e-3596-4541-b661-cf83e7bc4fa6", name: "Engineering Experience Squad" };
+export const CloudEngineeringSquad = { id: "772ea1dc-3574-42bc-a378-7a898d910ebd", name: "Cloud Engineering" };
+export const CloudProductionEngineeringSquad = { id: "6f2e744b-9f09-4c3a-852e-e2f138d1c14f", name: "Cloud Production Engineering" };
 // If a new Jira issue is created for a standalone PR, it will be assigned to a sprint from a board defined by this file.
 // If a new team or default board is created, this file should be updated accordingly.
 export const TeamConfigurationData = [
