@@ -91,6 +91,9 @@ npm run build
 # Run all UTs
 npm test
 
+# Run all UTs except Jira ITs
+npm test -- --exclude '**/JiraClient*' --exclude '**/TeamConfiguration*'
+
 # Run UTs from single file
 npm test TeamConfiguration
 
