@@ -78,6 +78,16 @@ export class NewIssueData {
         }
         return new NewIssueData(projectKey, accountId, projectKey === 'PREQ' ? null : accountId, parameters); // GHA-86 Leave PREQ unassigned
     }
+    static async createForPreqReview(jira, teamReview) {
+        const parameters = this.newIssueParameters('PREQ', null, 'Maintenance');
+        if (teamReview.accountId) {
+            parameters.reporter = { id: teamReview.accountId };
+        }
+        parameters.customfield_10001 = teamReview.team.id;
+        parameters.labels = ['preq-review-code'];
+        parameters.parent = await this.findEvergreenEpic(jira, teamReview.team);
+        return new NewIssueData('PREQ', teamReview.accountId, null, parameters);
+    }
     static computeProjectKey(inputJiraProject, parent) {
         if (!parent) {
             return inputJiraProject; // Can be null => no new ticket. Like in rspec where we want to create child work items only when parent is set.

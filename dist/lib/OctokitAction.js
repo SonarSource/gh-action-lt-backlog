@@ -24,6 +24,7 @@ import { addPullRequestExtensions } from './OctokitTypes.js';
 import { graphql } from '@octokit/graphql';
 import { JiraClient } from './JiraClient.js';
 import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN } from './Constants.js';
+import { NewIssueData } from './NewIssueData.js';
 export class OctokitAction extends Action {
     rest;
     octokit;
@@ -165,11 +166,11 @@ export class OctokitAction extends Action {
             return null;
         }
     }
-    async processRequestReview(issueId, requested_reviewer) {
+    async processRequestReview(issueId, requested_reviewer, teamReview) {
         if (requested_reviewer?.type === "Bot") {
             this.log(`Skipping request review from bot: ${requested_reviewer.login}`);
         }
-        else {
+        else if (requested_reviewer || teamReview) { // Draft PR creation or PR without reviewers can have both null => NO OP
             await this.jira.moveIssue(issueId, 'Request Review');
             if (requested_reviewer) {
                 const userEmails = await this.findEmails(requested_reviewer.login);
@@ -180,6 +181,9 @@ export class OctokitAction extends Action {
                     await this.jira.assignIssueToEmail(issueId, userEmails);
                 }
             }
+            if (teamReview) {
+                await this.createPreqReviewIssue(issueId, teamReview);
+            }
         }
     }
     async addJiraComponent(issueId, name, description = null) {
@@ -189,6 +193,17 @@ export class OctokitAction extends Action {
         }
         if (!await this.jira.addIssueComponent(issueId, name)) {
             this.setFailed('Failed to add component');
+        }
+    }
+    async createPreqReviewIssue(issueId, teamReview) {
+        const data = await NewIssueData.createForPreqReview(this.jira, teamReview);
+        if (data) {
+            const issue = await this.jira.loadIssue(issueId);
+            if (issue) {
+                this.log(`Creating ${data.projectKey} review issue`);
+                const reviewIssueId = await this.jira.createIssue(data.projectKey, `PR review for ${issue.fields.summary}`, data.additionalFields);
+                // ToDo: GHA-141 Create cross-links in Jira and GH
+            }
         }
     }
 }
