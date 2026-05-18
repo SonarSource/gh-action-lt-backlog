@@ -157,8 +157,8 @@ describe('OctokitAction', () => {
     expect(pr.isBot()).toBe(true);
   });
 
-  it('loadPullRequest Nigel', async () => {
-    const sut = new TestOctokitAction('sonar-nigel[bot]') as any;
+  it('loadPullRequest Another bot', async () => {
+    const sut = new TestOctokitAction('any-other-bot[bot]') as any;
     const pr = await sut.loadPullRequest(42);
     expect(pr.isRenovate()).toBe(false);
     expect(pr.isBot()).toBe(true);
