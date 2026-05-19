@@ -18,7 +18,27 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { RequestReview } from "./RequestReview.js";
+// import { RequestReview } from "./RequestReview.js";
 
-const action = new RequestReview();
-action.run();
+// const action = new RequestReview();
+// action.run();
+
+
+import { JIRA_DOMAIN, JIRA_ORGANIZATION_ID, JIRA_SITE_ID } from "../lib/Constants.js";
+import { JiraClient } from "../lib/JiraClient.js";
+import { NewIssueData } from "../lib/NewIssueData.js";
+import { TeamReviewData } from "../lib/TeamReviewData.js";
+
+console.log('hello');
+const jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, process.env['JIRA_USER'] || '', process.env['JIRA_TOKEN'] || '');
+const teamReview = TeamReviewData.createFromAccount({ name: 'platform-cloud-eng-squad' } as any, '5dc3f7c6e3cc320c5e8a91f1');
+if (teamReview) {
+
+  (async () => {
+    const data = await NewIssueData.createForPreqReview(jira, teamReview);
+    data.additionalFields.parent = { key: 'SC-46721' };
+    const issue = await jira.createIssue(data.projectKey, `PR review for Test`, data.additionalFields);
+    console.log(`Done: ${issue}`);
+  })();
+}
+
