@@ -26,7 +26,7 @@ import { NewIssueData } from "../lib/NewIssueData.js";
 import { TeamReviewData } from "../lib/TeamReviewData.js";
 console.log(`${JIRA_DOMAIN}, ${JIRA_SITE_ID}, ${JIRA_ORGANIZATION_ID}`);
 console.log('Identical');
-const jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, process.env['INPUT_JIRA_USER'] || '', process.env['INPUT_JIRA_TOKEN'] || '');
+const jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, process.env['INPUT_JIRA-USER'] || '', process.env['INPUT_JIRA-TOKEN'] || '');
 const teamReview = TeamReviewData.createFromAccount({ name: 'platform-cloud-eng-squad' }, '5dc3f7c6e3cc320c5e8a91f1');
 if (teamReview) {
     (async () => {
