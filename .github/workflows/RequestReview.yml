@@ -2,7 +2,7 @@ name: Request review
 
 on:
   pull_request:
-    types: ["review_requested"]
+#    types: ["review_requested"]
 
 jobs:
   RequestReview_job:
