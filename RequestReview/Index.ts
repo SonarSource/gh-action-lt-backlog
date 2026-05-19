@@ -36,11 +36,11 @@ if (teamReview) {
 
   (async () => {
     const data = await NewIssueData.createForPreqReview(jira, teamReview);
+    //data.additionalFields.customfield_10001 = undefined;
     //data.additionalFields.customfield_10001 = '3ca60b21-53c7-48e2-a2e2-6e85b39551d0';  // .NET
     data.additionalFields.customfield_10001 = 'eb40f25e-3596-4541-b661-cf83e7bc4fa6';  // Eng xp
-    //data.additionalFields.parent = { key: 'SC-46721' };
-    data.additionalFields.customfield_10001 = undefined;
     data.additionalFields.parent = undefined;
+    //data.additionalFields.parent = { key: 'SC-46721' };
     const issue = await jira.createIssue(data.projectKey, `PR review for Test`, data.additionalFields);
     console.log(`Done: ${issue}`);
   })();
