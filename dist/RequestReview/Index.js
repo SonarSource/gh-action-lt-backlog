@@ -24,6 +24,7 @@ import { JIRA_DOMAIN, JIRA_ORGANIZATION_ID, JIRA_SITE_ID } from "../lib/Constant
 import { JiraClient } from "../lib/JiraClient.js";
 import { NewIssueData } from "../lib/NewIssueData.js";
 import { TeamReviewData } from "../lib/TeamReviewData.js";
+console.log(`${JIRA_DOMAIN}, ${JIRA_SITE_ID}, ${JIRA_ORGANIZATION_ID}`);
 console.log('No Parent & Eng Xp 2');
 const jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, process.env['JIRA_USER'] || '', process.env['JIRA_TOKEN'] || '');
 const teamReview = TeamReviewData.createFromAccount({ name: 'platform-cloud-eng-squad' }, '5dc3f7c6e3cc320c5e8a91f1');
