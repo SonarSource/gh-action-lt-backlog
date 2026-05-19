@@ -30,8 +30,10 @@ const teamReview = TeamReviewData.createFromAccount({ name: 'platform-cloud-eng-
 if (teamReview) {
     (async () => {
         const data = await NewIssueData.createForPreqReview(jira, teamReview);
-        data.additionalFields.customfield_10001 = '3ca60b21-53c7-48e2-a2e2-6e85b39551d0'; // .NET
-        data.additionalFields.parent = { key: 'SC-46721' };
+        //data.additionalFields.customfield_10001 = '3ca60b21-53c7-48e2-a2e2-6e85b39551d0';  // .NET
+        //data.additionalFields.parent = { key: 'SC-46721' };
+        data.additionalFields.customfield_10001 = undefined;
+        data.additionalFields.parent = undefined;
         const issue = await jira.createIssue(data.projectKey, `PR review for Test`, data.additionalFields);
         console.log(`Done: ${issue}`);
     })();
