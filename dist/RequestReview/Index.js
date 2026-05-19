@@ -25,8 +25,8 @@ import { JiraClient } from "../lib/JiraClient.js";
 import { NewIssueData } from "../lib/NewIssueData.js";
 import { TeamReviewData } from "../lib/TeamReviewData.js";
 console.log(`${JIRA_DOMAIN}, ${JIRA_SITE_ID}, ${JIRA_ORGANIZATION_ID}`);
-console.log('No Parent & Eng Xp 2');
-const jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, process.env['JIRA_USER'] || '', process.env['JIRA_TOKEN'] || '');
+console.log('Identical');
+const jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, process.env['INPUT_JIRA_USER'] || '', process.env['INPUT_JIRA_TOKEN'] || '');
 const teamReview = TeamReviewData.createFromAccount({ name: 'platform-cloud-eng-squad' }, '5dc3f7c6e3cc320c5e8a91f1');
 if (teamReview) {
     (async () => {
@@ -39,7 +39,7 @@ if (teamReview) {
         data.additionalFields.parent = undefined;
         //data.additionalFields.parent = { key: 'SC-46721' };
         data.additionalFields.labels = ["dvi-created-by-automation"];
-        const issue = await jira.createIssue(data.projectKey, `Test - Ignore This`, data.additionalFields);
+        const issue = await jira.createIssue(data.projectKey, `Test - Ignore this`, data.additionalFields);
         console.log(`Done: ${issue}`);
     })();
 }
