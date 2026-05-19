@@ -30,6 +30,8 @@ const jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, pro
 const teamReview = TeamReviewData.createFromAccount({ name: 'platform-cloud-eng-squad' }, '5dc3f7c6e3cc320c5e8a91f1');
 if (teamReview) {
     (async () => {
+        var myself = await jira.myself();
+        console.log(JSON.stringify(myself, undefined, 2));
         const data = await NewIssueData.createForPreqReview(jira, teamReview);
         //data.additionalFields.customfield_10001 = undefined;
         //data.additionalFields.customfield_10001 = '3ca60b21-53c7-48e2-a2e2-6e85b39551d0';  // .NET
