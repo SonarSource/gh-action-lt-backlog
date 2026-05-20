@@ -24,7 +24,7 @@ import { TeamReviewData } from '../lib/TeamReviewData.js';
 
 export class RequestReview extends PullRequestAction {
   protected async processJiraIssue(pr: PullRequest, issueId: string): Promise<void> {
-    const teamReview = await TeamReviewData.createFromUser(this.jira, this.payload.requested_team ?? null, this.payload.sender?.login, this.findEmails);
+    const teamReview = await TeamReviewData.createFromUser(this.jira, this.payload.requested_team ?? null, this.payload.sender?.login, x => this.findEmails(x));
     await this.processRequestReview(pr, issueId, this.payload.requested_reviewer ?? null, teamReview);
   }
 }
