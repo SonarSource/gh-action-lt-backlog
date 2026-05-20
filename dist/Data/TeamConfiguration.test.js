@@ -21,7 +21,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { JIRA_DOMAIN, JIRA_ORGANIZATION_ID, JIRA_SITE_ID } from "../lib/Constants.js";
 import { JiraClient } from "../lib/JiraClient.js";
 import { LogTester } from "../tests/LogTester.js";
-import { EngineeringExperienceSquad, TeamConfigurationData } from "./TeamConfiguration.js";
+import { CloudEngineeringSquad, CloudProductionEngineeringSquad, EngineeringExperienceSquad, TeamConfigurationData } from "./TeamConfiguration.js";
 import { fail } from 'node:assert';
 let jira;
 vi.setConfig({ testTimeout: 20000 }); // 20s
@@ -152,6 +152,16 @@ describe('TeamConfiguration', () => {
         const team = await jira.findTeamByName(EngineeringExperienceSquad.name);
         expect(team).not.toBeNull();
         expect(team.id).toBe(EngineeringExperienceSquad.id);
+    });
+    it('CloudEngineeringSquad is valid', async () => {
+        const team = await jira.findTeamByName(CloudEngineeringSquad.name);
+        expect(team).not.toBeNull();
+        expect(team.id).toBe(CloudEngineeringSquad.id);
+    });
+    it('CloudProductionEngineeringSquad is valid', async () => {
+        const team = await jira.findTeamByName(CloudProductionEngineeringSquad.name);
+        expect(team).not.toBeNull();
+        expect(team.id).toBe(CloudProductionEngineeringSquad.id);
     });
     it('teams have valid names', async () => {
         for (const teamData of TeamConfigurationData) {
