@@ -22,10 +22,12 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import type { Api } from '@octokit/plugin-rest-endpoint-methods';
 import { Action } from './Action.js';
-import { PullRequest, IssueComment, addPullRequestExtensions, Issue } from './OctokitTypes.js';
+import { PullRequest, IssueComment, addPullRequestExtensions, Issue, SimpleUser } from './OctokitTypes.js';
 import { graphql, GraphQlQueryResponseData, GraphqlResponseError } from '@octokit/graphql';
 import { JiraClient } from './JiraClient.js';
 import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN } from './Constants.js';
+import { NewIssueData } from './NewIssueData.js';
+import { TeamReviewData } from './TeamReviewData.js';
 
 type VerifiedEmailsUser = {
   organizationVerifiedDomainEmails: string[];
@@ -205,10 +207,10 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected async processRequestReview(issueId: string, requested_reviewer: any): Promise<void> {
+  protected async processRequestReview(pr: PullRequest, issueId: string, requested_reviewer: SimpleUser | null, teamReview: TeamReviewData | null): Promise<void> {
     if (requested_reviewer?.type === "Bot") {
       this.log(`Skipping request review from bot: ${requested_reviewer.login}`);
-    } else {
+    } else if (requested_reviewer || teamReview) { // Draft PR creation or PR without reviewers can have both null => NO OP
       await this.jira.moveIssue(issueId, 'Request Review');
       if (requested_reviewer) {
         const userEmails = await this.findEmails(requested_reviewer.login);
@@ -217,6 +219,12 @@ export abstract class OctokitAction extends Action {
         } else {
           await this.jira.assignIssueToEmail(issueId, userEmails);
         }
+      }
+      if (teamReview) {
+        const data = await NewIssueData.createForPreqReview(this.jira, teamReview);
+        this.log(`Creating ${data.projectKey} review issue`);
+        const reviewIssueId = await this.jira.createIssue(data.projectKey, `PR review for ${pr.title}`, data.additionalFields);
+        // ToDo: GHA-141 Create cross-links in Jira and GH
       }
     }
   }

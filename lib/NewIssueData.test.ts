@@ -20,7 +20,8 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { NewIssueData } from '../lib/NewIssueData.js';
-import { PullRequest } from './OctokitTypes.js';
+import { TeamReviewData } from '../lib/TeamReviewData.js';
+import { PullRequest, SimpleTeam } from './OctokitTypes.js';
 import { jiraClientStub } from '../tests/JiraClientStub.js';
 import { LogTester } from '../tests/LogTester.js';
 
@@ -228,6 +229,37 @@ describe('NewIssueData', () => {
 
   it('create with project lead team', async () => {
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', ['renovate@renovate.com'], '')).toEqual(createExpectedWithoutAccount());
+  });
+
+  it('createForPreqReview', async () => {
+    const teamReview = TeamReviewData.createFromAccount({ name: 'platform-cloud-eng-squad' } as SimpleTeam, '1234-account');
+    expect(await NewIssueData.createForPreqReview(jiraClientStub, teamReview)).toEqual({
+      accountId: '1234-account',
+      assigneeId: null,
+      additionalFields: {
+        customfield_10001: '772ea1dc-3574-42bc-a378-7a898d910ebd',
+        issuetype: { name: 'Maintenance' },
+        labels: ['preq-review-code'],
+        parent: { key: 'SC-1000' },
+        reporter: { id: '1234-account' }
+      },
+      projectKey: 'PREQ'
+    });
+  });
+
+  it('createForPreqReview with null accountId', async () => {
+    const teamReview = TeamReviewData.createFromAccount({ name: 'platform-cloud-eng-squad' } as SimpleTeam, null);
+    expect(await NewIssueData.createForPreqReview(jiraClientStub, teamReview)).toEqual({
+      accountId: null,
+      assigneeId: null,
+      additionalFields: {
+        customfield_10001: '772ea1dc-3574-42bc-a378-7a898d910ebd',
+        issuetype: { name: 'Maintenance' },
+        labels: ['preq-review-code'],
+        parent: { key: 'SC-1000' }
+      },
+      projectKey: 'PREQ'
+    });
   });
 
   it('create with no team', async () => {
