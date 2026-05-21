@@ -45,9 +45,11 @@ export class PullRequestCreated extends OctokitAction {
     if (pr == null) {
       return;
     }
+    let accountId: string | null | undefined = undefined;
     let fixedIssues = await this.findFixedIssues(pr);
     if (fixedIssues == null) {
-      const issueId = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields);
+      accountId = await this.loadAccountId();
+      const issueId = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields, accountId);
       if (issueId) {
         fixedIssues = [issueId];
       }
@@ -60,7 +62,7 @@ export class PullRequestCreated extends OctokitAction {
       }
       for (const issue of fixedIssues) {
         await this.jira.addIssueRemoteLink(issue, pr.html_url);
-        await this.processAllReviews(pr, issue);
+        await this.processAllReviews(pr, issue, accountId);
       }
       if (this.isEngXpSquad) {
         for (const issue of fixedIssues.filter(x => x.startsWith('BUILD-'))) {  // BUILD-9328: No component for PREQ tickets
@@ -70,10 +72,10 @@ export class PullRequestCreated extends OctokitAction {
     }
   }
 
-  private async processNewJiraIssue(pr: PullRequest, inputJiraProject: string, inputAdditionalFields: string): Promise<string | null> {
+  private async processNewJiraIssue(pr: PullRequest, inputJiraProject: string, inputAdditionalFields: string, accountId: string | null): Promise<string | null> {
     const data = this.isEngXpSquad
-      ? await NewIssueData.createForEngExp(this.jira, pr, await this.findEmails(this.payload.sender?.login))
-      : await NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, await this.findEmails(this.payload.sender?.login), this.inputString('fallback-team'));
+      ? await NewIssueData.createForEngExp(this.jira, pr, accountId)
+      : await NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, accountId, this.inputString('fallback-team'));
     if (data) {
       const issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
       if (issueId) {
@@ -95,7 +97,7 @@ export class PullRequestCreated extends OctokitAction {
     }
   }
 
-  private async processAllReviews(pr: PullRequest, issueId: string): Promise<void> {
+  private async processAllReviews(pr: PullRequest, issueId: string, accountId: string | null | undefined): Promise<void> {
     // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
     await this.processRequestReview(pr, issueId, this.payload.pull_request?.requested_reviewers[0] || null, null);
     // ToDo: GHA-139 Use TeamReviewData and run it for pre-existing issues too
@@ -108,6 +110,10 @@ export class PullRequestCreated extends OctokitAction {
       pr.title = this.cleanupWhitespace(`${issueId} ${pr.title}`);
       await this.updatePullRequestTitle(pr.number, pr.title);
     }
+  }
+
+  private async loadAccountId(): Promise<string | null> {
+    return this.jira.findAccountId(await this.findEmails(this.payload.sender?.login));
   }
 
   private cleanupWhitespace(value: string): string {
