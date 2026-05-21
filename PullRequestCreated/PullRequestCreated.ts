@@ -75,10 +75,7 @@ export class PullRequestCreated extends OctokitAction {
       : await NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, await this.findEmails(this.payload.sender?.login), this.inputString('fallback-team'));
     if (data) {
       const issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
-      if (issueId == null) {
-        this.setFailed('Failed to create a new issue in Jira');
-        return null;
-      } else {
+      if (issueId) {
         await this.persistIssueId(pr, issueId);
         await this.jira.moveIssue(issueId, 'Commit');   // OPEN  -> TO DO
         if (data.accountId) {
@@ -90,6 +87,9 @@ export class PullRequestCreated extends OctokitAction {
         // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
         await this.processRequestReview(pr, issueId, this.payload.pull_request?.requested_reviewers[0] || null, null);  // ToDo: GHA-139 Use TeamReviewData and run it for pre-existing issues too
         return issueId;
+      } else {
+        this.setFailed('Failed to create a new issue in Jira');
+        return null;
       }
     } else {
       return null;
