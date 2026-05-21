@@ -60,6 +60,7 @@ export class PullRequestCreated extends OctokitAction {
       }
       for (const issue of fixedIssues) {
         await this.jira.addIssueRemoteLink(issue, pr.html_url);
+        await this.processAllReviews(pr, issue);
       }
       if (this.isEngXpSquad) {
         for (const issue of fixedIssues.filter(x => x.startsWith('BUILD-'))) {  // BUILD-9328: No component for PREQ tickets
@@ -84,8 +85,6 @@ export class PullRequestCreated extends OctokitAction {
         if (data.assigneeId) {
           await this.jira.assignIssueToAccount(issueId, data.assigneeId);  // Even if there's already a reviewer, we need this first to populate the lastAssignee field in Jira.
         }
-        // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
-        await this.processRequestReview(pr, issueId, this.payload.pull_request?.requested_reviewers[0] || null, null);  // ToDo: GHA-139 Use TeamReviewData and run it for pre-existing issues too
         return issueId;
       } else {
         this.setFailed('Failed to create a new issue in Jira');
@@ -94,6 +93,12 @@ export class PullRequestCreated extends OctokitAction {
     } else {
       return null;
     }
+  }
+
+  private async processAllReviews(pr: PullRequest, issueId: string): Promise<void> {
+    // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
+    await this.processRequestReview(pr, issueId, this.payload.pull_request?.requested_reviewers[0] || null, null);
+    // ToDo: GHA-139 Use TeamReviewData and run it for pre-existing issues too
   }
 
   private async persistIssueId(pr: PullRequest, issueId: string): Promise<void> {
