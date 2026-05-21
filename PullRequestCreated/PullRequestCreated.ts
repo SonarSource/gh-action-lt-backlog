@@ -22,6 +22,7 @@ import { OctokitAction } from '../lib/OctokitAction.js';
 import { PullRequest } from '../lib/OctokitTypes.js';
 import { JIRA_DOMAIN, RENOVATE_PREFIX } from '../lib/Constants.js';
 import { NewIssueData } from '../lib/NewIssueData.js';
+import { TeamReviewData } from '../lib/TeamReviewData.js';
 
 export class PullRequestCreated extends OctokitAction {
   protected async execute(): Promise<void> {
@@ -99,8 +100,19 @@ export class PullRequestCreated extends OctokitAction {
 
   private async processAllReviews(pr: PullRequest, issueId: string, accountId: string | null | undefined): Promise<void> {
     // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
-    await this.processRequestReview(pr, issueId, this.payload.pull_request?.requested_reviewers[0] || null, null);
-    // ToDo: GHA-139 Use TeamReviewData and run it for pre-existing issues too
+    if (this.payload.pull_request) {
+      await this.processRequestReview(pr, issueId, this.payload.pull_request.requested_reviewers[0] || null, null);
+      for (const team of this.payload.pull_request.requested_teams) {
+        this.log(`Processing team review request: ${team.name}`);
+        const teamReview = accountId === undefined
+          ? await TeamReviewData.createFromUser(team, async () => await this.loadSenderAccountId())
+          : TeamReviewData.createFromAccount(team, accountId);
+        if (teamReview) {
+          accountId = teamReview.accountId;   // In case it was undefined, reuse the loaded one
+          await this.processRequestReview(pr, issueId, null, teamReview);
+        }
+      }
+    }
   }
 
   private async persistIssueId(pr: PullRequest, issueId: string): Promise<void> {

@@ -29,8 +29,10 @@ import { PullRequest } from '../lib/OctokitTypes.js';
 
 class TestPullRequestCreated extends PullRequestCreated {
   protected async findEmails(login: string): Promise<string[]> {
+    this.log(`findEmails called for ${login}`);
     switch (login) {
       case 'test-user': return ['user@sonarsource.com'];
+      case 'test-reviewer': return ['reviewer@sonarsource.com'];
       case 'renamed': return ['unknown@sonarsource.com', 'user@sonarsource.com'];
       case 'renovate[bot]': return [];
       default: throw new Error(`Scaffolding did not expect login ${login}`);
@@ -136,6 +138,7 @@ describe('PullRequestCreated', () => {
     await runAction('KEY', 'Standalone PR');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
+      "findEmails called for test-user",
       "No mentioned issues found",
       "Looking for valid parent ticket",
       "No parent issue found",
@@ -158,6 +161,7 @@ describe('PullRequestCreated', () => {
     await runAction('KEY', 'Reproducer for USER-1234 should ignore issue ID');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
+      "findEmails called for test-user",
       "No mentioned issues found",
       "Looking for valid parent ticket",
       "No parent issue found",
@@ -181,6 +185,7 @@ describe('PullRequestCreated', () => {
     await runAction('KEY', 'Standalone PR', 'Original description, this ignores USER-1234 tickets as those should not be parents');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
+      "findEmails called for test-user",
       "No mentioned issues found",
       "Looking for valid parent ticket",
       "No parent issue found",
@@ -195,6 +200,7 @@ describe('PullRequestCreated', () => {
       "Adding the following ticket as comment: KEY-4242",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
       "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
+      "Processing team review request: test-team",
       "Done"
     ]);
   });
@@ -204,6 +210,7 @@ describe('PullRequestCreated', () => {
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
       "Invoked rest.issues.listComments({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42})",
+      "findEmails called for test-user",
       "No boardId is configured for team .NET Squad",
       "Found 2 Evergreen Epic(s), using NET-1000 .NET KTLO Epic",
       "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":null,\"parent\":{\"key\":\"NET-1000\"}})",
@@ -217,10 +224,11 @@ describe('PullRequestCreated', () => {
   });
 
   it('Standalone PR with reviewer', async () => {
-    github.context.payload.pull_request!.requested_reviewers = [{ type: "User", login: "test-user" }];
+    github.context.payload.pull_request!.requested_reviewers = [{ type: "User", login: "test-reviewer" }];
     await runAction('KEY', 'Standalone PR');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
+      "findEmails called for test-user",
       "No mentioned issues found",
       "Looking for valid parent ticket",
       "No parent issue found",
@@ -236,7 +244,8 @@ describe('PullRequestCreated', () => {
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
       "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
       "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
-      "Invoked jira.assignIssueToEmail('KEY-4242', ['user@sonarsource.com'])",
+      "findEmails called for test-reviewer",
+      "Invoked jira.assignIssueToEmail('KEY-4242', ['reviewer@sonarsource.com'])",
       "Done"
     ]);
   });
@@ -246,6 +255,7 @@ describe('PullRequestCreated', () => {
     await runAction('', 'Standalone PR');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
+      "findEmails called for test-user",
       "Invoked jira.createIssue('PREQ', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"reporter\":{\"id\":\"1234-account\"},\"customfield_10001\":\"eb40f25e-3596-4541-b661-cf83e7bc4fa6\",\"labels\":[\"dvi-created-by-automation\"]})",
       "Updating PR #42 title to: PREQ-4242 Standalone PR",
       "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"PREQ-4242 Standalone PR\"})",
@@ -280,7 +290,36 @@ describe('PullRequestCreated', () => {
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
       "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
       "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
+      "findEmails called for test-user",
       "Invoked jira.assignIssueToEmail('KEY-4242', ['user@sonarsource.com'])",
+      "Done"
+    ]);
+  });
+
+  it('Normal PR with team review', async () => {
+    github.context.payload.pull_request!.requested_teams = [
+      { name: "another-team" },                 // NO OP
+      { name: "platform-cloud-eng-squad" },     // Requests review, queries accountId
+      { name: "platform-cloud-prod-eng-squad" } // Requests review, reuses accountId
+    ];
+    await runAction('KEY', 'KEY-4242 Normal PR');
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Adding the following ticket as comment: KEY-4242",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
+      "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
+      "Processing team review request: another-team",
+      "Processing team review request: platform-cloud-eng-squad",
+      "findEmails called for test-user",
+      "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
+      "Found 1 Evergreen Epic(s), using SC-1000 Current SC Review Epic platform-cloud-eng-squad",
+      "Creating PREQ review issue",
+      "Invoked jira.createIssue('PREQ', 'PR review for KEY-4242 Normal PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"reporter\":{\"id\":\"1234-account\"},\"customfield_10001\":\"772ea1dc-3574-42bc-a378-7a898d910ebd\",\"labels\":[\"preq-review-code\"],\"parent\":{\"key\":\"SC-1000\"}})",
+      "Processing team review request: platform-cloud-prod-eng-squad",
+      "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
+      "Found 1 Evergreen Epic(s), using SC-2222 Current SC Review Epic platform-cloud-prod-eng-squad",
+      "Creating PREQ review issue",
+      "Invoked jira.createIssue('PREQ', 'PR review for KEY-4242 Normal PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"reporter\":{\"id\":\"1234-account\"},\"customfield_10001\":\"6f2e744b-9f09-4c3a-852e-e2f138d1c14f\",\"labels\":[\"preq-review-code\"],\"parent\":{\"key\":\"SC-2222\"}})",
       "Done"
     ]);
   });
