@@ -238,4 +238,8 @@ export abstract class OctokitAction extends Action {
       this.setFailed('Failed to add component');
     }
   }
+
+  protected async loadSenderAccountId(): Promise<string | null> {
+    return this.jira.findAccountId(await this.findEmails(this.payload.sender?.login));
+  }
 }
