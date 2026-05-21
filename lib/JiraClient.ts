@@ -126,7 +126,11 @@ export class JiraClient {
     }
     console.log(`Creating issue in project '${projectKey}'`);
     const response = await this.sendRestPostApi('issue', request);
-    return response?.key || null;
+    const issueId = response?.key || null;
+    if (issueId) {
+      console.log(`Created issue: ${issueId}`);
+    }
+    return issueId;
   }
 
   public loadIssue(issueKey: string): Promise<Issue> {
