@@ -19,7 +19,6 @@
  */
 
 import { CloudEngineeringSquad, CloudProductionEngineeringSquad } from "../Data/TeamConfiguration.js";
-import { JiraClient } from "./JiraClient.js";
 import { SimpleTeam } from "./OctokitTypes.js";
 import { Team } from "./Team.js";
 
@@ -41,12 +40,10 @@ export class TeamReviewData {
     }
   }
 
-  public static async createFromUser(jira: JiraClient, requested_team: SimpleTeam | null, login: string, findEmails: (login: string) => Promise<string[]>): Promise<TeamReviewData | null> {
+  public static async createFromUser(requested_team: SimpleTeam | null, loadAccountId: () => Promise<string | null>): Promise<TeamReviewData | null> {
     const team = this.selectTeam(requested_team);
     if (team) {
-      const userEmails = await findEmails(login);
-      const accountId = await jira.findAccountId(userEmails);
-      return new TeamReviewData(accountId, team);
+      return new TeamReviewData(await loadAccountId(), team);
     } else {
       return null;
     }

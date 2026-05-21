@@ -48,7 +48,7 @@ export class PullRequestCreated extends OctokitAction {
     let accountId: string | null | undefined = undefined;
     let fixedIssues = await this.findFixedIssues(pr);
     if (fixedIssues == null) {
-      accountId = await this.loadAccountId();
+      accountId = await this.loadSenderAccountId();
       const issueId = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields, accountId);
       if (issueId) {
         fixedIssues = [issueId];
@@ -110,10 +110,6 @@ export class PullRequestCreated extends OctokitAction {
       pr.title = this.cleanupWhitespace(`${issueId} ${pr.title}`);
       await this.updatePullRequestTitle(pr.number, pr.title);
     }
-  }
-
-  private async loadAccountId(): Promise<string | null> {
-    return this.jira.findAccountId(await this.findEmails(this.payload.sender?.login));
   }
 
   private cleanupWhitespace(value: string): string {
