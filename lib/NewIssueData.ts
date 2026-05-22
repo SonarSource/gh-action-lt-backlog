@@ -25,6 +25,7 @@ import { NewIssueParameters } from "./NewIssueParameters.js";
 import { JiraClient, Issue } from "./JiraClient.js";
 import { PullRequest } from "./OctokitTypes.js";
 import { Team } from "./Team.js";
+import { TeamReviewData } from "./TeamReviewData.js";
 
 export class NewIssueData {
   public readonly projectKey: string;
@@ -85,6 +86,17 @@ export class NewIssueData {
       parameters.parent = await this.findEvergreenEpic(jira, EngineeringExperienceSquad);
     }
     return new NewIssueData(projectKey, accountId, projectKey === 'PREQ' ? null : accountId, parameters); // GHA-86 Leave PREQ unassigned
+  }
+
+  public static async createForPreqReview(jira: JiraClient, teamReview: TeamReviewData): Promise<NewIssueData> {
+    const parameters = this.newIssueParameters('PREQ', null, 'Maintenance');
+    if (teamReview.accountId) {
+      parameters.reporter = { id: teamReview.accountId };
+    }
+    parameters.customfield_10001 = teamReview.team.id;
+    parameters.labels = ['preq-review-code'];
+    parameters.parent = await this.findEvergreenEpic(jira, teamReview.team, 'summary ~ "PREQ"');
+    return new NewIssueData('PREQ', teamReview.accountId, null, parameters); 
   }
 
   private static computeProjectKey(inputJiraProject: string, parent: any): string {
@@ -188,9 +200,9 @@ export class NewIssueData {
     }
   }
 
-  private static async findEvergreenEpic(jira: JiraClient, team: Team | null): Promise<{ key: string } | null> {
+  private static async findEvergreenEpic(jira: JiraClient, team: Team | null, summary: string = 'summary ~ "KTLO" OR summary ~ "Evergreen"'): Promise<{ key: string } | null> {
     if (team) {
-      const epics = await jira.findIssues(`issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=${team.id} ORDER BY key`);
+      const epics = await jira.findIssues(`issuetype = Epic AND statusCategory != Done AND (${summary}) and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=${team.id} ORDER BY key`);
       if (epics.length === 0) {
         console.log(`Could not find Evergreen Epic parent for team ${team.name} with ID ${team.id} and Start/Due date in Jira`);
         return null;

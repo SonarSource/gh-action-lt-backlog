@@ -27,6 +27,7 @@ export type PullRequest = components['schemas']['pull-request'] & {
   isRenovate(): boolean;
   isBot(): boolean;
 };
+export type SimpleUser = components["schemas"]["simple-user"];
 export type SimpleTeam = components["schemas"]["team-simple"];
 
 export function addPullRequestExtensions(pr: components['schemas']['pull-request']): PullRequest {  // Adds implementation of declared extensions

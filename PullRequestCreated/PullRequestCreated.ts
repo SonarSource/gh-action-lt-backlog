@@ -88,7 +88,7 @@ export class PullRequestCreated extends OctokitAction {
           await this.jira.assignIssueToAccount(issueId, data.assigneeId);  // Even if there's already a reviewer, we need this first to populate the lastAssignee field in Jira.
         }
         if (this.payload.pull_request?.requested_reviewers.length > 0) { // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
-          await this.processRequestReview(issueId, this.payload.pull_request?.requested_reviewers[0]);
+          await this.processRequestReview(pr, issueId, this.payload.pull_request?.requested_reviewers[0], null);  // ToDo: GHA-139 Use TeamReviewData and run it for pre-existing issues too
         }
         return issueId;
       }

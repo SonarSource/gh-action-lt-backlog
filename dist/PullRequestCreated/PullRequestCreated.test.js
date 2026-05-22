@@ -58,7 +58,8 @@ describe('PullRequestCreated', () => {
                 number: 42,
                 title: "PR Title",
                 body: 'PR Description',
-                requested_reviewers: []
+                requested_reviewers: [],
+                requested_teams: []
             },
             repository: {
                 html_url: "https://github.com/test-owner/test-repo",
@@ -160,7 +161,7 @@ describe('PullRequestCreated', () => {
         ]);
     });
     it('Standalone PR with description', async () => {
-        github.context.payload.pull_request.requested_teams = { type: 'Team', name: 'test-team' }; // Action does nothing additional when team is (auto)requested for review
+        github.context.payload.pull_request.requested_teams = [{ type: 'Team', name: 'test-team' }]; // Action does nothing additional when team is (auto)requested for review
         await runAction('KEY', 'Standalone PR', 'Original description, this ignores USER-1234 tickets as those should not be parents');
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",

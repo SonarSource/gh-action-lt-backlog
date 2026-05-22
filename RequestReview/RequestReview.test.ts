@@ -78,4 +78,24 @@ describe('RequestReview', () => {
       "Done",
     ]);
   });
+
+  it('Create platform review issue', async () => {
+    github.context.payload.requested_team = { name: 'platform-cloud-eng-squad' };
+    const sut = new RequestReview() as RequestReview & OctokitActionStub;
+    sut.jira = jiraClientStub;
+    sut.rest = createOctokitRestStub("GHA-42 Original Title");
+    sut.findEmails = async function (login: string): Promise<string[]> {
+      return ["user@sonarsource.com"];
+    }
+    await sut.run();
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Invoked jira.moveIssue('GHA-42', 'Request Review', null)",
+      "Invoked jira.assignIssueToEmail('GHA-42', ['user@sonarsource.com'])",
+      "Found 1 Evergreen Epic(s), using SC-1000 Current SC Review Epic",
+      "Creating PREQ review issue",
+      "Invoked jira.createIssue('PREQ', 'PR review for GHA-42 Original Title', {\"issuetype\":{\"name\":\"Maintenance\"},\"reporter\":{\"id\":\"1234-account\"},\"customfield_10001\":\"772ea1dc-3574-42bc-a378-7a898d910ebd\",\"labels\":[\"preq-review-code\"],\"parent\":{\"key\":\"SC-1000\"}})",
+      "Done",
+    ]);
+  });
 });
