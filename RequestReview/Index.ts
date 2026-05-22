@@ -68,5 +68,13 @@ class DebugAction extends OctokitAction {
       "url": "https://api.github.com/organizations/545988/team/17245565"
     };
 
+    // FIXME: List all team member IDs
+    const result = await this.rest.teams.listMembersInOrg({
+      org: this.repo.owner,
+      team_slug: team.slug
+    });
+    this.logSerialized(result.data);
+
+
   }
 }
