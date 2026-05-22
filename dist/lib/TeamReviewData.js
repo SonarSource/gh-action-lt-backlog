@@ -34,12 +34,10 @@ export class TeamReviewData {
             return null;
         }
     }
-    static async createFromUser(jira, requested_team, login, findEmails) {
+    static async createFromUser(requested_team, loadAccountId) {
         const team = this.selectTeam(requested_team);
         if (team) {
-            const userEmails = await findEmails(login);
-            const accountId = await jira.findAccountId(userEmails);
-            return new TeamReviewData(accountId, team);
+            return new TeamReviewData(await loadAccountId(), team);
         }
         else {
             return null;

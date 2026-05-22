@@ -216,5 +216,8 @@ export class OctokitAction extends Action {
             this.setFailed('Failed to add component');
         }
     }
+    async loadSenderAccountId() {
+        return this.jira.findAccountId(await this.findEmails(this.payload.sender?.login));
+    }
 }
 //# sourceMappingURL=OctokitAction.js.map

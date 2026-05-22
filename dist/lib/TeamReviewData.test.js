@@ -20,17 +20,9 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { CloudEngineeringSquad, CloudProductionEngineeringSquad } from '../Data/TeamConfiguration.js';
 import { TeamReviewData } from '../lib/TeamReviewData.js';
-import { jiraClientStub } from '../tests/JiraClientStub.js';
 import { LogTester } from '../tests/LogTester.js';
 function createSimpleTeam(name) {
     return { name };
-}
-async function findEmails(login) {
-    switch (login) {
-        case 'user': return ['user@sonarsource.com'];
-        case 'unknown': return ['unknown@sonarsource.com'];
-        default: throw new Error(`Scaffolding did not expect login ${login}`);
-    }
 }
 describe('TeamReviewData', () => {
     let logTester;
@@ -59,16 +51,16 @@ describe('TeamReviewData', () => {
     });
     describe('createFromUser', () => {
         it('platform team, user found in Jira', async () => {
-            expect(await TeamReviewData.createFromUser(jiraClientStub, createSimpleTeam('platform-cloud-eng-squad'), 'user', findEmails)).toEqual({ accountId: '1234-account', team: CloudEngineeringSquad });
+            expect(await TeamReviewData.createFromUser(createSimpleTeam('platform-cloud-eng-squad'), async () => '1234-account')).toEqual({ accountId: '1234-account', team: CloudEngineeringSquad });
         });
         it('platform team, user not found in Jira', async () => {
-            expect(await TeamReviewData.createFromUser(jiraClientStub, createSimpleTeam('platform-cloud-eng-squad'), 'unknown', findEmails)).toEqual({ accountId: null, team: CloudEngineeringSquad });
+            expect(await TeamReviewData.createFromUser(createSimpleTeam('platform-cloud-eng-squad'), async () => null)).toEqual({ accountId: null, team: CloudEngineeringSquad });
         });
         it('another team', async () => {
-            expect(await TeamReviewData.createFromUser(jiraClientStub, createSimpleTeam('another-team'), 'user', findEmails)).toBeNull();
+            expect(await TeamReviewData.createFromUser(createSimpleTeam('another-team'), async () => { throw new Error('This should not be called'); })).toBeNull();
         });
         it('null team', async () => {
-            expect(await TeamReviewData.createFromUser(jiraClientStub, null, 'user', findEmails)).toBeNull();
+            expect(await TeamReviewData.createFromUser(null, async () => { throw new Error('This should not be called'); })).toBeNull();
         });
     });
 });

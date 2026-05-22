@@ -20,6 +20,7 @@
 import { OctokitAction } from '../lib/OctokitAction.js';
 import { JIRA_DOMAIN, RENOVATE_PREFIX } from '../lib/Constants.js';
 import { NewIssueData } from '../lib/NewIssueData.js';
+import { TeamReviewData } from '../lib/TeamReviewData.js';
 export class PullRequestCreated extends OctokitAction {
     async execute() {
         const inputJiraProject = this.inputString('jira-project');
@@ -45,7 +46,7 @@ export class PullRequestCreated extends OctokitAction {
         let accountId = undefined;
         let fixedIssues = await this.findFixedIssues(pr);
         if (fixedIssues == null) {
-            accountId = await this.loadAccountId();
+            accountId = await this.loadSenderAccountId();
             const issueId = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields, accountId);
             if (issueId) {
                 fixedIssues = [issueId];
@@ -97,8 +98,19 @@ export class PullRequestCreated extends OctokitAction {
     }
     async processAllReviews(pr, issueId, accountId) {
         // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
-        await this.processRequestReview(pr, issueId, this.payload.pull_request?.requested_reviewers[0] || null, null);
-        // ToDo: GHA-139 Use TeamReviewData and run it for pre-existing issues too
+        if (this.payload.pull_request) {
+            await this.processRequestReview(pr, issueId, this.payload.pull_request.requested_reviewers[0] || null, null);
+            for (const team of this.payload.pull_request.requested_teams) {
+                this.log(`Processing team review request: ${team.name}`);
+                const teamReview = accountId === undefined
+                    ? await TeamReviewData.createFromUser(team, async () => await this.loadSenderAccountId())
+                    : TeamReviewData.createFromAccount(team, accountId);
+                if (teamReview) {
+                    accountId = teamReview.accountId; // In case it was undefined, reuse the loaded one
+                    await this.processRequestReview(pr, issueId, null, teamReview);
+                }
+            }
+        }
     }
     async persistIssueId(pr, issueId) {
         if (pr.isRenovate()) { // Renovate overrides the PR title back to the original https://github.com/renovatebot/renovate/issues/26833
@@ -108,9 +120,6 @@ export class PullRequestCreated extends OctokitAction {
             pr.title = this.cleanupWhitespace(`${issueId} ${pr.title}`);
             await this.updatePullRequestTitle(pr.number, pr.title);
         }
-    }
-    async loadAccountId() {
-        return this.jira.findAccountId(await this.findEmails(this.payload.sender?.login));
     }
     cleanupWhitespace(value) {
         return value.replaceAll(/\s\s+/g, " ").trim(); // Mainly remove triple space between issue ID and title when copying from Jira
