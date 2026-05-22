@@ -224,9 +224,11 @@ export abstract class OctokitAction extends Action {
         const data = await NewIssueData.createForPreqReview(this.jira, teamReview);
         this.log(`Creating ${data.projectKey} review issue`);
         const reviewIssueId = await this.jira.createIssue(data.projectKey, `PR review for ${pr.title}`, data.additionalFields);
-        await this.jira.addIssueRemoteLink(reviewIssueId, pr.html_url);
-        await this.jira.linkIssues(reviewIssueId, issueId, 'Relates');
-        await this.addComment(pr.number, `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.name}`);  
+        if (reviewIssueId) {
+          await this.jira.addIssueRemoteLink(reviewIssueId, pr.html_url);
+          await this.jira.linkIssues(reviewIssueId, issueId, 'Relates');
+          await this.addComment(pr.number, `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.name}`);  
+        }
       }
     }
   }
