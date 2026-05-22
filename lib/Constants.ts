@@ -18,7 +18,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-export const RENOVATE_PREFIX: string = 'Renovate Jira issue ID: ';  // Workaround for https://github.com/renovatebot/renovate/issues/26833
+export const RENOVATE_PREFIX: string = 'Renovate Jira issue ID: ';        // Workaround for https://github.com/renovatebot/renovate/issues/26833
+export const TEAM_REVIEW_PREFIX: string = 'Team Review Jira issue ID: ';  
 export const JIRA_ISSUE_PATTERN: RegExp = /\b(?!USER-)[A-Z][A-Z0-9]*-\d+/g;
 export const JIRA_DOMAIN = 'https://sonarsource.atlassian.net';
 export const NIGEL_ACCOUNT_ID = '712020:9c105dc5-0493-4d71-83a6-ed21c4ba03c0';

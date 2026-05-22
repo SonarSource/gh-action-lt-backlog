@@ -142,5 +142,8 @@ export const jiraClientStub = {
   },
   async addReviewedBy(issueId: string, userEmails: string[]): Promise<void> {
     console.log(`Invoked jira.addReviewedBy('${issueId}', ${serializeStrings(userEmails)})`);
+  },
+  async linkIssues(issueId: string, linkedIssueId: string, linkType: string): Promise<void> {
+    console.log(`Invoked jira.linkIssues('${issueId}', '${linkedIssueId}', '${linkType}')`);
   }
 } as unknown as JiraClient;

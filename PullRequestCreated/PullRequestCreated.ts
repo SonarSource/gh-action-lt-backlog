@@ -20,7 +20,7 @@
 
 import { OctokitAction } from '../lib/OctokitAction.js';
 import { PullRequest } from '../lib/OctokitTypes.js';
-import { JIRA_DOMAIN, RENOVATE_PREFIX } from '../lib/Constants.js';
+import { RENOVATE_PREFIX } from '../lib/Constants.js';
 import { NewIssueData } from '../lib/NewIssueData.js';
 import { TeamReviewData } from '../lib/TeamReviewData.js';
 
@@ -131,9 +131,5 @@ export class PullRequestCreated extends OctokitAction {
   private async addLinkedIssuesAsComment(pr: PullRequest, linkedIssues: string[]): Promise<void> {
     console.log(`Adding the following ticket as comment: ${linkedIssues}`);
     await this.addComment(pr.number, linkedIssues.map(x => this.issueLink(x)).join('\n'));
-  }
-
-  private issueLink(issue: string): string {
-    return `[${issue}](${JIRA_DOMAIN}/browse/${issue})`;
   }
 }
