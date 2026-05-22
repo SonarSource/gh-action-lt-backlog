@@ -51,27 +51,12 @@ import { PullRequest, SimpleTeam } from '../lib/OctokitTypes.js';
 class DebugAction extends OctokitAction {
 
   protected async execute(): Promise<void> {
-    const team: SimpleTeam = {
-      "description": "",
-      "html_url": "https://github.com/orgs/SonarSource/teams/quality-dotnet-squad",
-      "id": 17245565,
-      "members_url": "https://api.github.com/organizations/545988/team/17245565/members{/member}",
-      "name": "quality-dotnet-squad",
-      "node_id": "T_kwDOAAhUxM4BByV9",
-      "notification_setting": "notifications_enabled",
-      "organization_id": 545988,
-      "permission": "pull",
-      "privacy": "closed",
-      "repositories_url": "https://api.github.com/organizations/545988/team/17245565/repos",
-      "slug": "quality-dotnet-squad",
-      "type": "organization",
-      "url": "https://api.github.com/organizations/545988/team/17245565"
-    };
+
 
     // FIXME: List all team member IDs
     const result = await this.rest.teams.listMembersInOrg({
       org: this.repo.owner,
-      team_slug: team.slug
+      team_slug: 'platform-cloud-eng-squad'
     });
     this.logSerialized(result.data);
 
