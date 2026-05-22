@@ -132,8 +132,4 @@ export class PullRequestCreated extends OctokitAction {
     console.log(`Adding the following ticket as comment: ${linkedIssues}`);
     await this.addComment(pr.number, linkedIssues.map(x => this.issueLink(x)).join('\n'));
   }
-
-  private issueLink(issue: string): string {
-    return `[${issue}](${JIRA_DOMAIN}/browse/${issue})`;
-  }
 }

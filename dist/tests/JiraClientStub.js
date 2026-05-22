@@ -140,6 +140,9 @@ export const jiraClientStub = {
     },
     async addReviewedBy(issueId, userEmails) {
         console.log(`Invoked jira.addReviewedBy('${issueId}', ${serializeStrings(userEmails)})`);
+    },
+    async linkIssues(issueId, linkedIssueId, linkType) {
+        console.log(`Invoked jira.linkIssues('${issueId}', '${linkedIssueId}', '${linkType}')`);
     }
 };
 //# sourceMappingURL=JiraClientStub.js.map

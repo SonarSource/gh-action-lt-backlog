@@ -95,6 +95,11 @@ export type Issue = {
     components: NamedItem[];
     customfield_11227: Account[]; // Reviewers
     customfield_11228: Account[]; // Reviewed by
+    issuelinks: {
+      type: { name: string; inward: string; outward: string; };
+      inwardIssue?: { key: string; };
+      outwardIssue?: { key: string; };
+    }[];
   }
 }
 
@@ -228,6 +233,15 @@ export class JiraClient {
   public async addIssueRemoteLink(issueId: string, url: string, title: string | null = null): Promise<void> {
     console.log(`${issueId}: Adding remote link ${url}`);
     await this.sendRestPostApi(`issue/${issueId}/remotelink`, { object: { url, title: title ?? url } });
+  }
+
+  public async linkIssues(issueId: string, linkedIssueId: string, linkType: string): Promise<void> {
+    console.log(`Linking ${issueId} and ${linkedIssueId} as '${linkType}'`);
+    await this.sendRestPostApi('issueLink', {
+      type: { name: linkType },
+      inwardIssue: { key: issueId },
+      outwardIssue: { key: linkedIssueId },
+    });
   }
 
   public loadIssueRemoteLinks(issueId: string): Promise<RemoteLink[]> {

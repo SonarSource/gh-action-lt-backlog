@@ -131,6 +131,14 @@ export class JiraClient {
         console.log(`${issueId}: Adding remote link ${url}`);
         await this.sendRestPostApi(`issue/${issueId}/remotelink`, { object: { url, title: title ?? url } });
     }
+    async linkIssues(issueId, linkedIssueId, linkType) {
+        console.log(`Linking ${issueId} and ${linkedIssueId} as '${linkType}'`);
+        await this.sendRestPostApi('issueLink', {
+            type: { name: linkType },
+            inwardIssue: { key: issueId },
+            outwardIssue: { key: linkedIssueId },
+        });
+    }
     loadIssueRemoteLinks(issueId) {
         console.log(`${issueId}: Load remote links for ${issueId}`);
         return this.sendRestGetApi(`issue/${issueId}/remotelink`);

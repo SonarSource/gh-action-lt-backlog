@@ -315,11 +315,17 @@ describe('PullRequestCreated', () => {
       "Found 1 Evergreen Epic(s), using SC-1000 Current SC Review Epic platform-cloud-eng-squad",
       "Creating PREQ review issue",
       "Invoked jira.createIssue('PREQ', 'PR review for KEY-4242 Normal PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"reporter\":{\"id\":\"1234-account\"},\"customfield_10001\":\"772ea1dc-3574-42bc-a378-7a898d910ebd\",\"labels\":[\"preq-review-code\"],\"parent\":{\"key\":\"SC-1000\"}})",
+      "Invoked jira.addIssueRemoteLink('PREQ-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
+      "Invoked jira.linkIssues('PREQ-4242', 'KEY-4242', 'Relates')",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-eng-squad\"})",
       "Processing team review request: platform-cloud-prod-eng-squad",
       "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
       "Found 1 Evergreen Epic(s), using SC-2222 Current SC Review Epic platform-cloud-prod-eng-squad",
       "Creating PREQ review issue",
       "Invoked jira.createIssue('PREQ', 'PR review for KEY-4242 Normal PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"reporter\":{\"id\":\"1234-account\"},\"customfield_10001\":\"6f2e744b-9f09-4c3a-852e-e2f138d1c14f\",\"labels\":[\"preq-review-code\"],\"parent\":{\"key\":\"SC-2222\"}})",
+      "Invoked jira.addIssueRemoteLink('PREQ-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
+      "Invoked jira.linkIssues('PREQ-4242', 'KEY-4242', 'Relates')",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-prod-eng-squad\"})",
       "Done"
     ]);
   });

@@ -21,14 +21,16 @@ import { CloudEngineeringSquad, CloudProductionEngineeringSquad } from "../Data/
 export class TeamReviewData {
     accountId;
     team;
-    constructor(accountId, team) {
+    name;
+    constructor(accountId, team, name) {
         this.accountId = accountId;
         this.team = team;
+        this.name = name;
     }
     static createFromAccount(requested_team, accountId) {
         const team = this.selectTeam(requested_team);
         if (team) {
-            return new TeamReviewData(accountId, team);
+            return new TeamReviewData(accountId, team, requested_team.name);
         }
         else {
             return null;
@@ -37,7 +39,7 @@ export class TeamReviewData {
     static async createFromUser(requested_team, loadAccountId) {
         const team = this.selectTeam(requested_team);
         if (team) {
-            return new TeamReviewData(await loadAccountId(), team);
+            return new TeamReviewData(await loadAccountId(), team, requested_team.name);
         }
         else {
             return null;

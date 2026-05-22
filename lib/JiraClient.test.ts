@@ -245,6 +245,15 @@ describe('JiraClient', () => {
     expect(await sut.loadIssueRemoteLinks(issueId)).toMatchObject([{ object: { url: 'https://www.sonarsource.com/', title: 'Sonar' } }]);
   });
 
+  it('linkIssues', async () => {
+    const preqId = await ensurePreqIssueId();
+    await sut.linkIssues(issueId, preqId, 'Relates');
+    const thisissue = await sut.loadIssue(issueId);
+    const linkIssue = await sut.loadIssue(preqId);
+    expect(thisissue.fields.issuelinks).toMatchObject([{ type: { name: 'Relates' }, outwardIssue: { key: preqId } }]);
+    expect(linkIssue.fields.issuelinks).toMatchObject([{ type: { name: 'Relates' }, inwardIssue: { key: issueId } }]);
+  });
+
   it('findAccountId', async () => {
     expect(await sut.findAccountId(['unknown@sonarsource.com', 'helpdesk+jira-githubtech@sonarsource.com'])).toBe('712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4');
     expect(logTester.logsParams).toStrictEqual([

@@ -25,16 +25,18 @@ import { Team } from "./Team.js";
 export class TeamReviewData {
   public readonly accountId: string | null;
   public readonly team: Team;
+  public readonly name: string;
 
-  private constructor(accountId: string | null, team: Team) {
+  private constructor(accountId: string | null, team: Team, name: string) {
     this.accountId = accountId;
     this.team = team;
+    this.name = name;
   }
 
   public static createFromAccount(requested_team: SimpleTeam | undefined, accountId: string | null): TeamReviewData | null {
     const team = this.selectTeam(requested_team);
     if (team) {
-      return new TeamReviewData(accountId, team);
+      return new TeamReviewData(accountId, team, requested_team!.name);
     } else {
       return null;
     }
@@ -43,7 +45,7 @@ export class TeamReviewData {
   public static async createFromUser(requested_team: SimpleTeam | null, loadAccountId: () => Promise<string | null>): Promise<TeamReviewData | null> {
     const team = this.selectTeam(requested_team);
     if (team) {
-      return new TeamReviewData(await loadAccountId(), team);
+      return new TeamReviewData(await loadAccountId(), team, requested_team!.name);
     } else {
       return null;
     }
