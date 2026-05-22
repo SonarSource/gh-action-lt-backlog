@@ -302,6 +302,7 @@ describe('PullRequestCreated', () => {
       { name: "platform-cloud-eng-squad" },     // Requests review, queries accountId
       { name: "platform-cloud-prod-eng-squad" } // Requests review, reuses accountId
     ];
+    process.env['INPUT_TEAM-REVIEW-COMPONENT'] = 'Parameter Component';
     await runAction('KEY', 'KEY-4242 Normal PR');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
@@ -318,6 +319,8 @@ describe('PullRequestCreated', () => {
       "Invoked jira.addIssueRemoteLink('PREQ-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
       "Invoked jira.linkIssues('PREQ-4242', 'KEY-4242', 'Relates')",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-eng-squad\"})",
+      "Invoked jira.createComponent('PREQ', 'Parameter Component', 'null')",
+      "Invoked jira.addIssueComponent('PREQ-4242', 'Parameter Component')",
       "Processing team review request: platform-cloud-prod-eng-squad",
       "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
       "Found 1 Evergreen Epic(s), using SC-2222 Current SC Review Epic platform-cloud-prod-eng-squad",
@@ -326,6 +329,8 @@ describe('PullRequestCreated', () => {
       "Invoked jira.addIssueRemoteLink('PREQ-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
       "Invoked jira.linkIssues('PREQ-4242', 'KEY-4242', 'Relates')",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-prod-eng-squad\"})",
+      "Invoked jira.createComponent('PREQ', 'Parameter Component', 'null')",
+      "Invoked jira.addIssueComponent('PREQ-4242', 'Parameter Component')",
       "Done"
     ]);
   });

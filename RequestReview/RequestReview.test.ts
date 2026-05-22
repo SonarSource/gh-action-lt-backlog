@@ -81,6 +81,7 @@ describe('RequestReview', () => {
 
   it('Create platform review issue', async () => {
     github.context.payload.requested_team = { name: 'platform-cloud-eng-squad' };
+    process.env['INPUT_TEAM-REVIEW-COMPONENT'] = 'Parameter Component';
     const sut = new RequestReview() as RequestReview & OctokitActionStub;
     sut.jira = jiraClientStub;
     sut.rest = createOctokitRestStub("GHA-42 Original Title");
@@ -98,6 +99,8 @@ describe('RequestReview', () => {
       "Invoked jira.addIssueRemoteLink('PREQ-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
       "Invoked jira.linkIssues('PREQ-4242', 'GHA-42', 'Relates')",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-eng-squad\"})",
+      "Invoked jira.createComponent('PREQ', 'Parameter Component', 'null')",
+      "Invoked jira.addIssueComponent('PREQ-4242', 'Parameter Component')",
       "Done",
     ]);
   });

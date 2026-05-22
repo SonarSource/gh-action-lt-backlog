@@ -101,7 +101,8 @@ export class PullRequestCreated extends OctokitAction {
   private async processAllReviews(pr: PullRequest, issueId: string, accountId: string | null | undefined): Promise<void> {
     // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
     if (this.payload.pull_request) {
-      await this.processRequestReview(pr, issueId, this.payload.pull_request.requested_reviewers[0] || null, null);
+      const component = this.inputString('team-review-component');
+      await this.processRequestReview(pr, issueId, component, this.payload.pull_request.requested_reviewers[0] || null, null);
       for (const team of this.payload.pull_request.requested_teams) {
         this.log(`Processing team review request: ${team.name}`);
         const teamReview = accountId === undefined
@@ -109,7 +110,7 @@ export class PullRequestCreated extends OctokitAction {
           : TeamReviewData.createFromAccount(team, accountId);
         if (teamReview) {
           accountId = teamReview.accountId;   // In case it was undefined, reuse the loaded one
-          await this.processRequestReview(pr, issueId, null, teamReview);
+          await this.processRequestReview(pr, issueId, component, null, teamReview);
         }
       }
     }

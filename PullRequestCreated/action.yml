@@ -23,6 +23,9 @@ inputs:
   fallback-team:
     description: 'Jira Team name to be used as a default fallback'
     required: false
+  team-review-component:
+    description: 'Component added to team review PREQ ticket'
+    required: false
 runs:
   using: 'node20'
   main: '../dist/PullRequestCreated/Index.js'
