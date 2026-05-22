@@ -143,6 +143,9 @@ export class JiraClient {
         console.log(`${issueId}: Load remote links for ${issueId}`);
         return this.sendRestGetApi(`issue/${issueId}/remotelink`);
     }
+    myself() {
+        return this.sendRestGetApi(`myself`);
+    }
     async findAccountId(emails) {
         for (const email of emails) {
             const accountId = await this.findAccountIdFromEmail(email);

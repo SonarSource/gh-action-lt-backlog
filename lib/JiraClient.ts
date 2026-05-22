@@ -249,6 +249,10 @@ export class JiraClient {
     return this.sendRestGetApi(`issue/${issueId}/remotelink`);
   }
 
+  public myself(): Promise<any> {
+    return this.sendRestGetApi(`myself`);
+  }
+
   public async findAccountId(emails: string[]): Promise<string | null> {
     for (const email of emails) {
       const accountId = await this.findAccountIdFromEmail(email);
