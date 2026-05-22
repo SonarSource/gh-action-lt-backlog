@@ -232,11 +232,11 @@ describe('PullRequestCreated', () => {
       "Invoked jira.moveIssue('KEY-4242', 'Commit', null)",
       "Invoked jira.moveIssue('KEY-4242', 'Start', null)",
       "Invoked jira.assignIssueToAccount('KEY-4242', '1234-account')",
-      "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
-      "Invoked jira.assignIssueToEmail('KEY-4242', ['user@sonarsource.com'])",
       "Adding the following ticket as comment: KEY-4242",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
       "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
+      "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
+      "Invoked jira.assignIssueToEmail('KEY-4242', ['user@sonarsource.com'])",
       "Done"
     ]);
   });
@@ -267,6 +267,20 @@ describe('PullRequestCreated', () => {
       "Adding the following ticket as comment: GHA-1000",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[GHA-1000](https://sonarsource.atlassian.net/browse/GHA-1000)\"})",
       "Invoked jira.addIssueRemoteLink('GHA-1000'', 'https://github.com/test-owner/test-repo/pull/42', null)",
+      "Done"
+    ]);
+  });
+
+  it('Normal PR with reviewer', async () => {
+    github.context.payload.pull_request!.requested_reviewers = [{ type: "User", login: "test-user" }];
+    await runAction('KEY', 'KEY-4242 Normal PR');
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Adding the following ticket as comment: KEY-4242",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
+      "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
+      "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
+      "Invoked jira.assignIssueToEmail('KEY-4242', ['user@sonarsource.com'])",
       "Done"
     ]);
   });

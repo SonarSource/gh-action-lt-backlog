@@ -58,6 +58,7 @@ export class PullRequestCreated extends OctokitAction {
             }
             for (const issue of fixedIssues) {
                 await this.jira.addIssueRemoteLink(issue, pr.html_url);
+                await this.processAllReviews(pr, issue);
             }
             if (this.isEngXpSquad) {
                 for (const issue of fixedIssues.filter(x => x.startsWith('BUILD-'))) { // BUILD-9328: No component for PREQ tickets
@@ -72,11 +73,7 @@ export class PullRequestCreated extends OctokitAction {
             : await NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, await this.findEmails(this.payload.sender?.login), this.inputString('fallback-team'));
         if (data) {
             const issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
-            if (issueId == null) {
-                this.setFailed('Failed to create a new issue in Jira');
-                return null;
-            }
-            else {
+            if (issueId) {
                 await this.persistIssueId(pr, issueId);
                 await this.jira.moveIssue(issueId, 'Commit'); // OPEN  -> TO DO
                 if (data.accountId) {
@@ -85,15 +82,21 @@ export class PullRequestCreated extends OctokitAction {
                 if (data.assigneeId) {
                     await this.jira.assignIssueToAccount(issueId, data.assigneeId); // Even if there's already a reviewer, we need this first to populate the lastAssignee field in Jira.
                 }
-                if (this.payload.pull_request?.requested_reviewers.length > 0) { // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
-                    await this.processRequestReview(pr, issueId, this.payload.pull_request?.requested_reviewers[0], null); // ToDo: GHA-139 Use TeamReviewData and run it for pre-existing issues too
-                }
                 return issueId;
+            }
+            else {
+                this.setFailed('Failed to create a new issue in Jira');
+                return null;
             }
         }
         else {
             return null;
         }
+    }
+    async processAllReviews(pr, issueId) {
+        // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
+        await this.processRequestReview(pr, issueId, this.payload.pull_request?.requested_reviewers[0] || null, null);
+        // ToDo: GHA-139 Use TeamReviewData and run it for pre-existing issues too
     }
     async persistIssueId(pr, issueId) {
         if (pr.isRenovate()) { // Renovate overrides the PR title back to the original https://github.com/renovatebot/renovate/issues/26833
