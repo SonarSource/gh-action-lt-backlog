@@ -58,4 +58,6 @@ class DebugAction extends OctokitAction {
         this.logSerialized(result.data);
     }
 }
+const action = new DebugAction();
+action.run();
 //# sourceMappingURL=Index.js.map

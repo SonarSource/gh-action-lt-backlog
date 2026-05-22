@@ -78,3 +78,5 @@ class DebugAction extends OctokitAction {
 
   }
 }
+const action = new DebugAction();
+action.run();
