@@ -184,7 +184,7 @@ export class OctokitAction extends Action {
             return null;
         }
     }
-    async processRequestReview(pr, issueId, requested_reviewer, teamReview) {
+    async processRequestReview(pr, issueId, component, requested_reviewer, teamReview) {
         if (requested_reviewer?.type === "Bot") {
             this.log(`Skipping request review from bot: ${requested_reviewer.login}`);
         }
@@ -207,17 +207,20 @@ export class OctokitAction extends Action {
                     await this.jira.addIssueRemoteLink(reviewIssueId, pr.html_url);
                     await this.jira.linkIssues(reviewIssueId, issueId, 'Relates');
                     await this.addComment(pr.number, `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.name}`);
+                    await this.addJiraComponent(reviewIssueId, component);
                 }
             }
         }
     }
     async addJiraComponent(issueId, name, description = null) {
-        if (!await this.jira.createComponent(issueId.split('-')[0], name, description)) { // Same PR can have multiple issues from different projects
-            this.setFailed('Failed to create component');
-            return;
-        }
-        if (!await this.jira.addIssueComponent(issueId, name)) {
-            this.setFailed('Failed to add component');
+        if (name) {
+            if (!await this.jira.createComponent(issueId.split('-')[0], name, description)) { // Same PR can have multiple issues from different projects
+                this.setFailed('Failed to create component');
+                return;
+            }
+            if (!await this.jira.addIssueComponent(issueId, name)) {
+                this.setFailed('Failed to add component');
+            }
         }
     }
     async loadSenderAccountId() {
