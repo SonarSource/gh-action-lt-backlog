@@ -20,7 +20,7 @@
 
 import { OctokitAction } from '../lib/OctokitAction.js';
 import { PullRequest } from '../lib/OctokitTypes.js';
-import { JIRA_DOMAIN, RENOVATE_PREFIX } from '../lib/Constants.js';
+import { RENOVATE_PREFIX } from '../lib/Constants.js';
 import { NewIssueData } from '../lib/NewIssueData.js';
 import { TeamReviewData } from '../lib/TeamReviewData.js';
 
