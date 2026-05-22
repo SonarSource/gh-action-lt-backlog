@@ -34,10 +34,10 @@ describe('TeamReviewData', () => {
     });
     describe('createFromAccount and selectTeam', () => {
         it('platform-cloud-eng-squad', () => {
-            expect(TeamReviewData.createFromAccount(createSimpleTeam('platform-cloud-eng-squad'), '1234-account')).toEqual({ accountId: '1234-account', team: CloudEngineeringSquad });
+            expect(TeamReviewData.createFromAccount(createSimpleTeam('platform-cloud-eng-squad'), '1234-account')).toEqual({ accountId: '1234-account', team: CloudEngineeringSquad, "name": "platform-cloud-eng-squad" });
         });
         it('platform-cloud-prod-eng-squad', () => {
-            expect(TeamReviewData.createFromAccount(createSimpleTeam('platform-cloud-prod-eng-squad'), '1234-account')).toEqual({ accountId: '1234-account', team: CloudProductionEngineeringSquad });
+            expect(TeamReviewData.createFromAccount(createSimpleTeam('platform-cloud-prod-eng-squad'), '1234-account')).toEqual({ accountId: '1234-account', team: CloudProductionEngineeringSquad, "name": "platform-cloud-prod-eng-squad" });
         });
         it('another team', () => {
             expect(TeamReviewData.createFromAccount(createSimpleTeam('another-team'), '1234-account')).toBeNull();
@@ -46,15 +46,15 @@ describe('TeamReviewData', () => {
             expect(TeamReviewData.createFromAccount(undefined, '1234-account')).toBeNull();
         });
         it('null accountId', () => {
-            expect(TeamReviewData.createFromAccount(createSimpleTeam('platform-cloud-eng-squad'), null)).toEqual({ accountId: null, team: CloudEngineeringSquad });
+            expect(TeamReviewData.createFromAccount(createSimpleTeam('platform-cloud-eng-squad'), null)).toEqual({ accountId: null, team: CloudEngineeringSquad, "name": "platform-cloud-eng-squad" });
         });
     });
     describe('createFromUser', () => {
         it('platform team, user found in Jira', async () => {
-            expect(await TeamReviewData.createFromUser(createSimpleTeam('platform-cloud-eng-squad'), async () => '1234-account')).toEqual({ accountId: '1234-account', team: CloudEngineeringSquad });
+            expect(await TeamReviewData.createFromUser(createSimpleTeam('platform-cloud-eng-squad'), async () => '1234-account')).toEqual({ accountId: '1234-account', team: CloudEngineeringSquad, "name": "platform-cloud-eng-squad" });
         });
         it('platform team, user not found in Jira', async () => {
-            expect(await TeamReviewData.createFromUser(createSimpleTeam('platform-cloud-eng-squad'), async () => null)).toEqual({ accountId: null, team: CloudEngineeringSquad });
+            expect(await TeamReviewData.createFromUser(createSimpleTeam('platform-cloud-eng-squad'), async () => null)).toEqual({ accountId: null, team: CloudEngineeringSquad, "name": "platform-cloud-eng-squad" });
         });
         it('another team', async () => {
             expect(await TeamReviewData.createFromUser(createSimpleTeam('another-team'), async () => { throw new Error('This should not be called'); })).toBeNull();

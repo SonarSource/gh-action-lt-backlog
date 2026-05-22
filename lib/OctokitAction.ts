@@ -25,7 +25,7 @@ import { Action } from './Action.js';
 import { PullRequest, IssueComment, addPullRequestExtensions, Issue, SimpleUser } from './OctokitTypes.js';
 import { graphql, GraphQlQueryResponseData, GraphqlResponseError } from '@octokit/graphql';
 import { JiraClient } from './JiraClient.js';
-import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN } from './Constants.js';
+import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN, TEAM_REVIEW_PREFIX } from './Constants.js';
 import { NewIssueData } from './NewIssueData.js';
 import { TeamReviewData } from './TeamReviewData.js';
 
@@ -224,7 +224,9 @@ export abstract class OctokitAction extends Action {
         const data = await NewIssueData.createForPreqReview(this.jira, teamReview);
         this.log(`Creating ${data.projectKey} review issue`);
         const reviewIssueId = await this.jira.createIssue(data.projectKey, `PR review for ${pr.title}`, data.additionalFields);
-        // ToDo: GHA-141 Create cross-links in Jira and GH
+        await this.jira.addIssueRemoteLink(reviewIssueId, pr.html_url);
+        await this.jira.linkIssues(reviewIssueId, issueId, 'Relates');
+        await this.addComment(pr.number, `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.name}`);  
       }
     }
   }
@@ -241,5 +243,9 @@ export abstract class OctokitAction extends Action {
 
   protected async loadSenderAccountId(): Promise<string | null> {
     return this.jira.findAccountId(await this.findEmails(this.payload.sender?.login));
+  }
+
+  protected issueLink(issue: string): string {
+    return `[${issue}](${JIRA_DOMAIN}/browse/${issue})`;
   }
 }

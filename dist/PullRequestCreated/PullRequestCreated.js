@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import { OctokitAction } from '../lib/OctokitAction.js';
-import { JIRA_DOMAIN, RENOVATE_PREFIX } from '../lib/Constants.js';
+import { RENOVATE_PREFIX } from '../lib/Constants.js';
 import { NewIssueData } from '../lib/NewIssueData.js';
 import { TeamReviewData } from '../lib/TeamReviewData.js';
 export class PullRequestCreated extends OctokitAction {
@@ -127,9 +127,6 @@ export class PullRequestCreated extends OctokitAction {
     async addLinkedIssuesAsComment(pr, linkedIssues) {
         console.log(`Adding the following ticket as comment: ${linkedIssues}`);
         await this.addComment(pr.number, linkedIssues.map(x => this.issueLink(x)).join('\n'));
-    }
-    issueLink(issue) {
-        return `[${issue}](${JIRA_DOMAIN}/browse/${issue})`;
     }
 }
 //# sourceMappingURL=PullRequestCreated.js.map
