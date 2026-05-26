@@ -220,7 +220,7 @@ describe('NewIssueData', () => {
   });
 
   it('createForPreqReview', async () => {
-    const teamReview = TeamReviewData.createFromAccount({ name: 'platform-cloud-eng-squad' } as SimpleTeam, '1234-account');
+    const teamReview = await TeamReviewData.create({ name: 'platform-cloud-eng-squad' } as SimpleTeam, async() => '1234-account');
     expect(await NewIssueData.createForPreqReview(jiraClientStub, teamReview!)).toEqual({
       accountId: '1234-account',
       assigneeId: null,
@@ -236,7 +236,7 @@ describe('NewIssueData', () => {
   });
 
   it('createForPreqReview with null accountId', async () => {
-    const teamReview = TeamReviewData.createFromAccount({ name: 'platform-cloud-eng-squad' } as SimpleTeam, null);
+    const teamReview = await TeamReviewData.create({ name: 'platform-cloud-eng-squad' } as SimpleTeam, async () => null);
     expect(await NewIssueData.createForPreqReview(jiraClientStub, teamReview!)).toEqual({
       accountId: null,
       assigneeId: null,

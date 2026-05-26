@@ -103,9 +103,7 @@ export class PullRequestCreated extends OctokitAction {
             await this.processRequestReview(pr, issueId, component, this.payload.pull_request.requested_reviewers[0] || null, null);
             for (const team of this.payload.pull_request.requested_teams) {
                 this.log(`Processing team review request: ${team.name}`);
-                const teamReview = accountId === undefined
-                    ? await TeamReviewData.createFromUser(team, async () => await this.loadSenderAccountId())
-                    : TeamReviewData.createFromAccount(team, accountId);
+                const teamReview = await TeamReviewData.create(team, async () => accountId === undefined ? await this.loadSenderAccountId() : accountId);
                 if (teamReview) {
                     accountId = teamReview.accountId; // In case it was undefined, reuse the loaded one
                     await this.processRequestReview(pr, issueId, component, null, teamReview);

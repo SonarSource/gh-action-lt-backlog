@@ -190,7 +190,7 @@ describe('NewIssueData', () => {
         expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', null, '')).toEqual(createExpectedWithoutAccount());
     });
     it('createForPreqReview', async () => {
-        const teamReview = TeamReviewData.createFromAccount({ name: 'platform-cloud-eng-squad' }, '1234-account');
+        const teamReview = await TeamReviewData.create({ name: 'platform-cloud-eng-squad' }, async () => '1234-account');
         expect(await NewIssueData.createForPreqReview(jiraClientStub, teamReview)).toEqual({
             accountId: '1234-account',
             assigneeId: null,
@@ -205,7 +205,7 @@ describe('NewIssueData', () => {
         });
     });
     it('createForPreqReview with null accountId', async () => {
-        const teamReview = TeamReviewData.createFromAccount({ name: 'platform-cloud-eng-squad' }, null);
+        const teamReview = await TeamReviewData.create({ name: 'platform-cloud-eng-squad' }, async () => null);
         expect(await NewIssueData.createForPreqReview(jiraClientStub, teamReview)).toEqual({
             accountId: null,
             assigneeId: null,
