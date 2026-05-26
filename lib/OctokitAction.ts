@@ -207,7 +207,7 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected async processRequestReview(pr: PullRequest, issueId: string, requested_reviewer: SimpleUser | null, teamReview: TeamReviewData | null): Promise<void> {
+  protected async processRequestReview(pr: PullRequest, issueId: string, component: string, requested_reviewer: SimpleUser | null, teamReview: TeamReviewData | null): Promise<void> {
     if (requested_reviewer?.type === "Bot") {
       this.log(`Skipping request review from bot: ${requested_reviewer.login}`);
     } else if (requested_reviewer || teamReview) { // Draft PR creation or PR without reviewers can have both null => NO OP
@@ -227,19 +227,22 @@ export abstract class OctokitAction extends Action {
         if (reviewIssueId) {
           await this.jira.addIssueRemoteLink(reviewIssueId, pr.html_url);
           await this.jira.linkIssues(reviewIssueId, issueId, 'Relates');
-          await this.addComment(pr.number, `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.name}`);  
+          await this.addComment(pr.number, `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.name}`);
+          await this.addJiraComponent(reviewIssueId, component);
         }
       }
     }
   }
 
   protected async addJiraComponent(issueId: string, name: string, description: string | null = null): Promise<void> {
-    if (!await this.jira.createComponent(issueId.split('-')[0], name, description)) {   // Same PR can have multiple issues from different projects
-      this.setFailed('Failed to create component');
-      return;
-    }
-    if (!await this.jira.addIssueComponent(issueId, name)) {
-      this.setFailed('Failed to add component');
+    if (name) {
+      if (!await this.jira.createComponent(issueId.split('-')[0], name, description)) {   // Same PR can have multiple issues from different projects
+        this.setFailed('Failed to create component');
+        return;
+      }
+      if (!await this.jira.addIssueComponent(issueId, name)) {
+        this.setFailed('Failed to add component');
+      }
     }
   }
 

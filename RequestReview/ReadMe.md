@@ -24,6 +24,14 @@ Set to `true` only for repositories owned by Engineering Experience Squad. Do no
 
 This parameter will not change assignee, but will fill Reviewers field instead.
 
+### `team-review-component`
+
+The name of a Jira Component that will be added to the PREQ ticket created when a platform team is asked for a PR review.
+
+This parameter is optional, and should be used only for repositories requiring reviews from platform teams, typically based on CODEOWNERS file.
+
+This parameter should be configured with the same value for PullRequestCreated and RequestReview actions.
+
 ## Outputs
 
 None
