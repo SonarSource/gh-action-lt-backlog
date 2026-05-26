@@ -19,9 +19,9 @@
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { NewIssueData } from '../lib/NewIssueData.js';
-import { TeamReviewData } from '../lib/TeamReviewData.js';
 import { jiraClientStub } from '../tests/JiraClientStub.js';
 import { LogTester } from '../tests/LogTester.js';
+import { TeamReviewDataStub } from '../tests/TeamReviewDataStub.js';
 function createPullRequest(title, body, repo = 'repo') {
     return {
         number: 42,
@@ -190,8 +190,7 @@ describe('NewIssueData', () => {
         expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', null, '')).toEqual(createExpectedWithoutAccount());
     });
     it('createForPreqReview', async () => {
-        const teamReview = await TeamReviewData.create({ name: 'platform-cloud-eng-squad' }, async () => '1234-account');
-        expect(await NewIssueData.createForPreqReview(jiraClientStub, teamReview)).toEqual({
+        expect(await NewIssueData.createForPreqReview(jiraClientStub, TeamReviewDataStub.createCloudEngineering('1234-account'))).toEqual({
             accountId: '1234-account',
             assigneeId: null,
             additionalFields: {
@@ -205,8 +204,7 @@ describe('NewIssueData', () => {
         });
     });
     it('createForPreqReview with null accountId', async () => {
-        const teamReview = await TeamReviewData.create({ name: 'platform-cloud-eng-squad' }, async () => null);
-        expect(await NewIssueData.createForPreqReview(jiraClientStub, teamReview)).toEqual({
+        expect(await NewIssueData.createForPreqReview(jiraClientStub, TeamReviewDataStub.createCloudEngineering(null))).toEqual({
             accountId: null,
             assigneeId: null,
             additionalFields: {

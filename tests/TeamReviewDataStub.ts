@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
  * mailto: info AT sonarsource DOT com
@@ -17,13 +17,12 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import { PullRequestAction } from '../lib/PullRequestAction.js';
-import { TeamReviewData } from '../lib/TeamReviewData.js';
-export class RequestReview extends PullRequestAction {
-    async processJiraIssue(pr, issueId) {
-        const component = this.inputString('team-review-component');
-        const teamReview = await TeamReviewData.create(this, this.payload.requested_team ?? null);
-        await this.processRequestReview(pr, issueId, component, this.payload.requested_reviewer ?? null, teamReview);
-    }
+
+import { CloudEngineeringSquad } from "../Data/TeamConfiguration.js";
+import { TeamReviewData } from "../lib/TeamReviewData.js";
+
+export class TeamReviewDataStub extends TeamReviewData {
+  public static createCloudEngineering(accountId: string | null): TeamReviewData {
+    return new TeamReviewData(accountId, CloudEngineeringSquad, 'platform-cloud-eng-squad');
+  }
 }
-//# sourceMappingURL=RequestReview.js.map

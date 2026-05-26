@@ -46,11 +46,9 @@ export class PullRequestCreated extends OctokitAction {
     if (pr == null) {
       return;
     }
-    let accountId: string | null | undefined = undefined;
     let fixedIssues = await this.findFixedIssues(pr);
     if (fixedIssues == null) {
-      accountId = await this.loadSenderAccountId();
-      const issueId = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields, accountId);
+      const issueId = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields);
       if (issueId) {
         fixedIssues = [issueId];
       }
@@ -63,7 +61,7 @@ export class PullRequestCreated extends OctokitAction {
       }
       for (const issue of fixedIssues) {
         await this.jira.addIssueRemoteLink(issue, pr.html_url);
-        await this.processAllReviews(pr, issue, accountId);
+        await this.processAllReviews(pr, issue);
       }
       if (this.isEngXpSquad) {
         for (const issue of fixedIssues.filter(x => x.startsWith('BUILD-'))) {  // BUILD-9328: No component for PREQ tickets
@@ -73,7 +71,8 @@ export class PullRequestCreated extends OctokitAction {
     }
   }
 
-  private async processNewJiraIssue(pr: PullRequest, inputJiraProject: string, inputAdditionalFields: string, accountId: string | null): Promise<string | null> {
+  private async processNewJiraIssue(pr: PullRequest, inputJiraProject: string, inputAdditionalFields: string): Promise<string | null> {
+    const accountId = await this.loadSenderAccountId();
     const data = this.isEngXpSquad
       ? await NewIssueData.createForEngExp(this.jira, pr, accountId)
       : await NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, accountId, this.inputString('fallback-team'));
@@ -98,16 +97,15 @@ export class PullRequestCreated extends OctokitAction {
     }
   }
 
-  private async processAllReviews(pr: PullRequest, issueId: string, accountId: string | null | undefined): Promise<void> {
+  private async processAllReviews(pr: PullRequest, issueId: string): Promise<void> {
     // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
     if (this.payload.pull_request) {
       const component = this.inputString('team-review-component');
       await this.processRequestReview(pr, issueId, component, this.payload.pull_request.requested_reviewers[0] || null, null);
       for (const team of this.payload.pull_request.requested_teams) {
         this.log(`Processing team review request: ${team.name}`);
-        const teamReview = await TeamReviewData.create(team, async () => accountId === undefined ? await this.loadSenderAccountId() : accountId);
+        const teamReview = await TeamReviewData.create(this, team);
         if (teamReview) {
-          accountId = teamReview.accountId;   // In case it was undefined, reuse the loaded one
           await this.processRequestReview(pr, issueId, component, null, teamReview);
         }
       }

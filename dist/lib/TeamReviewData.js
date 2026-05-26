@@ -27,10 +27,10 @@ export class TeamReviewData {
         this.team = team;
         this.name = name;
     }
-    static async create(requested_team, loadAccountId) {
+    static async create(action, requested_team) {
         const team = this.selectTeam(requested_team);
         if (team) {
-            return new TeamReviewData(await loadAccountId(), team, requested_team.name);
+            return new TeamReviewData(await action.loadSenderAccountId(), team, requested_team.name);
         }
         else {
             return null;
