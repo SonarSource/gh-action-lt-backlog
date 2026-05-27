@@ -27,16 +27,7 @@ export class TeamReviewData {
         this.team = team;
         this.name = name;
     }
-    static createFromAccount(requested_team, accountId) {
-        const team = this.selectTeam(requested_team);
-        if (team) {
-            return new TeamReviewData(accountId, team, requested_team.name);
-        }
-        else {
-            return null;
-        }
-    }
-    static async createFromUser(requested_team, loadAccountId) {
+    static async create(requested_team, loadAccountId) {
         const team = this.selectTeam(requested_team);
         if (team) {
             return new TeamReviewData(await loadAccountId(), team, requested_team.name);

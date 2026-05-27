@@ -22,7 +22,7 @@ import { TeamReviewData } from '../lib/TeamReviewData.js';
 export class RequestReview extends PullRequestAction {
     async processJiraIssue(pr, issueId) {
         const component = this.inputString('team-review-component');
-        const teamReview = await TeamReviewData.createFromUser(this.payload.requested_team ?? null, async () => await this.loadSenderAccountId());
+        const teamReview = await TeamReviewData.create(this.payload.requested_team ?? null, async () => await this.loadSenderAccountId());
         await this.processRequestReview(pr, issueId, component, this.payload.requested_reviewer ?? null, teamReview);
     }
 }

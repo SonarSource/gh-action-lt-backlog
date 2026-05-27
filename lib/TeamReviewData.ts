@@ -33,16 +33,7 @@ export class TeamReviewData {
     this.name = name;
   }
 
-  public static createFromAccount(requested_team: SimpleTeam | undefined, accountId: string | null): TeamReviewData | null {
-    const team = this.selectTeam(requested_team);
-    if (team) {
-      return new TeamReviewData(accountId, team, requested_team!.name);
-    } else {
-      return null;
-    }
-  }
-
-  public static async createFromUser(requested_team: SimpleTeam | null, loadAccountId: () => Promise<string | null>): Promise<TeamReviewData | null> {
+  public static async create(requested_team: SimpleTeam | null, loadAccountId: () => Promise<string | null>): Promise<TeamReviewData | null> {
     const team = this.selectTeam(requested_team);
     if (team) {
       return new TeamReviewData(await loadAccountId(), team, requested_team!.name);
