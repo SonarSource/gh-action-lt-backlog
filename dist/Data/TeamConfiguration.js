@@ -34,7 +34,7 @@ export const TeamConfigurationData = [
     { name: CloudProductionEngineeringSquad.name, boardId: 8148 },
     { name: "Cloud Security", boardId: 1462 },
     { name: "Code Data Storage", boardId: 1610 },
-    { name: "Code Generation", boardId: 1569 },
+    { name: "Remediation Experience", boardId: 1569 },
     { name: "Data & ML Platform", boardId: 7875 },
     { name: "DTL Taint", boardId: 4146 },
     { name: "Organization & Reporting Squad", boardId: 1555 },
