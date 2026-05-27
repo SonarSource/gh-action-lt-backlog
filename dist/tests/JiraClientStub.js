@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import { EngineeringExperienceSquad } from "../Data/TeamConfiguration.js";
+import { JiraTeams } from "../Data/TeamConfiguration.js";
 import { JiraClient } from '../lib/JiraClient.js';
 function serializeStrings(values) {
     return '[' + values.map(x => `'${x}'`).join(', ') + ']';
@@ -61,7 +61,7 @@ export const jiraClientStub = {
         switch (accountId) {
             case '1234-account': return { name: '.NET Squad', id: 'dot-neeet-team' };
             case '2222-no-team': return null;
-            case '3333-eng-exp-account': return EngineeringExperienceSquad;
+            case '3333-eng-exp-account': return JiraTeams.EngineeringExperience;
             case '4444-no-epics-account': return { name: 'No Epics Squad', id: 'no-epics-team' };
             default: throw new Error(`Scaffolding did not expect accountId ${accountId}`);
         }

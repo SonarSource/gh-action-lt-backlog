@@ -18,9 +18,9 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { EngineeringExperienceSquad } from "../Data/TeamConfiguration.js";
+import { JiraTeams } from "../Data/TeamConfiguration.js";
 import { JiraClient, Issue } from '../lib/JiraClient.js';
-import { Team } from '../lib/Team.js';
+import { JiraTeam } from '../lib/JiraTeam.js';
 
 function serializeStrings(values: string[]): string {
   return '[' + values.map(x => `'${x}'`).join(', ') + ']';
@@ -61,16 +61,16 @@ export const jiraClientStub = {
       default: throw new Error(`Scaffolding did not expect email ${email}`);
     }
   },
-  async findTeamByUser(accountId: string): Promise<Team | null> {
+  async findTeamByUser(accountId: string): Promise<JiraTeam | null> {
     switch (accountId) {
       case '1234-account': return { name: '.NET Squad', id: 'dot-neeet-team' };
       case '2222-no-team': return null;
-      case '3333-eng-exp-account': return EngineeringExperienceSquad;
+      case '3333-eng-exp-account': return JiraTeams.EngineeringExperience;
       case '4444-no-epics-account': return { name: 'No Epics Squad', id: 'no-epics-team' };
       default: throw new Error(`Scaffolding did not expect accountId ${accountId}`);
     };
   },
-  async findTeamByName(accountId: string): Promise<Team | null> {
+  async findTeamByName(accountId: string): Promise<JiraTeam | null> {
     switch (accountId) {
       case 'fallback-team': return { name: 'Analysis Processing Squad', id: 'fallback-team' };
       case 'nonexistent-fallback-team': return null;

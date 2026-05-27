@@ -19,7 +19,7 @@
  */
 
 import { Config } from './Configuration.js';
-import { Team } from './Team.js';
+import { JiraTeam } from './JiraTeam.js';
 
 type TeamSearchV2NodeTeam = {
   id: string;
@@ -303,12 +303,12 @@ export class JiraClient {
     }
   }
 
-  public async findTeamByUser(accountId: string): Promise<Team | null> {
+  public async findTeamByUser(accountId: string): Promise<JiraTeam | null> {
     console.log(`Searching for teams of account ${accountId}`);
     return this.findTeam(`membership: { memberIds: "${accountId}" }`, x => true); // No post-filtering
   }
 
-  public async findTeamByName(teamName: string): Promise<Team | null> {
+  public async findTeamByName(teamName: string): Promise<JiraTeam | null> {
     console.log(`Searching for team ${teamName}`);
     return this.findTeam(`query: "${teamName}"`, x => x.name === teamName); // Query returns also partial matches. We need to post-filter them
   }
@@ -319,21 +319,21 @@ export class JiraClient {
     return response?.issues ?? [];
   }
 
-  private async findTeam(queryFilter: string, resultFilter: (x: Team) => boolean): Promise<Team | null> {
+  private async findTeam(queryFilter: string, resultFilter: (x: JiraTeam) => boolean): Promise<JiraTeam | null> {
     const nodes = (await this.findTeams(queryFilter)).filter(resultFilter);
     if (nodes.length === 0) {
       console.log(`Could not find team in Jira`);
       return null;
     }
     else {
-      const match = nodes.find((x: Team) => Config.findTeam(x.name) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
+      const match = nodes.find((x: JiraTeam) => Config.findTeam(x.name) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
       console.log(`Found ${nodes.length} team(s), using ${match.id} ${match.name}`);
       return match;
     }
   }
 
-  private async findTeams(queryFilter: string): Promise<Team[]> {
-    const allTeams: Team[] = [];
+  private async findTeams(queryFilter: string): Promise<JiraTeam[]> {
+    const allTeams: JiraTeam[] = [];
     let after: string | null = null;     // Must be serialized to 'after: null' in the string, because 'after: ""' does not work.
     let hasNextPage: boolean = true;
     while (hasNextPage) {

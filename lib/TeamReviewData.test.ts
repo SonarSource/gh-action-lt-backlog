@@ -19,7 +19,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { CloudEngineeringSquad, CloudProductionEngineeringSquad } from '../Data/TeamConfiguration.js';
+import { JiraTeams } from '../Data/TeamConfiguration.js';
 import { TeamReviewData } from '../lib/TeamReviewData.js';
 import { SimpleTeam, SimpleUser } from './OctokitTypes.js';
 import { LogTester } from '../tests/LogTester.js';
@@ -73,15 +73,15 @@ describe('TeamReviewData', () => {
 
   describe('create', () => {
     it('platform-cloud-eng-squad, user found in Jira', async () => {
-      expect(await TeamReviewData.create(createAction('some-login', '1234-account'), createSimpleTeam('platform-cloud-eng-squad'))).toEqual({ accountId: '1234-account', team: CloudEngineeringSquad, "name": "platform-cloud-eng-squad" });
+      expect(await TeamReviewData.create(createAction('some-login', '1234-account'), createSimpleTeam('platform-cloud-eng-squad'))).toEqual({ accountId: '1234-account', team: JiraTeams.CloudEngineering, "name": "platform-cloud-eng-squad" });
     });
 
     it('platform-cloud-eng-squad, user not found in Jira', async () => {
-      expect(await TeamReviewData.create(createAction('some-login', null), createSimpleTeam('platform-cloud-eng-squad'))).toEqual({ accountId: null, team: CloudEngineeringSquad, "name": "platform-cloud-eng-squad" });
+      expect(await TeamReviewData.create(createAction('some-login', null), createSimpleTeam('platform-cloud-eng-squad'))).toEqual({ accountId: null, team: JiraTeams.CloudEngineering, "name": "platform-cloud-eng-squad" });
     });
 
     it('platform-cloud-prod-eng-squad', async () => {
-      expect(await TeamReviewData.create(createAction('some-login', '1234-account'), createSimpleTeam('platform-cloud-prod-eng-squad'))).toEqual({ accountId: '1234-account', team: CloudProductionEngineeringSquad, "name": "platform-cloud-prod-eng-squad" });
+      expect(await TeamReviewData.create(createAction('some-login', '1234-account'), createSimpleTeam('platform-cloud-prod-eng-squad'))).toEqual({ accountId: '1234-account', team: JiraTeams.CloudProductionEngineering, "name": "platform-cloud-prod-eng-squad" });
     });
 
     it('another team', async () => {

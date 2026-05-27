@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import { EngineeringExperienceSquad } from "../Data/TeamConfiguration.js";
+import { JiraTeams } from "../Data/TeamConfiguration.js";
 import { Config } from "./Configuration.js";
 import { JIRA_ISSUE_PATTERN } from "./Constants.js";
 export class NewIssueData {
@@ -63,16 +63,16 @@ export class NewIssueData {
         if (accountId) {
             parameters.reporter = { id: accountId };
         }
-        parameters.customfield_10001 = EngineeringExperienceSquad.id;
+        parameters.customfield_10001 = JiraTeams.EngineeringExperience.id;
         if (!pr.isRenovate() && projectKey !== "PREQ") {
-            const sprintId = await this.findSprintId(jira, EngineeringExperienceSquad.name);
+            const sprintId = await this.findSprintId(jira, JiraTeams.EngineeringExperience.name);
             parameters.customfield_10020 = sprintId;
         }
         parameters.labels = pr.isRenovate()
             ? ['dvi-created-by-automation', 'dvi-renovate']
             : ['dvi-created-by-automation'];
         if (projectKey === 'BUILD') { // PREQ is handled by in-Jira automation, with hardcoded value
-            parameters.parent = await this.findEvergreenEpic(jira, EngineeringExperienceSquad);
+            parameters.parent = await this.findEvergreenEpic(jira, JiraTeams.EngineeringExperience);
         }
         return new NewIssueData(projectKey, accountId, projectKey === 'PREQ' ? null : accountId, parameters); // GHA-86 Leave PREQ unassigned
     }
@@ -105,7 +105,7 @@ export class NewIssueData {
         }
         else if (accountId) {
             const team = await jira.findTeamByUser(accountId);
-            return team?.name === EngineeringExperienceSquad.name ? 'BUILD' : 'PREQ';
+            return team?.name === JiraTeams.EngineeringExperience.name ? 'BUILD' : 'PREQ';
         }
         else { // renovate and similar bots
             return 'BUILD';
