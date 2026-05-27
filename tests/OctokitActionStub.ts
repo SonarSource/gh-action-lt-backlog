@@ -20,11 +20,13 @@
 
 import type { Api } from '@octokit/plugin-rest-endpoint-methods';
 import { GraphQlQueryResponseData } from '@octokit/graphql';
+import { context } from '@actions/github';
 
 // This provides typed access to the internal members of OctokitAction for unit testing
 export type OctokitActionStub = {
   jira: any;
   rest: Api['rest'];
+  payload: typeof context.payload;
   isEngXpSquad: boolean;
   sendGraphQL(query: string): Promise<GraphQlQueryResponseData>;
   findEmails(login: string): Promise<string[]>;

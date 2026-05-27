@@ -27,7 +27,7 @@ import { graphql, GraphQlQueryResponseData, GraphqlResponseError } from '@octoki
 import { JiraClient } from './JiraClient.js';
 import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN, TEAM_REVIEW_PREFIX } from './Constants.js';
 import { NewIssueData } from './NewIssueData.js';
-import { TeamReviewData } from './TeamReviewData.js';
+import type { TeamReviewData } from './TeamReviewData.js';
 
 type VerifiedEmailsUser = {
   organizationVerifiedDomainEmails: string[];
@@ -43,6 +43,7 @@ export abstract class OctokitAction extends Action {
   protected readonly jira: JiraClient;
   protected readonly isEngXpSquad: boolean;
   private graphqlWithAuth: typeof graphql | null = null;
+  private senderAccountId: string | null | undefined = undefined;   // Cache
 
   constructor() {
     super();
@@ -246,8 +247,11 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected async loadSenderAccountId(): Promise<string | null> {
-    return this.jira.findAccountId(await this.findEmails(this.payload.sender?.login));
+  public async loadSenderAccountId(): Promise<string | null> {
+    if (this.senderAccountId === undefined) {
+      this.senderAccountId = await this.jira.findAccountId(await this.findEmails(this.payload.sender?.login));
+    }
+    return this.senderAccountId;
   }
 
   protected issueLink(issue: string): string {

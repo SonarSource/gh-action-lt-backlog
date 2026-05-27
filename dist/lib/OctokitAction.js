@@ -31,6 +31,7 @@ export class OctokitAction extends Action {
     jira;
     isEngXpSquad;
     graphqlWithAuth = null;
+    senderAccountId = undefined; // Cache
     constructor() {
         super();
         this.jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, this.inputString('jira-user'), this.inputString('jira-token'));
@@ -224,7 +225,10 @@ export class OctokitAction extends Action {
         }
     }
     async loadSenderAccountId() {
-        return this.jira.findAccountId(await this.findEmails(this.payload.sender?.login));
+        if (this.senderAccountId === undefined) {
+            this.senderAccountId = await this.jira.findAccountId(await this.findEmails(this.payload.sender?.login));
+        }
+        return this.senderAccountId;
     }
     issueLink(issue) {
         return `[${issue}](${JIRA_DOMAIN}/browse/${issue})`;

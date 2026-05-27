@@ -24,6 +24,18 @@ import { LogTester } from '../tests/LogTester.js';
 function createSimpleTeam(name) {
     return { name };
 }
+function createAction(senderAccountId) {
+    return {
+        async loadSenderAccountId() {
+            if (senderAccountId === undefined) {
+                throw new Error('This method was not expected to be called');
+            }
+            else {
+                return senderAccountId;
+            }
+        }
+    };
+}
 describe('TeamReviewData', () => {
     let logTester;
     beforeEach(() => {
@@ -34,19 +46,19 @@ describe('TeamReviewData', () => {
     });
     describe('create', () => {
         it('platform-cloud-eng-squad, user found in Jira', async () => {
-            expect(await TeamReviewData.create(createSimpleTeam('platform-cloud-eng-squad'), async () => '1234-account')).toEqual({ accountId: '1234-account', team: CloudEngineeringSquad, "name": "platform-cloud-eng-squad" });
+            expect(await TeamReviewData.create(createAction('1234-account'), createSimpleTeam('platform-cloud-eng-squad'))).toEqual({ accountId: '1234-account', team: CloudEngineeringSquad, "name": "platform-cloud-eng-squad" });
         });
         it('platform-cloud-eng-squad, user not found in Jira', async () => {
-            expect(await TeamReviewData.create(createSimpleTeam('platform-cloud-eng-squad'), async () => null)).toEqual({ accountId: null, team: CloudEngineeringSquad, "name": "platform-cloud-eng-squad" });
+            expect(await TeamReviewData.create(createAction(null), createSimpleTeam('platform-cloud-eng-squad'))).toEqual({ accountId: null, team: CloudEngineeringSquad, "name": "platform-cloud-eng-squad" });
         });
         it('platform-cloud-prod-eng-squad', async () => {
-            expect(await TeamReviewData.create(createSimpleTeam('platform-cloud-prod-eng-squad'), async () => '1234-account')).toEqual({ accountId: '1234-account', team: CloudProductionEngineeringSquad, "name": "platform-cloud-prod-eng-squad" });
+            expect(await TeamReviewData.create(createAction('1234-account'), createSimpleTeam('platform-cloud-prod-eng-squad'))).toEqual({ accountId: '1234-account', team: CloudProductionEngineeringSquad, "name": "platform-cloud-prod-eng-squad" });
         });
         it('another team', async () => {
-            expect(await TeamReviewData.create(createSimpleTeam('another-team'), async () => { throw new Error('This should not be called'); })).toBeNull();
+            expect(await TeamReviewData.create(createAction(undefined), createSimpleTeam('another-team'))).toBeNull();
         });
         it('null team', async () => {
-            expect(await TeamReviewData.create(null, async () => { throw new Error('This should not be called'); })).toBeNull();
+            expect(await TeamReviewData.create(createAction(undefined), null)).toBeNull();
         });
     });
 });

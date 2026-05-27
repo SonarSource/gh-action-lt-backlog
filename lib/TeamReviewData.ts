@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
  * mailto: info AT sonarsource DOT com
@@ -19,6 +19,7 @@
  */
 
 import { CloudEngineeringSquad, CloudProductionEngineeringSquad } from "../Data/TeamConfiguration.js";
+import type { OctokitAction } from "./OctokitAction.js";
 import { SimpleTeam } from "./OctokitTypes.js";
 import { Team } from "./Team.js";
 
@@ -27,16 +28,16 @@ export class TeamReviewData {
   public readonly team: Team;
   public readonly name: string;
 
-  private constructor(accountId: string | null, team: Team, name: string) {
+  protected constructor(accountId: string | null, team: Team, name: string) {
     this.accountId = accountId;
     this.team = team;
     this.name = name;
   }
 
-  public static async create(requested_team: SimpleTeam | null, loadAccountId: () => Promise<string | null>): Promise<TeamReviewData | null> {
+  public static async create(action: OctokitAction, requested_team: SimpleTeam | null): Promise<TeamReviewData | null> {
     const team = this.selectTeam(requested_team);
     if (team) {
-      return new TeamReviewData(await loadAccountId(), team, requested_team!.name);
+      return new TeamReviewData(await action.loadSenderAccountId(), team, requested_team!.name);
     } else {
       return null;
     }
