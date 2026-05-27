@@ -32,6 +32,7 @@ export class OctokitAction extends Action {
     isEngXpSquad;
     graphqlWithAuth = null;
     senderAccountId = undefined; // Cache
+    teamMembersCache = new Map();
     constructor() {
         super();
         this.jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, this.inputString('jira-user'), this.inputString('jira-token'));
@@ -94,6 +95,15 @@ export class OctokitAction extends Action {
     }
     async listComments(issue_number) {
         return (await this.rest.issues.listComments(this.addRepo({ issue_number }))).data;
+    }
+    async listTeamMembers(teamSlug) {
+        let members = this.teamMembersCache.get(teamSlug);
+        if (!members) {
+            this.log(`Loading members of ${teamSlug}`);
+            members = (await this.rest.teams.listMembersInOrg({ org: this.repo.owner, team_slug: teamSlug, per_page: 100 })).data; // We don't need to paginate, 100 is more than enough (for now)
+            this.teamMembersCache.set(teamSlug, members);
+        }
+        return members;
     }
     updateIssueTitle(issue_number, title) {
         this.log(`Updating issue #${issue_number} title to: ${title}`);

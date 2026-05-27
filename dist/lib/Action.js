@@ -21,8 +21,8 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 export class Action {
     repo;
-    context;
     payload;
+    context;
     constructor() {
         this.context = github.context;
         this.repo = github.context.repo;

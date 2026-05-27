@@ -22,11 +22,13 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { JIRA_DOMAIN, JIRA_ORGANIZATION_ID, JIRA_SITE_ID } from "../lib/Constants.js";
 import { JiraClient } from "../lib/JiraClient.js";
 import { LogTester } from "../tests/LogTester.js";
-import { CloudEngineeringSquad, CloudProductionEngineeringSquad, EngineeringExperienceSquad, TeamConfigurationData } from "./TeamConfiguration.js";
+import { CloudEngineeringSquad, CloudProductionEngineeringSquad, EngineeringExperienceSquad, GitHubTeamSlugs, TeamConfigurationData } from "./TeamConfiguration.js";
 import { fail } from 'node:assert';
 import { Team } from '../lib/Team.js';
+import { getOctokit } from '@actions/github';
 
 let jira: JiraClient;
+let octokit: ReturnType<typeof getOctokit>;
 
 vi.setConfig({ testTimeout: 20000 }); // 20s
 
@@ -112,12 +114,18 @@ const ignoredTeams = [
 ];
 
 beforeAll(() => {
-  const user = process.env["JIRA_USER"];    // Can't use the same name as environment variables read by Octokit actions, because the dash is not propagated from shell to node
-  const token = process.env["JIRA_TOKEN"];
-  if (user && token) {
-    jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, user, token);
+  const jiraUser = process.env["JIRA_USER"];    // Can't use the same name as environment variables read by Octokit actions, because the dash is not propagated from shell to node
+  const jiraToken = process.env["JIRA_TOKEN"];
+  const githubToken = process.env["GITHUB_TOKEN"];
+  if (jiraUser && jiraToken) {
+    jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, jiraUser, jiraToken);
   } else {
-    fail("JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.");
+    fail('JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.');
+  }
+  if (githubToken) {
+    octokit = getOctokit(githubToken);
+  } else {
+    fail('GitHub tests require GITHUB_TOKEN environment variable to be set.');
   }
 });
 
@@ -197,6 +205,16 @@ describe('TeamConfiguration', () => {
         await jira.findSprintId(team.boardId);  // Can fail with 400 (Bad Request): The board does not support sprints
       } catch (error) {
         fail(`Team "${team.name}" with boardId ${team.boardId} findSprintId failed: ${error}`);
+      }
+    }
+  });
+
+  it('GitHubTeamSlugs are valid', async () => {
+    for (const slug of Object.values(GitHubTeamSlugs)) {
+      try {
+        await octokit.rest.teams.getByName({ org: 'SonarSource', team_slug: slug });
+      } catch (error) {
+        fail(`GitHubTeamSlug '${slug}' is invalid: ${error}`)
       }
     }
   });

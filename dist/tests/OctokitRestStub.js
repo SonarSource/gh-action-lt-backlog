@@ -64,6 +64,17 @@ export function createOctokitRestStub(title, body, login = 'test-user') {
             update(params) {
                 console.log(`Invoked rest.pulls.update(${JSON.stringify(params)})`);
             }
+        },
+        teams: {
+            listMembersInOrg(params) {
+                console.log(`Invoked rest.teams.listMembersInOrg(${JSON.stringify(params)})`);
+                return {
+                    data: [
+                        { login: 'first-login', type: 'User' },
+                        { login: 'second-login', type: 'User' },
+                    ]
+                };
+            }
         }
     };
 }
