@@ -33,7 +33,6 @@ vi.setConfig({ testTimeout: 20000 }); // 20s
 // All teams that exist in Jira, but do not create PRs and do not need boardId configured:
 const ignoredTeams = [
   ".NET Squad",               // Not using sprints
-  "[Deprecated] Cloud Platform",
   "1.SC_Project Mgmt.",
   "2.SCE_GTM",
   "3.Stripe_Project Mgmt.",
@@ -44,25 +43,17 @@ const ignoredTeams = [
   "BizTech - SolutionEnablement",
   "Business Intelligence",    // Not using sprints
   "Business Projects",
-  "Cloud ARB",
+  "CAB Change Approvers",
+  "Code Review Squad",        // Not using sprints
   "CodeNext Bravo Squad",
   "CodeNextTeam",             // Not using sprints
-  "Code Review Squad",        // Not using sprints
-  "Core Squad",
   "Customer Marketing",
-  "Customer Onboarding Squad",
-  "Customer Success",
-  "Data & Insights",          // Not using sprints
-  "DevRel",
+  "Data & Insights",
   "Documentation Squad",
-  "EA",
-  "EA EMEA",
-  "Enablement ⛴️ 🤿",
+  "ELT",
   "End-User Technology",
   "Engineering Project Management",
-  "Enterprise Acquisition - North America ",
   "Enterprise Architecture Squad",
-  "EUT - First Level Support",
   "EUT L1 Support",
   "EUT L2 Support",
   "EUT L3 Support",
@@ -76,52 +67,34 @@ const ignoredTeams = [
   "FP&A MC&Product",
   "Front-Office Squad (Stripe)",
   "Growth",
-  "Growth & New Ventures",
   "Growth Marketing",
   "GTM - Web Development Squad",
-  "HR Operations",
+  "Helix",
   "HR Business Partner",
-  "Identity UX",
+  "HR Operations",
   "Identity Triage",
   "Incident & Problem Management",
   "InfoSec",
   "Infrastructure",
   "Internal Events",
   "IST",
-  "IST-PST",
-  "IST-SECGOV",
   "ITOPS",
   "ITOPS-EUT",
-  "ITOPS-ISE",
-  "ITOPS-NETENG",
   "ITOPS-MIM",
-  "ITOPS-SM",
+  "ITOPS-NETENG",
   "ITOPS-SOC",
   "ITOPS-SYSENG",
-  "L2 IT Support",
   "Legal Team",
-  "ManishKTest",
-  "Marketing",
-  "Nice LTS shirt :)",
   "Operational Finance",
-  "PLG squad",
   "PM Team",
   "ProdSec",
   "Product Data",             // Not using sprints
   "Purchase",
-  "Renewals Team",
-  "RIS Squad",
   "SecGov",
   "Services",
-  "Signup & Onboarding",
   "Storefront EM",
   "Support Council",
-  "Support Team",
-  "Support Team Jira Admins",
-  "Support-test",
-  "Taint Analysis", // Replaced by STL and DTL Taint teams
-  "Team Ramrod",
-  "Technology Alliances Program",
+  "Taint Analysis",           // Aggregation of STL Taint and DTL Taint
   "Travel Team",
   "UX Team",
   "Vendor Management",
@@ -131,9 +104,11 @@ const ignoredTeams = [
   "WE Bochum",
   "WE Geneva",
   "WE London",
+  "WE Silicon Valley",
   "WE Singapore",
   "WE Sonar",
   "WE Tokyo",
+
 ];
 
 beforeAll(() => {
@@ -150,7 +125,7 @@ describe('TeamConfiguration', () => {
   let logTester: LogTester;
 
   beforeEach(() => {
-    logTester = new LogTester();
+    logTester = new LogTester(false);
   });
 
   afterEach(() => {

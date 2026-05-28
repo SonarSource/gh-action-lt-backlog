@@ -26,13 +26,15 @@ export class LogTester {
     logSpy;
     logsParams = [];
     originalLog = console.log.bind(console);
-    constructor() {
+    constructor(dumpOnTestFailed = true) {
         this.logSpy = vi.spyOn(console, 'log').mockImplementation((...args) => this.logsParams.push(...args));
-        onTestFailed(() => {
-            this.originalLog(`--- Console log for: ${expect.getState().currentTestName} ---`);
-            this.dump();
-            this.originalLog();
-        });
+        if (dumpOnTestFailed) {
+            onTestFailed(() => {
+                this.originalLog(`--- Console log for: ${expect.getState().currentTestName} ---`);
+                this.dump();
+                this.originalLog();
+            });
+        }
     }
     afterEach() {
         this.mockRestore();

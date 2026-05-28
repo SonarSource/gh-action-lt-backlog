@@ -29,13 +29,15 @@ export class LogTester {
   public logsParams: [message?: any, ...optionalParams: any[]][] = [];
   public readonly originalLog = console.log.bind(console);
 
-  constructor() {
+  constructor(dumpOnTestFailed: boolean = true) {
     this.logSpy = vi.spyOn(console, 'log').mockImplementation((...args) => this.logsParams.push(...args));
-    onTestFailed(() => {
-      this.originalLog(`--- Console log for: ${expect.getState().currentTestName} ---`);
-      this.dump();
-      this.originalLog();
-    });
+    if (dumpOnTestFailed) {
+      onTestFailed(() => {
+        this.originalLog(`--- Console log for: ${expect.getState().currentTestName} ---`);
+        this.dump();
+        this.originalLog();
+      });
+    }
   }
 
   public afterEach() {
