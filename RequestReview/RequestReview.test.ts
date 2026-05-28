@@ -80,7 +80,7 @@ describe('RequestReview', () => {
   });
 
   it('Create platform review issue', async () => {
-    github.context.payload.requested_team = { name: 'platform-cloud-eng-squad' };
+    github.context.payload.requested_team = { name: 'platform-cloud-eng-squad', slug: 'platform-cloud-eng-squad' };
     process.env['INPUT_TEAM-REVIEW-COMPONENT'] = 'Parameter Component';
     const sut = new RequestReview() as RequestReview & OctokitActionStub;
     sut.jira = jiraClientStub;
@@ -91,6 +91,10 @@ describe('RequestReview', () => {
     await sut.run();
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
+      "Loading members of platform-cloud-eng-squad",
+      "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-eng-squad\",\"per_page\":100})",
+      "Loading members of platform-cloud-prod-eng-squad",
+      "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-prod-eng-squad\",\"per_page\":100})",
       "Invoked jira.moveIssue('GHA-42', 'Request Review', null)",
       "Invoked jira.assignIssueToEmail('GHA-42', ['user@sonarsource.com'])",
       "Found 1 Evergreen Epic(s), using SC-1000 Current SC Review Epic platform-cloud-eng-squad",

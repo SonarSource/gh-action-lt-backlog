@@ -28,8 +28,8 @@ export type Repo = {
 
 export abstract class Action {
   public readonly repo: Repo;
+  public readonly payload: typeof github.context.payload;
   protected readonly context: typeof github.context;
-  protected readonly payload: typeof github.context.payload;
 
   protected abstract execute(): Promise<void>;
 

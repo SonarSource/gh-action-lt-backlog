@@ -298,9 +298,9 @@ describe('PullRequestCreated', () => {
 
   it('Normal PR with team review', async () => {
     github.context.payload.pull_request!.requested_teams = [
-      { name: "another-team" },                 // NO OP
-      { name: "platform-cloud-eng-squad" },     // Requests review, queries accountId
-      { name: "platform-cloud-prod-eng-squad" } // Requests review, reuses accountId
+      { name: "another-team", slug: "another-team" },                                       // NO OP
+      { name: "platform-cloud-eng-squad", slug: "platform-cloud-eng-squad" },               // Requests review, queries accountId
+      { name: "platform-cloud-prod-eng-squad", slug: "platform-cloud-prod-eng-squad" }      // Requests review, reuses accountId
     ];
     process.env['INPUT_TEAM-REVIEW-COMPONENT'] = 'Parameter Component';
     await runAction('KEY', 'KEY-4242 Normal PR');
@@ -311,6 +311,10 @@ describe('PullRequestCreated', () => {
       "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
       "Processing team review request: another-team",
       "Processing team review request: platform-cloud-eng-squad",
+      "Loading members of platform-cloud-eng-squad",
+      "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-eng-squad\",\"per_page\":100})",
+      "Loading members of platform-cloud-prod-eng-squad",
+      "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-prod-eng-squad\",\"per_page\":100})",
       "findEmails called for test-user",
       "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
       "Found 1 Evergreen Epic(s), using SC-1000 Current SC Review Epic platform-cloud-eng-squad",

@@ -44,6 +44,7 @@ export abstract class OctokitAction extends Action {
   protected readonly isEngXpSquad: boolean;
   private graphqlWithAuth: typeof graphql | null = null;
   private senderAccountId: string | null | undefined = undefined;   // Cache
+  private readonly teamMembersCache = new Map<string, SimpleUser[]>();
 
   constructor() {
     super();
@@ -113,6 +114,16 @@ export abstract class OctokitAction extends Action {
 
   protected async listComments(issue_number: number): Promise<IssueComment[]> {
     return (await this.rest.issues.listComments(this.addRepo({ issue_number }))).data;
+  }
+
+  public async listTeamMembers(teamSlug: string): Promise<SimpleUser[]> {
+    let members = this.teamMembersCache.get(teamSlug);
+    if (!members) {
+      this.log(`Loading members of ${teamSlug}`);
+      members = (await this.rest.teams.listMembersInOrg({ org: this.repo.owner, team_slug: teamSlug, per_page: 100 })).data;  // We don't need to paginate, 100 is more than enough (for now)
+      this.teamMembersCache.set(teamSlug, members);
+    }
+    return members;
   }
 
   protected updateIssueTitle(issue_number: number, title: string): Promise<void> {

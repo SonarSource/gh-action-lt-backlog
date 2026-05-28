@@ -17,6 +17,12 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+;
+export const GitHubTeamSlugs = {
+    PlatformCloudEngineering: 'platform-cloud-eng-squad',
+    PlatformCloudProductionEngineering: 'platform-cloud-prod-eng-squad',
+};
+// Jira Teams
 export const EngineeringExperienceSquad = { id: "eb40f25e-3596-4541-b661-cf83e7bc4fa6", name: "Engineering Experience Squad" };
 export const CloudEngineeringSquad = { id: "772ea1dc-3574-42bc-a378-7a898d910ebd", name: "Cloud Engineering" };
 export const CloudProductionEngineeringSquad = { id: "6f2e744b-9f09-4c3a-852e-e2f138d1c14f", name: "Cloud Production Engineering" };

@@ -18,10 +18,15 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { CloudEngineeringSquad, CloudProductionEngineeringSquad } from "../Data/TeamConfiguration.js";
+import { CloudEngineeringSquad, CloudProductionEngineeringSquad, GitHubTeamSlugs } from "../Data/TeamConfiguration.js";
 import type { OctokitAction } from "./OctokitAction.js";
 import { SimpleTeam } from "./OctokitTypes.js";
 import { Team } from "./Team.js";
+
+type TeamCandidate = {
+  jiraTeam: Team;
+  ignoredGitHubTeamSlugs: string[];
+};
 
 export class TeamReviewData {
   public readonly accountId: string | null;
@@ -35,21 +40,37 @@ export class TeamReviewData {
   }
 
   public static async create(action: OctokitAction, requested_team: SimpleTeam | null): Promise<TeamReviewData | null> {
-    const team = this.selectTeam(requested_team);
-    if (team) {
-      return new TeamReviewData(await action.loadSenderAccountId(), team, requested_team!.name);
+    const candidate = this.selectTeam(requested_team);
+    if (candidate && await this.senderIsFromOutsideTeam(action, candidate)) {
+      return new TeamReviewData(await action.loadSenderAccountId(), candidate.jiraTeam, requested_team!.name);
     } else {
       return null;
     }
   }
 
-  private static selectTeam(requested_team: SimpleTeam | undefined | null): Team | null {
-    if (requested_team?.name === 'platform-cloud-eng-squad') {
-      return CloudEngineeringSquad;
-    } else if (requested_team?.name === 'platform-cloud-prod-eng-squad') {
-      return CloudProductionEngineeringSquad;
+  private static selectTeam(requested_team: SimpleTeam | undefined | null): TeamCandidate | null {
+    if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
+      return {
+        jiraTeam: CloudEngineeringSquad,
+        ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
+      };
+    } else if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudProductionEngineering) {
+      return {
+        jiraTeam: CloudProductionEngineeringSquad,
+        ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
+      }
     } else {
       return null;
     }
+  }
+
+  private static async senderIsFromOutsideTeam(action: OctokitAction, candidate: TeamCandidate): Promise<boolean> {
+    for (const slug of candidate.ignoredGitHubTeamSlugs) {
+      const members = await action.listTeamMembers(slug);
+      if (members.some(x => x.login === action.payload.sender?.login)) {
+        return false;
+      }
+    }
+    return true;
   }
 }

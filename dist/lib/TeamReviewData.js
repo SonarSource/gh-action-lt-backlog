@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import { CloudEngineeringSquad, CloudProductionEngineeringSquad } from "../Data/TeamConfiguration.js";
+import { CloudEngineeringSquad, CloudProductionEngineeringSquad, GitHubTeamSlugs } from "../Data/TeamConfiguration.js";
 export class TeamReviewData {
     accountId;
     team;
@@ -28,24 +28,39 @@ export class TeamReviewData {
         this.name = name;
     }
     static async create(action, requested_team) {
-        const team = this.selectTeam(requested_team);
-        if (team) {
-            return new TeamReviewData(await action.loadSenderAccountId(), team, requested_team.name);
+        const candidate = this.selectTeam(requested_team);
+        if (candidate && await this.senderIsFromOutsideTeam(action, candidate)) {
+            return new TeamReviewData(await action.loadSenderAccountId(), candidate.jiraTeam, requested_team.name);
         }
         else {
             return null;
         }
     }
     static selectTeam(requested_team) {
-        if (requested_team?.name === 'platform-cloud-eng-squad') {
-            return CloudEngineeringSquad;
+        if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
+            return {
+                jiraTeam: CloudEngineeringSquad,
+                ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
+            };
         }
-        else if (requested_team?.name === 'platform-cloud-prod-eng-squad') {
-            return CloudProductionEngineeringSquad;
+        else if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudProductionEngineering) {
+            return {
+                jiraTeam: CloudProductionEngineeringSquad,
+                ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
+            };
         }
         else {
             return null;
         }
+    }
+    static async senderIsFromOutsideTeam(action, candidate) {
+        for (const slug of candidate.ignoredGitHubTeamSlugs) {
+            const members = await action.listTeamMembers(slug);
+            if (members.some(x => x.login === action.payload.sender?.login)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 //# sourceMappingURL=TeamReviewData.js.map
