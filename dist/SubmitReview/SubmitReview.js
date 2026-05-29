@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import { NIGEL_ACCOUNT_ID } from '../lib/Constants.js';
+import { JIRA_ISSUE_PATTERN, NIGEL_ACCOUNT_ID, TEAM_REVIEW_PREFIX } from '../lib/Constants.js';
 import { PullRequestAction } from '../lib/PullRequestAction.js';
 export class SubmitReview extends PullRequestAction {
     async processJiraIssue(pr, issueId) {
@@ -37,12 +37,37 @@ export class SubmitReview extends PullRequestAction {
             await this.jira.moveIssue(issueId, 'Request Changes');
         }
     }
+    async afterExecute(pr) {
+        if (this.payload.review.state === "approved") {
+            for (const comment of await this.listComments(pr.number)) {
+                const teamReviewIssueId = await this.approvedTeamReviewIssueId(comment.body);
+                if (teamReviewIssueId) {
+                    await this.jira.moveIssue(teamReviewIssueId, 'Resolve issue'); // Move to RESOLVED
+                    await this.jira.moveIssue(teamReviewIssueId, 'Close Issue'); // Move to DONE
+                }
+            }
+        }
+    }
     async assignCurrentUser(issueId) {
         const issue = await this.jira.loadIssue(issueId);
         if (!issue.fields.assignee || issue.fields.assignee.accountId === NIGEL_ACCOUNT_ID) {
             const userEmails = await this.findEmails(this.payload.sender?.login);
             await this.jira.assignIssueToEmail(issueId, userEmails);
         }
+    }
+    async approvedTeamReviewIssueId(body) {
+        if (body?.startsWith(TEAM_REVIEW_PREFIX)) {
+            const issueId = body.match(JIRA_ISSUE_PATTERN) ?? null;
+            const teamSlug = body.match(/<!--slug: ([^ ]+) -->/) ?? null;
+            if (issueId && teamSlug) {
+                const members = await this.listTeamMembers(teamSlug[1]);
+                if (members.some(x => x.login === this.payload.sender?.login)) {
+                    return issueId[0];
+                }
+                ;
+            }
+        }
+        return null;
     }
 }
 //# sourceMappingURL=SubmitReview.js.map

@@ -36,8 +36,12 @@ export class PullRequestAction extends OctokitAction {
                         await this.processJiraIssue(pr, issueId);
                     }
                 }
+                await this.afterExecute(pr);
             }
         }
+    }
+    async afterExecute(pr) {
+        // Override me
     }
 }
 //# sourceMappingURL=PullRequestAction.js.map
