@@ -217,7 +217,7 @@ export class OctokitAction extends Action {
                 if (reviewIssueId) {
                     await this.jira.addIssueRemoteLink(reviewIssueId, pr.html_url);
                     await this.jira.linkIssues(reviewIssueId, issueId, 'Relates');
-                    await this.addComment(pr.number, `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.name}`);
+                    await this.addComment(pr.number, `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.gitHubTeam.name}\n<!--slug: ${teamReview.gitHubTeam.slug} -->`);
                     await this.addJiraComponent(reviewIssueId, component);
                 }
             }

@@ -21,7 +21,7 @@ import { JiraTeams } from "../Data/TeamConfiguration.js";
 import { TeamReviewData } from "../lib/TeamReviewData.js";
 export class TeamReviewDataStub extends TeamReviewData {
     static createCloudEngineering(accountId) {
-        return new TeamReviewData(accountId, JiraTeams.CloudEngineering, 'platform-cloud-eng-squad');
+        return new TeamReviewData(accountId, JiraTeams.CloudEngineering, { name: 'platform-cloud-eng-squad', slug: 'platform-cloud-eng-squad' });
     }
 }
 //# sourceMappingURL=TeamReviewDataStub.js.map

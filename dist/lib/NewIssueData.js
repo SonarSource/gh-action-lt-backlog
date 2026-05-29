@@ -81,9 +81,9 @@ export class NewIssueData {
         if (teamReview.accountId) {
             parameters.reporter = { id: teamReview.accountId };
         }
-        parameters.customfield_10001 = teamReview.team.id;
+        parameters.customfield_10001 = teamReview.jiraTeam.id;
         parameters.labels = ['preq-review-code'];
-        parameters.parent = await this.findEvergreenEpic(jira, teamReview.team, 'summary ~ "PREQ"');
+        parameters.parent = await this.findEvergreenEpic(jira, teamReview.jiraTeam, 'summary ~ "PREQ"');
         return new NewIssueData('PREQ', teamReview.accountId, null, parameters);
     }
     static computeProjectKey(inputJiraProject, parent) {
