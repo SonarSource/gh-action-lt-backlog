@@ -40,7 +40,12 @@ export abstract class PullRequestAction extends OctokitAction {
             await this.processJiraIssue(pr, issueId);
           }
         }
+        await this.afterExecute(pr);
       }
     }
+  }
+
+  protected async afterExecute(pr: PullRequest): Promise<void> {
+    // Override me
   }
 }
