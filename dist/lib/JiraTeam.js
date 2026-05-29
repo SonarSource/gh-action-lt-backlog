@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
  * mailto: info AT sonarsource DOT com
@@ -17,12 +17,5 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
-import { JiraTeams } from "../Data/TeamConfiguration.js";
-import { TeamReviewData } from "../lib/TeamReviewData.js";
-
-export class TeamReviewDataStub extends TeamReviewData {
-  public static createCloudEngineering(accountId: string | null): TeamReviewData {
-    return new TeamReviewData(accountId, JiraTeams.CloudEngineering, 'platform-cloud-eng-squad');
-  }
-}
+export {};
+//# sourceMappingURL=JiraTeam.js.map

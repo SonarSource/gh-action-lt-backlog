@@ -21,7 +21,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { JIRA_DOMAIN, JIRA_ORGANIZATION_ID, JIRA_SITE_ID } from "../lib/Constants.js";
 import { JiraClient } from "../lib/JiraClient.js";
 import { LogTester } from "../tests/LogTester.js";
-import { CloudEngineeringSquad, CloudProductionEngineeringSquad, EngineeringExperienceSquad, GitHubTeamSlugs, TeamConfigurationData } from "./TeamConfiguration.js";
+import { GitHubTeamSlugs, JiraTeams, TeamConfigurationData } from "./TeamConfiguration.js";
 import { fail } from 'node:assert';
 import { getOctokit } from '@actions/github';
 let jira;
@@ -132,19 +132,19 @@ describe('TeamConfiguration', () => {
         logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
     });
     it('EngineeringExperienceSquad is valid', async () => {
-        const team = await jira.findTeamByName(EngineeringExperienceSquad.name);
+        const team = await jira.findTeamByName(JiraTeams.EngineeringExperience.name);
         expect(team).not.toBeNull();
-        expect(team.id).toBe(EngineeringExperienceSquad.id);
+        expect(team.id).toBe(JiraTeams.EngineeringExperience.id);
     });
     it('CloudEngineeringSquad is valid', async () => {
-        const team = await jira.findTeamByName(CloudEngineeringSquad.name);
+        const team = await jira.findTeamByName(JiraTeams.CloudEngineering.name);
         expect(team).not.toBeNull();
-        expect(team.id).toBe(CloudEngineeringSquad.id);
+        expect(team.id).toBe(JiraTeams.CloudEngineering.id);
     });
     it('CloudProductionEngineeringSquad is valid', async () => {
-        const team = await jira.findTeamByName(CloudProductionEngineeringSquad.name);
+        const team = await jira.findTeamByName(JiraTeams.CloudProductionEngineering.name);
         expect(team).not.toBeNull();
-        expect(team.id).toBe(CloudProductionEngineeringSquad.id);
+        expect(team.id).toBe(JiraTeams.CloudProductionEngineering.id);
     });
     it('teams have valid names', async () => {
         for (const teamData of TeamConfigurationData) {

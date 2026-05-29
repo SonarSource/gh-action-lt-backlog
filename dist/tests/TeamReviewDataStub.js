@@ -17,11 +17,11 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import { CloudEngineeringSquad } from "../Data/TeamConfiguration.js";
+import { JiraTeams } from "../Data/TeamConfiguration.js";
 import { TeamReviewData } from "../lib/TeamReviewData.js";
 export class TeamReviewDataStub extends TeamReviewData {
     static createCloudEngineering(accountId) {
-        return new TeamReviewData(accountId, CloudEngineeringSquad, 'platform-cloud-eng-squad');
+        return new TeamReviewData(accountId, JiraTeams.CloudEngineering, 'platform-cloud-eng-squad');
     }
 }
 //# sourceMappingURL=TeamReviewDataStub.js.map

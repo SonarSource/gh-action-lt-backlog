@@ -23,7 +23,7 @@ import { AtlassianDocument } from './AtlassianDocumentFormat.js';
 import { JiraClient } from './JiraClient.js';
 import { fail } from 'node:assert';
 import { NewIssueParameters } from './NewIssueParameters.js';
-import { EngineeringExperienceSquad, TeamConfigurationData } from '../Data/TeamConfiguration.js';
+import { JiraTeams, TeamConfigurationData } from '../Data/TeamConfiguration.js';
 import { Config } from './Configuration.js';
 import { LogTester } from '../tests/LogTester.js';
 import { JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID } from './Constants.js';
@@ -265,24 +265,24 @@ describe('JiraClient', () => {
   });
 
   it('findBoard', async () => {
-    const boardId = Config.findTeam(EngineeringExperienceSquad.name).boardId;
+    const boardId = Config.findTeam(JiraTeams.EngineeringExperience.name).boardId;
     expect(await sut.findBoard(boardId)).not.toBeNull();
   });
 
   it('findSprintId', async () => {
-    const boardId = Config.findTeam(EngineeringExperienceSquad.name).boardId;
+    const boardId = Config.findTeam(JiraTeams.EngineeringExperience.name).boardId;
     expect(await sut.findSprintId(boardId)).toBeGreaterThan(0);
   });
 
   it('findTeamByUser', async () => {
     // This UT needs productionSut, because team IDs are different in sandbox
     const accountId = '557058:f82b4ae5-78e0-4689-9f9e-419b773bf121';                                  // Thomas Vérin The Greatest, it can be any member of Eng Xp squad Jira team
-    expect(await productionSut.findTeamByUser(accountId)).toMatchObject({ ...EngineeringExperienceSquad });  // Eng Xp, because we maintain hardcoded value for it
+    expect(await productionSut.findTeamByUser(accountId)).toMatchObject({ ...JiraTeams.EngineeringExperience });  // Eng Xp, because we maintain hardcoded value for it
   });
 
   it('findTeamByName', async () => {
     // This UT needs productionSut, because team IDs are different in sandbox
-    expect(await productionSut.findTeamByName(EngineeringExperienceSquad.name)).toMatchObject({ ...EngineeringExperienceSquad });  // Eng Xp, because we maintain hardcoded value for it
+    expect(await productionSut.findTeamByName(JiraTeams.EngineeringExperience.name)).toMatchObject({ ...JiraTeams.EngineeringExperience });  // Eng Xp, because we maintain hardcoded value for it
   });
 
   it('findIssues', async () => {

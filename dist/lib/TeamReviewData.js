@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import { CloudEngineeringSquad, CloudProductionEngineeringSquad, GitHubTeamSlugs } from "../Data/TeamConfiguration.js";
+import { JiraTeams, GitHubTeamSlugs } from "../Data/TeamConfiguration.js";
 export class TeamReviewData {
     accountId;
     team;
@@ -39,13 +39,13 @@ export class TeamReviewData {
     static selectTeam(requested_team) {
         if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
             return {
-                jiraTeam: CloudEngineeringSquad,
+                jiraTeam: JiraTeams.CloudEngineering,
                 ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
             };
         }
         else if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudProductionEngineering) {
             return {
-                jiraTeam: CloudProductionEngineeringSquad,
+                jiraTeam: JiraTeams.CloudProductionEngineering,
                 ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
             };
         }

@@ -18,22 +18,22 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { CloudEngineeringSquad, CloudProductionEngineeringSquad, GitHubTeamSlugs } from "../Data/TeamConfiguration.js";
+import { JiraTeams, GitHubTeamSlugs } from "../Data/TeamConfiguration.js";
 import type { OctokitAction } from "./OctokitAction.js";
 import { SimpleTeam } from "./OctokitTypes.js";
-import { Team } from "./Team.js";
+import { JiraTeam } from "./JiraTeam.js";
 
 type TeamCandidate = {
-  jiraTeam: Team;
+  jiraTeam: JiraTeam;
   ignoredGitHubTeamSlugs: string[];
 };
 
 export class TeamReviewData {
   public readonly accountId: string | null;
-  public readonly team: Team;
+  public readonly team: JiraTeam;
   public readonly name: string;
 
-  protected constructor(accountId: string | null, team: Team, name: string) {
+  protected constructor(accountId: string | null, team: JiraTeam, name: string) {
     this.accountId = accountId;
     this.team = team;
     this.name = name;
@@ -51,12 +51,12 @@ export class TeamReviewData {
   private static selectTeam(requested_team: SimpleTeam | undefined | null): TeamCandidate | null {
     if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
       return {
-        jiraTeam: CloudEngineeringSquad,
+        jiraTeam: JiraTeams.CloudEngineering,
         ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
       };
     } else if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudProductionEngineering) {
       return {
-        jiraTeam: CloudProductionEngineeringSquad,
+        jiraTeam: JiraTeams.CloudProductionEngineering,
         ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
       }
     } else {

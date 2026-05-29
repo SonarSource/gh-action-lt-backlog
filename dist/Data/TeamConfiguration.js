@@ -22,10 +22,11 @@ export const GitHubTeamSlugs = {
     PlatformCloudEngineering: 'platform-cloud-eng-squad',
     PlatformCloudProductionEngineering: 'platform-cloud-prod-eng-squad',
 };
-// Jira Teams
-export const EngineeringExperienceSquad = { id: "eb40f25e-3596-4541-b661-cf83e7bc4fa6", name: "Engineering Experience Squad" };
-export const CloudEngineeringSquad = { id: "772ea1dc-3574-42bc-a378-7a898d910ebd", name: "Cloud Engineering" };
-export const CloudProductionEngineeringSquad = { id: "6f2e744b-9f09-4c3a-852e-e2f138d1c14f", name: "Cloud Production Engineering" };
+export const JiraTeams = {
+    EngineeringExperience: { id: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6', name: 'Engineering Experience Squad' },
+    CloudEngineering: { id: '772ea1dc-3574-42bc-a378-7a898d910ebd', name: 'Cloud Engineering' },
+    CloudProductionEngineering: { id: '6f2e744b-9f09-4c3a-852e-e2f138d1c14f', name: 'Cloud Production Engineering' },
+};
 // If a new Jira issue is created for a standalone PR, it will be assigned to a sprint from a board defined by this file.
 // If a new team or default board is created, this file should be updated accordingly.
 export const TeamConfigurationData = [
@@ -36,8 +37,8 @@ export const TeamConfigurationData = [
     { name: "BizTech - Back Office", boardId: 1464 },
     { name: "CAG Squad", boardId: 8314 },
     { name: "CFamily Squad", boardId: 173 },
-    { name: CloudEngineeringSquad.name, boardId: 8147 },
-    { name: CloudProductionEngineeringSquad.name, boardId: 8148 },
+    { name: JiraTeams.CloudEngineering.name, boardId: 8147 },
+    { name: JiraTeams.CloudProductionEngineering.name, boardId: 8148 },
     { name: "Cloud Security", boardId: 1462 },
     { name: "Code Data Storage", boardId: 1610 },
     { name: "Remediation Experience", boardId: 1569 },
@@ -46,7 +47,7 @@ export const TeamConfigurationData = [
     { name: "Organization & Reporting Squad", boardId: 1555 },
     { name: "DBD Squad", boardId: 1638 },
     { name: "Development Experience Squad", boardId: 1527 },
-    { name: EngineeringExperienceSquad.name, boardId: 1551 },
+    { name: JiraTeams.EngineeringExperience.name, boardId: 1551 },
     { name: "Front-End Engineering", boardId: 1444 },
     { name: "Identity Squad", boardId: 1448 },
     { name: "Integrations Squad", boardId: 1438 },
