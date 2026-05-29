@@ -20,17 +20,17 @@
 import { JiraTeams, GitHubTeamSlugs } from "../Data/TeamConfiguration.js";
 export class TeamReviewData {
     accountId;
-    team;
-    name;
-    constructor(accountId, team, name) {
+    jiraTeam;
+    gitHubTeam;
+    constructor(accountId, team, gitHubTeam) {
         this.accountId = accountId;
-        this.team = team;
-        this.name = name;
+        this.jiraTeam = team;
+        this.gitHubTeam = gitHubTeam;
     }
     static async create(action, requested_team) {
         const candidate = this.selectTeam(requested_team);
         if (candidate && await this.senderIsFromOutsideTeam(action, candidate)) {
-            return new TeamReviewData(await action.loadSenderAccountId(), candidate.jiraTeam, requested_team.name);
+            return new TeamReviewData(await action.loadSenderAccountId(), candidate.jiraTeam, requested_team);
         }
         else {
             return null;

@@ -30,19 +30,19 @@ type TeamCandidate = {
 
 export class TeamReviewData {
   public readonly accountId: string | null;
-  public readonly team: JiraTeam;
-  public readonly name: string;
+  public readonly jiraTeam: JiraTeam;
+  public readonly gitHubTeam: SimpleTeam;
 
-  protected constructor(accountId: string | null, team: JiraTeam, name: string) {
+  protected constructor(accountId: string | null, team: JiraTeam, gitHubTeam: SimpleTeam) {
     this.accountId = accountId;
-    this.team = team;
-    this.name = name;
+    this.jiraTeam = team;
+    this.gitHubTeam = gitHubTeam;
   }
 
   public static async create(action: OctokitAction, requested_team: SimpleTeam | null): Promise<TeamReviewData | null> {
     const candidate = this.selectTeam(requested_team);
     if (candidate && await this.senderIsFromOutsideTeam(action, candidate)) {
-      return new TeamReviewData(await action.loadSenderAccountId(), candidate.jiraTeam, requested_team!.name);
+      return new TeamReviewData(await action.loadSenderAccountId(), candidate.jiraTeam, requested_team!);
     } else {
       return null;
     }

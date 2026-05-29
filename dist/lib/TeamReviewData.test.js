@@ -64,13 +64,16 @@ describe('TeamReviewData', () => {
     });
     describe('create', () => {
         it('platform-cloud-eng-squad, user found in Jira', async () => {
-            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), createSimpleTeam('platform-cloud-eng-squad'))).toEqual({ accountId: '1234-account', team: JiraTeams.CloudEngineering, "name": "platform-cloud-eng-squad" });
+            const gitHubTeam = createSimpleTeam('platform-cloud-eng-squad');
+            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), gitHubTeam)).toEqual({ accountId: '1234-account', jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
         });
         it('platform-cloud-eng-squad, user not found in Jira', async () => {
-            expect(await TeamReviewData.create(createAction('some-login', null), createSimpleTeam('platform-cloud-eng-squad'))).toEqual({ accountId: null, team: JiraTeams.CloudEngineering, "name": "platform-cloud-eng-squad" });
+            const gitHubTeam = createSimpleTeam('platform-cloud-eng-squad');
+            expect(await TeamReviewData.create(createAction('some-login', null), gitHubTeam)).toEqual({ accountId: null, jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
         });
         it('platform-cloud-prod-eng-squad', async () => {
-            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), createSimpleTeam('platform-cloud-prod-eng-squad'))).toEqual({ accountId: '1234-account', team: JiraTeams.CloudProductionEngineering, "name": "platform-cloud-prod-eng-squad" });
+            const gitHubTeam = createSimpleTeam('platform-cloud-prod-eng-squad');
+            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), gitHubTeam)).toEqual({ accountId: '1234-account', jiraTeam: JiraTeams.CloudProductionEngineering, gitHubTeam });
         });
         it('another team', async () => {
             expect(await TeamReviewData.create(createAction('some-login', undefined), createSimpleTeam('another-team'))).toBeNull();
