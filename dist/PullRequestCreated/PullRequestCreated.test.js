@@ -175,7 +175,7 @@ describe('PullRequestCreated', () => {
             "No parent issue found",
             "No boardId is configured for team .NET Squad",
             "Found 2 Evergreen Epic(s), using NET-1000 .NET KTLO Epic",
-            "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":null,\"parent\":{\"key\":\"NET-1000\"}})",
+            "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"description\":{\"type\":\"doc\",\"version\":1,\"content\":[{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"Original description, this ignores USER-1234 tickets as those should not be parents\"}]}]},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":null,\"parent\":{\"key\":\"NET-1000\"}})",
             "Updating PR #42 title to: KEY-4242 Standalone PR",
             "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"KEY-4242 Standalone PR\"})",
             "Invoked jira.moveIssue('KEY-4242', 'Commit', null)",
