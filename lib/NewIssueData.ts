@@ -26,6 +26,7 @@ import { JiraClient, Issue } from "./JiraClient.js";
 import { PullRequest } from "./OctokitTypes.js";
 import { JiraTeam } from "./JiraTeam.js";
 import { TeamReviewData } from "./TeamReviewData.js";
+import { AtlassianDocument } from "./AtlassianDocumentFormat.js";
 
 export class NewIssueData {
   public readonly projectKey: string;
@@ -48,6 +49,7 @@ export class NewIssueData {
     if (projectKey) {
       const additionalFields = this.parseAdditionalFields(inputAdditionalFields);
       const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Maintenance'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
+      parameters.description = this.parseDescription(pr.body);
       if (parameters.issuetype.name !== 'Sub-task') {                                 // These fields cannot be set on Sub-task. Their values are inherited from the parent issue.
         const team = await this.findTeam(jira, accountId, projectKey, fallbackTeam);  // Can be null for bots when project lead is not member of any team, and fallbackTeam is not set. Jira request will fail if the field is mandatory for the project.
         if (team != null) {
@@ -69,6 +71,7 @@ export class NewIssueData {
   public static async createForEngExp(jira: JiraClient, pr: PullRequest, accountId: string | null): Promise<NewIssueData> {
     const projectKey = await this.computeProjectKeyForEngExp(jira, pr, accountId);
     const parameters = this.newIssueParameters(projectKey, null, 'Maintenance');
+    parameters.description = this.parseDescription(pr.body);
     if (accountId) {
       parameters.reporter = { id: accountId };
     }
@@ -212,6 +215,14 @@ export class NewIssueData {
     } else {
       console.log('Team was not found, can not search for parent Evergreen Epic');
       return null;
+    }
+  }
+
+  private static parseDescription(body: string | null): AtlassianDocument | undefined {
+    if (body && !/^Part of\s*<!--.*-->\s*$/s.test(body)) {  // Don't spam Jira with default PR template
+      return AtlassianDocument.fromMarkdown(body);
+    } else {
+      return undefined;
     }
   }
 }

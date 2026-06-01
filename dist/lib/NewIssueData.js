@@ -20,6 +20,7 @@
 import { JiraTeams } from "../Data/TeamConfiguration.js";
 import { Config } from "./Configuration.js";
 import { JIRA_ISSUE_PATTERN } from "./Constants.js";
+import { AtlassianDocument } from "./AtlassianDocumentFormat.js";
 export class NewIssueData {
     projectKey;
     accountId;
@@ -39,6 +40,7 @@ export class NewIssueData {
         if (projectKey) {
             const additionalFields = this.parseAdditionalFields(inputAdditionalFields);
             const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Maintenance'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
+            parameters.description = this.parseDescription(pr.body);
             if (parameters.issuetype.name !== 'Sub-task') { // These fields cannot be set on Sub-task. Their values are inherited from the parent issue.
                 const team = await this.findTeam(jira, accountId, projectKey, fallbackTeam); // Can be null for bots when project lead is not member of any team, and fallbackTeam is not set. Jira request will fail if the field is mandatory for the project.
                 if (team != null) {
@@ -60,6 +62,7 @@ export class NewIssueData {
     static async createForEngExp(jira, pr, accountId) {
         const projectKey = await this.computeProjectKeyForEngExp(jira, pr, accountId);
         const parameters = this.newIssueParameters(projectKey, null, 'Maintenance');
+        parameters.description = this.parseDescription(pr.body);
         if (accountId) {
             parameters.reporter = { id: accountId };
         }
@@ -200,6 +203,14 @@ export class NewIssueData {
         else {
             console.log('Team was not found, can not search for parent Evergreen Epic');
             return null;
+        }
+    }
+    static parseDescription(body) {
+        if (body && !/^Part of\s*<!--.*-->\s*$/s.test(body)) { // Don't spam Jira with default PR template
+            return AtlassianDocument.fromMarkdown(body);
+        }
+        else {
+            return undefined;
         }
     }
 }
