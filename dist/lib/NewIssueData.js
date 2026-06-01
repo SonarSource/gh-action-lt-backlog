@@ -174,6 +174,9 @@ export class NewIssueData {
                 return team;
             }
         }
+        if (projectKey === 'SC') { // GHA-293: Lead of SC is in too many squads => issues lands in random board. Bot PRs should fallback to Cloud Engineering, anything else is configurable via 'fallback-team' parameter.
+            return JiraTeams.CloudEngineering;
+        }
         const project = await jira.loadProject(projectKey);
         console.log(`No team found for current user, using ${projectKey} lead ${project.lead.displayName}`);
         return jira.findTeamByUser(project.lead.accountId);

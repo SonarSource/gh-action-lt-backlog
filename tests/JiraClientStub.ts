@@ -100,6 +100,8 @@ export const jiraClientStub = {
         return [];
       case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=eb40f25e-3596-4541-b661-cf83e7bc4fa6 ORDER BY key':
         return [{ key: 'BUILD-1000', fields: { summary: 'Eng Exp KTLO Epic' } } as Issue];
+      case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=772ea1dc-3574-42bc-a378-7a898d910ebd ORDER BY key':
+        return [{ key: 'SC-3333', fields: { summary: 'SC KTLO Epic platform-cloud-eng-squad' } } as Issue];
       case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "PREQ") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=772ea1dc-3574-42bc-a378-7a898d910ebd ORDER BY key':
         return [{ key: 'SC-1000', fields: { summary: 'Current SC Review Epic platform-cloud-eng-squad' } } as Issue];
       case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "PREQ") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=6f2e744b-9f09-4c3a-852e-e2f138d1c14f ORDER BY key':

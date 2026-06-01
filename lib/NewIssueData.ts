@@ -97,7 +97,7 @@ export class NewIssueData {
     parameters.customfield_10001 = teamReview.jiraTeam.id;
     parameters.labels = ['preq-review-code'];
     parameters.parent = await this.findEvergreenEpic(jira, teamReview.jiraTeam, 'summary ~ "PREQ"');
-    return new NewIssueData('PREQ', teamReview.accountId, null, parameters); 
+    return new NewIssueData('PREQ', teamReview.accountId, null, parameters);
   }
 
   private static computeProjectKey(inputJiraProject: string, parent: any): string {
@@ -184,6 +184,9 @@ export class NewIssueData {
       if (team) {
         return team;
       }
+    }
+    if (projectKey === 'SC') {  // GHA-293: Lead of SC is in too many squads => issues lands in random board. Bot PRs should fallback to Cloud Engineering, anything else is configurable via 'fallback-team' parameter.
+      return JiraTeams.CloudEngineering;
     }
     const project = await jira.loadProject(projectKey);
     console.log(`No team found for current user, using ${projectKey} lead ${project.lead.displayName}`);
