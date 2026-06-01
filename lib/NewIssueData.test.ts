@@ -257,6 +257,22 @@ describe('NewIssueData', () => {
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', null, '')).toEqual(createExpectedWithoutAccount('Body'));
   });
 
+  it('create with SC without fallback', async () => {
+    const expected: NewIssueData = {
+      accountId: null,
+      assigneeId: null,
+      additionalFields: {
+        customfield_10001: '772ea1dc-3574-42bc-a378-7a898d910ebd',
+        customfield_10020: 42,
+        issuetype: { name: 'Maintenance' },
+        parent: { key: 'SC-3333' },
+        description: createDescription('Body'),
+      },
+      projectKey: 'SC'
+    };
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'SC', '', null, '')).toEqual(expected);
+  });
+
   it('createForPreqReview', async () => {
     expect(await NewIssueData.createForPreqReview(jiraClientStub, TeamReviewDataStub.createCloudEngineering('1234-account'))).toEqual({
       accountId: '1234-account',
