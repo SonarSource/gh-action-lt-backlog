@@ -35,16 +35,18 @@ export class Debug extends OctokitAction {
         // a8f6f785-aea9-4647-8200-f249dfd5fa70
         this.log(`Schedule ID: ${scheduleId}`);
         // const oncallData = await this.sendRootlyGet(`oncalls?filter[schedule_ids]=${scheduleId}&include=user`);
-        const oncallData = await this.sendRootlyGet(`oncalls?include=user,schedule&earliest=true`);
-        this.log('oncallData:');
-        this.logSerialized(oncallData);
-        const userId = oncallData?.data?.[0]?.relationships?.user?.data?.id;
-        const user = oncallData?.included?.find((x) => x.type === 'users' && x.id === userId);
-        if (!user) {
-            this.log(`On-call user not found for schedule: ${scheduleName}`);
-            return null;
-        }
-        return { name: user.attributes.full_name, email: user.attributes.email };
+        //const oncallData = await this.sendRootlyGet(`oncalls?include=user,schedule&earliest=true`);
+        const data = await this.sendRootlyGet(`on_call_shifts?filter[schedule_id]=${scheduleId}&include=user`);
+        return null;
+        // this.log('oncallData:');
+        // this.logSerialized(oncallData);
+        // const userId = oncallData?.data?.[0]?.relationships?.user?.data?.id;
+        // const user = oncallData?.included?.find((x: any) => x.type === 'users' && x.id === userId);
+        // if (!user) {
+        //   this.log(`On-call user not found for schedule: ${scheduleName}`);
+        //   return null;
+        // }
+        // return { name: user.attributes.full_name, email: user.attributes.email };
     }
     async sendRootlyGet(path) {
         const token = this.inputString('rootly-token');
