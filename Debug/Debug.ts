@@ -49,7 +49,10 @@ export class Debug extends OctokitAction {
     // const data = await this.sendRootlyGet(`schedules?filter[name]=${encodeURIComponent(scheduleName)}`);
     // this.logSerialized(data);
 
-    const data = await this.sendRootlyGet(`schedules/a8f6f785-aea9-4647-8200-f249dfd5fa70`);
+    // const data = await this.sendRootlyGet(`schedules/a8f6f785-aea9-4647-8200-f249dfd5fa70`);
+    // this.logSerialized(data);
+
+    const data = await this.sendRootlyGet(`users/29784/email_addresses`);
     this.logSerialized(data);
 
 
