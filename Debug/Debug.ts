@@ -20,11 +20,60 @@
 
 import { OctokitAction } from '../lib/OctokitAction.js';
 
+type OnCallUser = {
+  name: string;
+  email: string;
+};
+
 export class Debug extends OctokitAction {
   override async execute(): Promise<void> {
-    const token = this.inputString('rootly-token');
+    const result = await this.readRootlyOnCall('Cloud Engineering Squad - Triager');
+    this.log(JSON.stringify(result));
+  }
 
-    this.log('Debug ' + token.length);
+  private async readRootlyOnCall(scheduleName: string): Promise<OnCallUser | null> {
+    this.log(`Loading Rootly on-call for schedule: ${scheduleName}`);
+    // FIXME: Schedule
+    const schedulesData = await this.sendRootlyGet(`schedules?filter[name]=${encodeURIComponent(scheduleName)}`);
+    const scheduleId = schedulesData?.data?.[0]?.id;
+    if (!scheduleId) {
+      this.log('Schedule not found');
+      return null;
+    }
+    // a8f6f785-aea9-4647-8200-f249dfd5fa70
+    this.log(`Schedule ID: ${scheduleId}`);
+
+    const oncallData = await this.sendRootlyGet(`oncalls?filter[schedule_ids]=${scheduleId}&include=user`);
+    this.log('oncallData:');
+    this.logSerialized(oncallData);
+    const userId = oncallData?.data?.[0]?.relationships?.user?.data?.id;
+    const user = oncallData?.included?.find((x: any) => x.type === 'users' && x.id === userId);
+    if (!user) {
+      this.log(`On-call user not found for schedule: ${scheduleName}`);
+      return null;
+    }
+    return { name: user.attributes.full_name, email: user.attributes.email };
+  }
+
+  private async sendRootlyGet(path: string): Promise<any> {
+    const token = this.inputString('rootly-token');
+    if (!token) {
+      throw new Error('rootly-token was not set');
+    }
+    try {
+      const response = await fetch(`https://api.rootly.com/v1/${path}`, {
+        headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.api+json' },
+      });
+      if (!response.ok) {
+        this.log(`Rootly request failed. Error ${response.status}: ${response.statusText}`);
+        return null;
+      }
+      return await response.json();
+    } catch (ex) {
+      this.log('Failed to send Rootly request');
+      this.log((ex as Error).toString());
+      return null;
+    }
   }
 }
 
