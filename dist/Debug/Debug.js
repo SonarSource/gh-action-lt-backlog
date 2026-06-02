@@ -26,17 +26,18 @@ export class Debug extends OctokitAction {
     async readRootlyOnCall(scheduleName) {
         this.log(`Loading Rootly on-call for schedule: ${scheduleName}`);
         // FIXME: Schedule
-        const schedulesData = await this.sendRootlyGet(`schedules?filter[name]=${encodeURIComponent(scheduleName)}`);
-        const scheduleId = schedulesData?.data?.[0]?.id;
-        if (!scheduleId) {
-            this.log('Schedule not found');
-            return null;
-        }
-        // a8f6f785-aea9-4647-8200-f249dfd5fa70
-        this.log(`Schedule ID: ${scheduleId}`);
+        // const schedulesData = await this.sendRootlyGet(`schedules?filter[name]=${encodeURIComponent(scheduleName)}`);
+        // const scheduleId = schedulesData?.data?.[0]?.id;
+        // if (!scheduleId) {
+        //   this.log('Schedule not found');
+        //   return null;
+        // }
+        // // a8f6f785-aea9-4647-8200-f249dfd5fa70
+        // this.log(`Schedule ID: ${scheduleId}`);
         // const oncallData = await this.sendRootlyGet(`oncalls?filter[schedule_ids]=${scheduleId}&include=user`);
         //const oncallData = await this.sendRootlyGet(`oncalls?include=user,schedule&earliest=true`);
-        const data = await this.sendRootlyGet(`on_call_shifts?filter[schedule_id]=${scheduleId}&include=user`);
+        const data = await this.sendRootlyGet(`schedules?filter[name]=${encodeURIComponent(scheduleName)}`);
+        this.logSerialized(data);
         return null;
         // this.log('oncallData:');
         // this.logSerialized(oncallData);
