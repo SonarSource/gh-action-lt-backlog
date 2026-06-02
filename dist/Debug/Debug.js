@@ -34,7 +34,8 @@ export class Debug extends OctokitAction {
         }
         // a8f6f785-aea9-4647-8200-f249dfd5fa70
         this.log(`Schedule ID: ${scheduleId}`);
-        const oncallData = await this.sendRootlyGet(`oncalls?filter[schedule_ids]=${scheduleId}&include=user`);
+        // const oncallData = await this.sendRootlyGet(`oncalls?filter[schedule_ids]=${scheduleId}&include=user`);
+        const oncallData = await this.sendRootlyGet(`oncalls?include=user,schedule`);
         this.log('oncallData:');
         this.logSerialized(oncallData);
         const userId = oncallData?.data?.[0]?.relationships?.user?.data?.id;
