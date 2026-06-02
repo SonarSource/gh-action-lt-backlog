@@ -1,0 +1,18 @@
+name: 'Debug action'
+inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
+  jira-user:
+    description: 'Jira auth User'
+    required: true
+  jira-token:
+    description: 'Jira auth Token'
+    required: true
+  rootly-token:
+    description: 'Rootly auth Token'
+    required: false
+
+runs:
+  using: 'node20'
+  main: '../dist/Debug/Debug.js'
