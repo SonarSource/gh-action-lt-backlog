@@ -52,12 +52,13 @@ export class Debug extends OctokitAction {
     // const data = await this.sendRootlyGet(`schedules/a8f6f785-aea9-4647-8200-f249dfd5fa70`);
     // this.logSerialized(data);
 
-    // this.log('With override 2');
-    // const data = await this.sendRootlyGet(`schedules/a8f6f785-aea9-4647-8200-f249dfd5fa70/shifts`);
-    // this.logSerialized(data);
+    this.log('With override 3');
+    const data = await this.sendRootlyGet(`schedules/a8f6f785-aea9-4647-8200-f249dfd5fa70/shifts?include=user`);
+    this.logSerialized(data);
 
-    const override = await this.sendRootlyGet(`override_shifts/13a12ad7-9e67-44e2-abed-452d2e6c2995`);
-    this.logSerialized(override);
+    // //                                         shift_overrides/13a12ad7-9e67-44e2-abed-452d2e6c2995
+    // const override = await this.sendRootlyGet(`override_shifts/13a12ad7-9e67-44e2-abed-452d2e6c2995`);
+    // this.logSerialized(override);
 
 
 
