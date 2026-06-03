@@ -24,5 +24,5 @@ inputs:
     description: 'Jira Team name to be used as a default fallback'
     required: false
 runs:
-  using: 'node20'
+  using: 'node24'
   main: '../dist/PullRequestCreated/Index.js'
