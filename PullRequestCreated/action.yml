@@ -27,5 +27,5 @@ inputs:
     description: 'Component added to team review PREQ ticket'
     required: false
 runs:
-  using: 'node20'
+  using: 'node24'
   main: '../dist/PullRequestCreated/Index.js'

@@ -1,4 +1,4 @@
 name: 'Log event payload'
 runs:
-  using: 'node20'
+  using: 'node24'
   main: '../dist/LogPayload/Index.js'
