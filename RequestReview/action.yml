@@ -4,6 +4,9 @@ inputs:
   github-token:
     description: 'GitHub auth Token'
     required: true
+  rootly-token:
+    description: 'Rootly auth Token'
+    required: false
   jira-user:
     description: 'Jira auth User'
     required: true
