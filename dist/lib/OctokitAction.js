@@ -27,8 +27,8 @@ import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID
 import { NewIssueData } from './NewIssueData.js';
 export class OctokitAction extends Action {
     rest;
-    octokit;
     jira;
+    octokit;
     isEngXpSquad;
     graphqlWithAuth = null;
     senderAccountId = undefined; // Cache
@@ -240,10 +240,13 @@ export class OctokitAction extends Action {
                 }
             }
             if (teamReview) {
-                const data = await NewIssueData.createForPreqReview(this.jira, teamReview);
+                const data = await NewIssueData.createForTeamReview(this.jira, teamReview);
                 this.log(`Creating ${data.projectKey} review issue`);
                 const reviewIssueId = await this.jira.createIssue(data.projectKey, `PR review for ${pr.title}`, data.additionalFields);
                 if (reviewIssueId) {
+                    if (data.assigneeId) {
+                        await this.jira.assignIssueToAccount(reviewIssueId, data.assigneeId);
+                    }
                     await this.jira.addIssueRemoteLink(reviewIssueId, pr.html_url);
                     await this.jira.linkIssues(reviewIssueId, issueId, 'Relates');
                     await this.addComment(pr.number, `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.gitHubTeam.name}\n<!--slug: ${teamReview.gitHubTeam.slug} -->`); // SubmitReview depends on format of this comment

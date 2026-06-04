@@ -24,10 +24,20 @@ import { LogTester } from '../tests/LogTester.js';
 function createSimpleTeam(name) {
     return { name, slug: name };
 }
-function createAction(senderLogin, senderAccountId) {
+function createAction(senderLogin, senderAccountId, assigneeAccountId) {
     const sender = senderLogin ? { login: senderLogin, type: 'User' } : undefined;
     return {
         payload: { sender },
+        jira: {
+            async findAccountId(emails) {
+                if (assigneeAccountId === undefined) {
+                    throw new Error('This method was not expected to be called');
+                }
+                else {
+                    return assigneeAccountId;
+                }
+            }
+        },
         async loadSenderAccountId() {
             if (senderAccountId === undefined) {
                 throw new Error('This method was not expected to be called');
@@ -51,7 +61,10 @@ function createAction(senderLogin, senderAccountId) {
                 default:
                     throw new Error(`Scaffolding did not expect teamSlug: ${teamSlug}`);
             }
-        }
+        },
+        async findRootlyOnCallEmails(schleduleId) {
+            return []; // Irrelevant, not consumed in scaffolding
+        },
     };
 }
 describe('TeamReviewData', () => {
@@ -65,21 +78,21 @@ describe('TeamReviewData', () => {
     describe('create', () => {
         it('platform-cloud-eng-squad, user found in Jira', async () => {
             const gitHubTeam = createSimpleTeam('platform-cloud-eng-squad');
-            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), gitHubTeam)).toEqual({ accountId: '1234-account', jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
+            expect(await TeamReviewData.create(createAction('some-login', '1234-account', '5000-triagger'), gitHubTeam)).toEqual({ senderAccountId: '1234-account', assigneeAccountId: '5000-triagger', jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
         });
         it('platform-cloud-eng-squad, user not found in Jira', async () => {
             const gitHubTeam = createSimpleTeam('platform-cloud-eng-squad');
-            expect(await TeamReviewData.create(createAction('some-login', null), gitHubTeam)).toEqual({ accountId: null, jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
+            expect(await TeamReviewData.create(createAction('some-login', null, null), gitHubTeam)).toEqual({ senderAccountId: null, assigneeAccountId: null, jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
         });
         it('platform-cloud-prod-eng-squad', async () => {
             const gitHubTeam = createSimpleTeam('platform-cloud-prod-eng-squad');
-            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), gitHubTeam)).toEqual({ accountId: '1234-account', jiraTeam: JiraTeams.CloudProductionEngineering, gitHubTeam });
+            expect(await TeamReviewData.create(createAction('some-login', '1234-account', '5000-triagger'), gitHubTeam)).toEqual({ senderAccountId: '1234-account', assigneeAccountId: '5000-triagger', jiraTeam: JiraTeams.CloudProductionEngineering, gitHubTeam });
         });
         it('another team', async () => {
-            expect(await TeamReviewData.create(createAction('some-login', undefined), createSimpleTeam('another-team'))).toBeNull();
+            expect(await TeamReviewData.create(createAction('some-login', undefined, undefined), createSimpleTeam('another-team'))).toBeNull();
         });
         it('null team', async () => {
-            expect(await TeamReviewData.create(createAction('some-login', undefined), null)).toBeNull();
+            expect(await TeamReviewData.create(createAction('some-login', undefined, undefined), null)).toBeNull();
         });
         it.each([
             { team: 'platform-cloud-eng-squad', user: 'cloud-user-2' },
@@ -87,7 +100,7 @@ describe('TeamReviewData', () => {
             { team: 'platform-cloud-prod-eng-squad', user: 'cloud-user-2' },
             { team: 'platform-cloud-prod-eng-squad', user: 'cloud-prod-user-2' },
         ])('null for $user from the same team $team', async ({ team, user }) => {
-            expect(await TeamReviewData.create(createAction(user, undefined), createSimpleTeam(team))).toBeNull();
+            expect(await TeamReviewData.create(createAction(user, undefined, undefined), createSimpleTeam(team))).toBeNull();
         });
     });
 });
