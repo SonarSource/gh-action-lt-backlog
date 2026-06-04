@@ -195,6 +195,35 @@ export class OctokitAction extends Action {
             return null;
         }
     }
+    async findRootlyOnCallEmails(scheduleId) {
+        this.log(`Finding Rootly On-Call email for schedule: ${scheduleId}`);
+        const response = await this.sendRootlyGet(`schedules/${scheduleId}/shifts?include=user`);
+        const emails = response?.included.filter(x => x.type === 'users').map(x => x.attributes.email) || [];
+        this.log(`Found ${emails.length} Rootly On-Call users`); // Do not leak email addresses into logs
+        return emails;
+    }
+    async sendRootlyGet(path) {
+        const token = this.inputString('rootly-token');
+        if (!token) {
+            this.log('rootly-token was not set, request can not be send');
+            return null;
+        }
+        try {
+            const response = await fetch(`https://api.rootly.com/v1/${path}`, {
+                headers: { authorization: `Bearer ${token}` },
+            });
+            if (!response.ok) {
+                this.log(`Rootly request failed. Error ${response.status}: ${response.statusText}`);
+                return null;
+            }
+            return await response.json();
+        }
+        catch (ex) {
+            this.log('Failed to send Rootly request');
+            this.log(ex.toString());
+            return null;
+        }
+    }
     async processRequestReview(pr, issueId, component, requested_reviewer, teamReview) {
         if (requested_reviewer?.type === "Bot") {
             this.log(`Skipping request review from bot: ${requested_reviewer.login}`);
