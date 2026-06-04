@@ -140,74 +140,88 @@ describe('TeamConfiguration', () => {
     logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
   });
 
-  it('EngineeringExperienceSquad is valid', async () => {
-    const team = await jira.findTeamByName(JiraTeams.EngineeringExperience.name);
-    expect(team).not.toBeNull();
-    expect(team!.id).toBe(JiraTeams.EngineeringExperience.id);
-  });
+  describe('Jira', () => {
+    it('EngineeringExperienceSquad is valid', async () => {
+      const team = await jira.findTeamByName(JiraTeams.EngineeringExperience.name);
+      expect(team).not.toBeNull();
+      expect(team!.id).toBe(JiraTeams.EngineeringExperience.id);
+    });
 
-  it('CloudEngineeringSquad is valid', async () => {
-    const team = await jira.findTeamByName(JiraTeams.CloudEngineering.name);
-    expect(team).not.toBeNull();
-    expect(team!.id).toBe(JiraTeams.CloudEngineering.id);
-  });
+    it('CloudEngineeringSquad is valid', async () => {
+      const team = await jira.findTeamByName(JiraTeams.CloudEngineering.name);
+      expect(team).not.toBeNull();
+      expect(team!.id).toBe(JiraTeams.CloudEngineering.id);
+    });
 
-  it('CloudProductionEngineeringSquad is valid', async () => {
-    const team = await jira.findTeamByName(JiraTeams.CloudProductionEngineering.name);
-    expect(team).not.toBeNull();
-    expect(team!.id).toBe(JiraTeams.CloudProductionEngineering.id);
-  });
+    it('CloudProductionEngineeringSquad is valid', async () => {
+      const team = await jira.findTeamByName(JiraTeams.CloudProductionEngineering.name);
+      expect(team).not.toBeNull();
+      expect(team!.id).toBe(JiraTeams.CloudProductionEngineering.id);
+    });
 
-  it('teams have valid names', async () => {
-    for (const teamData of TeamConfigurationData) {
-      const team = await jira.findTeamByName(teamData.name);
-      if (!team) {
-        fail(`Configured team does not exist in Jira: ${teamData.name}`);
+    it('teams have valid names', async () => {
+      for (const teamData of TeamConfigurationData) {
+        const team = await jira.findTeamByName(teamData.name);
+        if (!team) {
+          fail(`Configured team does not exist in Jira: ${teamData.name}`);
+        }
       }
-    }
+    });
+
+    it('teams have valid boardId', async () => {
+      for (const team of TeamConfigurationData) {
+        const board = await jira.findBoard(team.boardId);
+        if (!board) {
+          fail(`Configured team ${team.name} does not have a valid boardId: ${team.boardId}`);
+        }
+      }
+    });
+
+    it('list new teams', async () => {
+      const knownTeams: Set<string> = new Set();
+      for (const team of TeamConfigurationData) {
+        knownTeams.add(team.name);
+      }
+      for (const team of ignoredTeams) {
+        knownTeams.add(team);
+      }
+      const jiraTeams: JiraTeam[] = await (jira as any).findTeams('');
+      jiraTeams.sort((a, b) => a.name.localeCompare(b.name));
+      let newTeams: string = "";
+      for (const jiraTeam of jiraTeams) {
+        if (!knownTeams.has(jiraTeam.name)) {
+          newTeams += `"${jiraTeam.name}",\n`;
+        }
+      }
+      expect(knownTeams.size).toBeGreaterThan(0);
+      expect(jiraTeams.length).toBeGreaterThan(0);
+      if (newTeams) {
+        logTester.originalLog(`New teams found in Jira. Add them to TeamConfigurationData or ignoredTeams:\n${newTeams}`);
+      }
+    });
+
+    it('boardId uses sprints', async () => {
+      for (const team of TeamConfigurationData) {
+        try {
+          await jira.findSprintId(team.boardId);  // Can fail with 400 (Bad Request): The board does not support sprints
+        } catch (error) {
+          fail(`Team "${team.name}" with boardId ${team.boardId} findSprintId failed: ${error}`);
+        }
+      }
+    });
   });
 
-  it('teams have valid boardId', async () => {
-    for (const team of TeamConfigurationData) {
-      const board = await jira.findBoard(team.boardId);
-      if (!board) {
-        fail(`Configured team ${team.name} does not have a valid boardId: ${team.boardId}`);
+  describe('GitHub', () => {
+    it('GitHubTeamSlugs are valid', async () => {
+      for (const slug of Object.values(GitHubTeamSlugs)) {
+        try {
+          await octokit.rest.teams.getByName({ org: 'SonarSource', team_slug: slug });
+        } catch (error) {
+          fail(`GitHubTeamSlug '${slug}' is invalid: ${error}`)
+        }
       }
-    }
-  });
-
-  it('list new teams', async () => {
-    const knownTeams: Set<string> = new Set();
-    for (const team of TeamConfigurationData) {
-      knownTeams.add(team.name);
-    }
-    for (const team of ignoredTeams) {
-      knownTeams.add(team);
-    }
-    const jiraTeams: JiraTeam[] = await (jira as any).findTeams('');
-    jiraTeams.sort((a, b) => a.name.localeCompare(b.name));
-    let newTeams: string = "";
-    for (const jiraTeam of jiraTeams) {
-      if (!knownTeams.has(jiraTeam.name)) {
-        newTeams += `"${jiraTeam.name}",\n`;
-      }
-    }
-    expect(knownTeams.size).toBeGreaterThan(0);
-    expect(jiraTeams.length).toBeGreaterThan(0);
-    if (newTeams) {
-      logTester.originalLog(`New teams found in Jira. Add them to TeamConfigurationData or ignoredTeams:\n${newTeams}`);
-    }
-  });
-
-  it('boardId uses sprints', async () => {
-    for (const team of TeamConfigurationData) {
-      try {
-        await jira.findSprintId(team.boardId);  // Can fail with 400 (Bad Request): The board does not support sprints
-      } catch (error) {
-        fail(`Team "${team.name}" with boardId ${team.boardId} findSprintId failed: ${error}`);
-      }
-    }
-  });
+    });
+  })
 
   it('GitHubTeamSlugs are valid', async () => {
     for (const slug of Object.values(GitHubTeamSlugs)) {
