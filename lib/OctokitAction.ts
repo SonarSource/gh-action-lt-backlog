@@ -37,6 +37,21 @@ type VerifiedEmailsResponse = {
   user: VerifiedEmailsUser;
 }
 
+type RootlyScheduleSearchResponse = {
+  data: {
+    id: string
+  }[];
+}
+
+type RootlyScheduleShiftsResponse = {
+  included: {
+    type: string,
+    attributes: {
+      email: string
+    }
+  }[]
+}
+
 export abstract class OctokitAction extends Action {
   public readonly rest: Api['rest'];
   protected readonly octokit: ReturnType<typeof github.getOctokit>;
@@ -214,6 +229,36 @@ export abstract class OctokitAction extends Action {
       return data;
     } catch (ex) {
       this.log("Failed to send Slack request");
+      this.log((ex as Error).toString());
+      return null;
+    }
+  }
+
+  protected async findRootlyOnCallEmails(scheduleId: string): Promise<string[]> {
+    this.log(`Finding Rootly On-Call email for schedule: ${scheduleId}`);
+    const response = await this.sendRootlyGet<RootlyScheduleShiftsResponse>(`schedules/${scheduleId}/shifts?include=user`);
+    const emails = response?.included.filter(x => x.type === 'users').map(x => x.attributes.email) || [];
+    this.log(`Found ${emails.length} Rootly On-Call users`);  // Do not leak email addresses into logs
+    return emails;
+  }
+
+  private async sendRootlyGet<T>(path: string): Promise<T | null> {
+    const token = this.inputString('rootly-token');
+    if (!token) {
+      this.log('rootly-token was not set, request can not be send');
+      return null;
+    }
+    try {
+      const response = await fetch(`https://api.rootly.com/v1/${path}`, {
+        headers: { authorization: `Bearer ${token}`},
+      });
+      if (!response.ok) {
+        this.log(`Rootly request failed. Error ${response.status}: ${response.statusText}`);
+        return null;
+      }
+      return await response.json() as T;
+    } catch (ex) {
+      this.log('Failed to send Rootly request');
       this.log((ex as Error).toString());
       return null;
     }

@@ -106,7 +106,7 @@ describe('SubmitReview', () => {
     ]);
   });
 
-  describe('Approved move issue and assign', async () => {
+  describe('Approved move issue and assign', () => {
     it('bot', async () => {
       await runAction('approved', ['user@sonarsource.com'], 'dependabot[bot]', 'SUBMIT-1 Issue without assignee');
       expect(logTester.logsParams).toStrictEqual([
@@ -175,7 +175,7 @@ describe('SubmitReview', () => {
     ]);
   });
 
-  describe('Submitted with team review comment', async () => {
+  describe('Submitted with team review comment', () => {
     const comments = [
       {},  // No body
       { body: '' },
