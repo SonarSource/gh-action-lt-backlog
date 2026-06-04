@@ -37,8 +37,8 @@ export const JiraTeams = {
 } satisfies Record<string, JiraTeam>;
 
 export const RootlyScheduleIds = {
-  PlatformCloudEngineering: 'a8f6f785-aea9-4647-8200-f249dfd5fa70',
-  PlatformCloudProductionEngineering: '70205800-ac28-48cd-a45e-b2e56f01edc9',
+  PlatformCloudEngineeringTriagger: 'a8f6f785-aea9-4647-8200-f249dfd5fa70',
+  PlatformCloudProductionEngineeringTriagger: '70205800-ac28-48cd-a45e-b2e56f01edc9',
 };
 
 // If a new Jira issue is created for a standalone PR, it will be assigned to a sprint from a board defined by this file.
