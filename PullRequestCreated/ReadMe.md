@@ -24,6 +24,12 @@ This action does nothing if the PR title contains `DO NOT MERGE` phrase.
 
 Token to access the GitHub API. This is a special token from Vault, see below. The default `secrets.GITHUB_TOKEN` does not have enough permissions.
 
+### `rootly-token`
+
+Optional token to access the Rootly API. This is needed only in repos that ask platform teams for reviews based on CODEOWNERS file.
+
+Vault token to use: `development/kv/data/rootly ro-api-key | ROOTLY_TOKEN;`
+
 ### `jira-user`
 
 User to access the Jira API.
