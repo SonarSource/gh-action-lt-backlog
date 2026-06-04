@@ -17,20 +17,23 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import { JiraTeams, GitHubTeamSlugs } from "../Data/TeamConfiguration.js";
+import { JiraTeams, GitHubTeamSlugs, RootlyScheduleIds } from "../Data/TeamConfiguration.js";
 export class TeamReviewData {
-    accountId;
+    senderAccountId;
+    assigneeAccountId;
     jiraTeam;
     gitHubTeam;
-    constructor(accountId, team, gitHubTeam) {
-        this.accountId = accountId;
+    constructor(senderAccountId, assigneeAccountId, team, gitHubTeam) {
+        this.senderAccountId = senderAccountId;
+        this.assigneeAccountId = assigneeAccountId;
         this.jiraTeam = team;
         this.gitHubTeam = gitHubTeam;
     }
     static async create(action, requested_team) {
         const candidate = this.selectTeam(requested_team);
         if (candidate && await this.senderIsFromOutsideTeam(action, candidate)) {
-            return new TeamReviewData(await action.loadSenderAccountId(), candidate.jiraTeam, requested_team);
+            const assigneeAccountId = await action.jira.findAccountId(await action.findRootlyOnCallEmails(candidate.rootlyScheduleId));
+            return new TeamReviewData(await action.loadSenderAccountId(), assigneeAccountId, candidate.jiraTeam, requested_team);
         }
         else {
             return null;
@@ -40,12 +43,14 @@ export class TeamReviewData {
         if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
             return {
                 jiraTeam: JiraTeams.CloudEngineering,
+                rootlyScheduleId: RootlyScheduleIds.PlatformCloudEngineering,
                 ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
             };
         }
         else if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudProductionEngineering) {
             return {
                 jiraTeam: JiraTeams.CloudProductionEngineering,
+                rootlyScheduleId: RootlyScheduleIds.PlatformCloudProductionEngineering,
                 ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
             };
         }

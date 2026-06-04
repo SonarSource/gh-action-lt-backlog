@@ -18,23 +18,26 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { JiraTeams, GitHubTeamSlugs } from "../Data/TeamConfiguration.js";
+import { JiraTeams, GitHubTeamSlugs, RootlyScheduleIds } from "../Data/TeamConfiguration.js";
 import type { OctokitAction } from "./OctokitAction.js";
 import { SimpleTeam } from "./OctokitTypes.js";
 import { JiraTeam } from "./JiraTeam.js";
 
 type TeamCandidate = {
   jiraTeam: JiraTeam;
+  rootlyScheduleId: string;
   ignoredGitHubTeamSlugs: string[];
 };
 
 export class TeamReviewData {
-  public readonly accountId: string | null;
+  public readonly senderAccountId: string | null;
+  public readonly assigneeAccountId: string | null;
   public readonly jiraTeam: JiraTeam;
   public readonly gitHubTeam: SimpleTeam;
 
-  protected constructor(accountId: string | null, team: JiraTeam, gitHubTeam: SimpleTeam) {
-    this.accountId = accountId;
+  protected constructor(senderAccountId: string | null, assigneeAccountId: string | null, team: JiraTeam, gitHubTeam: SimpleTeam) {
+    this.senderAccountId = senderAccountId;
+    this.assigneeAccountId = assigneeAccountId;
     this.jiraTeam = team;
     this.gitHubTeam = gitHubTeam;
   }
@@ -42,7 +45,8 @@ export class TeamReviewData {
   public static async create(action: OctokitAction, requested_team: SimpleTeam | null): Promise<TeamReviewData | null> {
     const candidate = this.selectTeam(requested_team);
     if (candidate && await this.senderIsFromOutsideTeam(action, candidate)) {
-      return new TeamReviewData(await action.loadSenderAccountId(), candidate.jiraTeam, requested_team!);
+      const assigneeAccountId = await action.jira.findAccountId(await action.findRootlyOnCallEmails(candidate.rootlyScheduleId));
+      return new TeamReviewData(await action.loadSenderAccountId(), assigneeAccountId, candidate.jiraTeam, requested_team!);
     } else {
       return null;
     }
@@ -52,11 +56,13 @@ export class TeamReviewData {
     if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
       return {
         jiraTeam: JiraTeams.CloudEngineering,
+        rootlyScheduleId: RootlyScheduleIds.PlatformCloudEngineering,
         ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
       };
     } else if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudProductionEngineering) {
       return {
         jiraTeam: JiraTeams.CloudProductionEngineering,
+        rootlyScheduleId: RootlyScheduleIds.PlatformCloudProductionEngineering,
         ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
       }
     } else {

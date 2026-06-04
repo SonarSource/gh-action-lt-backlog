@@ -273,10 +273,10 @@ describe('NewIssueData', () => {
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'SC', '', null, '')).toEqual(expected);
   });
 
-  it('createForPreqReview', async () => {
-    expect(await NewIssueData.createForPreqReview(jiraClientStub, TeamReviewDataStub.createCloudEngineering('1234-account'))).toEqual({
+  it('createForTeamReview', async () => {
+    expect(await NewIssueData.createForTeamReview(jiraClientStub, TeamReviewDataStub.createCloudEngineering('1234-account', '5000-assignee'))).toEqual({
       accountId: '1234-account',
-      assigneeId: null,
+      assigneeId: '5000-assignee',
       additionalFields: {
         customfield_10001: '772ea1dc-3574-42bc-a378-7a898d910ebd',
         issuetype: { name: 'Maintenance' },
@@ -288,8 +288,8 @@ describe('NewIssueData', () => {
     });
   });
 
-  it('createForPreqReview with null accountId', async () => {
-    expect(await NewIssueData.createForPreqReview(jiraClientStub, TeamReviewDataStub.createCloudEngineering(null))).toEqual({
+  it('createForTeamReview with null accountId', async () => {
+    expect(await NewIssueData.createForTeamReview(jiraClientStub, TeamReviewDataStub.createCloudEngineering(null, null))).toEqual({
       accountId: null,
       assigneeId: null,
       additionalFields: {

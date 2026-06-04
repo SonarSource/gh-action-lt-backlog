@@ -23,7 +23,7 @@ import { SimpleTeam } from "../lib/OctokitTypes.js";
 import { TeamReviewData } from "../lib/TeamReviewData.js";
 
 export class TeamReviewDataStub extends TeamReviewData {
-  public static createCloudEngineering(accountId: string | null): TeamReviewData {
-    return new TeamReviewData(accountId, JiraTeams.CloudEngineering, { name: 'platform-cloud-eng-squad', slug: 'platform-cloud-eng-squad' } as SimpleTeam);
+  public static createCloudEngineering(senderAccountId: string | null, assigneeAccountId: string | null): TeamReviewData {
+    return new TeamReviewData(senderAccountId, assigneeAccountId, JiraTeams.CloudEngineering, { name: 'platform-cloud-eng-squad', slug: 'platform-cloud-eng-squad' } as SimpleTeam);
   }
 }

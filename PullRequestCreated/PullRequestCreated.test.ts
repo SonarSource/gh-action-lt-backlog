@@ -38,6 +38,11 @@ class TestPullRequestCreated extends PullRequestCreated {
       default: throw new Error(`Scaffolding did not expect login ${login}`);
     }
   }
+
+  public async findRootlyOnCallEmails(scheduleId: string): Promise<string[]> {
+    this.log(`Invoked findRootlyOnCallEmails("${scheduleId}")`);
+    return ["teamreview.triagger@sonarsource.com"];
+  }
 }
 
 async function runAction(jiraProject: string, title: string, body?: string | null, user: string = 'test-user') {
@@ -315,21 +320,25 @@ describe('PullRequestCreated', () => {
       "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-eng-squad\",\"per_page\":100})",
       "Loading members of platform-cloud-prod-eng-squad",
       "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-prod-eng-squad\",\"per_page\":100})",
+      "Invoked findRootlyOnCallEmails(\"a8f6f785-aea9-4647-8200-f249dfd5fa70\")",
       "findEmails called for test-user",
       "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
       "Found 1 Evergreen Epic(s), using SC-1000 Current SC Review Epic platform-cloud-eng-squad",
       "Creating PREQ review issue",
       "Invoked jira.createIssue('PREQ', 'PR review for KEY-4242 Normal PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"reporter\":{\"id\":\"1234-account\"},\"customfield_10001\":\"772ea1dc-3574-42bc-a378-7a898d910ebd\",\"labels\":[\"preq-review-code\"],\"parent\":{\"key\":\"SC-1000\"}})",
+      "Invoked jira.assignIssueToAccount('PREQ-4242', '5000-teamreview-triagger-account')",
       "Invoked jira.addIssueRemoteLink('PREQ-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
       "Invoked jira.linkIssues('PREQ-4242', 'KEY-4242', 'Relates')",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-eng-squad\\n<!--slug: platform-cloud-eng-squad -->\"})",
       "Invoked jira.createComponent('PREQ', 'Parameter Component', 'null')",
       "Invoked jira.addIssueComponent('PREQ-4242', 'Parameter Component')",
       "Processing team review request: platform-cloud-prod-eng-squad",
+      "Invoked findRootlyOnCallEmails(\"70205800-ac28-48cd-a45e-b2e56f01edc9\")",
       "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
       "Found 1 Evergreen Epic(s), using SC-2222 Current SC Review Epic platform-cloud-prod-eng-squad",
       "Creating PREQ review issue",
       "Invoked jira.createIssue('PREQ', 'PR review for KEY-4242 Normal PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"reporter\":{\"id\":\"1234-account\"},\"customfield_10001\":\"6f2e744b-9f09-4c3a-852e-e2f138d1c14f\",\"labels\":[\"preq-review-code\"],\"parent\":{\"key\":\"SC-2222\"}})",
+      "Invoked jira.assignIssueToAccount('PREQ-4242', '5000-teamreview-triagger-account')",
       "Invoked jira.addIssueRemoteLink('PREQ-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
       "Invoked jira.linkIssues('PREQ-4242', 'KEY-4242', 'Relates')",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-prod-eng-squad\\n<!--slug: platform-cloud-prod-eng-squad -->\"})",

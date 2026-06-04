@@ -89,15 +89,15 @@ export class NewIssueData {
     return new NewIssueData(projectKey, accountId, projectKey === 'PREQ' ? null : accountId, parameters); // GHA-86 Leave PREQ unassigned
   }
 
-  public static async createForPreqReview(jira: JiraClient, teamReview: TeamReviewData): Promise<NewIssueData> {
+  public static async createForTeamReview(jira: JiraClient, teamReview: TeamReviewData): Promise<NewIssueData> {
     const parameters = this.newIssueParameters('PREQ', null, 'Maintenance');
-    if (teamReview.accountId) {
-      parameters.reporter = { id: teamReview.accountId };
+    if (teamReview.senderAccountId) {
+      parameters.reporter = { id: teamReview.senderAccountId };
     }
     parameters.customfield_10001 = teamReview.jiraTeam.id;
     parameters.labels = ['preq-review-code'];
     parameters.parent = await this.findEvergreenEpic(jira, teamReview.jiraTeam, 'summary ~ "PREQ"');
-    return new NewIssueData('PREQ', teamReview.accountId, null, parameters);
+    return new NewIssueData('PREQ', teamReview.senderAccountId, teamReview.assigneeAccountId, parameters);
   }
 
   private static computeProjectKey(inputJiraProject: string, parent: any): string {
