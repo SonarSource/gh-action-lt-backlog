@@ -56,13 +56,13 @@ export class TeamReviewData {
     if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
       return {
         jiraTeam: JiraTeams.CloudEngineering,
-        rootlyScheduleId: RootlyScheduleIds.PlatformCloudEngineering,
+        rootlyScheduleId: RootlyScheduleIds.PlatformCloudEngineeringTriager,
         ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
       };
     } else if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudProductionEngineering) {
       return {
         jiraTeam: JiraTeams.CloudProductionEngineering,
-        rootlyScheduleId: RootlyScheduleIds.PlatformCloudProductionEngineering,
+        rootlyScheduleId: RootlyScheduleIds.PlatformCloudProductionEngineeringTriager,
         ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
       }
     } else {
