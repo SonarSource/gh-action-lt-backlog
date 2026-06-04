@@ -234,7 +234,7 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected async findRootlyOnCallEmails(scheduleId: string): Promise<string[]> {
+  public async findRootlyOnCallEmails(scheduleId: string): Promise<string[]> {
     this.log(`Finding Rootly On-Call email for schedule: ${scheduleId}`);
     const response = await this.sendRootlyGet<RootlyScheduleShiftsResponse>(`schedules/${scheduleId}/shifts?include=user`);
     const emails = response?.included.filter(x => x.type === 'users').map(x => x.attributes.email) || [];
