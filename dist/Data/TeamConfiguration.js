@@ -27,6 +27,10 @@ export const JiraTeams = {
     CloudEngineering: { id: '772ea1dc-3574-42bc-a378-7a898d910ebd', name: 'Cloud Engineering' },
     CloudProductionEngineering: { id: '6f2e744b-9f09-4c3a-852e-e2f138d1c14f', name: 'Cloud Production Engineering' },
 };
+export const RootlyScheduleIds = {
+    PlatformCloudEngineering: 'a8f6f785-aea9-4647-8200-f249dfd5fa70',
+    PlatformCloudProductionEngineering: '70205800-ac28-48cd-a45e-b2e56f01edc9',
+};
 // If a new Jira issue is created for a standalone PR, it will be assigned to a sprint from a board defined by this file.
 // If a new team or default board is created, this file should be updated accordingly.
 export const TeamConfigurationData = [

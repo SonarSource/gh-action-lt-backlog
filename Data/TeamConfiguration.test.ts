@@ -22,13 +22,13 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 import { JIRA_DOMAIN, JIRA_ORGANIZATION_ID, JIRA_SITE_ID } from "../lib/Constants.js";
 import { JiraClient } from "../lib/JiraClient.js";
 import { LogTester } from "../tests/LogTester.js";
-import { GitHubTeamSlugs, JiraTeams, TeamConfigurationData } from "./TeamConfiguration.js";
+import { GitHubTeamSlugs, JiraTeams, RootlyScheduleIds, TeamConfigurationData } from "./TeamConfiguration.js";
 import { fail } from 'node:assert';
 import { JiraTeam } from '../lib/JiraTeam.js';
-import { getOctokit } from '@actions/github';
+import { OctokitAction } from '../lib/OctokitAction.js';
 
 let jira: JiraClient;
-let octokit: ReturnType<typeof getOctokit>;
+let action: TestOctokitAction;
 
 vi.setConfig({ testTimeout: 20000 }); // 20s
 
@@ -110,20 +110,29 @@ const ignoredTeams = [
   "WE Singapore",
   "WE Sonar",
   "WE Tokyo",
-
 ];
+
+class TestOctokitAction extends OctokitAction {
+  async execute(): Promise<void> {
+    throw new Error('This is not supposed to be executed');
+  }
+}
 
 beforeAll(() => {
   const jiraUser = process.env["JIRA_USER"];    // Can't use the same name as environment variables read by Octokit actions, because the dash is not propagated from shell to node
   const jiraToken = process.env["JIRA_TOKEN"];
   const githubToken = process.env["GITHUB_TOKEN"];
+  const rootlyToken = process.env["ROOTLY_TOKEN"];  // This is available only in CI, user tokens can't be created by default
   if (jiraUser && jiraToken) {
     jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, jiraUser, jiraToken);
   } else {
     fail('JiraClient tests require JIRA_USER and JIRA_TOKEN environment variables to be set.');
   }
   if (githubToken) {
-    octokit = getOctokit(githubToken);
+    process.env['GITHUB_REPOSITORY'] = 'SonarSource/test-repo'; // Owner needs to be correct for findEmails to work properly
+    process.env['INPUT_GITHUB-TOKEN'] = githubToken;
+    process.env['INPUT_ROOTLY-TOKEN'] = rootlyToken;
+    action = new TestOctokitAction()
   } else {
     fail('GitHub tests require GITHUB_TOKEN environment variable to be set.');
   }
@@ -131,6 +140,7 @@ beforeAll(() => {
 
 describe('TeamConfiguration', () => {
   let logTester: LogTester;
+  const itRunsOnlyInCI = process.env.GITHUB_ACTIONS === 'true' ? it : it.skip;
 
   beforeEach(() => {
     logTester = new LogTester(false);
@@ -215,7 +225,7 @@ describe('TeamConfiguration', () => {
     it('GitHubTeamSlugs are valid', async () => {
       for (const slug of Object.values(GitHubTeamSlugs)) {
         try {
-          await octokit.rest.teams.getByName({ org: 'SonarSource', team_slug: slug });
+          await action.rest.teams.getByName({ org: 'SonarSource', team_slug: slug });
         } catch (error) {
           fail(`GitHubTeamSlug '${slug}' is invalid: ${error}`)
         }
@@ -223,13 +233,16 @@ describe('TeamConfiguration', () => {
     });
   })
 
-  it('GitHubTeamSlugs are valid', async () => {
-    for (const slug of Object.values(GitHubTeamSlugs)) {
-      try {
-        await octokit.rest.teams.getByName({ org: 'SonarSource', team_slug: slug });
-      } catch (error) {
-        fail(`GitHubTeamSlug '${slug}' is invalid: ${error}`)
+  describe('Rootly', () => {
+    itRunsOnlyInCI('RootlyScheduleIds are valid', async () => {
+      for (const scheduleId of Object.values(RootlyScheduleIds)) {
+        try {
+          const emails = await action.findRootlyOnCallEmails(scheduleId);
+          expect(emails.length).toBeGreaterThan(0);
+        } catch (error) {
+          fail(`RootlyScheduleId '${scheduleId}' is invalid: ${error}`)
+        }
       }
-    }
+    });
   });
 });
