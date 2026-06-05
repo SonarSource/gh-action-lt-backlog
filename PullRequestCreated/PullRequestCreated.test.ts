@@ -350,6 +350,7 @@ describe('PullRequestCreated', () => {
 
   it('Normal PR isEngXpSquad', async () => {
     process.env['INPUT_IS-ENG-XP-SQUAD'] = 'true';
+    process.env['INPUT_TEAM-REVIEW-COMPONENT'] = 'Parameter Component';
     await runAction('', 'BUILD-4444 Fix normal issue');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
@@ -358,6 +359,8 @@ describe('PullRequestCreated', () => {
       "Invoked jira.addIssueRemoteLink('BUILD-4444'', 'https://github.com/test-owner/test-repo/pull/42', null)",
       "Invoked jira.createComponent('BUILD', 'test-repo', 'https://github.com/test-owner/test-repo')",
       "Invoked jira.addIssueComponent('BUILD-4444', 'test-repo')",
+      "Invoked jira.createComponent('BUILD', 'Parameter Component', 'null')",
+      "Invoked jira.addIssueComponent('BUILD-4444', 'Parameter Component')",
       "Done"
     ]);
   });
