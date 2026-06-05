@@ -28,6 +28,7 @@ export interface TeamConfiguration {
 export const GitHubTeamSlugs = {
   PlatformCloudEngineering: 'platform-cloud-eng-squad',
   PlatformCloudProductionEngineering: 'platform-cloud-prod-eng-squad',
+  PlatformEngXp: 'platform-eng-xp-squad'
 };
 
 export const JiraTeams = {

@@ -18,12 +18,16 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { JiraTeams } from "../Data/TeamConfiguration.js";
+import { GitHubTeamSlugs, JiraTeams } from "../Data/TeamConfiguration.js";
 import { SimpleTeam } from "../lib/OctokitTypes.js";
 import { TeamReviewData } from "../lib/TeamReviewData.js";
 
 export class TeamReviewDataStub extends TeamReviewData {
   public static createCloudEngineering(senderAccountId: string | null, assigneeAccountId: string | null): TeamReviewData {
-    return new TeamReviewData(senderAccountId, assigneeAccountId, JiraTeams.CloudEngineering, { name: 'platform-cloud-eng-squad', slug: 'platform-cloud-eng-squad' } as SimpleTeam);
+    return new TeamReviewData(true, senderAccountId, assigneeAccountId, JiraTeams.CloudEngineering, { name: GitHubTeamSlugs.PlatformCloudEngineering, slug: GitHubTeamSlugs.PlatformCloudEngineering } as SimpleTeam);
+  }
+
+  public static createEngXp(senderAccountId: string | null, assigneeAccountId: string | null): TeamReviewData {
+    return new TeamReviewData(false, senderAccountId, assigneeAccountId, JiraTeams.EngineeringExperience, { name: GitHubTeamSlugs.PlatformEngXp, slug: GitHubTeamSlugs.PlatformEngXp } as SimpleTeam);
   }
 }

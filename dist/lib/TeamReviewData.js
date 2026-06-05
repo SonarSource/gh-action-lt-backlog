@@ -19,11 +19,13 @@
  */
 import { JiraTeams, GitHubTeamSlugs, RootlyScheduleIds } from "../Data/TeamConfiguration.js";
 export class TeamReviewData {
+    createReviewTicket;
     senderAccountId;
     assigneeAccountId;
     jiraTeam;
     gitHubTeam;
-    constructor(senderAccountId, assigneeAccountId, team, gitHubTeam) {
+    constructor(createReviewTicket, senderAccountId, assigneeAccountId, team, gitHubTeam) {
+        this.createReviewTicket = createReviewTicket;
         this.senderAccountId = senderAccountId;
         this.assigneeAccountId = assigneeAccountId;
         this.jiraTeam = team;
@@ -33,7 +35,7 @@ export class TeamReviewData {
         const candidate = this.selectTeam(requested_team);
         if (candidate && await this.senderIsFromOutsideTeam(action, candidate)) {
             const assigneeAccountId = await action.jira.findAccountId(await action.findRootlyOnCallEmails(candidate.rootlyScheduleId));
-            return new TeamReviewData(await action.loadSenderAccountId(), assigneeAccountId, candidate.jiraTeam, requested_team);
+            return new TeamReviewData(candidate.createReviewTicket, await action.loadSenderAccountId(), assigneeAccountId, candidate.jiraTeam, requested_team);
         }
         else {
             return null;
@@ -42,6 +44,7 @@ export class TeamReviewData {
     static selectTeam(requested_team) {
         if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
             return {
+                createReviewTicket: true,
                 jiraTeam: JiraTeams.CloudEngineering,
                 rootlyScheduleId: RootlyScheduleIds.PlatformCloudEngineeringTriager,
                 ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
@@ -49,9 +52,18 @@ export class TeamReviewData {
         }
         else if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudProductionEngineering) {
             return {
+                createReviewTicket: true,
                 jiraTeam: JiraTeams.CloudProductionEngineering,
                 rootlyScheduleId: RootlyScheduleIds.PlatformCloudProductionEngineeringTriager,
                 ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
+            };
+        }
+        else if (requested_team?.slug === GitHubTeamSlugs.PlatformEngXp) {
+            return {
+                createReviewTicket: false,
+                jiraTeam: JiraTeams.EngineeringExperience,
+                rootlyScheduleId: '', // ToDo: GHA-318, use rootly
+                ignoredGitHubTeamSlugs: []
             };
         }
         else {

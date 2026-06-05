@@ -282,19 +282,21 @@ export abstract class OctokitAction extends Action {
         }
       }
       if (teamReview) {
-        const data = await NewIssueData.createForTeamReview(this.jira, teamReview);
-        this.log(`Creating ${data.projectKey} review issue`);
-        const reviewIssueId = await this.jira.createIssue(data.projectKey, `PR review for ${pr.title}`, data.additionalFields);
-        if (reviewIssueId) {
-          if (data.assigneeId) {
-            await this.jira.assignIssueToAccount(reviewIssueId, data.assigneeId);
+        if (teamReview.createReviewTicket) {
+          const data = await NewIssueData.createForTeamReview(this.jira, teamReview);
+          this.log(`Creating ${data.projectKey} review issue`);
+          const reviewIssueId = await this.jira.createIssue(data.projectKey, `PR review for ${pr.title}`, data.additionalFields);
+          if (reviewIssueId) {
+            if (data.assigneeId) {
+              await this.jira.assignIssueToAccount(reviewIssueId, data.assigneeId);
+            }
+            await this.jira.addIssueRemoteLink(reviewIssueId, pr.html_url);
+            await this.jira.linkIssues(reviewIssueId, issueId, 'Relates');
+            await this.addComment(pr.number, `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.gitHubTeam.name}\n<!--slug: ${teamReview.gitHubTeam.slug} -->`); // SubmitReview depends on format of this comment
+            await this.addJiraComponent(reviewIssueId, component);
           }
-          await this.jira.addIssueRemoteLink(reviewIssueId, pr.html_url);
-          await this.jira.linkIssues(reviewIssueId, issueId, 'Relates');
-          await this.addComment(pr.number, `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.gitHubTeam.name}\n<!--slug: ${teamReview.gitHubTeam.slug} -->`); // SubmitReview depends on format of this comment
-          await this.addJiraComponent(reviewIssueId, component);
         }
-      }
+      } // ToDo: GHA-318, assign to rootly
     }
   }
 

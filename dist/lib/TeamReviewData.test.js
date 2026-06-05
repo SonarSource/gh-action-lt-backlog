@@ -78,15 +78,23 @@ describe('TeamReviewData', () => {
     describe('create', () => {
         it('platform-cloud-eng-squad, user found in Jira', async () => {
             const gitHubTeam = createSimpleTeam('platform-cloud-eng-squad');
-            expect(await TeamReviewData.create(createAction('some-login', '1234-account', '5000-triagger'), gitHubTeam)).toEqual({ senderAccountId: '1234-account', assigneeAccountId: '5000-triagger', jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
+            expect(await TeamReviewData.create(createAction('some-login', '1234-account', '5000-triagger'), gitHubTeam))
+                .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: '5000-triagger', jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
         });
         it('platform-cloud-eng-squad, user not found in Jira', async () => {
             const gitHubTeam = createSimpleTeam('platform-cloud-eng-squad');
-            expect(await TeamReviewData.create(createAction('some-login', null, null), gitHubTeam)).toEqual({ senderAccountId: null, assigneeAccountId: null, jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
+            expect(await TeamReviewData.create(createAction('some-login', null, null), gitHubTeam))
+                .toEqual({ createReviewTicket: true, senderAccountId: null, assigneeAccountId: null, jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
         });
         it('platform-cloud-prod-eng-squad', async () => {
             const gitHubTeam = createSimpleTeam('platform-cloud-prod-eng-squad');
-            expect(await TeamReviewData.create(createAction('some-login', '1234-account', '5000-triagger'), gitHubTeam)).toEqual({ senderAccountId: '1234-account', assigneeAccountId: '5000-triagger', jiraTeam: JiraTeams.CloudProductionEngineering, gitHubTeam });
+            expect(await TeamReviewData.create(createAction('some-login', '1234-account', '5000-triagger'), gitHubTeam))
+                .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: '5000-triagger', jiraTeam: JiraTeams.CloudProductionEngineering, gitHubTeam });
+        });
+        it('eng-xp-squad', async () => {
+            const gitHubTeam = createSimpleTeam('platform-eng-xp-squad');
+            expect(await TeamReviewData.create(createAction('some-login', '1234-account', null), gitHubTeam))
+                .toEqual({ createReviewTicket: false, senderAccountId: '1234-account', assigneeAccountId: null, jiraTeam: JiraTeams.EngineeringExperience, gitHubTeam });
         });
         it('another team', async () => {
             expect(await TeamReviewData.create(createAction('some-login', undefined, undefined), createSimpleTeam('another-team'))).toBeNull();
