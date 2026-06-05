@@ -127,6 +127,7 @@ describe('OctokitAction', () => {
     const pr = await sut.loadPullRequest(42);
     expect(pr).toMatchObject({ number: 42, title: "PR title" });  // Plus the remaining properties from scaffolding
     expect(pr.isRenovate()).toBe(false);
+    expect(pr.isDependabot()).toBe(false);
     expect(pr.isBot()).toBe(false);
     expect(logTester.logsParams).toStrictEqual(["Loading PR #42"]);
   });
@@ -135,6 +136,7 @@ describe('OctokitAction', () => {
     const sut = new TestOctokitAction('renovate[bot]') as any;
     const pr = await sut.loadPullRequest(42);
     expect(pr.isRenovate()).toBe(true);
+    expect(pr.isDependabot()).toBe(false);
     expect(pr.isBot()).toBe(true);
   });
 

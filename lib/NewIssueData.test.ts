@@ -34,7 +34,7 @@ function createPullRequest(title: string, body: string | null, repo: string = 'r
     base: { repo: { name: repo } },
     isRenovate(): boolean { return title === 'Renovate PR' },
     isDependabot(): boolean { return title === 'Dependabot PR' },
-    isBot(): boolean { return title === 'Renovate PR' || title === 'Dependabot PR' }
+    isBot(): boolean { return title === 'Renovate PR' || title === 'Dependabot PR' || title === 'Some Other Bot PR' }
   } as unknown as PullRequest;
 }
 
@@ -232,6 +232,19 @@ describe('NewIssueData', () => {
 
   it('create dependabot ignores parent', async () => {
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Dependabot PR', 'FOREIGN-1234 and NET-1111'), 'KEY', '', null, '')).toEqual(createExpectedWithoutAccount('FOREIGN-1234 and NET-1111'));
+  });
+
+  it('create non-Renovate non-Dependabot bot resolves parent', async () => {
+    // GHA-322: Vault-based bot PRs (e.g. hashicorp-vault-sonar-prod[bot]) are not release-note bots, so the parent must be resolved from the PR body.
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Some Other Bot PR', 'Part of work item KEY-1234'), 'KEY', '', '1234-account', '')).toEqual(createExpectedParent('KEY', 'KEY-1234', 'Sub-task', 'Part of work item KEY-1234'));
+  });
+
+  it('dependabot and renovate ignore parent', async () => {
+    const body = 'Part of NET-1111';
+    const dependabot = await NewIssueData.create(jiraClientStub, createPullRequest('Dependabot PR', body), 'KEY', '', null, '');
+    const renovate = await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', body), 'KEY', '', null, '');
+    expect(dependabot).toEqual(renovate);
+    expect(dependabot?.additionalFields.parent).toEqual({ key: 'NET-1000' });
   });
 
   it('create with fallbackTeam valid', async () => {
