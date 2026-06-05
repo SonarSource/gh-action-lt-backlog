@@ -44,7 +44,7 @@ export class PullRequestCreated extends OctokitAction {
             return;
         }
         let fixedIssues = await this.findFixedIssues(pr);
-        if (fixedIssues == null) {
+        if (fixedIssues.length === 0) {
             const issueId = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields);
             if (issueId) {
                 fixedIssues = [issueId];
