@@ -17,16 +17,22 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+import { JIRA_ISSUE_PATTERN } from './Constants.js';
 import { OctokitAction } from './OctokitAction.js';
+import { addPullRequestExtensions } from './OctokitTypes.js';
 export class PullRequestAction extends OctokitAction {
     async execute() {
-        const pr = await this.loadPullRequest(this.payload.pull_request.number);
-        if (pr) {
-            const issueIds = await this.findFixedIssues(pr);
-            if (issueIds.length === 0) {
-                console.log('No Jira issue found in the PR title.');
-            }
-            else {
+        const payloadPr = addPullRequestExtensions(this.payload.pull_request);
+        // GHA-321 Avoid race condition: PullRequestCreated handles review for newly created issues. This handles everything else.
+        const issueIds = payloadPr.created_at === payloadPr.updated_at // This action was scheduled directly from PR creation (RequestReview), the race is on.
+            ? payloadPr.title?.match(JIRA_ISSUE_PATTERN) ?? [] // Use payload! PR with ticket number will work just fine. Standalone PR doesn't have tickets here and is handled by PullRequestCreated.
+            : await this.findFixedIssues(payloadPr); // Action triggered later => normal processing, including renovate PRs with issue ID in comment
+        if (issueIds.length === 0) {
+            console.log('No Jira issue found in the PR title.');
+        }
+        else {
+            const pr = await this.loadPullRequest(payloadPr.number);
+            if (pr) {
                 for (const issueId of issueIds) {
                     // BUILD/PREQ tickets are processed only when they are from Engineering Experience Squad repos. They should be ignored in any other repo, not to interfere with their process.
                     if ((issueId.startsWith('BUILD-') || issueId.startsWith('PREQ-')) && !this.isEngXpSquad) {

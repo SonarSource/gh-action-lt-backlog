@@ -40,6 +40,8 @@ describe('RequestReview', () => {
             pull_request: {
                 number: 42,
                 title: "PR Title",
+                created_at: '2024-12-24T11:00:00Z',
+                updated_at: '2024-12-24T22:33:44Z', // By default, these are requests send later after PR creation
             },
             requested_reviewer: {
                 login: "test-user",
@@ -58,7 +60,8 @@ describe('RequestReview', () => {
     it('Processes all issues in title', async () => {
         const sut = new RequestReview();
         sut.jira = jiraClientStub;
-        sut.rest = createOctokitRestStub("GHA-42 and GHA-43");
+        sut.rest = createOctokitRestStub('GHA-42 and GHA-43');
+        github.context.payload.pull_request.title = 'GHA-42 and GHA-43';
         sut.findEmails = async function (login) {
             return ["user@sonarsource.com"];
         };
@@ -77,7 +80,8 @@ describe('RequestReview', () => {
         process.env['INPUT_TEAM-REVIEW-COMPONENT'] = 'Parameter Component';
         const sut = new RequestReview();
         sut.jira = jiraClientStub;
-        sut.rest = createOctokitRestStub("GHA-42 Original Title");
+        sut.rest = createOctokitRestStub('GHA-42 Original Title');
+        github.context.payload.pull_request.title = 'GHA-42 Original Title';
         sut.findEmails = async function (login) {
             return ["user@sonarsource.com"];
         };
@@ -104,6 +108,22 @@ describe('RequestReview', () => {
             "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-eng-squad\\n<!--slug: platform-cloud-eng-squad -->\"})",
             "Invoked jira.createComponent('PREQ', 'Parameter Component', 'null')",
             "Invoked jira.addIssueComponent('PREQ-4242', 'Parameter Component')",
+            "Done",
+        ]);
+    });
+    // This is just a smoke test, the logic is tested in PullRequestAction
+    it('Standalone PR created with reviewer', async () => {
+        const sut = new RequestReview();
+        sut.jira = jiraClientStub;
+        sut.rest = createOctokitRestStub('Standalone PR');
+        github.context.payload.pull_request.title = 'Standalone PR';
+        github.context.payload.pull_request.updated_at = github.context.payload.pull_request.created_at; // PR was created with reviewer
+        sut.findEmails = async function (login) {
+            return ["user@sonarsource.com"];
+        };
+        await sut.run();
+        expect(logTester.logsParams).toStrictEqual([
+            "No Jira issue found in the PR title.",
             "Done",
         ]);
     });

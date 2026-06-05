@@ -48,9 +48,10 @@ export class PullRequestCreated extends OctokitAction {
     }
     let fixedIssues = await this.findFixedIssues(pr);
     if (fixedIssues.length === 0) {
-      const issueId = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields);
-      if (issueId) {
-        fixedIssues = [issueId];
+      const issue = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields);
+      if (issue) {
+        fixedIssues = [issue];
+        await this.processAllReviews(pr, issue);  // Only for issues created by this action. Every other scenario is handled by RequestReview action.
       }
     } else if (pr.title !== this.cleanupWhitespace(pr.title)) { // New issues do this when persisting issue ID
       await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
@@ -61,7 +62,6 @@ export class PullRequestCreated extends OctokitAction {
       }
       for (const issue of fixedIssues) {
         await this.jira.addIssueRemoteLink(issue, pr.html_url);
-        await this.processAllReviews(pr, issue);
       }
       if (this.isEngXpSquad) {
         for (const issue of fixedIssues.filter(x => x.startsWith('BUILD-'))) {  // BUILD-9328: No component for PREQ tickets
