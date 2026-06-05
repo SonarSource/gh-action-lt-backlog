@@ -27,15 +27,18 @@ type TeamCandidate = {
   jiraTeam: JiraTeam;
   rootlyScheduleId: string;
   ignoredGitHubTeamSlugs: string[];
+  createReviewTicket: boolean;
 };
 
 export class TeamReviewData {
+  public readonly createReviewTicket: boolean;
   public readonly senderAccountId: string | null;
   public readonly assigneeAccountId: string | null;
   public readonly jiraTeam: JiraTeam;
   public readonly gitHubTeam: SimpleTeam;
 
-  protected constructor(senderAccountId: string | null, assigneeAccountId: string | null, team: JiraTeam, gitHubTeam: SimpleTeam) {
+  protected constructor(createReviewTicket: boolean, senderAccountId: string | null, assigneeAccountId: string | null, team: JiraTeam, gitHubTeam: SimpleTeam) {
+    this.createReviewTicket = createReviewTicket;
     this.senderAccountId = senderAccountId;
     this.assigneeAccountId = assigneeAccountId;
     this.jiraTeam = team;
@@ -46,7 +49,7 @@ export class TeamReviewData {
     const candidate = this.selectTeam(requested_team);
     if (candidate && await this.senderIsFromOutsideTeam(action, candidate)) {
       const assigneeAccountId = await action.jira.findAccountId(await action.findRootlyOnCallEmails(candidate.rootlyScheduleId));
-      return new TeamReviewData(await action.loadSenderAccountId(), assigneeAccountId, candidate.jiraTeam, requested_team!);
+      return new TeamReviewData(candidate.createReviewTicket, await action.loadSenderAccountId(), assigneeAccountId, candidate.jiraTeam, requested_team!);
     } else {
       return null;
     }
@@ -55,16 +58,25 @@ export class TeamReviewData {
   private static selectTeam(requested_team: SimpleTeam | undefined | null): TeamCandidate | null {
     if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
       return {
+        createReviewTicket: true,
         jiraTeam: JiraTeams.CloudEngineering,
         rootlyScheduleId: RootlyScheduleIds.PlatformCloudEngineeringTriager,
         ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
       };
     } else if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudProductionEngineering) {
       return {
+        createReviewTicket: true,
         jiraTeam: JiraTeams.CloudProductionEngineering,
         rootlyScheduleId: RootlyScheduleIds.PlatformCloudProductionEngineeringTriager,
         ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
-      }
+      };
+    } else if (requested_team?.slug === GitHubTeamSlugs.PlatformEngXp) {
+      return {
+        createReviewTicket: false,
+        jiraTeam: JiraTeams.EngineeringExperience,
+        rootlyScheduleId: '', // ToDo: GHA-318, use rootly
+        ignoredGitHubTeamSlugs: []
+      };
     } else {
       return null;
     }

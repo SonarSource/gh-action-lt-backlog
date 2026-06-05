@@ -21,6 +21,7 @@
 export const GitHubTeamSlugs = {
     PlatformCloudEngineering: 'platform-cloud-eng-squad',
     PlatformCloudProductionEngineering: 'platform-cloud-prod-eng-squad',
+    PlatformEngXp: 'platform-eng-xp-squad'
 };
 export const JiraTeams = {
     EngineeringExperience: { id: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6', name: 'Engineering Experience Squad' },

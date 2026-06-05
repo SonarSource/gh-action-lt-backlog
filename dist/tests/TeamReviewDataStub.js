@@ -17,11 +17,14 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import { JiraTeams } from "../Data/TeamConfiguration.js";
+import { GitHubTeamSlugs, JiraTeams } from "../Data/TeamConfiguration.js";
 import { TeamReviewData } from "../lib/TeamReviewData.js";
 export class TeamReviewDataStub extends TeamReviewData {
     static createCloudEngineering(senderAccountId, assigneeAccountId) {
-        return new TeamReviewData(senderAccountId, assigneeAccountId, JiraTeams.CloudEngineering, { name: 'platform-cloud-eng-squad', slug: 'platform-cloud-eng-squad' });
+        return new TeamReviewData(true, senderAccountId, assigneeAccountId, JiraTeams.CloudEngineering, { name: GitHubTeamSlugs.PlatformCloudEngineering, slug: GitHubTeamSlugs.PlatformCloudEngineering });
+    }
+    static createEngXp(senderAccountId, assigneeAccountId) {
+        return new TeamReviewData(false, senderAccountId, assigneeAccountId, JiraTeams.EngineeringExperience, { name: GitHubTeamSlugs.PlatformEngXp, slug: GitHubTeamSlugs.PlatformEngXp });
     }
 }
 //# sourceMappingURL=TeamReviewDataStub.js.map
