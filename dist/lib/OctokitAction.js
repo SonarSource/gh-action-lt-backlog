@@ -200,6 +200,9 @@ export class OctokitAction extends Action {
         }
     }
     async findRootlyOnCallEmails(scheduleId) {
+        if (!scheduleId) {
+            return [];
+        }
         this.log(`Finding Rootly On-Call email for schedule: ${scheduleId}`);
         const response = await this.sendRootlyGet(`schedules/${scheduleId}/shifts?include=user`);
         const emails = response?.included.filter(x => x.type === 'users').map(x => x.attributes.email) || [];
@@ -258,7 +261,10 @@ export class OctokitAction extends Action {
                         await this.addJiraComponent(reviewIssueId, component);
                     }
                 }
-            } // ToDo: GHA-318, assign to rootly
+                else if (teamReview.assigneeAccountId) {
+                    await this.jira.assignIssueToAccount(issueId, teamReview.assigneeAccountId);
+                }
+            }
         }
     }
     async addJiraComponent(issueId, name, description = null) {

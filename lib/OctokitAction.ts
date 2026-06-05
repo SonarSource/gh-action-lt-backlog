@@ -238,7 +238,10 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  public async findRootlyOnCallEmails(scheduleId: string): Promise<string[]> {
+  public async findRootlyOnCallEmails(scheduleId: string | null): Promise<string[]> {
+    if (!scheduleId) {
+      return [];
+    }
     this.log(`Finding Rootly On-Call email for schedule: ${scheduleId}`);
     const response = await this.sendRootlyGet<RootlyScheduleShiftsResponse>(`schedules/${scheduleId}/shifts?include=user`);
     const emails = response?.included.filter(x => x.type === 'users').map(x => x.attributes.email) || [];
@@ -295,8 +298,10 @@ export abstract class OctokitAction extends Action {
             await this.addComment(pr.number, `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.gitHubTeam.name}\n<!--slug: ${teamReview.gitHubTeam.slug} -->`); // SubmitReview depends on format of this comment
             await this.addJiraComponent(reviewIssueId, component);
           }
+        } else if (teamReview.assigneeAccountId) {
+          await this.jira.assignIssueToAccount(issueId, teamReview.assigneeAccountId);
         }
-      } // ToDo: GHA-318, assign to rootly
+      }
     }
   }
 

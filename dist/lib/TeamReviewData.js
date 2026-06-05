@@ -31,8 +31,8 @@ export class TeamReviewData {
         this.jiraTeam = team;
         this.gitHubTeam = gitHubTeam;
     }
-    static async create(action, requested_team) {
-        const candidate = this.selectTeam(requested_team);
+    static async create(action, issueId, requested_team) {
+        const candidate = this.selectTeam(issueId, requested_team);
         if (candidate && await this.senderIsFromOutsideTeam(action, candidate)) {
             const assigneeAccountId = await action.jira.findAccountId(await action.findRootlyOnCallEmails(candidate.rootlyScheduleId));
             return new TeamReviewData(candidate.createReviewTicket, await action.loadSenderAccountId(), assigneeAccountId, candidate.jiraTeam, requested_team);
@@ -41,7 +41,7 @@ export class TeamReviewData {
             return null;
         }
     }
-    static selectTeam(requested_team) {
+    static selectTeam(issueId, requested_team) {
         if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
             return {
                 createReviewTicket: true,
@@ -62,7 +62,7 @@ export class TeamReviewData {
             return {
                 createReviewTicket: false,
                 jiraTeam: JiraTeams.EngineeringExperience,
-                rootlyScheduleId: '', // ToDo: GHA-318, use rootly
+                rootlyScheduleId: issueId.startsWith('PREQ-') ? RootlyScheduleIds.PlatformEngXpTriager : null, // Do not assing BUILD tickets
                 ignoredGitHubTeamSlugs: []
             };
         }
