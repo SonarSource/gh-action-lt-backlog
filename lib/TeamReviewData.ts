@@ -24,10 +24,10 @@ import { SimpleTeam } from "./OctokitTypes.js";
 import { JiraTeam } from "./JiraTeam.js";
 
 type TeamCandidate = {
-  jiraTeam: JiraTeam;
-  rootlyScheduleId: string;
-  ignoredGitHubTeamSlugs: string[];
   createReviewTicket: boolean;
+  jiraTeam: JiraTeam;
+  rootlyScheduleId: string | null;
+  ignoredGitHubTeamSlugs: string[];
 };
 
 export class TeamReviewData {
@@ -45,8 +45,8 @@ export class TeamReviewData {
     this.gitHubTeam = gitHubTeam;
   }
 
-  public static async create(action: OctokitAction, requested_team: SimpleTeam | null): Promise<TeamReviewData | null> {
-    const candidate = this.selectTeam(requested_team);
+  public static async create(action: OctokitAction, issueId: string, requested_team: SimpleTeam | null): Promise<TeamReviewData | null> {
+    const candidate = this.selectTeam(issueId, requested_team);
     if (candidate && await this.senderIsFromOutsideTeam(action, candidate)) {
       const assigneeAccountId = await action.jira.findAccountId(await action.findRootlyOnCallEmails(candidate.rootlyScheduleId));
       return new TeamReviewData(candidate.createReviewTicket, await action.loadSenderAccountId(), assigneeAccountId, candidate.jiraTeam, requested_team!);
@@ -55,7 +55,7 @@ export class TeamReviewData {
     }
   }
 
-  private static selectTeam(requested_team: SimpleTeam | undefined | null): TeamCandidate | null {
+  private static selectTeam(issueId: string, requested_team: SimpleTeam | undefined | null): TeamCandidate | null {
     if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
       return {
         createReviewTicket: true,
@@ -74,7 +74,7 @@ export class TeamReviewData {
       return {
         createReviewTicket: false,
         jiraTeam: JiraTeams.EngineeringExperience,
-        rootlyScheduleId: '', // ToDo: GHA-318, use rootly
+        rootlyScheduleId: issueId.startsWith('PREQ-') ? RootlyScheduleIds.PlatformEngXpTriager : null,  // Do not assing BUILD tickets
         ignoredGitHubTeamSlugs: []
       };
     } else {
