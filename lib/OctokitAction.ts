@@ -173,6 +173,10 @@ export abstract class OctokitAction extends Action {
   }
 
   protected async findEmails(login: string): Promise<string[]> {
+    if (login.endsWith('[bot]')) {
+      this.log(`Skipping email search for bot: ${login}`);
+      return [];
+    }
     this.log(`Searching for email of ${login}`);
     try {
       const { user: { organizationVerifiedDomainEmails: emails } } = await this.sendGraphQL<VerifiedEmailsResponse>(`
