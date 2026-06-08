@@ -22,7 +22,7 @@ export class PullRequestAction extends OctokitAction {
     async execute() {
         const pr = await this.loadPullRequest(this.payload.pull_request.number);
         if (pr) {
-            const issueIds = (await this.findFixedIssues(pr)) ?? [];
+            const issueIds = await this.findFixedIssues(pr);
             if (issueIds.length === 0) {
                 console.log('No Jira issue found in the PR title.');
             }
