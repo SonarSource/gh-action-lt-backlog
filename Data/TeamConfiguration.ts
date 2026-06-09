@@ -28,19 +28,22 @@ export interface TeamConfiguration {
 export const GitHubTeamSlugs = {
   PlatformCloudEngineering: 'platform-cloud-eng-squad',
   PlatformCloudProductionEngineering: 'platform-cloud-prod-eng-squad',
-  PlatformEngXp: 'platform-eng-xp-squad'
+  PlatformEngXp: 'platform-eng-xp-squad',
+  PlatformFrontEndEngineering: 'platform-front-end-eng-squad',
 };
 
 export const JiraTeams = {
   EngineeringExperience: { id: 'eb40f25e-3596-4541-b661-cf83e7bc4fa6', name: 'Engineering Experience Squad' },
   CloudEngineering: { id: '772ea1dc-3574-42bc-a378-7a898d910ebd', name: 'Cloud Engineering' },
   CloudProductionEngineering: { id: '6f2e744b-9f09-4c3a-852e-e2f138d1c14f', name: 'Cloud Production Engineering'},
+  FrontEndEngineering: { id: '53da4327-9401-498d-ae38-28dcb1e347a1', name: 'Front-End Engineering'},
 } satisfies Record<string, JiraTeam>;
 
 export const RootlyScheduleIds = {
   PlatformCloudEngineeringTriager: 'a8f6f785-aea9-4647-8200-f249dfd5fa70',
   PlatformCloudProductionEngineeringTriager: '70205800-ac28-48cd-a45e-b2e56f01edc9',
   PlatformEngXpTriager: '340d3bc8-9b6c-43fc-856a-e44bec97ebc8',
+  PlatformFrontEndEngineeringTriager: '2091132b-a81b-4c6c-80ea-8d4ea74227af',
 };
 
 // If a new Jira issue is created for a standalone PR, it will be assigned to a sprint from a board defined by this file.
@@ -64,7 +67,7 @@ export const TeamConfigurationData: TeamConfiguration[] = [
   { name: "DBD Squad", boardId: 1638 },
   { name: "Development Experience Squad", boardId: 1527 },
   { name: JiraTeams.EngineeringExperience.name, boardId: 1551 },
-  { name: "Front-End Engineering", boardId: 1444 },
+  { name: JiraTeams.FrontEndEngineering.name, boardId: 1444 },
   { name: "Identity Squad", boardId: 1448 },
   { name: "Integrations Squad", boardId: 1438 },
   { name: "JVM Squad", boardId: 1671 },

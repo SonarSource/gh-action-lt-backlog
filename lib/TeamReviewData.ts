@@ -70,6 +70,13 @@ export class TeamReviewData {
         rootlyScheduleId: RootlyScheduleIds.PlatformCloudProductionEngineeringTriager,
         ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
       };
+    } else if (requested_team?.slug === GitHubTeamSlugs.PlatformFrontEndEngineering) {
+      return {
+        createReviewTicket: true,
+        jiraTeam: JiraTeams.FrontEndEngineering,
+        rootlyScheduleId: RootlyScheduleIds.PlatformFrontEndEngineeringTriager,
+        ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformFrontEndEngineering]
+      };
     } else if (requested_team?.slug === GitHubTeamSlugs.PlatformEngXp) {
       return {
         createReviewTicket: false,
