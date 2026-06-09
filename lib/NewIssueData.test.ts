@@ -87,8 +87,19 @@ function createExpectedParent(projectKey: string, parent: string | null, issueTy
   };
 }
 
-function createExpectedWithoutAccount(description: string, projectKey: string = 'KEY', parent: string | null = 'NET-1000', issueType: string = 'Maintenance'): NewIssueData {
-  return { ...createExpectedParent(projectKey, parent, issueType, description), accountId: null, assigneeId: null };
+function createExpectedWithoutAccount(description: string): NewIssueData {
+  return {
+    accountId: null,
+    assigneeId: null,
+    additionalFields: {
+      customfield_10001: 'dot-neeet-team',
+      customfield_10020: null,
+      issuetype: { name: 'Maintenance' },
+      parent: { key: 'NET-1000' },
+      description: createDescription(description),
+    },
+    projectKey: 'KEY'
+  };
 }
 
 describe('NewIssueData', () => {
@@ -225,7 +236,7 @@ describe('NewIssueData', () => {
 
   it('create non-Renovate non-Dependabot bot resolves parent', async () => {
     // GHA-322: Vault-based bot PRs (e.g. hashicorp-vault-sonar-prod[bot]) are not release-note bots, so the parent must be resolved from the PR body.
-    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Some Other Bot PR', 'Part of work item KEY-1234'), 'KEY', '', null, '')).toEqual(createExpectedWithoutAccount('Part of work item KEY-1234', 'KEY', 'KEY-1234', 'Sub-task'));
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Some Other Bot PR', 'Part of work item KEY-1234'), 'KEY', '', null, '')).toEqual(createExpectedParent('KEY', 'KEY-1234', 'Sub-task', 'Part of work item KEY-1234', null));
   });
 
   it('create with fallbackTeam valid', async () => {
