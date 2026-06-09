@@ -38,6 +38,8 @@ function createAction(senderLogin, senderAccountId) {
                             return 'cloud-production-engineering-triagger';
                         case 'eng.xp@sonarsource.com':
                             return 'eng-xp-triagger';
+                        case 'front-end.engineering@sonarsource.com':
+                            return 'front-end-engineering-triagger';
                         default:
                             throw new Error(`Scaffolding did not expect email: ${email}`);
                     }
@@ -65,6 +67,11 @@ function createAction(senderLogin, senderAccountId) {
                         { login: 'cloud-prod-user-1', type: 'User' },
                         { login: 'cloud-prod-user-2', type: 'User' }
                     ];
+                case 'platform-front-end-eng-squad':
+                    return [
+                        { login: 'front-end-user-1', type: 'User' },
+                        { login: 'front-end-user-2', type: 'User' }
+                    ];
                 default:
                     throw new Error(`Scaffolding did not expect teamSlug: ${teamSlug}`);
             }
@@ -77,6 +84,8 @@ function createAction(senderLogin, senderAccountId) {
                     return ['cloud.production.engineering@sonarsource.com'];
                 case '340d3bc8-9b6c-43fc-856a-e44bec97ebc8':
                     return ['eng.xp@sonarsource.com'];
+                case '2091132b-a81b-4c6c-80ea-8d4ea74227af':
+                    return ['front-end.engineering@sonarsource.com'];
                 default:
                     if (scheduleId === null) {
                         return [];
@@ -114,6 +123,11 @@ describe('TeamReviewData', () => {
             expect(await TeamReviewData.create(createAction('some-login', '1234-account'), 'SC-1234', gitHubTeam))
                 .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: 'cloud-production-engineering-triagger', jiraTeam: JiraTeams.CloudProductionEngineering, gitHubTeam });
         });
+        it('platform-front-end-eng-squad', async () => {
+            const gitHubTeam = createSimpleTeam('platform-front-end-eng-squad');
+            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), 'SC-1234', gitHubTeam))
+                .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: 'front-end-engineering-triagger', jiraTeam: JiraTeams.FrontEndEngineering, gitHubTeam });
+        });
         it('eng-xp-squad PREQ', async () => {
             const gitHubTeam = createSimpleTeam('platform-eng-xp-squad');
             expect(await TeamReviewData.create(createAction('some-login', '1234-account'), 'PREQ-1234', gitHubTeam))
@@ -135,6 +149,7 @@ describe('TeamReviewData', () => {
             { team: 'platform-cloud-eng-squad', user: 'cloud-prod-user-2' },
             { team: 'platform-cloud-prod-eng-squad', user: 'cloud-user-2' },
             { team: 'platform-cloud-prod-eng-squad', user: 'cloud-prod-user-2' },
+            { team: 'platform-front-end-eng-squad', user: 'front-end-user-2' },
         ])('null for $user from the same team $team', async ({ team, user }) => {
             expect(await TeamReviewData.create(createAction(user, undefined), 'SC-1234', createSimpleTeam(team))).toBeNull();
         });
