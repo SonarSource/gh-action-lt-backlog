@@ -33,7 +33,8 @@ function createPullRequest(title: string, body: string | null, repo: string = 'r
     body,
     base: { repo: { name: repo } },
     isRenovate(): boolean { return title === 'Renovate PR' },
-    isBot(): boolean { return title === 'Renovate PR' || title === 'Dependabot PR' }
+    isDependabot(): boolean { return title === 'Dependabot PR' },
+    isBot(): boolean { return title === 'Renovate PR' || title === 'Dependabot PR' || title === 'Some Other Bot PR' }
   } as unknown as PullRequest;
 }
 
@@ -70,10 +71,10 @@ function createExpected(description: string | undefined): NewIssueData {
   };
 }
 
-function createExpectedParent(projectKey: string, parent: string | null, issueType: string, description: string): NewIssueData {
+function createExpectedParent(projectKey: string, parent: string | null, issueType: string, description: string, accountId: string | null = '1234-account'): NewIssueData {
   return {
-    accountId: '1234-account',
-    assigneeId: '1234-account',
+    accountId,
+    assigneeId: accountId,
     additionalFields: {
       // No team or sprintId for Sub-task
       customfield_10001: issueType === 'Sub-task' ? undefined : 'dot-neeet-team',
@@ -231,6 +232,11 @@ describe('NewIssueData', () => {
 
   it('create dependabot ignores parent', async () => {
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Dependabot PR', 'FOREIGN-1234 and NET-1111'), 'KEY', '', null, '')).toEqual(createExpectedWithoutAccount('FOREIGN-1234 and NET-1111'));
+  });
+
+  it('create non-Renovate non-Dependabot bot resolves parent', async () => {
+    // GHA-322: Vault-based bot PRs (e.g. hashicorp-vault-sonar-prod[bot]) are not release-note bots, so the parent must be resolved from the PR body.
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Some Other Bot PR', 'Part of work item KEY-1234'), 'KEY', '', null, '')).toEqual(createExpectedParent('KEY', 'KEY-1234', 'Sub-task', 'Part of work item KEY-1234', null));
   });
 
   it('create with fallbackTeam valid', async () => {

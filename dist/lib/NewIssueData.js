@@ -33,7 +33,7 @@ export class NewIssueData {
         this.additionalFields = additionalFields;
     }
     static async create(jira, pr, inputJiraProject, inputAdditionalFields, accountId, fallbackTeam) {
-        const parent = pr.isBot()
+        const parent = pr.isRenovate() || pr.isDependabot()
             ? null // Description contains release notes with irrelevant issue IDs
             : await this.findValidParent(jira, this.findMentionedIssues(pr));
         const projectKey = this.computeProjectKey(inputJiraProject, parent);
