@@ -56,6 +56,7 @@ export class TeamReviewData {
   }
 
   private static selectTeam(issueId: string, requested_team: SimpleTeam | undefined | null): TeamCandidate | null {
+    console.log(`Selecting team for slug ${requested_team?.slug}`);
     if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
       return {
         createReviewTicket: true,
@@ -93,6 +94,7 @@ export class TeamReviewData {
     for (const slug of candidate.ignoredGitHubTeamSlugs) {
       const members = await action.listTeamMembers(slug);
       if (members.some(x => x.login === action.payload.sender?.login)) {
+        console.log(`Skipping team review, ${action.payload.sender?.login} is a member of ${slug}`);
         return false;
       }
     }
