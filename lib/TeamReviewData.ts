@@ -56,7 +56,7 @@ export class TeamReviewData {
   }
 
   private static selectTeam(issueId: string, requested_team: SimpleTeam | undefined | null): TeamCandidate | null {
-    console.log(`Selecting team for slug ${requested_team?.slug}`);
+    console.log(`Selecting team for ${requested_team?.slug}`);
     if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
       return {
         createReviewTicket: true,
