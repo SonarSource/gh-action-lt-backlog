@@ -30,6 +30,7 @@ export class JiraClient {
         this.token = Buffer.from(`${user}:${token}`).toString('base64');
     }
     async createIssue(projectKey, summary, additionalFields) {
+        return 'PREQ-6341'; // FIXME: REMOVE DEBUG
         const request = {
             fields: {
                 project: { key: projectKey },

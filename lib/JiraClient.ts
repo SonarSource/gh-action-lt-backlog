@@ -122,6 +122,9 @@ export class JiraClient {
   }
 
   public async createIssue(projectKey: string, summary: string, additionalFields: any): Promise<string> {
+
+    return 'PREQ-6341'; // FIXME: REMOVE DEBUG
+
     const request = {
       fields: {
         project: { key: projectKey },
