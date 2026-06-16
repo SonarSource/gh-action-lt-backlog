@@ -92,9 +92,9 @@ jobs:
       - uses: sonarsource/gh-action-lt-backlog/LockBranch@v2
         with:
           github-token: ${{ fromJSON(steps.secrets.outputs.vault).lock_token }}
-          lock-branch: ${{ github.event.inputs.lock-branch }}
+          lock-branch: ${{ inputs.lock-branch }}
           slack-token: ${{ fromJSON(steps.secrets.outputs.vault).slack_api_token }} # Optional, needed only when slack-channel is set
-          additional-message: ${{ github.event.inputs.additional-message }}         # Optional, useful only when slack-channel is set
+          additional-message: ${{ inputs.additional-message }}                      # Optional, useful only when slack-channel is set
           branch-pattern: "master"              # Optional
           slack-channel: public-channel-name    # Optional
 ```
