@@ -149,12 +149,8 @@ export const jiraClientStub = {
     }
     return [];
   },
-  async addFixVersion(issueKey: string, versionName: string): Promise<boolean> {
-    if (issueKey === 'KEY-9003') {
-      return false;
-    }
+  async addFixVersion(issueKey: string, versionName: string): Promise<void> {
     console.log(`Invoked jira.addFixVersion('${issueKey}', '${versionName}')`);
-    return true;
   },
   async addReviewer(issueId: string, userEmails: string[]): Promise<void> {
     console.log(`Invoked jira.addReviewer('${issueId}', ${serializeStrings(userEmails)})`);

@@ -34,7 +34,7 @@ This parameter will resolve only issues created by automation, or bots.
 
 ### `fix-version`
 
-Jira fix version to assign on merge, such as `10.23`. Optional.
+Jira fix version name to assign when the pull request is merged, such as `10.23`. Leave empty to skip. The fix version is set only when the linked issue has none yet. Failures are logged but do not fail the workflow.
 
 ## Outputs
 

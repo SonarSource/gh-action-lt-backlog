@@ -243,7 +243,7 @@ export class JiraClient {
     return issue.fields?.fixVersions ?? [];
   }
 
-  public async addFixVersion(issueKey: string, versionName: string): Promise<boolean> {
+  public async addFixVersion(issueKey: string, versionName: string): Promise<void> {
     console.log(`${issueKey}: Adding fix version ${versionName}`);
     const request = {
       update: {
@@ -252,7 +252,7 @@ export class JiraClient {
         }]
       }
     };
-    return await this.sendRestPutApi(`issue/${issueKey}?notifyUsers=false`, request) != null;
+    await this.sendRestPutApi(`issue/${issueKey}?notifyUsers=false`, request);
   }
 
   public async addIssueRemoteLink(issueId: string, url: string, title: string | null = null): Promise<void> {

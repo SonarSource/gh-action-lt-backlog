@@ -64,10 +64,7 @@ export class PullRequestClosed extends PullRequestAction {
       return;
     }
 
-    const added = await this.jira.addFixVersion(issueId, fixVersion);
-    if (!added) {
-      this.log(`${issueId}: Could not set fix version ${fixVersion}, skipping fix version assignment`);
-    }
+    await this.jira.addFixVersion(issueId, fixVersion);
   }
 
   private async processClose(issueId: string): Promise<void> {
