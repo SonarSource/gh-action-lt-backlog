@@ -147,6 +147,18 @@ export const jiraClientStub = {
         }
         return [];
     },
+    async findProjectVersions(projectKey) {
+        if (projectKey === 'KEY') {
+            return [
+                { id: '1', name: '8.31', released: false, archived: false },
+                { id: '2', name: '8.32', released: false, archived: false },
+            ];
+        }
+        if (projectKey === 'KEY-NOVERSION') {
+            return [{ id: '3', name: '1.0', released: true, archived: false }];
+        }
+        throw new Error(`Scaffolding did not expect project ${projectKey}`);
+    },
     async addFixVersion(issueKey, versionName) {
         console.log(`Invoked jira.addFixVersion('${issueKey}', '${versionName}')`);
     },

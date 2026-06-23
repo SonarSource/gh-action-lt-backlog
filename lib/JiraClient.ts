@@ -84,6 +84,13 @@ type NamedItem = {
   name: string;
 }
 
+export type JiraVersion = {
+  id: string;
+  name: string;
+  released: boolean;
+  archived: boolean;
+}
+
 export type Issue = {
   key: string;
   fields: {
@@ -241,6 +248,11 @@ export class JiraClient {
       return null;
     }
     return issue.fields?.fixVersions ?? [];
+  }
+
+  public async findProjectVersions(projectKey: string): Promise<JiraVersion[]> {
+    console.log(`Loading versions for project '${projectKey}'`);
+    return (await this.sendRestGetApi(`project/${projectKey}/versions`)) ?? [];
   }
 
   public async addFixVersion(issueKey: string, versionName: string): Promise<void> {

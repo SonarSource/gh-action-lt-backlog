@@ -269,7 +269,7 @@ export class OctokitAction extends Action {
     }
     async addJiraComponent(issueId, name, description = null) {
         if (name) {
-            if (!await this.jira.createComponent(issueId.split('-')[0], name, description)) { // Same PR can have multiple issues from different projects
+            if (!await this.jira.createComponent(this.projectKeyFromIssueId(issueId), name, description)) {
                 this.setFailed('Failed to create component');
                 return;
             }
@@ -277,6 +277,9 @@ export class OctokitAction extends Action {
                 this.setFailed('Failed to add component');
             }
         }
+    }
+    projectKeyFromIssueId(issueId) {
+        return issueId.split('-')[0];
     }
     async loadSenderAccountId() {
         if (this.senderAccountId === undefined) {

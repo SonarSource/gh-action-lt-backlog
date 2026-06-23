@@ -19,7 +19,7 @@
  */
 
 import { JiraTeams } from "../Data/TeamConfiguration.js";
-import { JiraClient, Issue } from '../lib/JiraClient.js';
+import { JiraClient, Issue, JiraVersion } from '../lib/JiraClient.js';
 import { JiraTeam } from '../lib/JiraTeam.js';
 
 function serializeStrings(values: string[]): string {
@@ -148,6 +148,18 @@ export const jiraClientStub = {
       return null;
     }
     return [];
+  },
+  async findProjectVersions(projectKey: string): Promise<JiraVersion[]> {
+    if (projectKey === 'KEY') {
+      return [
+        { id: '1', name: '8.31', released: false, archived: false },
+        { id: '2', name: '8.32', released: false, archived: false },
+      ];
+    }
+    if (projectKey === 'KEY-NOVERSION') {
+      return [{ id: '3', name: '1.0', released: true, archived: false }];
+    }
+    throw new Error(`Scaffolding did not expect project ${projectKey}`);
   },
   async addFixVersion(issueKey: string, versionName: string): Promise<void> {
     console.log(`Invoked jira.addFixVersion('${issueKey}', '${versionName}')`);
