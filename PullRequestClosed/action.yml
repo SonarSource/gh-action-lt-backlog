@@ -14,6 +14,10 @@ inputs:
     description: 'Repo is owned by Engineering Experience Squad'
     required: false
     default: 'false'
+  fix-version:
+    description: 'Jira fix version name to set on merge, such as 10.23. Leave empty to skip.'
+    required: false
+    default: ''
 runs:
   using: 'node24'
   main: '../dist/PullRequestClosed/Index.js'
