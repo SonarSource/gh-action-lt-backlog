@@ -131,6 +131,10 @@ export class JiraClient {
         };
         return await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request) != null;
     }
+    async findProjectVersions(projectKey) {
+        console.log(`${projectKey}: Loading versions`);
+        return (await this.sendRestGetApi(`project/${projectKey}/versions`)) ?? [];
+    }
     async addFixVersion(issueKey, versionName) {
         console.log(`${issueKey}: Adding fix version ${versionName}`);
         const request = {

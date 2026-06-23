@@ -307,7 +307,7 @@ export abstract class OctokitAction extends Action {
 
   protected async addJiraComponent(issueId: string, name: string, description: string | null = null): Promise<void> {
     if (name) {
-      if (!await this.jira.createComponent(issueId.split('-')[0], name, description)) {   // Same PR can have multiple issues from different projects
+      if (!await this.jira.createComponent(this.projectKeyFromIssueId(issueId), name, description)) {
         this.setFailed('Failed to create component');
         return;
       }
@@ -315,6 +315,10 @@ export abstract class OctokitAction extends Action {
         this.setFailed('Failed to add component');
       }
     }
+  }
+
+  protected projectKeyFromIssueId(issueId: string): string {
+    return issueId.split('-')[0];
   }
 
   public async loadSenderAccountId(): Promise<string | null> {

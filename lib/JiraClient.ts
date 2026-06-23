@@ -109,6 +109,13 @@ export type Project = {
   lead: Account;
 }
 
+export type JiraVersion = {
+  id: string;
+  name: string;
+  released: boolean;
+  archived: boolean;
+}
+
 export class JiraClient {
   private readonly domain: string;
   private readonly siteId: string;
@@ -233,6 +240,11 @@ export class JiraClient {
       }
     };
     return await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request) != null;
+  }
+
+  public async findProjectVersions(projectKey: string): Promise<JiraVersion[]> {
+    console.log(`${projectKey}: Loading versions`);
+    return (await this.sendRestGetApi(`project/${projectKey}/versions`)) ?? [];
   }
 
   public async addFixVersion(issueKey: string, versionName: string): Promise<void> {
