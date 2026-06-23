@@ -198,15 +198,5 @@ describe('PullRequestClosed', () => {
             "Done",
         ]);
     });
-    it('skips fix version when assignment fails', async () => {
-        process.env['INPUT_FIX-VERSION'] = '10.23';
-        await runAction('KEY-9003 Title', true);
-        expect(logTester.logsParams).toStrictEqual([
-            "Loading PR #42",
-            "Invoked jira.transitionIssue('KEY-9003', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
-            "KEY-9003: Could not set fix version 10.23, skipping fix version assignment",
-            "Done",
-        ]);
-    });
 });
 //# sourceMappingURL=PullRequestClosed.test.js.map

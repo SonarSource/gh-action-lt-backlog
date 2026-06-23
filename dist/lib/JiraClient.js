@@ -148,7 +148,7 @@ export class JiraClient {
                     }]
             }
         };
-        return await this.sendRestPutApi(`issue/${issueKey}?notifyUsers=false`, request) != null;
+        await this.sendRestPutApi(`issue/${issueKey}?notifyUsers=false`, request);
     }
     async addIssueRemoteLink(issueId, url, title = null) {
         console.log(`${issueId}: Adding remote link ${url}`);
