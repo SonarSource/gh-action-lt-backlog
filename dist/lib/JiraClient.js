@@ -131,6 +131,25 @@ export class JiraClient {
         };
         return await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request) != null;
     }
+    async findIssueFixVersions(issueKey) {
+        console.log(`${issueKey}: Loading fix versions`);
+        const issue = await this.sendRestGetApi(`issue/${issueKey}?fields=fixVersions`);
+        if (issue == null) {
+            return null;
+        }
+        return issue.fields?.fixVersions ?? [];
+    }
+    async addFixVersion(issueKey, versionName) {
+        console.log(`${issueKey}: Adding fix version ${versionName}`);
+        const request = {
+            update: {
+                fixVersions: [{
+                        add: { name: versionName }
+                    }]
+            }
+        };
+        await this.sendRestPutApi(`issue/${issueKey}?notifyUsers=false`, request);
+    }
     async addIssueRemoteLink(issueId, url, title = null) {
         console.log(`${issueId}: Adding remote link ${url}`);
         await this.sendRestPostApi(`issue/${issueId}/remotelink`, { object: { url, title: title ?? url } });
