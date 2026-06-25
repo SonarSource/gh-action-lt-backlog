@@ -198,5 +198,27 @@ describe('PullRequestClosed', () => {
             "Done",
         ]);
     });
+    it('autodetects the lowest unreleased fix version on merge', async () => {
+        process.env['INPUT_FIX-VERSION'] = 'autodetect-lowest';
+        await runAction('KEY-1234 Title', true);
+        expect(logTester.logsParams).toStrictEqual([
+            "Loading PR #42",
+            "Invoked jira.transitionIssue('KEY-1234', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+            "KEY: Found 2 unreleased versions, using lowest 8.31",
+            "Invoked jira.addFixVersion('KEY-1234', '8.31')",
+            "Done",
+        ]);
+    });
+    it('autodetects fix version on feature branch merge', async () => {
+        process.env['INPUT_FIX-VERSION'] = 'autodetect-lowest';
+        await runAction('KEY-5678 Title', true, 'test-user', 'user/branch');
+        expect(logTester.logsParams).toStrictEqual([
+            "Loading PR #42",
+            "Invoked jira.transitionIssue('KEY-5678', {\"id\":\"10001\",\"name\":\"Merge into branch\"}, null)",
+            "KEY: Found 2 unreleased versions, using lowest 8.31",
+            "Invoked jira.addFixVersion('KEY-5678', '8.31')",
+            "Done",
+        ]);
+    });
 });
 //# sourceMappingURL=PullRequestClosed.test.js.map

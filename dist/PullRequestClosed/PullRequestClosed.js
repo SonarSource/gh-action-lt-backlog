@@ -17,6 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+import { FIX_VERSION_AUTODETECT_LOWEST, findLowestUnreleasedFixVersion } from '../lib/FixVersionResolver.js';
 import { PullRequestAction } from '../lib/PullRequestAction.js';
 export class PullRequestClosed extends PullRequestAction {
     async processJiraIssue(pr, issueId) {
@@ -46,8 +47,8 @@ export class PullRequestClosed extends PullRequestAction {
         await this.addFixVersionIfEmpty(issueId);
     }
     async addFixVersionIfEmpty(issueId) {
-        const fixVersion = this.inputString('fix-version').trim();
-        if (fixVersion === '') {
+        const fixVersionInput = this.inputString('fix-version').trim();
+        if (fixVersionInput === '') {
             return;
         }
         const existingFixVersions = await this.jira.findIssueFixVersions(issueId);
@@ -57,6 +58,12 @@ export class PullRequestClosed extends PullRequestAction {
         }
         if (existingFixVersions.length > 0) {
             this.log(`${issueId}: fix version already set (${existingFixVersions.map((version) => version.name).join(', ')}), skipping`);
+            return;
+        }
+        const fixVersion = fixVersionInput === FIX_VERSION_AUTODETECT_LOWEST
+            ? await findLowestUnreleasedFixVersion(this.jira, this.projectKeyFromIssueId(issueId))
+            : fixVersionInput;
+        if (fixVersion == null) {
             return;
         }
         await this.jira.addFixVersion(issueId, fixVersion);

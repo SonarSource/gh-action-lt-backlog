@@ -139,6 +139,10 @@ export class JiraClient {
         }
         return issue.fields?.fixVersions ?? [];
     }
+    async findProjectVersions(projectKey) {
+        console.log(`Loading versions for project '${projectKey}'`);
+        return (await this.sendRestGetApi(`project/${projectKey}/versions`)) ?? [];
+    }
     async addFixVersion(issueKey, versionName) {
         console.log(`${issueKey}: Adding fix version ${versionName}`);
         const request = {

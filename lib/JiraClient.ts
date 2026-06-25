@@ -84,6 +84,13 @@ type NamedItem = {
   name: string;
 }
 
+export type JiraVersion = {
+  id: string;
+  name: string;
+  released: boolean;
+  archived: boolean;
+}
+
 export type Issue = {
   key: string;
   fields: {
@@ -243,16 +250,17 @@ export class JiraClient {
     return issue.fields?.fixVersions ?? [];
   }
 
+  public async findProjectVersions(projectKey: string): Promise<JiraVersion[]> {
+    console.log(`Loading versions for project '${projectKey}'`);
+    return (await this.sendRestGetApi(`project/${projectKey}/versions`)) ?? [];
+  }
+
   public async addFixVersion(issueKey: string, versionName: string): Promise<void> {
     console.log(`${issueKey}: Adding fix version ${versionName}`);
-    const request = {
-      update: {
-        fixVersions: [{
-          add: { name: versionName }
-        }]
-      }
-    };
-    await this.sendRestPutApi(`issue/${issueKey}?notifyUsers=false`, request);
+    const request = { update: { fixVersions: [{ add: { name: versionName } }] } };
+    if (await this.sendRestPutApi(`issue/${issueKey}?notifyUsers=false`, request) == null) {
+      console.log(`${issueKey}: Failed to add fix version ${versionName} (does it exist in the project?)`);
+    }
   }
 
   public async addIssueRemoteLink(issueId: string, url: string, title: string | null = null): Promise<void> {
