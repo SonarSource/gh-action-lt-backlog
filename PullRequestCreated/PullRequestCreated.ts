@@ -105,7 +105,7 @@ export class PullRequestCreated extends OctokitAction {
       await this.processRequestReview(pr, issueId, component, this.payload.pull_request.requested_reviewers[0] || null, null);
       for (const team of this.payload.pull_request.requested_teams) {
         this.log(`Processing team review request: ${team.name}`);
-        const teamReview = await TeamReviewData.create(this, issueId, team);
+        const teamReview = await TeamReviewData.create(this, pr, issueId, team);
         if (teamReview) {
           await this.processRequestReview(pr, issueId, component, null, teamReview);
         }

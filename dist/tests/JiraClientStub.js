@@ -51,7 +51,7 @@ export const jiraClientStub = {
             case 'user@sonarsource.com': return '1234-account';
             case 'eng.exp@sonarsource.com': return '3333-eng-exp-account';
             case 'team.without.evergreen.epics@sonarsource.com': return '4444-no-epics-account';
-            case 'teamreview.triagger@sonarsource.com': return '5000-teamreview-triagger-account';
+            case 'teamreview.triager@sonarsource.com': return '5000-teamreview-triager-account';
             case 'unknown@sonarsource.com': return null;
             case 'renovate@renovate.com': return null;
             case 'dependabot@dependabot.com': return null;
