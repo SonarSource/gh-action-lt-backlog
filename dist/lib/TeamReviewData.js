@@ -31,8 +31,8 @@ export class TeamReviewData {
         this.jiraTeam = team;
         this.gitHubTeam = gitHubTeam;
     }
-    static async create(action, issueId, requested_team) {
-        const candidate = this.selectTeam(issueId, requested_team);
+    static async create(action, pr, issueId, requested_team) {
+        const candidate = this.selectTeam(pr, issueId, requested_team);
         if (candidate && await this.senderIsFromOutsideTeam(action, candidate)) {
             const assigneeAccountId = await action.jira.findAccountId(await action.findRootlyOnCallEmails(candidate.rootlyScheduleId));
             return new TeamReviewData(candidate.createReviewTicket, await action.loadSenderAccountId(), assigneeAccountId, candidate.jiraTeam, requested_team);
@@ -41,10 +41,11 @@ export class TeamReviewData {
             return null;
         }
     }
-    static selectTeam(issueId, requested_team) {
+    static selectTeam(pr, issueId, requested_team) {
+        const createReviewTicket = !pr.isBot(); // Do not create 2nd Jira issue for bot PRs
         if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
             return {
-                createReviewTicket: true,
+                createReviewTicket,
                 jiraTeam: JiraTeams.CloudEngineering,
                 rootlyScheduleId: RootlyScheduleIds.PlatformCloudEngineeringTriager,
                 ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
@@ -52,7 +53,7 @@ export class TeamReviewData {
         }
         else if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudProductionEngineering) {
             return {
-                createReviewTicket: true,
+                createReviewTicket,
                 jiraTeam: JiraTeams.CloudProductionEngineering,
                 rootlyScheduleId: RootlyScheduleIds.PlatformCloudProductionEngineeringTriager,
                 ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
@@ -60,7 +61,7 @@ export class TeamReviewData {
         }
         else if (requested_team?.slug === GitHubTeamSlugs.PlatformFrontEndEngineering) {
             return {
-                createReviewTicket: true,
+                createReviewTicket,
                 jiraTeam: JiraTeams.FrontEndEngineering,
                 rootlyScheduleId: RootlyScheduleIds.PlatformFrontEndEngineeringTriager,
                 ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformFrontEndEngineering]

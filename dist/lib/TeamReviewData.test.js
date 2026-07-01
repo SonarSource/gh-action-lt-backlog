@@ -21,6 +21,15 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { JiraTeams } from '../Data/TeamConfiguration.js';
 import { TeamReviewData } from '../lib/TeamReviewData.js';
 import { LogTester } from '../tests/LogTester.js';
+function createPullRequest(title) {
+    return {
+        number: 42,
+        title,
+        isRenovate() { return false; },
+        isDependabot() { return false; },
+        isBot() { return title === 'Bot PR'; }
+    };
+}
 function createSimpleTeam(name) {
     return { name, slug: name };
 }
@@ -33,13 +42,13 @@ function createAction(senderLogin, senderAccountId) {
                 for (const email of emails) {
                     switch (email) {
                         case 'cloud.engineering@sonarsource.com':
-                            return 'cloud-engineering-triagger';
+                            return 'cloud-engineering-triager';
                         case 'cloud.production.engineering@sonarsource.com':
-                            return 'cloud-production-engineering-triagger';
+                            return 'cloud-production-engineering-triager';
                         case 'eng.xp@sonarsource.com':
-                            return 'eng-xp-triagger';
+                            return 'eng-xp-triager';
                         case 'front-end.engineering@sonarsource.com':
-                            return 'front-end-engineering-triagger';
+                            return 'front-end-engineering-triager';
                         default:
                             throw new Error(`Scaffolding did not expect email: ${email}`);
                     }
@@ -99,6 +108,7 @@ function createAction(senderLogin, senderAccountId) {
 }
 describe('TeamReviewData', () => {
     let logTester;
+    const normalPR = createPullRequest('Normal PR');
     beforeEach(() => {
         logTester = new LogTester();
     });
@@ -108,41 +118,41 @@ describe('TeamReviewData', () => {
     describe('create', () => {
         it('platform-cloud-eng-squad, user found in Jira', async () => {
             const gitHubTeam = createSimpleTeam('platform-cloud-eng-squad');
-            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), 'SC-1234', gitHubTeam))
-                .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: 'cloud-engineering-triagger', jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
+            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), normalPR, 'SC-1234', gitHubTeam))
+                .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: 'cloud-engineering-triager', jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
         });
         it('platform-cloud-eng-squad, user not found in Jira', async () => {
             const action = createAction('some-login', null);
             action.jira.findAccountId = async () => null;
             const gitHubTeam = createSimpleTeam('platform-cloud-eng-squad');
-            expect(await TeamReviewData.create(action, 'SC-1234', gitHubTeam))
+            expect(await TeamReviewData.create(action, normalPR, 'SC-1234', gitHubTeam))
                 .toEqual({ createReviewTicket: true, senderAccountId: null, assigneeAccountId: null, jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
         });
         it('platform-cloud-prod-eng-squad', async () => {
             const gitHubTeam = createSimpleTeam('platform-cloud-prod-eng-squad');
-            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), 'SC-1234', gitHubTeam))
-                .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: 'cloud-production-engineering-triagger', jiraTeam: JiraTeams.CloudProductionEngineering, gitHubTeam });
+            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), normalPR, 'SC-1234', gitHubTeam))
+                .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: 'cloud-production-engineering-triager', jiraTeam: JiraTeams.CloudProductionEngineering, gitHubTeam });
         });
         it('platform-front-end-eng-squad', async () => {
             const gitHubTeam = createSimpleTeam('platform-front-end-eng-squad');
-            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), 'SC-1234', gitHubTeam))
-                .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: 'front-end-engineering-triagger', jiraTeam: JiraTeams.FrontEndEngineering, gitHubTeam });
+            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), normalPR, 'SC-1234', gitHubTeam))
+                .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: 'front-end-engineering-triager', jiraTeam: JiraTeams.FrontEndEngineering, gitHubTeam });
         });
         it('eng-xp-squad PREQ', async () => {
             const gitHubTeam = createSimpleTeam('platform-eng-xp-squad');
-            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), 'PREQ-1234', gitHubTeam))
-                .toEqual({ createReviewTicket: false, senderAccountId: '1234-account', assigneeAccountId: 'eng-xp-triagger', jiraTeam: JiraTeams.EngineeringExperience, gitHubTeam });
+            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), normalPR, 'PREQ-1234', gitHubTeam))
+                .toEqual({ createReviewTicket: false, senderAccountId: '1234-account', assigneeAccountId: 'eng-xp-triager', jiraTeam: JiraTeams.EngineeringExperience, gitHubTeam });
         });
         it('eng-xp-squad BUILD', async () => {
             const gitHubTeam = createSimpleTeam('platform-eng-xp-squad');
-            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), 'BUILD-1234', gitHubTeam))
+            expect(await TeamReviewData.create(createAction('some-login', '1234-account'), normalPR, 'BUILD-1234', gitHubTeam))
                 .toEqual({ createReviewTicket: false, senderAccountId: '1234-account', assigneeAccountId: null, jiraTeam: JiraTeams.EngineeringExperience, gitHubTeam });
         });
         it('another team', async () => {
-            expect(await TeamReviewData.create(createAction('some-login', undefined), 'SC-1234', createSimpleTeam('another-team'))).toBeNull();
+            expect(await TeamReviewData.create(createAction('some-login', undefined), normalPR, 'SC-1234', createSimpleTeam('another-team'))).toBeNull();
         });
         it('null team', async () => {
-            expect(await TeamReviewData.create(createAction('some-login', undefined), 'SC-1234', null)).toBeNull();
+            expect(await TeamReviewData.create(createAction('some-login', undefined), normalPR, 'SC-1234', null)).toBeNull();
         });
         it.each([
             { team: 'platform-cloud-eng-squad', user: 'cloud-user-2' },
@@ -151,7 +161,17 @@ describe('TeamReviewData', () => {
             { team: 'platform-cloud-prod-eng-squad', user: 'cloud-prod-user-2' },
             { team: 'platform-front-end-eng-squad', user: 'front-end-user-2' },
         ])('null for $user from the same team $team', async ({ team, user }) => {
-            expect(await TeamReviewData.create(createAction(user, undefined), 'SC-1234', createSimpleTeam(team))).toBeNull();
+            expect(await TeamReviewData.create(createAction(user, undefined), normalPR, 'SC-1234', createSimpleTeam(team))).toBeNull();
+        });
+        it.each([
+            'platform-cloud-eng-squad',
+            'platform-cloud-prod-eng-squad',
+            'platform-front-end-eng-squad',
+        ])('bot PRs do not create review PRs', async (team) => {
+            const result = await TeamReviewData.create(createAction('any-bot[bot]', null), createPullRequest('Bot PR'), 'SC-1234', createSimpleTeam(team));
+            expect(result).not.toBeNull();
+            expect(result.createReviewTicket).toBe(false);
+            expect(result.assigneeAccountId).toBeOneOf(['cloud-engineering-triager', 'cloud-production-engineering-triager', 'front-end-engineering-triager']);
         });
     });
 });
