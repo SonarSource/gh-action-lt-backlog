@@ -120,7 +120,7 @@ export abstract class OctokitAction extends Action {
     const text = pr.isRenovate() // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
       ? (await this.listComments(pr.number)).findLast(x => x.body?.startsWith(RENOVATE_PREFIX))?.body
       : pr.title;
-    return text?.match(JIRA_ISSUE_PATTERN) ?? [];
+    return [...new Set(text?.match(JIRA_ISSUE_PATTERN) ?? [])];
   }
 
   protected async addComment(issue_number: number, body: string): Promise<void> {
