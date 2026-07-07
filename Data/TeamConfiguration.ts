@@ -73,7 +73,7 @@ export const TeamConfigurationData: TeamConfiguration[] = [
   { name: "JVM Squad", boardId: 1671 },
   { name: "Server Platform squad", boardId: 1548 },
   { name: "Python / Data-ML Squad", boardId: 1572 },
-  { name: "RAD Squad", boardId: 1770 },
+  { name: "Language Coverage Squad", boardId: 1770 },
   { name: "Security SCA", boardId: 1803 },
   { name: "STL Taint", boardId: 4179 },
   { name: "Web Squad", boardId: 1672 },
