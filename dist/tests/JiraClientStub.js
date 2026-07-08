@@ -138,6 +138,18 @@ export const jiraClientStub = {
         console.log(`Invoked jira.addIssueComponent('${issueId}', '${name}')`);
         return true;
     },
+    async findIssueFixVersions(issueKey) {
+        if (issueKey === 'KEY-9001') {
+            return [{ id: '99', name: '9.8' }];
+        }
+        if (issueKey === 'KEY-9002') {
+            return null;
+        }
+        return [];
+    },
+    async addFixVersion(issueKey, versionName) {
+        console.log(`Invoked jira.addFixVersion('${issueKey}', '${versionName}')`);
+    },
     async addReviewer(issueId, userEmails) {
         console.log(`Invoked jira.addReviewer('${issueId}', ${serializeStrings(userEmails)})`);
     },

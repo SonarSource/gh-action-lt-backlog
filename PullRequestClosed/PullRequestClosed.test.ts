@@ -167,5 +167,58 @@ describe('PullRequestClosed', () => {
       "Done",
     ]);
   });
+
+  it('sets fix version when configured on merge', async () => {
+    process.env['INPUT_FIX-VERSION'] = '10.23';
+    await runAction('KEY-1234 Title', true);
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Invoked jira.transitionIssue('KEY-1234', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+      "Invoked jira.addFixVersion('KEY-1234', '10.23')",
+      "Done",
+    ]);
+  });
+
+  it('skips fix version when already set', async () => {
+    process.env['INPUT_FIX-VERSION'] = '10.23';
+    await runAction('KEY-9001 Title', true);
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Invoked jira.transitionIssue('KEY-9001', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+      "KEY-9001: fix version already set (9.8), skipping",
+      "Done",
+    ]);
+  });
+
+  it('skips fix version when loading existing fix versions fails', async () => {
+    process.env['INPUT_FIX-VERSION'] = '10.23';
+    await runAction('KEY-9002 Title', true);
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Invoked jira.transitionIssue('KEY-9002', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+      "KEY-9002: Could not load fix versions, skipping fix version assignment",
+      "Done",
+    ]);
+  });
+
+  it('does not set fix version when input is empty', async () => {
+    process.env['INPUT_FIX-VERSION'] = '';
+    await runAction('KEY-1234 Title', true);
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Invoked jira.transitionIssue('KEY-1234', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+      "Done",
+    ]);
+  });
+
+  it('does not set fix version when pull request is not merged', async () => {
+    process.env['INPUT_FIX-VERSION'] = '10.23';
+    await runAction('KEY-1234 Title', false);
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Skipping issue cancellation for creator Creator of KEY-1234",
+      "Done",
+    ]);
+  });
 });
 
