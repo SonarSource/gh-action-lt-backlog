@@ -67,7 +67,7 @@ jobs:
       - uses: sonarsource/gh-action-lt-backlog/PullRequestClosed@v2
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          jira-user:  ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
-          jira-token: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
+          jira-user:    {{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
+          jira-token:   {{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
 
 ```
