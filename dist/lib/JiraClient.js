@@ -207,6 +207,21 @@ export class JiraClient {
         const response = await this.sendRestGetApi(`search/jql?fields=key,summary,customfield_10015,duedate&jql=${encodeURIComponent(jql)}`); // // Only first page of results
         return response?.issues ?? [];
     }
+    async findBoardIssues(boardId, jql) {
+        console.log(`Searching for issues on board ${boardId}: ${jql}`);
+        const issues = [];
+        let total = 0;
+        do { // A release gate must see every ticket, so page through all results
+            const response = await this.sendRestGetAgile(`board/${boardId}/issue?fields=key,assignee&startAt=${issues.length}&jql=${encodeURIComponent(jql)}`);
+            const page = response?.issues ?? [];
+            if (page.length === 0) {
+                break; // Stop even if total claims more, otherwise an inconsistent total loops forever
+            }
+            issues.push(...page);
+            total = response?.total ?? 0;
+        } while (issues.length < total);
+        return issues;
+    }
     async findTeam(queryFilter, resultFilter) {
         const nodes = (await this.findTeams(queryFilter)).filter(resultFilter);
         if (nodes.length === 0) {

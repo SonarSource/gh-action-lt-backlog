@@ -73,7 +73,7 @@ type RemoteLink = {
   }
 }
 
-type Account = {
+export type Account = {
   accountId: string;
   emailAddress: string;
   displayName: string;
@@ -314,9 +314,25 @@ export class JiraClient {
   }
 
   public async findIssues(jql: string): Promise<Issue[]> {
-    console.log(`Searching for issues: ${jql}`);  
+    console.log(`Searching for issues: ${jql}`);
     const response = await this.sendRestGetApi(`search/jql?fields=key,summary,customfield_10015,duedate&jql=${encodeURIComponent(jql)}`);  // // Only first page of results
     return response?.issues ?? [];
+  }
+
+  public async findBoardIssues(boardId: number, jql: string): Promise<Issue[]> {
+    console.log(`Searching for issues on board ${boardId}: ${jql}`);
+    const issues: Issue[] = [];
+    let total = 0;
+    do {  // A release gate must see every ticket, so page through all results
+      const response = await this.sendRestGetAgile(`board/${boardId}/issue?fields=key,assignee&startAt=${issues.length}&jql=${encodeURIComponent(jql)}`);
+      const page: Issue[] = response?.issues ?? [];
+      if (page.length === 0) {
+        break;  // Stop even if total claims more, otherwise an inconsistent total loops forever
+      }
+      issues.push(...page);
+      total = response?.total ?? 0;
+    } while (issues.length < total);
+    return issues;
   }
 
   private async findTeam(queryFilter: string, resultFilter: (x: JiraTeam) => boolean): Promise<JiraTeam | null> {
