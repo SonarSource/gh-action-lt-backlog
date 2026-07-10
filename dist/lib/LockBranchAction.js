@@ -21,7 +21,6 @@ import { OctokitAction } from './OctokitAction.js';
 export class LockBranchAction extends OctokitAction {
     async execute() {
         const pattern = this.inputString('branch-pattern');
-        const additionalMessage = this.inputString('additional-message');
         const rule = await this.findRule(pattern);
         if (rule) {
             const lockBranch = this.resolveLockBranch(rule);
@@ -34,9 +33,7 @@ export class LockBranchAction extends OctokitAction {
                 }
                 const updated = await this.updateRule(rule.id, lockBranch);
                 if (updated.lockBranch === lockBranch) {
-                    const action = lockBranch ? 'locked :ice_cube:' : 'unlocked and is now open for changes :sunny:';
-                    const suffix = additionalMessage ? `\n\n${additionalMessage}` : '';
-                    const message = `${this.repo.repo}: The branch \`${pattern}\` was ${action}${suffix}`;
+                    const message = await this.buildSlackMessage(pattern, lockBranch);
                     this.log(`Done: ${message}`);
                     this.sendSlackMessage(message);
                 }
@@ -45,6 +42,12 @@ export class LockBranchAction extends OctokitAction {
                 }
             }
         }
+    }
+    async buildSlackMessage(pattern, lockBranch) {
+        const action = lockBranch ? 'locked :ice_cube:' : 'unlocked and is now open for changes :sunny:';
+        const additionalMessage = this.inputString('additional-message');
+        const suffix = additionalMessage ? `\n\n${additionalMessage}` : '';
+        return `${this.repo.repo}: The branch \`${pattern}\` was ${action}${suffix}`;
     }
     async findRule(pattern) {
         const rules = (await this.loadRules()).filter(x => x.pattern === pattern);
