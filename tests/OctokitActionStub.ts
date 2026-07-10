@@ -31,4 +31,5 @@ export type OctokitActionStub = {
   sendGraphQL(query: string): Promise<GraphQlQueryResponseData>;
   findEmails(login: string): Promise<string[]>;
   sendSlackPost(url: string, jsonRequest: any): Promise<any>;
+  findSlackUserId(email: string): Promise<string | null>;
 };
