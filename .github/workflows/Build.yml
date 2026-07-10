@@ -11,7 +11,7 @@ on:
 jobs:
   validate-build:
     name: Validate Dist files
-    runs-on: github-ubuntu-latest-s
+    runs-on: sonar-xs
     permissions:
       id-token: write
       contents: read
