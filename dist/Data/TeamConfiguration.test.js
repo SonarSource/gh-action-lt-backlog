@@ -36,14 +36,21 @@ const ignoredTeams = [
     "Accounts Payable",
     "Agentic Security",
     "AICoreTeam",
+    "Analysis Trust", // Not using sprints
     "BizTech - FrontOffice",
     "BizTech - SolutionEnablement",
+    "Brand & Communications",
     "Business Intelligence", // Not using sprints
     "Business Projects",
     "CAB Change Approvers",
     "Code Review Squad", // Not using sprints
     "CodeNext Bravo Squad",
     "CodeNextTeam", // Not using sprints
+    "Communications",
+    "Content",
+    "Core Languages & Parsers Squad", // Not using sprints
+    "Corporate Marketing",
+    "Creative",
     "Customer Marketing",
     "Data & Insights",
     "Documentation Squad",
@@ -83,10 +90,12 @@ const ignoredTeams = [
     "ITOPS-SYSENG",
     "Legal Team",
     "Operational Finance",
+    "Org Change JSM Process Owners",
     "PM Team",
     "ProdSec",
     "Product Data", // Not using sprints
     "Purchase",
+    "Rule Coverage", // Not using sprints
     "SecGov",
     "Services",
     "Storefront EM",
