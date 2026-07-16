@@ -29,7 +29,6 @@ let action;
 vi.setConfig({ testTimeout: 20000 }); // 20s
 // All teams that exist in Jira, but do not create PRs and do not need boardId configured:
 const ignoredTeams = [
-    ".NET Squad", // Not using sprints
     "1.SC_Project Mgmt.",
     "2.SCE_GTM",
     "3.Stripe_Project Mgmt.",
