@@ -55,13 +55,15 @@ The `/node_modules/` files that are part of the GIT repo:
 * Must contain production dependencies for the actions to run.
 * Must NOT contain development and testing dependencies, as those bring 10k+ small files that takes ages to check out on every action run.
 
+CI uses these committed production dependencies without running `npm install`, matching what action consumers receive. Run `npm install` locally to install both production and development dependencies.
+
 Dependency update:
 
-1. Delete `/node_module/`.
-1. Comment out `/node_module/` exclusion in `.gitignore` file.
-1. Run `npm install --omit=dev` to restore only production dependencies into the `/node_module/`.
+1. Delete `/node_modules/`.
+1. Comment out `/node_modules/` exclusion in `.gitignore` file.
+1. Run `npm install --omit=dev` to restore only production dependencies into `/node_modules/`.
 1. Commit all changes.
-1. Uncomment `/node_module/` exclusion in `.gitignore` file.
+1. Uncomment `/node_modules/` exclusion in `.gitignore` file.
 1. Run `npm install` to get all remaining files for local development.
 1. Commit changes to `.package-lock.json` file.
 
@@ -74,7 +76,7 @@ ${env:GITHUB_REPOSITORY}="SonarSource/<YourRepoName>"
 ${env:INPUT_GITHUB-TOKEN}="ghp_...."
 ${env:INPUT_PARAM}="True"
 ${env:INPUT_PARAM-NAME-WITH-HYPHEN}="Value"
-clear; node .\dist\ActionName\ActionName.js
+clear; node .\src\ActionName.js
 ```
 
 ### Development commands
@@ -85,20 +87,17 @@ ${env:GITHUB_TOKEN}="ghp_..."
 ${env:JIRA_USER}="...@sonarsource.com"
 ${env:JIRA_TOKEN}="..."
 
-# Rebuild
-npm run build
-
 # Run all UTs
 npm test
 
 # Run all UTs except Jira ITs
-npm test -- --exclude '**/JiraClient*' --exclude '**/TeamConfiguration*'
+node --test --test-timeout=20000 "test/!(JiraClient).test.js" "test/!(Data)/**/*.test.js"
 
 # Run UTs from single file
-npm test TeamConfiguration
+node --test test/Data/TeamConfiguration.test.js
 
 # Run single UT
-npm test TeamConfiguration -- -t "list new teams"
+node --test --test-name-pattern="list new teams" test/Data/TeamConfiguration.test.js
 ```
 
 ### Local debugging
@@ -110,12 +109,10 @@ Create `.vscode/launch.json` file, update `program` path to `FIXME` startup file
   "version": "0.2.0",
   "configurations": [
     {
-      "program": "${workspaceFolder}/dist/FIXME/FIXME.js",
+      "program": "${workspaceFolder}/src/FIXME.js",
       "type": "node",
       "request": "launch",
-      "name": "Launch",
-      "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": [ "${workspaceFolder}/dist/**/*.js" ]
+      "name": "Launch"
     }
   ]
 }

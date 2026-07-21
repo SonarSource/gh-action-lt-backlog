@@ -16,4 +16,4 @@ inputs:
     default: 'false'
 runs:
   using: 'node24'
-  main: '../dist/PullRequestClosed/Index.js'
+  main: '../src/PullRequestClosed.js'

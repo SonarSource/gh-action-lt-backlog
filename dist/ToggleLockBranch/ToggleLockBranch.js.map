@@ -1,1 +1,0 @@
-{"version":3,"file":"ToggleLockBranch.js","sourceRoot":"","sources":["../../ToggleLockBranch/ToggleLockBranch.ts"],"names":[],"mappings":"AAAA;;;;;;;;;;;;;;;;;;GAkBG;AAEH,OAAO,EAAE,gBAAgB,EAAkB,MAAM,4BAA4B,CAAC;AAE9E,MAAM,OAAO,gBAAiB,SAAQ,gBAAgB;IAC1C,iBAAiB,CAAC,IAAoB;QAC9C,OAAO,CAAC,IAAI,CAAC,UAAU,CAAC;IAC1B,CAAC;CACF"}

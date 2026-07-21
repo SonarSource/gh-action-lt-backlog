@@ -15,4 +15,4 @@ inputs:
     required: true
 runs:
   using: 'node24'
-  main: '../dist/ImportIssue/Index.js'
+  main: '../src/ImportIssue.js'

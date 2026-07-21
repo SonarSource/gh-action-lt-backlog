@@ -3,19 +3,18 @@
   "version": "1.0.0",
   "description": "BacklogAutomation",
   "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "build": "tsc --build",
-    "clean": "tsc --build --clean",
-    "test": "vitest run",
-    "test-uts": "vitest run --exclude 'Data/*'",
-    "test-data": "vitest run Data/",
-    "format": "prettier --write \"**/*.ts\""
+    "check-dependencies": "npm ls --omit=dev",
+    "test": "node --test --test-timeout=20000 \"test/**/*.test.js\"",
+    "test-uts": "node --test --test-timeout=20000 \"test/*.test.js\" \"test/!(Data)/**/*.test.js\"",
+    "test-data": "node --test --test-timeout=20000 \"test/Data/**/*.test.js\"",
+    "format": "prettier --write \"**/*.js\""
   },
   "devDependencies": {
-    "@types/node": "^25.6.0",
-    "vitest": "^4.1.4",
-    "prettier": "^3.8.3",
-    "typescript": "^6.0.3"
+    "prettier": "^3.8.3"
   },
   "dependencies": {
     "@actions/core": "^3.0.0",

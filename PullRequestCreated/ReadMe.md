@@ -14,7 +14,7 @@ Action uses `Commit` and `Start` transitions to update the issue and assigns it 
 
 Action assigns a Team field based on the PR author's Team, or Project Lead for authors without Jira account (bots).
 
-Action assigns a Sprint field based on the determined user Team and boardId from the [configuration](../Data/TeamConfiguration.ts).
+Action assigns a Sprint field based on the determined user Team and boardId from the [configuration](../src/helpers/TeamConfiguration.js).
 
 This action does nothing if the PR title contains `DO NOT MERGE` phrase.
 
@@ -98,7 +98,7 @@ Ask DevInfra Squad to "Add Jira GitHub tokens" to the Vault configuration of you
 
     Check your team membership in Jira and remove yourself from irrelevant teams.
     
-    Teams present in the [configuration](../Data/TeamConfiguration.ts) are preferred in case user is member of multiple teams.
+    Teams present in the [configuration](../src/helpers/TeamConfiguration.js) are preferred in case user is member of multiple teams.
     
     Check if the Team name is specified correctly.
     
@@ -106,7 +106,7 @@ Ask DevInfra Squad to "Add Jira GitHub tokens" to the Vault configuration of you
 
     Check the action log to see if it managed to identify Team, Board and Sprint. 
     
-    Check if the [configuration](../Data/TeamConfiguration.ts) contains correct Team name and boardId.
+    Check if the [configuration](../src/helpers/TeamConfiguration.js) contains correct Team name and boardId.
 
 ## Example usage
 

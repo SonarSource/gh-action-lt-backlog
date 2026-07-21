@@ -31,4 +31,4 @@ inputs:
     required: false
 runs:
   using: 'node24'
-  main: '../dist/PullRequestCreated/Index.js'
+  main: '../src/PullRequestCreated.js'

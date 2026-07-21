@@ -1,12 +1,4 @@
 ﻿<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/0.5.89-alpha">
-  <PropertyGroup>
-    <!--Command to run on project build-->
-    <BuildCommand>npm run build</BuildCommand>
-    <!--Command to run on project clean-->
-    <CleanCommand>npm run clean</CleanCommand>
-    <JavaScriptTestRoot>.\</JavaScriptTestRoot>
-    <JavaScriptTestFramework>Jest</JavaScriptTestFramework>
-  </PropertyGroup>
   <ItemGroup>
     <None Include=".github\workflows\*" />
   </ItemGroup>
