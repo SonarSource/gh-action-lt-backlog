@@ -11,10 +11,14 @@
     "test": "node --test --test-timeout=20000 \"test/**/*.test.js\"",
     "test-uts": "node --test --test-timeout=20000 \"test/*.test.js\" \"test/!(Data)/**/*.test.js\"",
     "test-data": "node --test --test-timeout=20000 \"test/Data/**/*.test.js\"",
-    "format": "prettier --write \"**/*.js\""
+    "format": "prettier --write \"**/*.js\"",
+    "prepare": "husky",
+    "precommit": "pretty-quick --staged"
   },
   "devDependencies": {
-    "prettier": "^3.8.3"
+    "husky": "9.1.7",
+    "prettier": "^3.8.3",
+    "pretty-quick": "4.2.2"
   },
   "dependencies": {
     "@actions/core": "^3.0.0",
