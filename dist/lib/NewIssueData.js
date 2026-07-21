@@ -21,8 +21,8 @@ import { JiraTeams } from "../Data/TeamConfiguration.js";
 import { Config } from "./Configuration.js";
 import { JIRA_ISSUE_PATTERN } from "./Constants.js";
 import { AtlassianDocument } from "./AtlassianDocumentFormat.js";
-const JIRA_DESCRIPTION_MAX_LENGTH = 32_767;
-const DESCRIPTION_TRUNCATION_NOTICE = '\n\nDescription truncated because it exceeds the Jira character limit. See the pull request for the full description.';
+const JIRA_DESCRIPTION_MAX_ADF_LENGTH = 32_767;
+const DESCRIPTION_TRUNCATION_NOTICE = 'Description truncated because it exceeds the Jira character limit. See the pull request for the full description.';
 export class NewIssueData {
     projectKey;
     accountId;
@@ -212,12 +212,12 @@ export class NewIssueData {
     }
     static parseDescription(body) {
         if (body && !/^Part of\s*<!--.*-->\s*$/s.test(body)) { // Don't spam Jira with default PR template
-            let description = body;
-            if (description.length > JIRA_DESCRIPTION_MAX_LENGTH) {
-                console.log(`PR description has ${description.length} characters and will be truncated to fit Jira's ${JIRA_DESCRIPTION_MAX_LENGTH}-character limit`);
-                description = description.substring(0, JIRA_DESCRIPTION_MAX_LENGTH - DESCRIPTION_TRUNCATION_NOTICE.length) + DESCRIPTION_TRUNCATION_NOTICE;
+            const description = AtlassianDocument.fromMarkdown(body);
+            const serializedLength = JSON.stringify(description).length;
+            if (serializedLength > JIRA_DESCRIPTION_MAX_ADF_LENGTH) {
+                console.log(`PR description ADF has ${serializedLength} characters and will be truncated to fit Jira's ${JIRA_DESCRIPTION_MAX_ADF_LENGTH}-character limit`);
             }
-            return AtlassianDocument.fromMarkdown(description);
+            return description.truncate(JIRA_DESCRIPTION_MAX_ADF_LENGTH, DESCRIPTION_TRUNCATION_NOTICE);
         }
         else {
             return undefined;
