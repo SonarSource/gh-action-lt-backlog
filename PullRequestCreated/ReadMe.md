@@ -3,6 +3,7 @@
 Upon pull request creation, create a Jira ticket if no tickets are mentioned in the title.
 
 This action will take the first non-`Sub-task` ticket and use it as a parent for the created ticket:
+
 - if the parent is an `Epic`, the created ticket will be a `Maintenance`
 - if the parent is not an `Epic`, the created ticket will be a `Sub-task`
 - if there is no parent, the created ticket will be a `Maintenance`
@@ -44,7 +45,7 @@ Jira project key that is used to create new issues. If key is not specified, the
 
 ### `additional-fields`
 
-Additional fields to set when creating the Jira issue. 
+Additional fields to set when creating the Jira issue.
 
 ```yaml
 additional-fields: '{ "components": [ { "name": "Something" } ], "labels": ["Something"] }'
@@ -84,29 +85,29 @@ Ask DevInfra Squad to "Add Jira GitHub tokens" to the Vault configuration of you
 
 1. Issue creation fails
 
-    > Field 'customfield_...' cannot be set. It is not on the appropriate screen, or unknown.
+   > Field 'customfield_...' cannot be set. It is not on the appropriate screen, or unknown.
 
-    Ask Jira Admin to update Issue creation screen for your project and Maintenance issue type. It is missing Team or Sprint field.
+   Ask Jira Admin to update Issue creation screen for your project and Maintenance issue type. It is missing Team or Sprint field.
 
 1. Search for active sprint fails
 
-    > The requested board cannot be viewed because it either does not exist or you do not have permission to view it.
+   > The requested board cannot be viewed because it either does not exist or you do not have permission to view it.
 
-    Go to the filter of your board and add "My organization" to the "Viewers" permission list.
+   Go to the filter of your board and add "My organization" to the "Viewers" permission list.
 
 1. Issue is assigned to a wrong Team
 
-    Check your team membership in Jira and remove yourself from irrelevant teams.
-    
-    Teams present in the [configuration](../src/helpers/TeamConfiguration.js) are preferred in case user is member of multiple teams.
-    
-    Check if the Team name is specified correctly.
-    
+   Check your team membership in Jira and remove yourself from irrelevant teams.
+
+   Teams present in the [configuration](../src/helpers/TeamConfiguration.js) are preferred in case user is member of multiple teams.
+
+   Check if the Team name is specified correctly.
+
 1. Issue is not assigned to a sprint
 
-    Check the action log to see if it managed to identify Team, Board and Sprint. 
-    
-    Check if the [configuration](../src/helpers/TeamConfiguration.js) contains correct Team name and boardId.
+   Check the action log to see if it managed to identify Team, Board and Sprint.
+
+   Check if the [configuration](../src/helpers/TeamConfiguration.js) contains correct Team name and boardId.
 
 ## Example usage
 
@@ -115,7 +116,7 @@ name: Pull Request Created
 
 on:
   pull_request:
-    types: ["opened"]
+    types: ['opened']
 
 jobs:
   PullRequestCreated_job:
@@ -125,7 +126,7 @@ jobs:
       id-token: write
     # For external PR, ticket should be created manually
     if: |
-        github.event.pull_request.head.repo.full_name == github.repository
+      github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - id: secrets
         uses: SonarSource/vault-action-wrapper@v3
@@ -137,8 +138,7 @@ jobs:
       - uses: sonarsource/gh-action-lt-backlog/PullRequestCreated@v2
         with:
           github-token: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
-          jira-user:    ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
-          jira-token:   ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
+          jira-user: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
+          jira-token: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
           jira-project: EXAMPLE
-
 ```

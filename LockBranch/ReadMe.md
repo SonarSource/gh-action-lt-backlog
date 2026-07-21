@@ -48,9 +48,10 @@ None
 
 ## Prerequisites
 
-Ask DevInfra squad to add a 
-* `github_lock` token to the Vault configuration of your repository. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/8372a71d1dbb5d408f777eaaea1ead6d85c75299/orders/analysis-dotnet-squad.yaml#L185-L186)
-* `development/kv/data/slack` token. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/8372a71d1dbb5d408f777eaaea1ead6d85c75299/orders/analysis-dotnet-squad.yaml#L200)
+Ask DevInfra squad to add a
+
+- `github_lock` token to the Vault configuration of your repository. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/8372a71d1dbb5d408f777eaaea1ead6d85c75299/orders/analysis-dotnet-squad.yaml#L185-L186)
+- `development/kv/data/slack` token. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/8372a71d1dbb5d408f777eaaea1ead6d85c75299/orders/analysis-dotnet-squad.yaml#L200)
 
 A branch protection rule for the configured `branch-pattern` has to exist before running this action.
 
@@ -92,9 +93,9 @@ jobs:
       - uses: sonarsource/gh-action-lt-backlog/LockBranch@v2
         with:
           github-token: ${{ fromJSON(steps.secrets.outputs.vault).lock_token }}
-          lock-branch:  ${{ inputs.lock-branch }}
-          slack-token:  ${{ fromJSON(steps.secrets.outputs.vault).slack_api_token }} # Optional, needed only when slack-channel is set
-          additional-message: ${{ inputs.additional-message }}                      # Optional, useful only when slack-channel is set
-          branch-pattern: "master"              # Optional
-          slack-channel: public-channel-name    # Optional
+          lock-branch: ${{ inputs.lock-branch }}
+          slack-token: ${{ fromJSON(steps.secrets.outputs.vault).slack_api_token }} # Optional, needed only when slack-channel is set
+          additional-message: ${{ inputs.additional-message }} # Optional, useful only when slack-channel is set
+          branch-pattern: 'master' # Optional
+          slack-channel: public-channel-name # Optional
 ```

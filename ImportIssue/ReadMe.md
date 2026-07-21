@@ -35,7 +35,7 @@ name: Issue labeled
 
 on:
   issues:
-    types: ["labeled"]
+    types: ['labeled']
 
 jobs:
   CreateJiraIssue_job:
@@ -54,8 +54,7 @@ jobs:
       - uses: sonarsource/gh-action-lt-backlog/ImportIssue@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          jira-user:    ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
-          jira-token:   ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
+          jira-user: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
+          jira-token: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
           jira-project: EXAMPLE
-
 ```

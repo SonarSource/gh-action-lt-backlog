@@ -1,4 +1,4 @@
-Part of 
+Part of
 <!--
   Only for standalone PRs without Jira issue in the PR title:
     * Replace this comment with Epic ID to create a new Maintenance work item in Jira

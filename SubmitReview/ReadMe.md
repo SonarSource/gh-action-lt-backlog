@@ -11,7 +11,7 @@ This action will attempt to move all tickets mentionned in the pull request titl
 
 ### `github-token`
 
-Token to access the GitHub API. 
+Token to access the GitHub API.
 
 ### `jira-user`
 
@@ -52,9 +52,9 @@ jobs:
       id-token: write
     # For external PR, ticket should be moved manually
     if: |
-        github.event.pull_request.head.repo.full_name == github.repository
-        && (github.event.review.state == 'changes_requested' 
-            || github.event.review.state == 'approved')
+      github.event.pull_request.head.repo.full_name == github.repository
+      && (github.event.review.state == 'changes_requested'
+          || github.event.review.state == 'approved')
     steps:
       - id: secrets
         uses: SonarSource/vault-action-wrapper@v3
@@ -66,7 +66,6 @@ jobs:
       - uses: sonarsource/gh-action-lt-backlog/SubmitReview@v2
         with:
           github-token: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
-          jira-user:    ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
-          jira-token:   ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
-
+          jira-user: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
+          jira-token: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
 ```

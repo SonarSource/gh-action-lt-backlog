@@ -10,7 +10,7 @@ The intended usage is to prevent any changes on a repository that is about to be
 
 ### `github-token`
 
-Token to access the GitHub API. 
+Token to access the GitHub API.
 
 The token needs `administration:write` permissions or `public_repo` scope from a user with admin rights to the repository.
 
@@ -18,13 +18,13 @@ The token needs `administration:write` permissions or `public_repo` scope from a
 
 Slack auth Token with `chat-write` and `chat-write.public` scope. This parameter is needed only when `slack-channel` is also specified.
 
-This parameter is optional. 
+This parameter is optional.
 
 ### `branch-pattern`
 
 The pattern of the branch protection rule that should be locked or unlocked.
 
-This parameter is optional. 
+This parameter is optional.
 
 Default value: `master`
 
@@ -32,13 +32,13 @@ Default value: `master`
 
 Slack channel name or ID to send the notification to. When set, requires `slack-token` to be set as well.
 
-This parameter is optional. 
+This parameter is optional.
 
 ### `additional-message`
 
 Additional Slack message text to be added to the default message.
 
-This parameter is optional. 
+This parameter is optional.
 
 ## Outputs
 
@@ -46,9 +46,10 @@ None
 
 ## Prerequisites
 
-Ask DevInfra squad to add a 
-* `github_lock` token to the Vault configuration of your repository. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/8372a71d1dbb5d408f777eaaea1ead6d85c75299/orders/analysis-dotnet-squad.yaml#L185-L186)
-* `development/kv/data/slack` token. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/8372a71d1dbb5d408f777eaaea1ead6d85c75299/orders/analysis-dotnet-squad.yaml#L200)
+Ask DevInfra squad to add a
+
+- `github_lock` token to the Vault configuration of your repository. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/8372a71d1dbb5d408f777eaaea1ead6d85c75299/orders/analysis-dotnet-squad.yaml#L185-L186)
+- `development/kv/data/slack` token. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/8372a71d1dbb5d408f777eaaea1ead6d85c75299/orders/analysis-dotnet-squad.yaml#L200)
 
 A branch protection rule for the configured `branch-pattern` has to exist before running this action.
 
@@ -64,7 +65,7 @@ Update your IaC branch protection to ignore changes of `lock_branch`. [Example](
 name: Toggle lock branch
 
 on:
-  workflow_dispatch:    # Triggered manually from the GitHub UI / Actions
+  workflow_dispatch: # Triggered manually from the GitHub UI / Actions
     inputs:
       additional-message:
         description: 'Additional Slack message text'
@@ -86,9 +87,8 @@ jobs:
       - uses: sonarsource/gh-action-lt-backlog/ToggleLockBranch@v2
         with:
           github-token: ${{ fromJSON(steps.secrets.outputs.vault).lock_token }}
-          slack-token:  ${{ fromJSON(steps.secrets.outputs.vault).slack_api_token }} # Optional, needed only when slack-channel is set
-          additional-message: ${{ inputs.additional-message }}         # Optional, useful only when slack-channel is set
-          branch-pattern: "master"              # Optional
-          slack-channel: public-channel-name    # Optional
-
+          slack-token: ${{ fromJSON(steps.secrets.outputs.vault).slack_api_token }} # Optional, needed only when slack-channel is set
+          additional-message: ${{ inputs.additional-message }} # Optional, useful only when slack-channel is set
+          branch-pattern: 'master' # Optional
+          slack-channel: public-channel-name # Optional
 ```

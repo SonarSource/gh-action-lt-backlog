@@ -11,7 +11,7 @@
     "test": "node --test --test-timeout=20000 \"test/**/*.test.js\"",
     "test-uts": "node --test --test-timeout=20000 \"test/*.test.js\" \"test/!(Data)/**/*.test.js\"",
     "test-data": "node --test --test-timeout=20000 \"test/Data/**/*.test.js\"",
-    "format": "prettier --write \"**/*.js\"",
+    "format": "prettier --write .",
     "prepare": "husky",
     "precommit": "pretty-quick --staged"
   },

@@ -53,7 +53,7 @@ name: Request review
 
 on:
   pull_request:
-    types: ["review_requested"]
+    types: ['review_requested']
 
 jobs:
   RequestReview_job:
@@ -63,7 +63,7 @@ jobs:
       id-token: write
     # For external PR, ticket should be moved manually
     if: |
-        github.event.pull_request.head.repo.full_name == github.repository
+      github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - id: secrets
         uses: SonarSource/vault-action-wrapper@v3
@@ -75,7 +75,6 @@ jobs:
       - uses: sonarsource/gh-action-lt-backlog/RequestReview@v2
         with:
           github-token: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
-          jira-user:    ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
-          jira-token:   ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
-
+          jira-user: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
+          jira-token: ${{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
 ```

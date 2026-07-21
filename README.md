@@ -38,22 +38,26 @@ All actions should be consumed from these branches.
 
 2. Add the following line in `.npmrc` in your HOME folder:
 
-    If `npm-repox-token` is base64 encoded:
-    ```ini
-    //repox.jfrog.io/artifactory/api/npm/npm/:_auth = <npm-repox-token>
-    ```
-    If not:
-    ```ini
-    //repox.jfrog.io/artifactory/api/npm/npm/:_authToken = <npm-repox-token>
-    ```
+   If `npm-repox-token` is base64 encoded:
 
-    More info: https://docs.npmjs.com/cli/v9/configuring-npm/npmrc#auth-related-configuration
+   ```ini
+   //repox.jfrog.io/artifactory/api/npm/npm/:_auth = <npm-repox-token>
+   ```
+
+   If not:
+
+   ```ini
+   //repox.jfrog.io/artifactory/api/npm/npm/:_authToken = <npm-repox-token>
+   ```
+
+   More info: https://docs.npmjs.com/cli/v9/configuring-npm/npmrc#auth-related-configuration
 
 ### /node_modules/ dependencies
 
 The `/node_modules/` files that are part of the GIT repo:
-* Must contain production dependencies for the actions to run.
-* Must NOT contain development and testing dependencies, as those bring 10k+ small files that takes ages to check out on every action run.
+
+- Must contain production dependencies for the actions to run.
+- Must NOT contain development and testing dependencies, as those bring 10k+ small files that takes ages to check out on every action run.
 
 CI uses these committed production dependencies without running `npm install`, matching what action consumers receive. Run `npm install` locally to install both production and development dependencies.
 

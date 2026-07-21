@@ -1,6 +1,6 @@
 # LogPayload
 
-Log JSON payload of any GitHub Action to console. Useful for development. 
+Log JSON payload of any GitHub Action to console. Useful for development.
 
 ## Inputs
 
@@ -15,9 +15,9 @@ None
 ```yaml
 name: Log Payload
 
-on:     # Any trigger
+on: # Any trigger
   milestone:
-    types: ["created"]
+    types: ['created']
 
 jobs:
   LogPayload_job:
@@ -25,5 +25,4 @@ jobs:
     runs-on: sonar-xs
     steps:
       - uses: sonarsource/gh-action-lt-backlog/LogPayload@v2
-
 ```
