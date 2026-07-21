@@ -121,6 +121,17 @@ describe('NewIssueData', () => {
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', null), 'KEY', '', '1234-account', '')).toEqual(createExpected(undefined));
   });
 
+  it('create standalone PR with description exceeding Jira character limit', async () => {
+    const jiraDescriptionLimit = 32_767;
+    const truncationNotice = '\n\nDescription truncated because it exceeds the Jira character limit. See the pull request for the full description.';
+    const body = 'x'.repeat(jiraDescriptionLimit + 1);
+    const expectedDescription = 'x'.repeat(jiraDescriptionLimit - truncationNotice.length) + truncationNotice;
+
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', body), 'KEY', '', '1234-account', '')).toEqual(createExpected(expectedDescription));
+    expect(expectedDescription).toHaveLength(jiraDescriptionLimit);
+    expect(logTester.logsParams).toContain(`PR description has ${body.length} characters and will be truncated to fit Jira's ${jiraDescriptionLimit}-character limit`);
+  });
+
   it('create standalone PR with body as default template', async () => {
     const body = `Part of 
 <!-- 
