@@ -238,6 +238,37 @@ export abstract class OctokitAction extends Action {
     }
   }
 
+  protected async findSlackUserId(email: string): Promise<string | null> {
+    const response = await this.sendSlackGet("https://slack.com/api/users.lookupByEmail", { email });
+    return response?.user?.id ?? null;
+  }
+
+  protected async sendSlackGet(url: string, params: Record<string, string>): Promise<any> {
+    const token = this.inputString("slack-token");
+    if (!token) {
+      throw new Error("slack-token was not set");
+    }
+    try {
+      const response = await fetch(`${url}?${new URLSearchParams(params)}`, {
+        headers: { authorization: `Bearer ${token}` }  // Params may contain emails, so they are not logged
+      });
+      if (!response.ok) {
+        this.log(`Failed to send API request. Error ${response.status}: ${response.statusText}`);
+        return null;
+      }
+      const data = await response.json();
+      if (!data.ok) {
+        this.log(`Failed to send API request. Error: ${data.error}`);
+        return null;
+      }
+      return data;
+    } catch (ex) {
+      this.log("Failed to send Slack request");
+      this.log((ex as Error).toString());
+      return null;
+    }
+  }
+
   public async findRootlyOnCallEmails(scheduleId: string | null): Promise<string[]> {
     if (!scheduleId) {
       return [];

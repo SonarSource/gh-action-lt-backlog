@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
  * mailto: info AT sonarsource DOT com
@@ -18,18 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import type { Api } from '@octokit/plugin-rest-endpoint-methods';
-import { GraphQlQueryResponseData } from '@octokit/graphql';
-import { context } from '@actions/github';
+import { PrepareRelease } from "./PrepareRelease.js";
 
-// This provides typed access to the internal members of OctokitAction for unit testing
-export type OctokitActionStub = {
-  jira: any;
-  rest: Api['rest'];
-  payload: typeof context.payload;
-  isEngXpSquad: boolean;
-  sendGraphQL(query: string): Promise<GraphQlQueryResponseData>;
-  findEmails(login: string): Promise<string[]>;
-  sendSlackPost(url: string, jsonRequest: any): Promise<any>;
-  findSlackUserId(email: string): Promise<string | null>;
-};
+const action = new PrepareRelease();
+action.run();
