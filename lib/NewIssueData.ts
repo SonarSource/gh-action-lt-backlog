@@ -28,7 +28,8 @@ import { JiraTeam } from "./JiraTeam.js";
 import { TeamReviewData } from "./TeamReviewData.js";
 import { AtlassianDocument } from "./AtlassianDocumentFormat.js";
 
-const JIRA_DESCRIPTION_MAX_ADF_LENGTH = 32_767;
+const JIRA_DESCRIPTION_MAX_MARKDOWN_LENGTH = 5_000;
+const JIRA_DESCRIPTION_SAFE_ADF_LENGTH = 30_000;
 const DESCRIPTION_TRUNCATION_NOTICE = 'Description truncated because it exceeds the Jira character limit. See the pull request for the full description.';
 
 export class NewIssueData {
@@ -228,12 +229,28 @@ export class NewIssueData {
     if (body && !/^Part of\s*<!--.*-->\s*$/s.test(body)) {  // Don't spam Jira with default PR template
       const description = AtlassianDocument.fromMarkdown(body);
       const serializedLength = JSON.stringify(description).length;
-      if (serializedLength > JIRA_DESCRIPTION_MAX_ADF_LENGTH) {
-        console.log(`PR description ADF has ${serializedLength} characters and will be truncated to fit Jira's ${JIRA_DESCRIPTION_MAX_ADF_LENGTH}-character limit`);
+      if (body.length <= JIRA_DESCRIPTION_MAX_MARKDOWN_LENGTH && serializedLength <= JIRA_DESCRIPTION_SAFE_ADF_LENGTH) {
+        return description;
       }
-      return description.truncate(JIRA_DESCRIPTION_MAX_ADF_LENGTH, DESCRIPTION_TRUNCATION_NOTICE);
+      console.log(`PR description has ${body.length} Markdown characters and ${serializedLength} serialized ADF characters; it will be truncated to fit Jira's limit`);
+      return this.truncateDescription(body);
     } else {
       return undefined;
+    }
+  }
+
+  private static truncateDescription(body: string): AtlassianDocument {
+    const suffix = `\n\n${DESCRIPTION_TRUNCATION_NOTICE}`;
+    let prefixLength = Math.min(body.length, JIRA_DESCRIPTION_MAX_MARKDOWN_LENGTH - suffix.length);
+    while (true) {
+      const description = AtlassianDocument.fromMarkdown(body.substring(0, prefixLength) + suffix);
+      if (JSON.stringify(description).length <= JIRA_DESCRIPTION_SAFE_ADF_LENGTH) {
+        return description;
+      }
+      if (prefixLength === 0) {
+        throw new Error('The Jira description truncation notice exceeds the safe ADF length');
+      }
+      prefixLength = Math.floor(prefixLength / 2);
     }
   }
 }

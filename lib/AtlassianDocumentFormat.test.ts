@@ -153,33 +153,6 @@ Code comment
       });
     });
   });
-
-  describe('truncate', () => {
-    it('keeps ADF that fits the serialized length limit unchanged', () => {
-      const document = AtlassianDocument.fromMarkdown('Short description');
-
-      expect(document.truncate(JSON.stringify(document).length, 'Truncated')).toBe(document);
-    });
-
-    it('truncates serialized ADF and appends a notice', () => {
-      const document = AtlassianDocument.fromMarkdown('[release notes](https://example.com/release)\n'.repeat(20));
-      const maxSerializedLength = 1_000;
-
-      const truncated = document.truncate(maxSerializedLength, 'Description truncated');
-
-      expect(JSON.stringify(document).length).toBeGreaterThan(maxSerializedLength);
-      expect(JSON.stringify(truncated).length).toBeLessThanOrEqual(maxSerializedLength);
-      expect(truncated.content.at(-1)).toEqual({
-        type: 'paragraph',
-        content: [{ type: 'text', text: 'Description truncated' }]
-      });
-      expect(truncated.content[0].content![0]).toEqual({
-        type: 'text',
-        text: 'release notes',
-        marks: [{ type: 'link', attrs: { href: 'https://example.com/release' } }]
-      });
-    });
-  });
 });
 
 describe('AdfNode', () => {

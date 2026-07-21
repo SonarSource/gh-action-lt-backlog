@@ -24,7 +24,7 @@ import { PullRequest } from './OctokitTypes.js';
 import { jiraClientStub } from '../tests/JiraClientStub.js';
 import { LogTester } from '../tests/LogTester.js';
 import { TeamReviewDataStub } from '../tests/TeamReviewDataStub.js';
-import { AtlassianDocument, AdfNode } from './AtlassianDocumentFormat.js';
+import { AtlassianDocument } from './AtlassianDocumentFormat.js';
 
 function createPullRequest(title: string, body: string | null, repo: string = 'repo'): PullRequest {
   return {
@@ -39,15 +39,21 @@ function createPullRequest(title: string, body: string | null, repo: string = 'r
 }
 
 function createDescription(text: string | undefined): AtlassianDocument | undefined {
-  return text === undefined ? undefined : new AtlassianDocument([{
+  return text === undefined ? undefined : {
     content: [
       {
-        text,
-        type: "text",
+        content: [
+          {
+            text,
+            type: "text",
+          },
+        ],
+        type: "paragraph",
       },
     ],
-    type: "paragraph",
-  } as AdfNode]);
+    type: "doc",
+    version: 1,
+  }
 }
 
 function createExpected(description: string | undefined): NewIssueData {
@@ -115,19 +121,34 @@ describe('NewIssueData', () => {
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', null), 'KEY', '', '1234-account', '')).toEqual(createExpected(undefined));
   });
 
-  it('create standalone PR with ADF exceeding Jira character limit', async () => {
-    const jiraDescriptionLimit = 32_767;
+  it('caps long standalone PR descriptions at 5,000 Markdown characters', async () => {
+    const maxMarkdownLength = 5_000;
+    const safeAdfLength = 30_000;
     const truncationNotice = 'Description truncated because it exceeds the Jira character limit. See the pull request for the full description.';
     const body = '[release notes](https://example.com/release)\n'.repeat(500);
+    const originalAdfLength = JSON.stringify(AtlassianDocument.fromMarkdown(body)).length;
+    const suffix = `\n\n${truncationNotice}`;
+
+    const result = await NewIssueData.create(jiraClientStub, createPullRequest('Title', body), 'KEY', '', '1234-account', '');
+
+    expect(result!.additionalFields.description).toEqual(AtlassianDocument.fromMarkdown(body.substring(0, maxMarkdownLength - suffix.length) + suffix));
+    expect(JSON.stringify(result!.additionalFields.description).length).toBeLessThanOrEqual(safeAdfLength);
+    expect(JSON.stringify(result!.additionalFields.description)).toContain(truncationNotice);
+    expect(logTester.logsParams).toContain(`PR description has ${body.length} Markdown characters and ${originalAdfLength} serialized ADF characters; it will be truncated to fit Jira's limit`);
+  });
+
+  it('shrinks descriptions further when 5,000 Markdown characters still produce oversized ADF', async () => {
+    const safeAdfLength = 30_000;
+    const truncationNotice = 'Description truncated because it exceeds the Jira character limit. See the pull request for the full description.';
+    const body = '[x](y)\n'.repeat(700);
     const originalAdfLength = JSON.stringify(AtlassianDocument.fromMarkdown(body)).length;
 
     const result = await NewIssueData.create(jiraClientStub, createPullRequest('Title', body), 'KEY', '', '1234-account', '');
 
-    expect(body.length).toBeLessThan(jiraDescriptionLimit);
-    expect(originalAdfLength).toBeGreaterThan(jiraDescriptionLimit);
-    expect(JSON.stringify(result!.additionalFields.description).length).toBeLessThanOrEqual(jiraDescriptionLimit);
-    expect(result!.additionalFields.description.content.at(-1)).toEqual(createDescription(truncationNotice)!.content[0]);
-    expect(logTester.logsParams).toContain(`PR description ADF has ${originalAdfLength} characters and will be truncated to fit Jira's ${jiraDescriptionLimit}-character limit`);
+    expect(body.length).toBeLessThanOrEqual(5_000);
+    expect(originalAdfLength).toBeGreaterThan(safeAdfLength);
+    expect(JSON.stringify(result!.additionalFields.description).length).toBeLessThanOrEqual(safeAdfLength);
+    expect(JSON.stringify(result!.additionalFields.description)).toContain(truncationNotice);
   });
 
   it('create standalone PR with body as default template', async () => {

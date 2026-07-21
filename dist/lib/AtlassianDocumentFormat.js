@@ -36,64 +36,6 @@ export class AtlassianDocument {
         this.normalizeHeadings(contents);
         return new AtlassianDocument(contents);
     }
-    truncate(maxSerializedLength, truncationNotice) {
-        if (JSON.stringify(this).length <= maxSerializedLength) {
-            return this;
-        }
-        const notice = new AdfNode({ type: 'paragraph', text: truncationNotice });
-        let truncated = new AtlassianDocument([notice]);
-        if (JSON.stringify(truncated).length > maxSerializedLength) {
-            throw new Error('The truncation notice exceeds the maximum serialized ADF length');
-        }
-        let minTextLength = 0;
-        let maxTextLength = AtlassianDocument.textLength(this.content);
-        while (minTextLength <= maxTextLength) {
-            const textLength = Math.floor((minTextLength + maxTextLength) / 2);
-            const candidate = new AtlassianDocument([
-                ...AtlassianDocument.truncateContent(this.content, textLength),
-                notice,
-            ]);
-            if (JSON.stringify(candidate).length <= maxSerializedLength) {
-                truncated = candidate;
-                minTextLength = textLength + 1;
-            }
-            else {
-                maxTextLength = textLength - 1;
-            }
-        }
-        return truncated;
-    }
-    static textLength(nodes) {
-        return nodes.reduce((length, node) => length + (node.text ? Array.from(node.text).length : 0) + this.textLength(node.content ?? []), 0);
-    }
-    static truncateContent(nodes, maxTextLength) {
-        const state = { remainingTextLength: maxTextLength };
-        const result = [];
-        for (const node of nodes) {
-            const truncated = this.truncateNode(node, state);
-            if (truncated) {
-                result.push(truncated);
-            }
-            if (state.remainingTextLength === 0) {
-                break;
-            }
-        }
-        return result;
-    }
-    static truncateNode(node, state) {
-        if (node.text != null) {
-            if (state.remainingTextLength === 0) {
-                return null;
-            }
-            const characters = Array.from(node.text);
-            const text = characters.slice(0, state.remainingTextLength).join('');
-            state.remainingTextLength -= Math.min(characters.length, state.remainingTextLength);
-            return { ...node, text };
-        }
-        const content = this.truncateContent(node.content ?? [], state.remainingTextLength);
-        state.remainingTextLength -= AtlassianDocument.textLength(content);
-        return content.length > 0 ? { ...node, content } : null;
-    }
     static normalizeHeadings(nodes) {
         const headings = nodes.filter(x => x.type === 'heading');
         if (headings.length > 0) {
