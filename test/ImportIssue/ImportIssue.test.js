@@ -48,7 +48,7 @@ describe('ImportIssue', () => {
       assert.deepStrictEqual(logTester.logsParams, [
         'Importing #42',
         `Invoked jira.createIssue('GHA', 'New issue', {"issuetype":{"name":"${type}"},"description":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Lorem Ipsum"}]}]}})`,
-        'Created GHA-4242',
+        'Created Jira issue',
         "Invoked jira.addIssueRemoteLink('GHA-4242'', 'https://www.github.com/test-owner/test-repo/issues/42', null)",
         'Updating issue #42 title to: GHA-4242 New issue',
         'Invoked rest.issues.update({"owner":"test-owner","repo":"test-repo","issue_number":42,"title":"GHA-4242 New issue"})',

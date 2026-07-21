@@ -38,7 +38,7 @@ export class ImportIssue extends OctokitAction {
       description: AtlassianDocument.fromMarkdown(issue.body ?? ''),
     };
     const id = await this.jira.createIssue(jiraProject, issue.title, parameters);
-    console.log(`Created ${id}`);
+    this.log('Created Jira issue');
     const promises = [];
     promises.push(
       this.jira.addIssueRemoteLink(id, issue.html_url),

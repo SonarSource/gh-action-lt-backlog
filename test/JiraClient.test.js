@@ -76,12 +76,7 @@ describe('JiraClient', () => {
     );
     assertCalledWith(
       logTester.logSpy,
-      `{
-  "errorMessages": [
-    "Issue does not exist or you do not have permission to see it."
-  ],
-  "errors": {}
-}`,
+      '{   "errorMessages": [     "Issue does not exist or you do not have permission to see it."   ],   "errors": {} }',
     );
   });
   it('createIssue', async () => {

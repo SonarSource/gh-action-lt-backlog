@@ -19,6 +19,8 @@
  */
 import { JiraTeams } from '../../src/helpers/TeamConfiguration.js';
 import { JiraClient } from '../../src/helpers/JiraClient.js';
+
+const TEST_SPRINT_ID = 42;
 function serializeStrings(values) {
   return '[' + values.map(x => `'${x}'`).join(', ') + ']';
 }
@@ -169,7 +171,7 @@ export const jiraClientStub = {
     }
   },
   async findSprintId(boardId) {
-    return 42;
+    return TEST_SPRINT_ID;
   },
   async findIssues(jql) {
     switch (jql) {

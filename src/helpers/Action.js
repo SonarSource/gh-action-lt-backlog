@@ -20,6 +20,10 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 
+function sanitizeLogMessage(value) {
+  return String(value).replaceAll(/[\r\n\u2028\u2029]/g, ' ');
+}
+
 export class Action {
   repo;
   payload;
@@ -41,10 +45,10 @@ export class Action {
     }
   }
   log(line) {
-    console.log(line);
+    console.log(sanitizeLogMessage(line));
   }
   logSerialized(value) {
-    console.log(this.serializeToString(value));
+    this.log(this.serializeToString(value));
   }
   addRepo(other) {
     return { ...this.repo, ...other };

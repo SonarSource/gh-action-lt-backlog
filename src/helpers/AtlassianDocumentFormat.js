@@ -20,6 +20,8 @@
 import { MarkdownParser } from './MarkdownParser.js';
 import { MarkdownTextParser } from './MarkdownTextParser.js';
 
+const MAX_HEADING_LEVEL = 6;
+
 export class AtlassianDocument {
   type = 'doc';
   version = 1;
@@ -40,7 +42,7 @@ export class AtlassianDocument {
   static normalizeHeadings(nodes) {
     const headings = nodes.filter(x => x.type === 'heading');
     if (headings.length > 0) {
-      const min = headings.reduce((min, x) => Math.min(min, x.attrs.level), 6);
+      const min = headings.reduce((min, x) => Math.min(min, x.attrs.level), MAX_HEADING_LEVEL);
       for (const node of headings) {
         node.attrs.level -= min - 1; // Normalize to start from 1
       }

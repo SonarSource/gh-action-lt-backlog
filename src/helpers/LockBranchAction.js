@@ -24,29 +24,33 @@ export class LockBranchAction extends OctokitAction {
     const pattern = this.inputString('branch-pattern');
     const additionalMessage = this.inputString('additional-message');
     const rule = await this.findRule(pattern);
-    if (rule) {
-      const lockBranch = this.resolveLockBranch(rule);
-      if (rule.lockBranch === lockBranch) {
-        this.log(`The branch \`${pattern}\` is already ${lockBranch ? 'locked' : 'unlocked'}.`);
-      } else {
-        if (!lockBranch) {
-          // Was locked => unlocking
-          await this.cancelAutoMerge(pattern);
-        }
-        const updated = await this.updateRule(rule.id, lockBranch);
-        if (updated.lockBranch === lockBranch) {
-          const action = lockBranch
-            ? 'locked :ice_cube:'
-            : 'unlocked and is now open for changes :sunny:';
-          const suffix = additionalMessage ? `\n\n${additionalMessage}` : '';
-          const message = `${this.repo.repo}: The branch \`${pattern}\` was ${action}${suffix}`;
-          this.log(`Done: ${message}`);
-          this.sendSlackMessage(message);
-        } else {
-          this.log(`Failed: '${pattern}' was not updated successfully.`); // And we have no idea why
-        }
-      }
+    if (!rule) {
+      return;
     }
+    const lockBranch = this.resolveLockBranch(rule);
+    if (rule.lockBranch === lockBranch) {
+      this.log(`The branch \`${pattern}\` is already ${lockBranch ? 'locked' : 'unlocked'}.`);
+      return;
+    }
+    if (!lockBranch) {
+      // Was locked => unlocking
+      await this.cancelAutoMerge(pattern);
+    }
+    const updated = await this.updateRule(rule.id, lockBranch);
+    await this.reportUpdate(updated, lockBranch, pattern, additionalMessage);
+  }
+  async reportUpdate(updated, lockBranch, pattern, additionalMessage) {
+    if (updated.lockBranch !== lockBranch) {
+      this.log(`Failed: '${pattern}' was not updated successfully.`); // And we have no idea why
+      return;
+    }
+    const action = lockBranch
+      ? 'locked :ice_cube:'
+      : 'unlocked and is now open for changes :sunny:';
+    const suffix = additionalMessage ? `\n\n${additionalMessage}` : '';
+    const message = `${this.repo.repo}: The branch \`${pattern}\` was ${action}${suffix}`;
+    this.log(`Done: ${message}`);
+    await this.sendSlackMessage(message);
   }
   async findRule(pattern) {
     const rules = (await this.loadRules()).filter(x => x.pattern === pattern);

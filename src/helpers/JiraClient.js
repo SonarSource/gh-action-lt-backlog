@@ -19,13 +19,25 @@
  */
 import { Config } from './Configuration.js';
 
+function encodePathSegment(value) {
+  return encodeURIComponent(String(value));
+}
+
+function logSafely(value) {
+  console.log(String(value).replaceAll(/[\r\n\u2028\u2029]/g, ' '));
+}
+
 export class JiraClient {
   domain;
   siteId;
   organizationId;
   token;
   constructor(domain, siteId, organizationId, user, token) {
-    this.domain = domain;
+    const jiraUrl = new URL(domain);
+    if (jiraUrl.protocol !== 'https:') {
+      throw new TypeError('Jira domain must use HTTPS');
+    }
+    this.domain = jiraUrl.origin;
     this.siteId = siteId;
     this.organizationId = organizationId;
     this.token = Buffer.from(`${user}:${token}`).toString('base64');
@@ -38,38 +50,39 @@ export class JiraClient {
         ...additionalFields,
       },
     };
-    console.log(`Creating issue in project '${projectKey}'`);
+    logSafely(`Creating issue in project '${projectKey}'`);
     const response = await this.sendRestPostApi('issue', request);
     const issueId = response?.key || null;
     if (issueId) {
-      console.log(`Created issue: ${issueId}`);
+      logSafely(`Created issue: ${issueId}`);
     }
     return issueId;
   }
   loadIssue(issueKey) {
-    console.log(`Load issue '${issueKey}'`);
-    return this.sendRestGetApi(`issue/${issueKey}`);
+    logSafely(`Load issue '${issueKey}'`);
+    return this.sendRestGetApi(`issue/${encodePathSegment(issueKey)}`);
   }
   loadProject(projectKey) {
-    console.log(`Load project '${projectKey}'`);
-    return this.sendRestGetApi(`project/${projectKey}`);
+    logSafely(`Load project '${projectKey}'`);
+    return this.sendRestGetApi(`project/${encodePathSegment(projectKey)}`);
   }
   async moveIssue(issueId, transitionName, fields = null) {
     const transition = await this.findTransition(issueId, transitionName);
     if (transition == null) {
-      console.log(`${issueId}: Could not find the transition '${transitionName}'`);
+      logSafely(`${issueId}: Could not find the transition '${transitionName}'`);
     } else {
       await this.transitionIssue(issueId, transition, fields);
     }
   }
   async findTransition(issueId, transitionName) {
     const transitions =
-      (await this.sendRestGetApi(`issue/${issueId}/transitions`))?.transitions ?? [];
+      (await this.sendRestGetApi(`issue/${encodePathSegment(issueId)}/transitions`))?.transitions ??
+      [];
     return transitions.find(x => x.name === transitionName) || null;
   }
   async transitionIssue(issueId, transition, fields = null) {
-    console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
-    await this.sendRestPostApi(`issue/${issueId}/transitions`, {
+    logSafely(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
+    await this.sendRestPostApi(`issue/${encodePathSegment(issueId)}/transitions`, {
       transition: { id: transition.id },
       fields,
     });
@@ -81,13 +94,13 @@ export class JiraClient {
     }
   }
   async assignIssueToAccount(issueId, accountId) {
-    console.log(`${issueId}: Assigning to ${accountId}`);
-    await this.sendRestPutApi(`issue/${issueId}/assignee`, { accountId });
+    logSafely(`${issueId}: Assigning to ${accountId}`);
+    await this.sendRestPutApi(`issue/${encodePathSegment(issueId)}/assignee`, { accountId });
   }
   async addReviewer(issueId, userEmails) {
     const accountId = await this.findAccountId(userEmails);
     if (accountId != null) {
-      console.log(`${issueId}: Adding Reviewer ${accountId}`);
+      logSafely(`${issueId}: Adding Reviewer ${accountId}`);
       const request = {
         update: {
           customfield_11227: [
@@ -97,13 +110,13 @@ export class JiraClient {
           ],
         },
       };
-      await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request);
+      await this.sendRestPutApi(`issue/${encodePathSegment(issueId)}?notifyUsers=false`, request);
     }
   }
   async addReviewedBy(issueId, userEmails) {
     const accountId = await this.findAccountId(userEmails);
     if (accountId != null) {
-      console.log(`${issueId}: Adding Reviewed by ${accountId}`);
+      logSafely(`${issueId}: Adding Reviewed by ${accountId}`);
       const request = {
         update: {
           customfield_11228: [
@@ -113,20 +126,20 @@ export class JiraClient {
           ],
         },
       };
-      await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request);
+      await this.sendRestPutApi(`issue/${encodePathSegment(issueId)}?notifyUsers=false`, request);
     }
   }
   async createComponent(projectKey, name, description) {
-    console.log(`Searching for component '${name}' in project ${projectKey}`);
+    logSafely(`Searching for component '${name}' in project ${projectKey}`);
     const { total, values } = await this.sendRestGetApi(
       `project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`,
     );
     if (values.some(x => x.name === name)) {
       // values contains matches on partial names and descriptions
-      console.log(`Component found in ${total} result(s)`);
+      logSafely(`Component found in ${total} result(s)`);
       return true;
     } else {
-      console.log(`Component not found in ${total} result(s). Creating a new one.`);
+      logSafely(`Component not found in ${total} result(s). Creating a new one.`);
       return (
         (await this.sendRestPostApi('component', { project: projectKey, name, description })) !=
         null
@@ -134,7 +147,7 @@ export class JiraClient {
     }
   }
   async addIssueComponent(issueId, name) {
-    console.log(`${issueId}: Adding component ${name}`);
+    logSafely(`${issueId}: Adding component ${name}`);
     const request = {
       update: {
         components: [
@@ -144,16 +157,21 @@ export class JiraClient {
         ],
       },
     };
-    return (await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request)) != null;
+    return (
+      (await this.sendRestPutApi(
+        `issue/${encodePathSegment(issueId)}?notifyUsers=false`,
+        request,
+      )) != null
+    );
   }
   async addIssueRemoteLink(issueId, url, title = null) {
-    console.log(`${issueId}: Adding remote link ${url}`);
-    await this.sendRestPostApi(`issue/${issueId}/remotelink`, {
+    logSafely(`${issueId}: Adding remote link ${url}`);
+    await this.sendRestPostApi(`issue/${encodePathSegment(issueId)}/remotelink`, {
       object: { url, title: title ?? url },
     });
   }
   async linkIssues(issueId, linkedIssueId, linkType) {
-    console.log(`Linking ${issueId} and ${linkedIssueId} as '${linkType}'`);
+    logSafely(`Linking ${issueId} and ${linkedIssueId} as '${linkType}'`);
     await this.sendRestPostApi('issueLink', {
       type: { name: linkType },
       inwardIssue: { key: issueId },
@@ -161,8 +179,8 @@ export class JiraClient {
     });
   }
   loadIssueRemoteLinks(issueId) {
-    console.log(`${issueId}: Load remote links for ${issueId}`);
-    return this.sendRestGetApi(`issue/${issueId}/remotelink`);
+    logSafely(`${issueId}: Load remote links for ${issueId}`);
+    return this.sendRestGetApi(`issue/${encodePathSegment(issueId)}/remotelink`);
   }
   async findAccountId(emails) {
     for (const email of emails) {
@@ -175,65 +193,67 @@ export class JiraClient {
   }
   async findAccountIdFromEmail(email) {
     if (email == null) {
-      console.log('Could not find accountId, email is null');
+      logSafely('Could not find accountId, email is null');
       return null;
     }
     const logUser = email.substring(0, email.indexOf('@')).replace('.', ' '); // Do not leak email addresses to logs
-    console.log(`Searching for user: ${logUser}`);
+    logSafely(`Searching for user: ${logUser}`);
     let accounts =
       (await this.sendRestGetApi(`user/search?query=${encodeURIComponent(email)}`)) ?? [];
     accounts = accounts.filter(x => x.emailAddress === email); // Just in case the address is part of the name, or other unexpected field
     if (accounts.length === 0) {
-      console.log(`Could not find user ${logUser} in Jira`);
+      logSafely(`Could not find user ${logUser} in Jira`);
       return null;
     } else {
-      console.log(
+      logSafely(
         `Found ${accounts.length} account(s), using ${accounts[0].accountId} ${accounts[0].displayName}`,
       );
       return accounts[0].accountId;
     }
   }
   findBoard(boardId) {
-    console.log(`Searching for boardId ${boardId}`);
-    return this.sendRestGetAgile(`board/${boardId}`);
+    logSafely(`Searching for boardId ${boardId}`);
+    return this.sendRestGetAgile(`board/${encodePathSegment(boardId)}`);
   }
   async findSprintId(boardId) {
-    console.log(`Searching for active sprint in board ${boardId}`);
-    let { values } = await this.sendRestGetAgile(`board/${boardId}/sprint?state=active`);
+    logSafely(`Searching for active sprint in board ${boardId}`);
+    let { values } = await this.sendRestGetAgile(
+      `board/${encodePathSegment(boardId)}/sprint?state=active`,
+    );
     values = values.filter(x => x.originBoardId === boardId); // Board filter can contain sprints from other boards
     if (values.length === 0) {
-      console.log(`Could not find active sprint in board ${boardId}`);
+      logSafely(`Could not find active sprint in board ${boardId}`);
       return null;
     } else {
       const originalLength = values.length; // .pop() below removes an item from the array
       const sprint = values.sort((a, b) => a.endDate.localeCompare(b.endDate)).pop(); // There should be exactly one. If not, use the one ending later in case previous iteration was not closed yet.
-      console.log(`Found ${originalLength} active sprint(s), using ${sprint.id} ${sprint.name}`);
+      logSafely(`Found ${originalLength} active sprint(s), using ${sprint.id} ${sprint.name}`);
       return sprint.id;
     }
   }
   async findTeamByUser(accountId) {
-    console.log(`Searching for teams of account ${accountId}`);
+    logSafely(`Searching for teams of account ${accountId}`);
     return this.findTeam(`membership: { memberIds: "${accountId}" }`, x => true); // No post-filtering
   }
   async findTeamByName(teamName) {
-    console.log(`Searching for team ${teamName}`);
+    logSafely(`Searching for team ${teamName}`);
     return this.findTeam(`query: "${teamName}"`, x => x.name === teamName); // Query returns also partial matches. We need to post-filter them
   }
   async findIssues(jql) {
-    console.log(`Searching for issues: ${jql}`);
+    logSafely(`Searching for issues: ${jql}`);
     const response = await this.sendRestGetApi(
       `search/jql?fields=key,summary,customfield_10015,duedate&jql=${encodeURIComponent(jql)}`,
     ); // // Only first page of results
     return response?.issues ?? [];
   }
   async findTeam(queryFilter, resultFilter) {
-    const nodes = (await this.findTeams(queryFilter)).filter(resultFilter);
+    const nodes = (await this.findTeams(queryFilter)).filter(result => resultFilter(result));
     if (nodes.length === 0) {
-      console.log(`Could not find team in Jira`);
+      logSafely(`Could not find team in Jira`);
       return null;
     } else {
       const match = nodes.find(x => Config.findTeam(x.name) != null) ?? nodes[0]; // Prefer teams that are defined in config to avoid OU-based, ad-hoc, and test teams
-      console.log(`Found ${nodes.length} team(s), using ${match.id} ${match.name}`);
+      logSafely(`Found ${nodes.length} team(s), using ${match.id} ${match.name}`);
       return match;
     }
   }
@@ -263,12 +283,10 @@ export class JiraClient {
           }
         }`);
       if (!response) {
-        console.log(`ERROR: Failed to search for teams.`); // The http error was likely already logged
+        logSafely(`ERROR: Failed to search for teams.`); // The http error was likely already logged
         return [];
       } else if (response.errors) {
-        console.log(
-          `ERROR: Failed to search for teams. ${JSON.stringify(response.errors, null, 2)}`,
-        );
+        logSafely(`ERROR: Failed to search for teams. ${JSON.stringify(response.errors, null, 2)}`);
         return [];
       } else if (response.data.team) {
         const teamData = response.data.team.teamSearchV2;
@@ -285,7 +303,7 @@ export class JiraClient {
     return allTeams;
   }
   async sendGraphQL(query) {
-    console.log(query); // Log only the GraphQL query, without the surrounding { "query": ... }
+    logSafely(query); // Log only the GraphQL query, without the surrounding { "query": ... }
     return this.sendRequest('POST', 'gateway/api/graphql', { query });
   }
   async sendRestGetApi(endpoint) {
@@ -295,15 +313,18 @@ export class JiraClient {
     return this.sendRequest('GET', `rest/agile/1.0/${endpoint}`);
   }
   async sendRestPostApi(endpoint, body) {
-    console.log(JSON.stringify(body, null, 2));
+    logSafely(JSON.stringify(body, null, 2));
     return this.sendRequest('POST', `rest/api/3/${endpoint}`, body);
   }
   async sendRestPutApi(endpoint, body) {
-    console.log(JSON.stringify(body, null, 2));
+    logSafely(JSON.stringify(body, null, 2));
     return this.sendRequest('PUT', `rest/api/3/${endpoint}`, body);
   }
   async sendRequest(method, path, body) {
-    const url = `${this.domain}/${path}`;
+    const url = new URL(path, `${this.domain}/`);
+    if (url.origin !== this.domain) {
+      throw new TypeError('Jira request URL must remain on the configured domain');
+    }
     const response = await fetch(url, {
       method,
       headers: {
@@ -319,11 +340,11 @@ export class JiraClient {
     if (response.ok) {
       return data;
     } else {
-      console.log(
+      logSafely(
         `${response.status} (${response.statusText}): ${data?.errorMessages?.join('. ') ?? 'Unknown error'}`,
       );
       if (data != null) {
-        console.log(JSON.stringify(data, null, 2));
+        logSafely(JSON.stringify(data, null, 2));
       }
       return null;
     }

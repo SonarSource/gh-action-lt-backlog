@@ -258,54 +258,67 @@ export class OctokitAction extends Action {
   async processRequestReview(pr, issueId, component, requested_reviewer, teamReview) {
     if (requested_reviewer?.type === 'Bot') {
       this.log(`Skipping request review from bot: ${requested_reviewer.login}`);
-    } else if (requested_reviewer || teamReview) {
-      // Draft PR creation or PR without reviewers can have both null => NO OP
-      await this.jira.moveIssue(issueId, 'Request Review');
-      if (requested_reviewer) {
-        const userEmails = await this.findEmails(requested_reviewer.login);
-        if (this.isEngXpSquad) {
-          await this.jira.addReviewer(issueId, userEmails);
-        } else {
-          await this.jira.assignIssueToEmail(issueId, userEmails);
-        }
-      }
-      if (teamReview) {
-        if (teamReview.createReviewTicket) {
-          const data = await NewIssueData.createForTeamReview(this.jira, teamReview);
-          this.log(`Creating ${data.projectKey} review issue`);
-          const reviewIssueId = await this.jira.createIssue(
-            data.projectKey,
-            `PR review for ${pr.title}`,
-            data.additionalFields,
-          );
-          if (reviewIssueId) {
-            if (data.assigneeId) {
-              await this.jira.assignIssueToAccount(reviewIssueId, data.assigneeId);
-            }
-            await this.jira.addIssueRemoteLink(reviewIssueId, pr.html_url);
-            await this.jira.linkIssues(reviewIssueId, issueId, 'Relates');
-            await this.addComment(
-              pr.number,
-              `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.gitHubTeam.name}\n<!--slug: ${teamReview.gitHubTeam.slug} -->`,
-            ); // SubmitReview depends on format of this comment
-            await this.addJiraComponent(reviewIssueId, component);
-          }
-        } else if (teamReview.assigneeAccountId) {
-          await this.jira.assignIssueToAccount(issueId, teamReview.assigneeAccountId);
-        }
-      }
+      return;
+    }
+    // Draft PR creation or PR without reviewers can have both null => NO OP
+    if (!requested_reviewer && !teamReview) {
+      return;
+    }
+    await this.jira.moveIssue(issueId, 'Request Review');
+    if (requested_reviewer) {
+      await this.processUserReview(issueId, requested_reviewer);
+    }
+    if (teamReview) {
+      await this.processTeamReview(pr, issueId, component, teamReview);
     }
   }
+  async processUserReview(issueId, requestedReviewer) {
+    const userEmails = await this.findEmails(requestedReviewer.login);
+    if (this.isEngXpSquad) {
+      await this.jira.addReviewer(issueId, userEmails);
+    } else {
+      await this.jira.assignIssueToEmail(issueId, userEmails);
+    }
+  }
+  async processTeamReview(pr, issueId, component, teamReview) {
+    if (!teamReview.createReviewTicket) {
+      if (teamReview.assigneeAccountId) {
+        await this.jira.assignIssueToAccount(issueId, teamReview.assigneeAccountId);
+      }
+      return;
+    }
+    const data = await NewIssueData.createForTeamReview(this.jira, teamReview);
+    this.log(`Creating ${data.projectKey} review issue`);
+    const reviewIssueId = await this.jira.createIssue(
+      data.projectKey,
+      `PR review for ${pr.title}`,
+      data.additionalFields,
+    );
+    if (!reviewIssueId) {
+      return;
+    }
+    if (data.assigneeId) {
+      await this.jira.assignIssueToAccount(reviewIssueId, data.assigneeId);
+    }
+    await this.jira.addIssueRemoteLink(reviewIssueId, pr.html_url);
+    await this.jira.linkIssues(reviewIssueId, issueId, 'Relates');
+    await this.addComment(
+      pr.number,
+      `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.gitHubTeam.name}\n<!--slug: ${teamReview.gitHubTeam.slug} -->`,
+    ); // SubmitReview depends on format of this comment
+    await this.addJiraComponent(reviewIssueId, component);
+  }
   async addJiraComponent(issueId, name, description = null) {
-    if (name) {
-      if (!(await this.jira.createComponent(issueId.split('-')[0], name, description))) {
-        // Same PR can have multiple issues from different projects
-        this.setFailed('Failed to create component');
-        return;
-      }
-      if (!(await this.jira.addIssueComponent(issueId, name))) {
-        this.setFailed('Failed to add component');
-      }
+    if (!name) {
+      return;
+    }
+    if (!(await this.jira.createComponent(issueId.split('-')[0], name, description))) {
+      // Same PR can have multiple issues from different projects
+      this.setFailed('Failed to create component');
+      return;
+    }
+    if (!(await this.jira.addIssueComponent(issueId, name))) {
+      this.setFailed('Failed to add component');
     }
   }
   async loadSenderAccountId() {

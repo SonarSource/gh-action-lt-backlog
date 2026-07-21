@@ -236,7 +236,7 @@ describe('LockBranchAction', () => {
     assert.deepStrictEqual(logTester.logsParams, [
       'Invoked sendGraphQL list branch protection rules',
       'Invoked sendGraphQL updateBranchProtectionRule to lock id-of-unlocked-3',
-      'Done: test-repo: The branch `unlocked` was locked :ice_cube:\n\nThis is because ABC',
+      'Done: test-repo: The branch `unlocked` was locked :ice_cube:  This is because ABC',
       'Sending Slack message',
       'Invoked sendSlackPost(\'https://slack.com/api/chat.postMessage\', {"channel":"channel-name","text":"test-repo: The branch `unlocked` was locked :ice_cube:\\n\\nThis is because ABC"}',
       'Done',

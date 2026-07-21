@@ -31,20 +31,24 @@ export class PullRequestAction extends OctokitAction {
         : await this.findFixedIssues(payloadPr); // Action triggered later => normal processing, including renovate PRs with issue ID in comment
     if (issueIds.length === 0) {
       console.log('No Jira issue found in the PR title.');
-    } else {
-      const pr = await this.loadPullRequest(payloadPr.number);
-      if (pr) {
-        for (const issueId of issueIds) {
-          // BUILD/PREQ tickets are processed only when they are from Engineering Experience Squad repos. They should be ignored in any other repo, not to interfere with their process.
-          if ((issueId.startsWith('BUILD-') || issueId.startsWith('PREQ-')) && !this.isEngXpSquad) {
-            this.log(`Skipping ${issueId}`);
-          } else {
-            await this.processJiraIssue(pr, issueId);
-          }
-        }
-        await this.afterExecute(pr);
+      return;
+    }
+    const pr = await this.loadPullRequest(payloadPr.number);
+    if (!pr) {
+      return;
+    }
+    for (const issueId of issueIds) {
+      // BUILD/PREQ tickets are processed only when they are from Engineering Experience Squad repos. They should be ignored in any other repo, not to interfere with their process.
+      if (this.shouldSkipIssue(issueId)) {
+        this.log(`Skipping ${issueId}`);
+      } else {
+        await this.processJiraIssue(pr, issueId);
       }
     }
+    await this.afterExecute(pr);
+  }
+  shouldSkipIssue(issueId) {
+    return (issueId.startsWith('BUILD-') || issueId.startsWith('PREQ-')) && !this.isEngXpSquad;
   }
   async afterExecute(pr) {
     // Override me

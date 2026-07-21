@@ -28,16 +28,7 @@ describe('LogPayload', () => {
     await action.run();
     assert.deepStrictEqual(logTester.logsParams, [
       '--- Event payload ---',
-      `{
-  "pull_request": {
-    "number": 42,
-    "title": "PR Title"
-  },
-  "sender": {
-    "login": "test-user",
-    "type": "User"
-  }
-}`,
+      '{   "pull_request": {     "number": 42,     "title": "PR Title"   },   "sender": {     "login": "test-user",     "type": "User"   } }',
       '----------',
       'Done',
     ]);

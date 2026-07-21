@@ -27,15 +27,8 @@ export class PullRequestCreated extends OctokitAction {
   async execute() {
     const inputJiraProject = this.inputString('jira-project');
     const inputAdditionalFields = this.inputString('additional-fields');
-    if (this.isEngXpSquad) {
-      if (inputJiraProject) {
-        this.setFailed('jira-project input is not supported when is-eng-xp-squad is set.');
-        return;
-      }
-      if (inputAdditionalFields) {
-        this.setFailed('additional-fields input is not supported when is-eng-xp-squad is set.');
-        return;
-      }
+    if (!this.validateInputs(inputJiraProject, inputAdditionalFields)) {
+      return;
     }
     if (/DO NOT MERGE/i.test(this.payload.pull_request?.title)) {
       this.log("'DO NOT MERGE' found in the PR title, skipping the action.");
@@ -45,32 +38,54 @@ export class PullRequestCreated extends OctokitAction {
     if (pr == null) {
       return;
     }
-    let fixedIssues = await this.findFixedIssues(pr);
+    const fixedIssues = await this.findOrCreateIssues(pr, inputJiraProject, inputAdditionalFields);
+    await this.processFixedIssues(pr, fixedIssues);
+  }
+  validateInputs(inputJiraProject, inputAdditionalFields) {
+    if (!this.isEngXpSquad) {
+      return true;
+    }
+    if (inputJiraProject) {
+      this.setFailed('jira-project input is not supported when is-eng-xp-squad is set.');
+      return false;
+    }
+    if (inputAdditionalFields) {
+      this.setFailed('additional-fields input is not supported when is-eng-xp-squad is set.');
+      return false;
+    }
+    return true;
+  }
+  async findOrCreateIssues(pr, inputJiraProject, inputAdditionalFields) {
+    const fixedIssues = await this.findFixedIssues(pr);
     if (fixedIssues.length === 0) {
       const issue = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields);
-      if (issue) {
-        fixedIssues = [issue];
-        await this.processAllReviews(pr, issue); // Only for issues created by this action. Every other scenario is handled by RequestReview action.
+      if (!issue) {
+        return fixedIssues;
       }
-    } else if (pr.title !== this.cleanupWhitespace(pr.title)) {
+      await this.processAllReviews(pr, issue); // Only for issues created by this action. Every other scenario is handled by RequestReview action.
+      return [issue];
+    }
+    if (pr.title !== this.cleanupWhitespace(pr.title)) {
       // New issues do this when persisting issue ID
       await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
     }
-    if (fixedIssues) {
-      if (!pr.isRenovate()) {
-        // Renovate already has a comment with issue ID to persist the actual issue
-        await this.addLinkedIssuesAsComment(pr, fixedIssues);
-      }
-      for (const issue of fixedIssues) {
-        await this.jira.addIssueRemoteLink(issue, pr.html_url);
-      }
-      if (this.isEngXpSquad) {
-        for (const issue of fixedIssues.filter(x => x.startsWith('BUILD-'))) {
-          // BUILD-9328: No component for PREQ tickets
-          await this.addJiraComponent(issue, this.repo.repo, this.payload.repository?.html_url);
-          await this.addJiraComponent(issue, this.inputString('team-review-component')); // Mainly for PREQ, when set
-        }
-      }
+    return fixedIssues;
+  }
+  async processFixedIssues(pr, fixedIssues) {
+    if (!pr.isRenovate()) {
+      // Renovate already has a comment with issue ID to persist the actual issue
+      await this.addLinkedIssuesAsComment(pr, fixedIssues);
+    }
+    for (const issue of fixedIssues) {
+      await this.jira.addIssueRemoteLink(issue, pr.html_url);
+    }
+    if (!this.isEngXpSquad) {
+      return;
+    }
+    for (const issue of fixedIssues.filter(x => x.startsWith('BUILD-'))) {
+      // BUILD-9328: No component for PREQ tickets
+      await this.addJiraComponent(issue, this.repo.repo, this.payload.repository?.html_url);
+      await this.addJiraComponent(issue, this.inputString('team-review-component')); // Mainly for PREQ, when set
     }
   }
   async processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields) {
