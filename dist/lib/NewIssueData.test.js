@@ -108,29 +108,26 @@ describe('NewIssueData', () => {
     it('create standalone PR with body null', async () => {
         expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', null), 'KEY', '', '1234-account', '')).toEqual(createExpected(undefined));
     });
-    it('caps long standalone PR descriptions at 5,000 Markdown characters', async () => {
-        const maxMarkdownLength = 5_000;
+    it('keeps long standalone PR descriptions when their serialized ADF fits', async () => {
         const safeAdfLength = 30_000;
-        const truncationNotice = 'Description truncated because it exceeds the Jira character limit. See the pull request for the full description.';
-        const body = '[release notes](https://example.com/release)\n'.repeat(500);
-        const originalAdfLength = JSON.stringify(AtlassianDocument.fromMarkdown(body)).length;
-        const suffix = `\n\n${truncationNotice}`;
+        const body = 'a'.repeat(10_000);
+        const description = AtlassianDocument.fromMarkdown(body);
         const result = await NewIssueData.create(jiraClientStub, createPullRequest('Title', body), 'KEY', '', '1234-account', '');
-        expect(result.additionalFields.description).toEqual(AtlassianDocument.fromMarkdown(body.substring(0, maxMarkdownLength - suffix.length) + suffix));
-        expect(JSON.stringify(result.additionalFields.description).length).toBeLessThanOrEqual(safeAdfLength);
-        expect(JSON.stringify(result.additionalFields.description)).toContain(truncationNotice);
-        expect(logTester.logsParams).toContain(`PR description has ${body.length} Markdown characters and ${originalAdfLength} serialized ADF characters; it will be truncated to fit Jira's limit`);
+        expect(body.length).toBeGreaterThan(5_000);
+        expect(JSON.stringify(description).length).toBeLessThanOrEqual(safeAdfLength);
+        expect(result.additionalFields.description).toEqual(description);
+        expect(logTester.logsParams).not.toContainEqual(expect.stringContaining('it will be truncated'));
     });
-    it('shrinks descriptions further when 5,000 Markdown characters still produce oversized ADF', async () => {
+    it('shrinks descriptions when their serialized ADF is oversized', async () => {
         const safeAdfLength = 30_000;
         const truncationNotice = 'Description truncated because it exceeds the Jira character limit. See the pull request for the full description.';
         const body = '[x](y)\n'.repeat(700);
         const originalAdfLength = JSON.stringify(AtlassianDocument.fromMarkdown(body)).length;
         const result = await NewIssueData.create(jiraClientStub, createPullRequest('Title', body), 'KEY', '', '1234-account', '');
-        expect(body.length).toBeLessThanOrEqual(5_000);
         expect(originalAdfLength).toBeGreaterThan(safeAdfLength);
         expect(JSON.stringify(result.additionalFields.description).length).toBeLessThanOrEqual(safeAdfLength);
         expect(JSON.stringify(result.additionalFields.description)).toContain(truncationNotice);
+        expect(logTester.logsParams).toContain(`PR description has ${originalAdfLength} serialized ADF characters; it will be truncated to fit Jira's limit`);
     });
     it('create standalone PR with body as default template', async () => {
         const body = `Part of 
