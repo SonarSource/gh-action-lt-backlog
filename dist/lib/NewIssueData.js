@@ -22,6 +22,7 @@ import { Config } from "./Configuration.js";
 import { JIRA_ISSUE_PATTERN } from "./Constants.js";
 import { AtlassianDocument } from "./AtlassianDocumentFormat.js";
 const JIRA_DESCRIPTION_SAFE_ADF_LENGTH = 30_000;
+const JIRA_DESCRIPTION_FIRST_RETRY_MAX_MARKDOWN_LENGTH = 20_000;
 const DESCRIPTION_TRUNCATION_NOTICE = 'Description truncated because it exceeds the Jira character limit. See the pull request for the full description.';
 export class NewIssueData {
     projectKey;
@@ -222,7 +223,7 @@ export class NewIssueData {
             let input = body;
             while (serializedLength > JIRA_DESCRIPTION_SAFE_ADF_LENGTH && input.length > 0) {
                 // Cap the first retry to quickly reduce very large descriptions; subsequent retries keep halving the input.
-                input = input.substring(0, Math.min(20_000, Math.floor(input.length / 2)));
+                input = input.substring(0, Math.min(JIRA_DESCRIPTION_FIRST_RETRY_MAX_MARKDOWN_LENGTH, Math.floor(input.length / 2)));
                 description = AtlassianDocument.fromMarkdown(input + suffix);
                 serializedLength = JSON.stringify(description).length;
             }
