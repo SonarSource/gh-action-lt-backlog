@@ -235,6 +235,7 @@ export class NewIssueData {
       const suffix = `\n\n${DESCRIPTION_TRUNCATION_NOTICE}`;
       let input = body;
       while (serializedLength > JIRA_DESCRIPTION_SAFE_ADF_LENGTH && input.length > 0) {
+        // Cap the first retry to quickly reduce very large descriptions; subsequent retries keep halving the input.
         input = input.substring(0, Math.min(20_000, Math.floor(input.length / 2)));
         description = AtlassianDocument.fromMarkdown(input + suffix);
         serializedLength = JSON.stringify(description).length;
