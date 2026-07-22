@@ -241,7 +241,7 @@ export class NewIssueData {
         serializedLength = JSON.stringify(description).length;
       }
       if (serializedLength > JIRA_DESCRIPTION_SAFE_ADF_LENGTH) {
-        throw new Error('The Jira description truncation notice exceeds the safe ADF length');
+        throw new Error('Failed to truncate the Jira description: the ADF transformer produced an oversized document after the Markdown input was reduced to zero');
       }
       return description;
     } else {
