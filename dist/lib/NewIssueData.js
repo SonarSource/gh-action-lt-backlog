@@ -23,7 +23,6 @@ import { JIRA_ISSUE_PATTERN } from "./Constants.js";
 import { AtlassianDocument } from "./AtlassianDocumentFormat.js";
 const JIRA_DESCRIPTION_SAFE_ADF_LENGTH = 30_000;
 const JIRA_DESCRIPTION_FIRST_RETRY_MAX_MARKDOWN_LENGTH = 20_000;
-const DESCRIPTION_TRUNCATION_NOTICE = 'Description truncated because it exceeds the Jira character limit. See the pull request for the full description.';
 export class NewIssueData {
     projectKey;
     accountId;
@@ -213,22 +212,12 @@ export class NewIssueData {
     }
     static parseDescription(body) {
         if (body && !/^Part of\s*<!--.*-->\s*$/s.test(body)) { // Don't spam Jira with default PR template
-            let description = AtlassianDocument.fromMarkdown(body);
-            let serializedLength = JSON.stringify(description).length;
-            if (serializedLength <= JIRA_DESCRIPTION_SAFE_ADF_LENGTH) {
-                return description;
-            }
-            console.log(`PR description has ${serializedLength} serialized ADF characters; it will be truncated to fit Jira's limit`);
-            const suffix = `\n\n${DESCRIPTION_TRUNCATION_NOTICE}`;
             let input = body;
-            while (serializedLength > JIRA_DESCRIPTION_SAFE_ADF_LENGTH && input.length > 0) {
+            let description = AtlassianDocument.fromMarkdown(body);
+            while (JSON.stringify(description).length > JIRA_DESCRIPTION_SAFE_ADF_LENGTH && input.length > 0) {
                 // Cap the first retry to quickly reduce very large descriptions; subsequent retries keep halving the input.
                 input = input.substring(0, Math.min(JIRA_DESCRIPTION_FIRST_RETRY_MAX_MARKDOWN_LENGTH, Math.floor(input.length / 2)));
-                description = AtlassianDocument.fromMarkdown(input + suffix);
-                serializedLength = JSON.stringify(description).length;
-            }
-            if (serializedLength > JIRA_DESCRIPTION_SAFE_ADF_LENGTH) {
-                throw new Error('Failed to truncate the Jira description: the ADF transformer produced an oversized document after the Markdown input was reduced to zero');
+                description = AtlassianDocument.fromMarkdown(`${input}\n\nDescription truncated because it exceeds the Jira character limit. See the pull request for the full description.`);
             }
             return description;
         }

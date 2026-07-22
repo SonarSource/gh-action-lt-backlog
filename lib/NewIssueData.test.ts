@@ -145,7 +145,6 @@ describe('NewIssueData', () => {
     expect(originalAdfLength).toBeGreaterThan(safeAdfLength);
     expect(JSON.stringify(result!.additionalFields.description).length).toBeLessThanOrEqual(safeAdfLength);
     expect(JSON.stringify(result!.additionalFields.description)).toContain(truncationNotice);
-    expect(logTester.logsParams).toContain(`PR description has ${originalAdfLength} serialized ADF characters; it will be truncated to fit Jira's limit`);
   });
 
   it('create standalone PR with body as default template', async () => {
