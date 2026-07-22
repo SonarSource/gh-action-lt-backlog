@@ -28,6 +28,9 @@ import { JiraTeam } from "./JiraTeam.js";
 import { TeamReviewData } from "./TeamReviewData.js";
 import { AtlassianDocument } from "./AtlassianDocumentFormat.js";
 
+const JIRA_DESCRIPTION_SAFE_ADF_LENGTH = 30_000;
+const JIRA_DESCRIPTION_FIRST_RETRY_MAX_MARKDOWN_LENGTH = 20_000;
+
 export class NewIssueData {
   public readonly projectKey: string;
   public readonly accountId: string | null;
@@ -223,7 +226,14 @@ export class NewIssueData {
 
   private static parseDescription(body: string | null): AtlassianDocument | undefined {
     if (body && !/^Part of\s*<!--.*-->\s*$/s.test(body)) {  // Don't spam Jira with default PR template
-      return AtlassianDocument.fromMarkdown(body);
+      let input = body;
+      let description = AtlassianDocument.fromMarkdown(body);
+      while (JSON.stringify(description).length > JIRA_DESCRIPTION_SAFE_ADF_LENGTH && input.length > 0) {
+        // Cap the first retry to quickly reduce very large descriptions; subsequent retries keep halving the input.
+        input = input.substring(0, Math.min(JIRA_DESCRIPTION_FIRST_RETRY_MAX_MARKDOWN_LENGTH, Math.floor(input.length / 2)));
+        description = AtlassianDocument.fromMarkdown(`${input}\n\nDescription truncated because it exceeds the Jira character limit. See the pull request for the full description.`);
+      }
+      return description;
     } else {
       return undefined;
     }
