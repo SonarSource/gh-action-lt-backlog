@@ -55,7 +55,7 @@ export class PullRequestClosed extends PullRequestAction {
             this.log(`${issueId}: Could not load issue`);
         }
         else if (issue.fields.fixVersions.length > 0) {
-            this.log(`${issueId}: Fix version is already set (${issue.fields.fixVersions.map(x => x.name).join(', ')}), skipping`);
+            this.log(`${issueId}: Fix version is already set ${issue.fields.fixVersions.map(x => x.name).join(', ')}, skipping`);
         }
         else {
             await this.jira.addFixVersion(issueId, fixVersion);

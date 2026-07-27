@@ -176,7 +176,7 @@ describe('PullRequestClosed', () => {
             expect(logTester.logsParams).toStrictEqual([
                 "Loading PR #42",
                 "Invoked jira.transitionIssue('FIXVER-2', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
-                "FIXVER-2: Fix version is already set (1.42, 1.41.1), skipping",
+                "FIXVER-2: Fix version is already set 1.42, 1.41.1, skipping",
                 "Done",
             ]);
         });
