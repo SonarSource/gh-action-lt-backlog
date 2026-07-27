@@ -1,1 +1,0 @@
-{"version":3,"file":"LockBranch.js","sourceRoot":"","sources":["../../LockBranch/LockBranch.ts"],"names":[],"mappings":"AAAA;;;;;;;;;;;;;;;;;;GAkBG;AAEH,OAAO,EAAE,gBAAgB,EAAE,MAAM,4BAA4B,CAAC;AAE9D,MAAM,OAAO,UAAW,SAAQ,gBAAgB;IACpC,iBAAiB;QACzB,OAAO,IAAI,CAAC,YAAY,CAAC,aAAa,CAAC,CAAC;IAC1C,CAAC;CACF"}
