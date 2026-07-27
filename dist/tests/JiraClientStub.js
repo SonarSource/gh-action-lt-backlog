@@ -36,6 +36,7 @@ export const jiraClientStub = {
             case 'THEME-42': return { key: 'THEME-42', fields: { project: { key: 'THEME' }, issuetype: { name: 'Theme' } } };
             case 'FIXVER-1': return { key: 'FIXVER-1', fields: { project: { key: 'FIXVER' }, issuetype: { name: 'Feature' }, fixVersions: [] } };
             case 'FIXVER-2': return { key: 'FIXVER-2', fields: { project: { key: 'FIXVER' }, issuetype: { name: 'Feature' }, fixVersions: [{ name: '1.42' }, { name: '1.41.1' }] } };
+            case 'NOFIXV-1': return { key: 'NOFIXV-1', fields: { project: { key: 'NOFIXV' }, issuetype: { name: 'Feature' }, fixVersions: [] } };
             case 'FAKE-1234': return null;
             default: throw new Error(`Scaffolding did not expect ${issueId}`);
         }
@@ -114,6 +115,13 @@ export const jiraClientStub = {
     async createIssue(projectKey, summary, additionalFields) {
         console.log(`Invoked jira.createIssue('${projectKey}', '${summary}', ${JSON.stringify(additionalFields)})`);
         return `${projectKey}-4242`;
+    },
+    async findProjectVersions(projectKey) {
+        switch (projectKey) {
+            case 'FIXVER': return [{ id: '1', name: '10.23', released: false, archived: false }];
+            case 'NOFIXV': return [];
+            default: throw new Error(`Scaffolding did not expect projectKey ${projectKey}`);
+        }
     },
     async addFixVersion(issueKey, versionName) {
         console.log(`Invoked jira.addFixVersion('${issueKey}', '${versionName}')`);

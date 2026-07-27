@@ -190,28 +190,27 @@ describe('PullRequestClosed', () => {
                 "Done",
             ]);
         });
-    });
-    it('autodetects the lowest unreleased fix version on merge', async () => {
-        process.env['INPUT_FIX-VERSION'] = 'autodetect-lowest';
-        await runAction('KEY-1234 Title', true);
-        expect(logTester.logsParams).toStrictEqual([
-            "Loading PR #42",
-            "Invoked jira.transitionIssue('KEY-1234', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
-            "KEY: Found 2 unreleased versions, using lowest 8.31",
-            "Invoked jira.addFixVersion('KEY-1234', '8.31')",
-            "Done",
-        ]);
-    });
-    it('autodetects fix version on feature branch merge', async () => {
-        process.env['INPUT_FIX-VERSION'] = 'autodetect-lowest';
-        await runAction('KEY-5678 Title', true, 'test-user', 'user/branch');
-        expect(logTester.logsParams).toStrictEqual([
-            "Loading PR #42",
-            "Invoked jira.transitionIssue('KEY-5678', {\"id\":\"10001\",\"name\":\"Merge into branch\"}, null)",
-            "KEY: Found 2 unreleased versions, using lowest 8.31",
-            "Invoked jira.addFixVersion('KEY-5678', '8.31')",
-            "Done",
-        ]);
+        it('autodetect-lowest valid', async () => {
+            process.env['INPUT_FIX-VERSION'] = 'autodetect-lowest';
+            await runAction('FIXVER-1 Title', true);
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                "Invoked jira.transitionIssue('FIXVER-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+                "FIXVER: Found 1 unreleased versions 10.23, using 10.23",
+                "Invoked jira.addFixVersion('FIXVER-1', '10.23')",
+                "Done",
+            ]);
+        });
+        it('autodetect-lowest project without fix version', async () => {
+            process.env['INPUT_FIX-VERSION'] = 'autodetect-lowest';
+            await runAction('NOFIXV-1 Title', true, 'test-user', 'user/branch');
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                "Invoked jira.transitionIssue('NOFIXV-1', {\"id\":\"10001\",\"name\":\"Merge into branch\"}, null)",
+                "NOFIXV: No unreleased versions found",
+                "Done",
+            ]);
+        });
     });
 });
 //# sourceMappingURL=PullRequestClosed.test.js.map
