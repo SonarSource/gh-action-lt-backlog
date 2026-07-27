@@ -44,6 +44,6 @@ function parseVersion(name) {
     const index = name.indexOf('-');
     const numbers = index < 0 ? name : name.substring(0, index);
     const suffix = index < 0 ? 'ZZZ' : name.substring(index + 1); // ZZZ: Push normal release 1.0 after milestone 1.0-M1
-    return { numbers: numbers.split('.').map(x => parseInt(x, 10) || 0), suffix };
+    return { numbers: numbers.split('.').map(x => Number.parseInt(x, 10) || 0), suffix };
 }
 //# sourceMappingURL=FixVersionResolver.js.map
