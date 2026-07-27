@@ -29,58 +29,21 @@ export async function findLowestUnreleasedFixVersion(jira, projectKey) {
         return unreleased[0].name;
     }
 }
-function compareVersionNames(left, right) {
-    const leftParts = normalizeVersionName(left).split('.');
-    const rightParts = normalizeVersionName(right).split('.');
-    const length = Math.max(leftParts.length, rightParts.length);
-    for (let index = 0; index < length; index++) {
-        const comparison = compareVersionPart(leftParts[index] ?? '', rightParts[index] ?? '');
-        if (comparison !== 0) {
-            return comparison;
+function compareVersionNames(leftName, rightName) {
+    const left = parseVersion(leftName);
+    const right = parseVersion(rightName);
+    for (let i = 0; i < Math.max(left.numbers.length, right.numbers.length); i++) {
+        const sign = Math.sign((left.numbers[i] ?? 0) - (right.numbers[i] ?? 0));
+        if (sign !== 0) {
+            return sign;
         }
     }
-    return 0;
+    return left.suffix.localeCompare(right.suffix, 'en', { numeric: true });
 }
-function compareVersionPart(leftPart, rightPart) {
-    const leftParsed = parseNumericVersionPart(leftPart);
-    const rightParsed = parseNumericVersionPart(rightPart);
-    if (leftParsed && rightParsed) {
-        if (leftParsed.number !== rightParsed.number) {
-            return leftParsed.number - rightParsed.number;
-        }
-        const leftSuffix = leftParsed.suffix;
-        const rightSuffix = rightParsed.suffix;
-        if (leftSuffix === rightSuffix) {
-            return 0;
-        }
-        if (leftSuffix === '') {
-            return 1;
-        }
-        if (rightSuffix === '') {
-            return -1;
-        }
-        return leftSuffix.localeCompare(rightSuffix, 'en', { numeric: true });
-    }
-    return leftPart.localeCompare(rightPart, 'en', { numeric: true });
-}
-function parseNumericVersionPart(part) {
-    let index = 0;
-    while (index < part.length) {
-        const character = part[index];
-        if (character === undefined || character < '0' || character > '9') {
-            break;
-        }
-        index++;
-    }
-    if (index === 0) {
-        return null;
-    }
-    return {
-        number: Number(part.slice(0, index)),
-        suffix: part.slice(index),
-    };
-}
-function normalizeVersionName(versionName) {
-    return versionName.replace(/\.0$/, '');
+function parseVersion(name) {
+    const index = name.indexOf('-');
+    const numbers = index < 0 ? name : name.substring(0, index);
+    const suffix = index < 0 ? 'ZZZ' : name.substring(index + 1); // ZZZ: Push normal release 1.0 after milestone 1.0-M1
+    return { numbers: numbers.split('.').map(x => parseInt(x, 10) || 0), suffix };
 }
 //# sourceMappingURL=FixVersionResolver.js.map
