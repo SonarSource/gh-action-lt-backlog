@@ -45,26 +45,23 @@ export class PullRequestClosed extends PullRequestAction {
       await this.jira.transitionIssue(issueId, transition);
     }
 
-    await this.addFixVersionIfEmpty(issueId);
+    await this.addFixVersion(issueId);
   }
 
-  private async addFixVersionIfEmpty(issueId: string): Promise<void> {
+  private async addFixVersion(issueId: string): Promise<void> {
     const fixVersion = this.inputString('fix-version').trim();
     if (fixVersion === '') {
       return;
     }
 
-    const existingFixVersions = await this.jira.findIssueFixVersions(issueId);
-    if (existingFixVersions == null) {
-      this.log(`${issueId}: Could not load fix versions, skipping fix version assignment`);
-      return;
+    const issue = await this.jira.loadIssue(issueId);
+    if (!issue) {
+      this.log(`${issueId}: Could not load issue`);
+    } else if (issue.fields.fixVersions.length > 0) {
+      this.log(`${issueId}: Fix version is already set (${issue.fields.fixVersions.map(x => x.name).join(', ')}), skipping`);
+    } else {
+      await this.jira.addFixVersion(issueId, fixVersion);
     }
-    if (existingFixVersions.length > 0) {
-      this.log(`${issueId}: fix version already set (${existingFixVersions.map((version) => version.name).join(', ')}), skipping`);
-      return;
-    }
-
-    await this.jira.addFixVersion(issueId, fixVersion);
   }
 
   private async processClose(issueId: string): Promise<void> {

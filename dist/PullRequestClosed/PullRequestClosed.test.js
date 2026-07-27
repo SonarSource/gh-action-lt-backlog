@@ -150,53 +150,46 @@ describe('PullRequestClosed', () => {
             "Done",
         ]);
     });
-    it('sets fix version when configured on merge', async () => {
-        process.env['INPUT_FIX-VERSION'] = '10.23';
-        await runAction('KEY-1234 Title', true);
-        expect(logTester.logsParams).toStrictEqual([
-            "Loading PR #42",
-            "Invoked jira.transitionIssue('KEY-1234', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
-            "Invoked jira.addFixVersion('KEY-1234', '10.23')",
-            "Done",
-        ]);
-    });
-    it('skips fix version when already set', async () => {
-        process.env['INPUT_FIX-VERSION'] = '10.23';
-        await runAction('KEY-9001 Title', true);
-        expect(logTester.logsParams).toStrictEqual([
-            "Loading PR #42",
-            "Invoked jira.transitionIssue('KEY-9001', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
-            "KEY-9001: fix version already set (9.8), skipping",
-            "Done",
-        ]);
-    });
-    it('skips fix version when loading existing fix versions fails', async () => {
-        process.env['INPUT_FIX-VERSION'] = '10.23';
-        await runAction('KEY-9002 Title', true);
-        expect(logTester.logsParams).toStrictEqual([
-            "Loading PR #42",
-            "Invoked jira.transitionIssue('KEY-9002', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
-            "KEY-9002: Could not load fix versions, skipping fix version assignment",
-            "Done",
-        ]);
-    });
-    it('does not set fix version when input is empty', async () => {
-        process.env['INPUT_FIX-VERSION'] = '';
-        await runAction('KEY-1234 Title', true);
-        expect(logTester.logsParams).toStrictEqual([
-            "Loading PR #42",
-            "Invoked jira.transitionIssue('KEY-1234', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
-            "Done",
-        ]);
-    });
-    it('does not set fix version when pull request is not merged', async () => {
-        process.env['INPUT_FIX-VERSION'] = '10.23';
-        await runAction('KEY-1234 Title', false);
-        expect(logTester.logsParams).toStrictEqual([
-            "Loading PR #42",
-            "Skipping issue cancellation for creator Creator of KEY-1234",
-            "Done",
-        ]);
+    describe('fix-version', () => {
+        it('empty value', async () => {
+            process.env['INPUT_FIX-VERSION'] = '';
+            await runAction('FIXVER-1 Title', true);
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                "Invoked jira.transitionIssue('FIXVER-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+                "Done",
+            ]);
+        });
+        it('hardcoded value', async () => {
+            process.env['INPUT_FIX-VERSION'] = '10.23';
+            await runAction('FIXVER-1 Title', true);
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                "Invoked jira.transitionIssue('FIXVER-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+                "Invoked jira.addFixVersion('FIXVER-1', '10.23')",
+                "Done",
+            ]);
+        });
+        it('already set', async () => {
+            process.env['INPUT_FIX-VERSION'] = '10.23';
+            await runAction('FIXVER-2 Title', true);
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                "Invoked jira.transitionIssue('FIXVER-2', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+                "FIXVER-2: Fix version is already set (1.42, 1.41.1), skipping",
+                "Done",
+            ]);
+        });
+        it('can not load issue', async () => {
+            process.env['INPUT_FIX-VERSION'] = '10.23';
+            await runAction('FAKE-1234 Title', true);
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                "Invoked jira.transitionIssue('FAKE-1234', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+                "FAKE-1234: Could not load issue",
+                "Done",
+            ]);
+        });
     });
 });
 //# sourceMappingURL=PullRequestClosed.test.js.map

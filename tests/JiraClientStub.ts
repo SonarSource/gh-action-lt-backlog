@@ -38,6 +38,8 @@ export const jiraClientStub = {
       case 'SUBMIT-2': return { key: 'SUBMIT-2', fields: { project: { key: 'SUBMIT' }, issuetype: { name: 'Maintenance' }, assignee: { accountId: '4242-4242', emailAddress: 'user@sonarsource.com', displayName: 'User' } } };
       case 'SUBMIT-3': return { key: 'SUBMIT-3', fields: { project: { key: 'SUBMIT' }, issuetype: { name: 'Maintenance' }, assignee: { accountId: '712020:9c105dc5-0493-4d71-83a6-ed21c4ba03c0', emailAddress: 'nigel@sonarsource.com', displayName: 'Jira False Positive Bot' } } };
       case 'THEME-42': return { key: 'THEME-42', fields: { project: { key: 'THEME' }, issuetype: { name: 'Theme' } } };
+      case 'FIXVER-1': return { key: 'FIXVER-1', fields: { project: { key: 'FIXVER' }, issuetype: { name: 'Feature' }, fixVersions: [] } };
+      case 'FIXVER-2': return { key: 'FIXVER-2', fields: { project: { key: 'FIXVER' }, issuetype: { name: 'Feature' }, fixVersions: [{ name: '1.42' }, { name: '1.41.1' }] } };
       case 'FAKE-1234': return null;
       default: throw new Error(`Scaffolding did not expect ${issueId}`);
     }
@@ -115,6 +117,9 @@ export const jiraClientStub = {
     console.log(`Invoked jira.createIssue('${projectKey}', '${summary}', ${JSON.stringify(additionalFields)})`);
     return `${projectKey}-4242`;
   },
+  async addFixVersion(issueKey: string, versionName: string): Promise<void> {
+    console.log(`Invoked jira.addFixVersion('${issueKey}', '${versionName}')`);
+  },
   async addIssueRemoteLink(issueId: string, url: string, title: string | null = null): Promise<void> {
     title = title ? `'${title}'` : 'null';
     console.log(`Invoked jira.addIssueRemoteLink('${issueId}'', '${url}', ${title})`);
@@ -148,9 +153,6 @@ export const jiraClientStub = {
       return null;
     }
     return [];
-  },
-  async addFixVersion(issueKey: string, versionName: string): Promise<void> {
-    console.log(`Invoked jira.addFixVersion('${issueKey}', '${versionName}')`);
   },
   async addReviewer(issueId: string, userEmails: string[]): Promise<void> {
     console.log(`Invoked jira.addReviewer('${issueId}', ${serializeStrings(userEmails)})`);
