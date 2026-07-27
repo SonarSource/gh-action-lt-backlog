@@ -93,6 +93,7 @@ export type Issue = {
     issuetype: NamedItem;
     status: NamedItem;
     components: NamedItem[];
+    fixVersions: NamedItem[];
     customfield_11227: Account[]; // Reviewers
     customfield_11228: Account[]; // Reviewed by
     issuelinks: {
@@ -232,6 +233,18 @@ export class JiraClient {
       }
     };
     return await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request) != null;
+  }
+
+  public async addFixVersion(issueKey: string, versionName: string): Promise<void> {
+    console.log(`${issueKey}: Adding fix version ${versionName}`);
+    const request = {
+      update: {
+        fixVersions: [{
+          add: { name: versionName }
+        }]
+      }
+    };
+    await this.sendRestPutApi(`issue/${issueKey}`, request);
   }
 
   public async addIssueRemoteLink(issueId: string, url: string, title: string | null = null): Promise<void> {

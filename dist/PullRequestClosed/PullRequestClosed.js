@@ -43,6 +43,23 @@ export class PullRequestClosed extends PullRequestAction {
         else {
             await this.jira.transitionIssue(issueId, transition);
         }
+        await this.addFixVersion(issueId);
+    }
+    async addFixVersion(issueId) {
+        const fixVersion = this.inputString('fix-version').trim();
+        if (fixVersion === '') {
+            return;
+        }
+        const issue = await this.jira.loadIssue(issueId);
+        if (!issue) {
+            this.log(`${issueId}: Could not load issue`);
+        }
+        else if (issue.fields.fixVersions.length > 0) {
+            this.log(`${issueId}: Fix version is already set (${issue.fields.fixVersions.map(x => x.name).join(', ')}), skipping`);
+        }
+        else {
+            await this.jira.addFixVersion(issueId, fixVersion);
+        }
     }
     async processClose(issueId) {
         const issue = await this.jira.loadIssue(issueId);

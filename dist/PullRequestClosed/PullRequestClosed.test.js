@@ -150,5 +150,46 @@ describe('PullRequestClosed', () => {
             "Done",
         ]);
     });
+    describe('fix-version', () => {
+        it('empty value', async () => {
+            process.env['INPUT_FIX-VERSION'] = '';
+            await runAction('FIXVER-1 Title', true);
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                "Invoked jira.transitionIssue('FIXVER-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+                "Done",
+            ]);
+        });
+        it('hardcoded value', async () => {
+            process.env['INPUT_FIX-VERSION'] = '10.23';
+            await runAction('FIXVER-1 Title', true);
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                "Invoked jira.transitionIssue('FIXVER-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+                "Invoked jira.addFixVersion('FIXVER-1', '10.23')",
+                "Done",
+            ]);
+        });
+        it('already set', async () => {
+            process.env['INPUT_FIX-VERSION'] = '10.23';
+            await runAction('FIXVER-2 Title', true);
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                "Invoked jira.transitionIssue('FIXVER-2', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+                "FIXVER-2: Fix version is already set (1.42, 1.41.1), skipping",
+                "Done",
+            ]);
+        });
+        it('can not load issue', async () => {
+            process.env['INPUT_FIX-VERSION'] = '10.23';
+            await runAction('FAKE-1234 Title', true);
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                "Invoked jira.transitionIssue('FAKE-1234', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+                "FAKE-1234: Could not load issue",
+                "Done",
+            ]);
+        });
+    });
 });
 //# sourceMappingURL=PullRequestClosed.test.js.map

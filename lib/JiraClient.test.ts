@@ -240,6 +240,13 @@ describe('JiraClient', () => {
     expect(issue.fields.components).toMatchObject([{ name: 'JiraClient UT' }]);
   });
 
+  it('addFixVersion', async () => {
+    // This will break after every Jira sandbox wipeout. Go to GHA project https://sonarsource-sandbox-608.atlassian.net/browse/GHA, add releases, and add '42.0-SandBox' release
+    await sut.addFixVersion(issueId, '42.0-SandBox');
+    const issue = await sut.loadIssue(issueId);
+    expect(issue.fields.fixVersions).toMatchObject([{ name: '42.0-SandBox' }]);
+  });
+
   it('addIssueRemoteLink and loadIssueRemoteLinks', async () => {
     await sut.addIssueRemoteLink(issueId, 'https://www.sonarsource.com/', 'Sonar');
     expect(await sut.loadIssueRemoteLinks(issueId)).toMatchObject([{ object: { url: 'https://www.sonarsource.com/', title: 'Sonar' } }]);

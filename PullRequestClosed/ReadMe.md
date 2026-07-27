@@ -8,6 +8,8 @@ If `Merge into branch` or `Merge into master` transitions are not available, the
 
 If the PR is closed without being merged, then the action will try to use `Cancel issue` transition for issues created by `Jira Tech User GitHub` via `PullRequestCreated` automation. It will not close any other issues.
 
+When a pull request is merged, the action can optionally assign a Jira fix version to linked issues that do not have one yet.
+
 This action will attempt to move all tickets mentioned in the pull request title.
 
 ## Inputs
@@ -29,6 +31,12 @@ Token to access the Jira API.
 Set to `true` only for repositories owned by Engineering Experience Squad. Do not use it anywhere else.
 
 This parameter will resolve only issues created by automation, or bots.
+
+### `fix-version`
+
+Jira fix version name assigned to issues without fix version set. Example: `10.23`
+
+This parameter is optional.
 
 ## Outputs
 
