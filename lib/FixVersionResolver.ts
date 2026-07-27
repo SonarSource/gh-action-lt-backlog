@@ -20,39 +20,29 @@
 
 import { JiraClient } from './JiraClient.js';
 
-export const FIX_VERSION_AUTODETECT_LOWEST = 'autodetect-lowest';
-
 export async function findLowestUnreleasedFixVersion(jira: JiraClient, projectKey: string): Promise<string | null> {
-  const versions = await jira.findProjectVersions(projectKey);
-  const unreleased = versions.filter((version) => !version.released && !version.archived);
+  const allVersions = await jira.findProjectVersions(projectKey);
+  const unreleased = allVersions.filter(x => !x.released && !x.archived).toSorted((left, right) => compareVersionNames(left.name, right.name));
 
   if (unreleased.length === 0) {
-    console.log(`${projectKey}: No unreleased versions found, skipping fix version`);
+    console.log(`${projectKey}: No unreleased versions found`);
     return null;
+  } else {
+    console.log(`${projectKey}: Found ${unreleased.length} unreleased versions ${unreleased.map(x => x.name).join(', ')}, using ${unreleased[0].name}`);
+    return unreleased[0].name;
   }
-
-  const sortedUnreleased = unreleased.toSorted((left, right) =>
-    compareVersionNames(left.name, right.name),
-  );
-  const selected = sortedUnreleased[0];
-  if (unreleased.length > 1) {
-    console.log(`${projectKey}: Found ${unreleased.length} unreleased versions, using lowest ${selected.name}`);
-  }
-  return selected.name;
 }
 
 function compareVersionNames(left: string, right: string): number {
   const leftParts = normalizeVersionName(left).split('.');
   const rightParts = normalizeVersionName(right).split('.');
   const length = Math.max(leftParts.length, rightParts.length);
-
   for (let index = 0; index < length; index++) {
     const comparison = compareVersionPart(leftParts[index] ?? '', rightParts[index] ?? '');
     if (comparison !== 0) {
       return comparison;
     }
   }
-
   return 0;
 }
 

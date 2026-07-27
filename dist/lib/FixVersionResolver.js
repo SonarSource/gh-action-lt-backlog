@@ -17,20 +17,17 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-export const FIX_VERSION_AUTODETECT_LOWEST = 'autodetect-lowest';
 export async function findLowestUnreleasedFixVersion(jira, projectKey) {
-    const versions = await jira.findProjectVersions(projectKey);
-    const unreleased = versions.filter((version) => !version.released && !version.archived);
+    const allVersions = await jira.findProjectVersions(projectKey);
+    const unreleased = allVersions.filter(x => !x.released && !x.archived).toSorted((left, right) => compareVersionNames(left.name, right.name));
     if (unreleased.length === 0) {
-        console.log(`${projectKey}: No unreleased versions found, skipping fix version`);
+        console.log(`${projectKey}: No unreleased versions found`);
         return null;
     }
-    const sortedUnreleased = unreleased.toSorted((left, right) => compareVersionNames(left.name, right.name));
-    const selected = sortedUnreleased[0];
-    if (unreleased.length > 1) {
-        console.log(`${projectKey}: Found ${unreleased.length} unreleased versions, using lowest ${selected.name}`);
+    else {
+        console.log(`${projectKey}: Found ${unreleased.length} unreleased versions ${unreleased.map(x => x.name).join(', ')}, using ${unreleased[0].name}`);
+        return unreleased[0].name;
     }
-    return selected.name;
 }
 function compareVersionNames(left, right) {
     const leftParts = normalizeVersionName(left).split('.');
