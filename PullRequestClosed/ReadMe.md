@@ -36,6 +36,8 @@ This parameter will resolve only issues created by automation, or bots.
 
 Jira fix version name assigned to issues without fix version set. Example: `10.23`
 
+Special value `autodetect-lowest` will use the lowest unreleased fix version for the given project.
+
 This parameter is optional.
 
 ## Outputs
@@ -77,5 +79,6 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           jira-user:    {{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
           jira-token:   {{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
+          fix-version:  autodetect-lowest   # Optional
 
 ```

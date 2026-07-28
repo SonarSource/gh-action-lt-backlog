@@ -20,6 +20,7 @@
 
 import { PullRequestAction } from '../lib/PullRequestAction.js';
 import { PullRequest } from '../lib/OctokitTypes.js';
+import { findLowestUnreleasedFixVersion } from '../lib/FixVersionResolver.js';
 
 export class PullRequestClosed extends PullRequestAction {
   protected async processJiraIssue(pr: PullRequest, issueId: string): Promise<void> {
@@ -58,9 +59,14 @@ export class PullRequestClosed extends PullRequestAction {
     if (!issue) {
       this.log(`${issueId}: Could not load issue`);
     } else if (issue.fields.fixVersions.length > 0) {
-      this.log(`${issueId}: Fix version is already set (${issue.fields.fixVersions.map(x => x.name).join(', ')}), skipping`);
+      this.log(`${issueId}: Fix version is already set ${issue.fields.fixVersions.map(x => x.name).join(', ')}, skipping`);
     } else {
-      await this.jira.addFixVersion(issueId, fixVersion);
+      const newFixVersion = fixVersion === 'autodetect-lowest'
+        ? await findLowestUnreleasedFixVersion(this.jira, this.projectKeyFromIssueId(issueId))
+        : fixVersion;
+      if (newFixVersion) {
+        await this.jira.addFixVersion(issueId, newFixVersion);
+      }
     }
   }
 

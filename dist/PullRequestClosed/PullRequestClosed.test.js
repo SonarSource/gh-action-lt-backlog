@@ -176,7 +176,7 @@ describe('PullRequestClosed', () => {
             expect(logTester.logsParams).toStrictEqual([
                 "Loading PR #42",
                 "Invoked jira.transitionIssue('FIXVER-2', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
-                "FIXVER-2: Fix version is already set (1.42, 1.41.1), skipping",
+                "FIXVER-2: Fix version is already set 1.42, 1.41.1, skipping",
                 "Done",
             ]);
         });
@@ -187,6 +187,27 @@ describe('PullRequestClosed', () => {
                 "Loading PR #42",
                 "Invoked jira.transitionIssue('FAKE-1234', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
                 "FAKE-1234: Could not load issue",
+                "Done",
+            ]);
+        });
+        it('autodetect-lowest valid', async () => {
+            process.env['INPUT_FIX-VERSION'] = 'autodetect-lowest';
+            await runAction('FIXVER-1 Title', true);
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                "Invoked jira.transitionIssue('FIXVER-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+                "FIXVER: Found 1 unreleased versions 10.23, using 10.23",
+                "Invoked jira.addFixVersion('FIXVER-1', '10.23')",
+                "Done",
+            ]);
+        });
+        it('autodetect-lowest project without fix version', async () => {
+            process.env['INPUT_FIX-VERSION'] = 'autodetect-lowest';
+            await runAction('NOFIXV-1 Title', true, 'test-user', 'user/branch');
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                "Invoked jira.transitionIssue('NOFIXV-1', {\"id\":\"10001\",\"name\":\"Merge into branch\"}, null)",
+                "NOFIXV: No unreleased versions found",
                 "Done",
             ]);
         });

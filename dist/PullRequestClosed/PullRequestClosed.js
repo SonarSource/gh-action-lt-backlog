@@ -18,6 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import { PullRequestAction } from '../lib/PullRequestAction.js';
+import { findLowestUnreleasedFixVersion } from '../lib/FixVersionResolver.js';
 export class PullRequestClosed extends PullRequestAction {
     async processJiraIssue(pr, issueId) {
         if (this.isEngXpSquad) { // Can't auto-close auto-created issues, the reporter is set to the actual user
@@ -55,10 +56,15 @@ export class PullRequestClosed extends PullRequestAction {
             this.log(`${issueId}: Could not load issue`);
         }
         else if (issue.fields.fixVersions.length > 0) {
-            this.log(`${issueId}: Fix version is already set (${issue.fields.fixVersions.map(x => x.name).join(', ')}), skipping`);
+            this.log(`${issueId}: Fix version is already set ${issue.fields.fixVersions.map(x => x.name).join(', ')}, skipping`);
         }
         else {
-            await this.jira.addFixVersion(issueId, fixVersion);
+            const newFixVersion = fixVersion === 'autodetect-lowest'
+                ? await findLowestUnreleasedFixVersion(this.jira, this.projectKeyFromIssueId(issueId))
+                : fixVersion;
+            if (newFixVersion) {
+                await this.jira.addFixVersion(issueId, newFixVersion);
+            }
         }
     }
     async processClose(issueId) {
