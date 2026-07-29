@@ -23,6 +23,7 @@ import { LockBranchAction, ProtectionRule } from './LockBranchAction.js';
 import { LogTester } from '../tests/LogTester.js';
 import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
 import { OctokitActionStub } from '../tests/OctokitActionStub.js';
+import * as github from '@actions/github';
 
 class TestLockBranchAction extends LockBranchAction {
   constructor(private readonly lockValue: boolean) {
@@ -219,6 +220,13 @@ describe('LockBranchAction', () => {
     process.env['INPUT_BRANCH-PATTERN'] = 'master';
     process.env['INPUT_SLACK-CHANNEL'] = '';
     process.env['INPUT_ADDITIONAL-MESSAGE'] = '';
+    github.context.payload = {
+      sender: {
+        login: 'test-user',
+        type: "User",
+        html_url: "#test-url"
+      }
+    };
   });
 
   afterEach(() => {
@@ -241,7 +249,7 @@ describe('LockBranchAction', () => {
     expect(logTester.logsParams).toStrictEqual([
       "Invoked sendGraphQL list branch protection rules",
       "Invoked sendGraphQL updateBranchProtectionRule to lock id-of-unlocked-3",
-      "Done: test-repo: The branch `unlocked` was locked :ice_cube:",
+      "Done: *test-repo*: The branch `unlocked` was locked :ice_cube: by <#test-url|test-user>",
       "Skip sending slack message, channel was not set.",
       "Done"
     ]);
@@ -255,9 +263,9 @@ describe('LockBranchAction', () => {
     expect(logTester.logsParams).toStrictEqual([
       "Invoked sendGraphQL list branch protection rules",
       "Invoked sendGraphQL updateBranchProtectionRule to lock id-of-unlocked-3",
-      "Done: test-repo: The branch `unlocked` was locked :ice_cube:\n\nThis is because ABC",
+      "Done: *test-repo*: The branch `unlocked` was locked :ice_cube: by <#test-url|test-user>\n\nThis is because ABC",
       "Sending Slack message",
-      "Invoked sendSlackPost('https://slack.com/api/chat.postMessage', {\"channel\":\"channel-name\",\"text\":\"test-repo: The branch `unlocked` was locked :ice_cube:\\n\\nThis is because ABC\"}",
+      "Invoked sendSlackPost('https://slack.com/api/chat.postMessage', {\"channel\":\"channel-name\",\"text\":\"*test-repo*: The branch `unlocked` was locked :ice_cube: by <#test-url|test-user>\\n\\nThis is because ABC\"}",
       "Done"
     ]);
   });
@@ -289,9 +297,9 @@ describe('LockBranchAction', () => {
       "Invoked sendGraphQL disablePullRequestAutoMerge for pr-21",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":21,\"body\":\"The target branch was unlocked and auto-merge was canceled to prevent unexpected actions.\"})",
       "Invoked sendGraphQL updateBranchProtectionRule to unlock id-of-locked-222",
-      "Done: test-repo: The branch `locked` was unlocked and is now open for changes :sunny:",
+      "Done: *test-repo*: The branch `locked` was unlocked and is now open for changes :sunny: by <#test-url|test-user>",
       "Sending Slack message",
-      "Invoked sendSlackPost('https://slack.com/api/chat.postMessage', {\"channel\":\"channel-name\",\"text\":\"test-repo: The branch `locked` was unlocked and is now open for changes :sunny:\"}",
+      "Invoked sendSlackPost('https://slack.com/api/chat.postMessage', {\"channel\":\"channel-name\",\"text\":\"*test-repo*: The branch `locked` was unlocked and is now open for changes :sunny: by <#test-url|test-user>\"}",
       "Done"
     ]);
   });
