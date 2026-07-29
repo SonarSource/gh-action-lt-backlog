@@ -24,6 +24,7 @@ import { LogTester } from '../tests/LogTester.js';
 import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
 import { OctokitActionStub } from '../tests/OctokitActionStub.js';
 import { LockBranchActionStub } from '../tests/LockBranchActionStub.js';
+import * as github from '@actions/github';
 
 async function runAction(currentLockBranch: boolean): Promise<void> {
   const pattern = process.env['INPUT_BRANCH-PATTERN']!;
@@ -57,6 +58,13 @@ describe('LockBranch', () => {
     process.env['INPUT_BRANCH-PATTERN'] = 'master';
     process.env['INPUT_SLACK-CHANNEL'] = '';
     process.env['INPUT_ADDITIONAL-MESSAGE'] = '';
+    github.context.payload = {
+      sender: {
+        login: 'test-user',
+        type: "User",
+        html_url: "#test-url"
+      }
+    };
   });
 
   afterEach(() => {
@@ -69,7 +77,7 @@ describe('LockBranch', () => {
     expect(logTester.logsParams).toStrictEqual([
       "Invoked findRule(master)",
       "Invoked updateRule(rule-id, true)",
-      "Done: test-repo: The branch `master` was locked :ice_cube:",
+      "Done: *test-repo*: The branch `master` was locked :ice_cube: by <#test-url|test-user>",
       "Skip sending slack message, channel was not set.",
       "Done"
     ]);
@@ -82,7 +90,7 @@ describe('LockBranch', () => {
       "Invoked findRule(master)",
       "Invoked cancelAutoMerge(master)",
       "Invoked updateRule(rule-id, false)",
-      "Done: test-repo: The branch `master` was unlocked and is now open for changes :sunny:",
+      "Done: *test-repo*: The branch `master` was unlocked and is now open for changes :sunny: by <#test-url|test-user>",
       "Skip sending slack message, channel was not set.",
       "Done"
     ]);
