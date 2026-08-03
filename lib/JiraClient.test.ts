@@ -297,4 +297,8 @@ describe('JiraClient', () => {
       { key: 'GHA-1', fields: { summary: 'Add Jira automation Dogfood' } },
       { key: 'NET-5', fields: { summary: 'Hardening' } }]);
   });
+
+  it('findAllIssues', async () => {
+    expect(Array.isArray(await sut.findAllIssues('project = SCAN4NET'))).toBe(true);
+  });
 });
