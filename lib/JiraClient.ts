@@ -73,7 +73,7 @@ type RemoteLink = {
   }
 }
 
-type Account = {
+export type Account = {
   accountId: string;
   emailAddress: string;
   displayName: string;
@@ -339,9 +339,25 @@ export class JiraClient {
   }
 
   public async findIssues(jql: string): Promise<Issue[]> {
-    console.log(`Searching for issues: ${jql}`);  
+    console.log(`Searching for issues: ${jql}`);
     const response = await this.sendRestGetApi(`search/jql?fields=key,summary,customfield_10015,duedate&jql=${encodeURIComponent(jql)}`);  // // Only first page of results
     return response?.issues ?? [];
+  }
+
+  public async findAllIssues(jql: string): Promise<Issue[]> {
+    console.log(`Searching for issues: ${jql}`);
+    const issues: Issue[] = [];
+    let nextPageToken: string | undefined = undefined;  // This search pages by token and returns no total
+    do {
+      const tokenParam = nextPageToken ? `&nextPageToken=${encodeURIComponent(nextPageToken)}` : '';
+      const response = await this.sendRestGetApi(`search/jql?fields=key,assignee&jql=${encodeURIComponent(jql)}${tokenParam}`);
+      if (response === null) {
+        throw new Error(`Failed to fetch issues page (token: ${nextPageToken ?? 'first'})`);
+      }
+      issues.push(...(response.issues ?? []));
+      nextPageToken = response.nextPageToken;  // Absent on the last page
+    } while (nextPageToken);
+    return issues;
   }
 
   private async findTeam(queryFilter: string, resultFilter: (x: JiraTeam) => boolean): Promise<JiraTeam | null> {

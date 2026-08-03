@@ -262,5 +262,8 @@ describe('JiraClient', () => {
             { key: 'NET-5', fields: { summary: 'Hardening' } }
         ]);
     });
+    it('findAllIssues', async () => {
+        expect(Array.isArray(await sut.findAllIssues('project = SCAN4NET'))).toBe(true);
+    });
 });
 //# sourceMappingURL=JiraClient.test.js.map
