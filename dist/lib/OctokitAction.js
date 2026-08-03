@@ -25,6 +25,7 @@ import { graphql, GraphqlResponseError } from '@octokit/graphql';
 import { JiraClient } from './JiraClient.js';
 import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN, TEAM_REVIEW_PREFIX } from './Constants.js';
 import { NewIssueData } from './NewIssueData.js';
+const HTTP_TOO_MANY_REQUESTS = 429;
 export class OctokitAction extends Action {
     rest;
     jira;
@@ -187,6 +188,61 @@ export class OctokitAction extends Action {
                 return null;
             }
             const data = await response.json();
+            if (!data.ok) {
+                this.log(`Failed to send API request. Error: ${data.error}`);
+                return null;
+            }
+            return data;
+        }
+        catch (ex) {
+            this.log("Failed to send Slack request");
+            this.log(ex.toString());
+            return null;
+        }
+    }
+    async loadSlackUserIdsByName() {
+        const usersByName = new Map();
+        let cursor = "";
+        do {
+            const response = await this.sendSlackGet("https://slack.com/api/users.list", cursor ? { cursor } : {});
+            for (const member of response?.members ?? []) {
+                const first = member.profile?.first_name;
+                const last = member.profile?.last_name;
+                if (!first || !last) {
+                    continue;
+                }
+                const name = this.normalizeName(`${first} ${last}`);
+                if (name && !usersByName.has(name)) { // First match wins
+                    usersByName.set(name, member.id);
+                }
+            }
+            cursor = response?.response_metadata?.next_cursor ?? "";
+        } while (cursor);
+        return usersByName;
+    }
+    normalizeName(name) {
+        return name.trim().toLowerCase();
+    }
+    async sendSlackGet(url, params) {
+        const token = this.inputString("slack-token");
+        if (!token) {
+            throw new Error("slack-token was not set");
+        }
+        try {
+            const requestUrl = `${url}?${new URLSearchParams(params)}`;
+            const headers = { authorization: `Bearer ${token}` };
+            let response = await fetch(requestUrl, { headers });
+            if (response.status === HTTP_TOO_MANY_REQUESTS) {
+                const delay = Number(response.headers.get("Retry-After") ?? 1);
+                this.log(`Rate limited by Slack. Retrying in ${delay} second(s).`);
+                await new Promise(resolve => setTimeout(resolve, delay * 1000));
+                response = await fetch(requestUrl, { headers });
+            }
+            if (!response.ok) {
+                this.log(`Failed to send API request. Error ${response.status}: ${response.statusText}`);
+                return null;
+            }
+            const data = (await response.json());
             if (!data.ok) {
                 this.log(`Failed to send API request. Error: ${data.error}`);
                 return null;
