@@ -98,6 +98,7 @@ const ignoredTeams = [
   "PM Team",
   "ProdSec",
   "Product Data",             // Not using sprints
+  "Product Launch Cross-functional team",
   "Purchase",
   "Rule Coverage",            // Not using sprints
   "SecGov",
