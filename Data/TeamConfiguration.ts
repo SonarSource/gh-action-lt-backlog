@@ -50,7 +50,7 @@ export const RootlyScheduleIds = {
 // If a new team or default board is created, this file should be updated accordingly.
 export const TeamConfigurationData: TeamConfiguration[] = [
   { name: "ABD Squad", boardId: 1638 },
-  { name: "Analysis as a Service", boardId: 5313 },
+  { name: "Agentic Analysis", boardId: 5313 },
   { name: "Analysis Processing Squad", boardId: 1443 },
   { name: "Architecture Squad", boardId: 1561 },
   { name: "Autoscan", boardId: 9544 },
