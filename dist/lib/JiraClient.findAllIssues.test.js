@@ -21,8 +21,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { JiraClient } from './JiraClient.js';
 import { LogTester } from '../tests/LogTester.js';
 const jql = 'project = "NET" AND status = "In Validation"';
-const encoded = encodeURIComponent(jql);
-const endpoint = (token) => `search/jql?fields=key,assignee&jql=${encoded}${token ? `&nextPageToken=${encodeURIComponent(token)}` : ''}`;
+const endpoint = `search/jql?fields=key,assignee&maxResults=1000&jql=${encodeURIComponent(jql)}`;
 function stubClient(respond) {
     const client = new JiraClient('https://jira.example', 'site-id', 'org-id', 'fake', 'fake');
     const endpoints = [];
@@ -40,35 +39,20 @@ describe('JiraClient.findAllIssues', () => {
     afterEach(() => {
         logTester?.afterEach();
     });
-    it('fetches a single page when there is no next-page token', async () => {
-        const { client, endpoints } = stubClient(() => ({ issues: [{ key: 'ABC-1' }, { key: 'ABC-2' }], isLast: true }));
+    it('fetches the issues in a single request', async () => {
+        const { client, endpoints } = stubClient(() => ({ issues: [{ key: 'ABC-1' }, { key: 'ABC-2' }] }));
         const result = await client.findAllIssues(jql);
         expect(result.map(x => x.key)).toStrictEqual(['ABC-1', 'ABC-2']);
-        expect(endpoints).toStrictEqual([endpoint()]);
-    });
-    it('follows nextPageToken until the last page', async () => {
-        const pages = [
-            { issues: [{ key: 'ABC-1' }, { key: 'ABC-2' }], nextPageToken: 't1' },
-            { issues: [{ key: 'ABC-3' }], isLast: true },
-        ];
-        const { client, endpoints } = stubClient(() => pages.shift());
-        const result = await client.findAllIssues(jql);
-        expect(result.map(x => x.key)).toStrictEqual(['ABC-1', 'ABC-2', 'ABC-3']);
-        expect(endpoints).toStrictEqual([endpoint(), endpoint('t1')]);
+        expect(endpoints).toStrictEqual([endpoint]);
     });
     it('returns an empty array when there are no issues', async () => {
-        const { client, endpoints } = stubClient(() => ({ issues: [], isLast: true }));
+        const { client, endpoints } = stubClient(() => ({ issues: [] }));
         expect(await client.findAllIssues(jql)).toStrictEqual([]);
-        expect(endpoints).toStrictEqual([endpoint()]);
+        expect(endpoints).toStrictEqual([endpoint]);
     });
-    it('throws when the first page request fails', async () => {
+    it('throws when the request fails', async () => {
         const { client } = stubClient(() => null);
-        await expect(client.findAllIssues(jql)).rejects.toThrow('Failed to fetch issues page (token: first)');
-    });
-    it('throws when a subsequent page request fails', async () => {
-        const pages = [{ issues: [{ key: 'ABC-1' }], nextPageToken: 't1' }, null];
-        const { client } = stubClient(() => pages.shift());
-        await expect(client.findAllIssues(jql)).rejects.toThrow('Failed to fetch issues page (token: t1)');
+        await expect(client.findAllIssues(jql)).rejects.toThrow('Failed to fetch issues');
     });
 });
 //# sourceMappingURL=JiraClient.findAllIssues.test.js.map
