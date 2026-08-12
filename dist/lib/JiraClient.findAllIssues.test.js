@@ -21,7 +21,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { JiraClient } from './JiraClient.js';
 import { LogTester } from '../tests/LogTester.js';
 const jql = 'project = "NET" AND status = "In Validation"';
-const endpoint = `search/jql?fields=key,assignee&maxResults=1000&jql=${encodeURIComponent(jql)}`;
+const endpoint = `search/jql?fields=key,assignee&maxResults=50&jql=${encodeURIComponent(jql)}`;
 function stubClient(respond) {
     const client = new JiraClient('https://jira.example', 'site-id', 'org-id', 'fake', 'fake');
     const endpoints = [];
