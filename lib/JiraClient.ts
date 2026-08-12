@@ -346,18 +346,11 @@ export class JiraClient {
 
   public async findAllIssues(jql: string): Promise<Issue[]> {
     console.log(`Searching for issues: ${jql}`);
-    const issues: Issue[] = [];
-    let nextPageToken: string | undefined = undefined;  // This search pages by token and returns no total
-    do {
-      const tokenParam = nextPageToken ? `&nextPageToken=${encodeURIComponent(nextPageToken)}` : '';
-      const response = await this.sendRestGetApi(`search/jql?fields=key,assignee&jql=${encodeURIComponent(jql)}${tokenParam}`);
-      if (response === null) {
-        throw new Error(`Failed to fetch issues page (token: ${nextPageToken ?? 'first'})`);
-      }
-      issues.push(...(response.issues ?? []));
-      nextPageToken = response.nextPageToken;  // Absent on the last page
-    } while (nextPageToken);
-    return issues;
+    const response = await this.sendRestGetApi(`search/jql?fields=key,assignee&maxResults=1000&jql=${encodeURIComponent(jql)}`);
+    if (response === null) {  // A release gate must see every ticket, so surface the error instead of under-counting
+      throw new Error('Failed to fetch issues');
+    }
+    return response.issues ?? [];
   }
 
   private async findTeam(queryFilter: string, resultFilter: (x: JiraTeam) => boolean): Promise<JiraTeam | null> {
