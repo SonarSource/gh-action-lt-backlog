@@ -44,6 +44,12 @@ describe('SlackClient', () => {
         expect(await sut.findUserByEmail('missing@example.com')).toBeNull();
     });
     // Local token is difficult to craft
+    itRunsOnlyInCI('findUserByEmail resolves a real user (needs users:read.email scope)', async () => {
+        const sut = new SlackClient(process.env.SLACK_TOKEN, '');
+        expect(await sut.findUserByEmail('alexander.meseldzija@sonarsource.com')).not.toBeNull();
+        expect(await sut.findUserByEmail('nobody@sonarsource.example')).toBeNull();
+    });
+    // Local token is difficult to craft
     itRunsOnlyInCI('sendMessage succeeds', async () => {
         const sut = new SlackClient(process.env.SLACK_TOKEN, 'notification_tester');
         await sut.sendMessage('gh-action-lt-backlog Unit Test');
