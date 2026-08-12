@@ -18,6 +18,11 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+type SlackResponse = {
+  ok?: boolean;
+  error?: string;
+}
+
 type SlackUserResponse = {
   user?: {
     id: string;
@@ -48,10 +53,10 @@ export class SlackClient {
   }
 
   private sendGet<T>(url: string, params: Record<string, string>): Promise<T | null> {
-    return this.sendRequest(`${url}?${new URLSearchParams(params)}`, { method: "GET" });
+    return this.sendRequest<T>(`${url}?${new URLSearchParams(params)}`, { method: "GET" });
   }
 
-  private sendPost(url: string, jsonRequest: any): Promise<any> {
+  private sendPost(url: string, jsonRequest: Record<string, unknown>): Promise<unknown> {
     const body = JSON.stringify(jsonRequest);
     console.log(`Sending slack POST: ${body}`);
     return this.sendRequest(url, {
@@ -61,7 +66,7 @@ export class SlackClient {
     });
   }
 
-  private async sendRequest(url: string, options: RequestInit): Promise<any> {
+  private async sendRequest<T>(url: string, options: RequestInit): Promise<T | null> {
     if (!this.token) {
       throw new Error("slack-token was not set");
     }
@@ -74,7 +79,7 @@ export class SlackClient {
         console.log(`Failed to send API request. Error ${response.status}: ${response.statusText}`);
         return null;
       }
-      const data = await response.json();
+      const data = await response.json() as T & SlackResponse;
       if (!data.ok) {
         console.log(`Failed to send API request. Error: ${data.error}`);
         return null;

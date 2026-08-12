@@ -66,7 +66,7 @@ async function runAction(issues: any[], currentlyLocked: boolean = false, slackI
   };
   action.slack.findUserByEmail = async (email: string) => slackIds.get(email) ?? null;
   action.rest = createOctokitRestStub('Irrelevant');
-  action.slack.sendPost = async (url: string, req: any) => {
+  action.slack.sendPost = async (url: string, req: unknown) => {
     console.log(`Invoked sendSlackPost(${url}, ${JSON.stringify(req)})`);
     return {};
   };

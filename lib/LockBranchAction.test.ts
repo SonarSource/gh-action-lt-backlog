@@ -200,10 +200,10 @@ function sendGraphQLStub(query: string): any {
 }
 
 async function runAction(lockValue: boolean): Promise<void> {
-  const action = new TestLockBranchAction(lockValue) as TestLockBranchAction & OctokitActionStub;
+  const action = new TestLockBranchAction(lockValue) as unknown as OctokitActionStub & { run(): Promise<void> };
   action.sendGraphQL = sendGraphQLStub;
   action.rest = createOctokitRestStub("Irrelevant");
-  action.slack.sendPost = async function (url: string, jsonRequest: any): Promise<any> {
+  action.slack.sendPost = async function (url: string, jsonRequest: unknown): Promise<unknown> {
     console.log(`Invoked sendSlackPost('${url}', ${JSON.stringify(jsonRequest)}`)
     return {};
   }
