@@ -25,7 +25,10 @@ import { context } from '@actions/github';
 // This provides typed access to the internal members of OctokitAction for unit testing
 export type OctokitActionStub = {
   jira: any;
-  slack: any;
+  slack: {
+    findUserByEmail(email: string): Promise<string | null>;
+    sendPost(url: string, jsonRequest: unknown): Promise<unknown>;
+  };
   rest: Api['rest'];
   payload: typeof context.payload;
   isEngXpSquad: boolean;

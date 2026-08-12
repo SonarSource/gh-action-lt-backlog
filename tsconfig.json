@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "nodenext",
     "target": "es2024",
-    "lib": ["es2023", "dom"],
+    "lib": ["es2024", "dom"],
     "sourceMap": true,
     "newLine": "lf",
     "outDir": "./dist"
