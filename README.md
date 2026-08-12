@@ -30,7 +30,7 @@ All actions should be consumed from these branches.
 
 [ToggleLockBranch](ToggleLockBranch) - Lock or Unlock branch to prevent merge of PRs.
 
-[PrepareRelease](PrepareRelease) - Lock the release branch and ping assignees of tickets still in Validate on Slack.
+[AnnounceRelease](AnnounceRelease) - Lock the release branch and ping assignees of tickets still in Validate on Slack.
 
 ## Development notes
 

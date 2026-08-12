@@ -18,27 +18,29 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { PrepareRelease } from './PrepareRelease.js';
+import { AnnounceRelease } from './AnnounceRelease.js';
 import { LogTester } from '../tests/LogTester.js';
 import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
+import * as github from '@actions/github';
 function issue(key, assignee) {
     const account = assignee ? { accountId: assignee, emailAddress: `${assignee}@x.com`, displayName: assignee } : null;
     return { key, fields: { assignee: account } };
 }
 const link = (key) => `<https://sonarsource.atlassian.net/browse/${key}|${key}>`;
-function slackUsersFrom(issues) {
-    const users = new Map();
+const lockedBy = '*test-repo*: The branch `master` was locked :ice_cube: by <#test-url|test-user>';
+function slackIdsFrom(issues) {
+    const ids = new Map();
     for (const { fields } of issues) {
-        const name = fields.assignee?.displayName;
-        if (name) {
-            users.set(name.trim().toLowerCase(), `U-${name}`);
+        const assignee = fields.assignee;
+        if (assignee) {
+            ids.set(assignee.emailAddress, `U-${assignee.displayName}`);
         }
     }
-    return users;
+    return ids;
 }
-async function runAction(issues, currentlyLocked = false, slackUsers = slackUsersFrom(issues), projectExists = true) {
+async function runAction(issues, currentlyLocked = false, slackIds = slackIdsFrom(issues)) {
     const pattern = process.env['INPUT_BRANCH-PATTERN'];
-    const action = new PrepareRelease();
+    const action = new AnnounceRelease();
     action.findRule = async (pattern) => {
         console.log(`Invoked findRule(${pattern})`);
         return { id: 'rule-id', lockBranch: currentlyLocked, pattern };
@@ -50,20 +52,19 @@ async function runAction(issues, currentlyLocked = false, slackUsers = slackUser
     action.cancelAutoMerge = async (pattern) => {
         console.log(`Invoked cancelAutoMerge(${pattern})`);
     };
-    action.jira.loadProject = async () => (projectExists ? {} : null);
     action.jira.findAllIssues = async (jql) => {
         console.log(`Invoked findAllIssues(${jql})`);
         return issues;
     };
-    action.loadSlackUserIdsByName = async () => slackUsers;
+    action.slack.findUserByEmail = async (email) => slackIds.get(email) ?? null;
     action.rest = createOctokitRestStub('Irrelevant');
-    action.sendSlackPost = async (url, req) => {
+    action.slack.sendPost = async (url, req) => {
         console.log(`Invoked sendSlackPost(${url}, ${JSON.stringify(req)})`);
         return {};
     };
     await action.run();
 }
-describe('PrepareRelease', () => {
+describe('AnnounceRelease', () => {
     let logTester;
     beforeEach(() => {
         logTester = new LogTester();
@@ -72,10 +73,17 @@ describe('PrepareRelease', () => {
         process.env['INPUT_JIRA-USER'] = 'fake';
         process.env['INPUT_JIRA-TOKEN'] = 'fake';
         process.env['INPUT_PROJECT'] = 'NET';
-        process.env['INPUT_STATUS'] = 'In Validation';
         process.env['INPUT_BRANCH-PATTERN'] = 'master';
         process.env['INPUT_SLACK-CHANNEL'] = 'test-channel';
         process.env['INPUT_SLACK-TOKEN'] = 'fake';
+        process.env['INPUT_ADDITIONAL-MESSAGE'] = '';
+        github.context.payload = {
+            sender: {
+                login: 'test-user',
+                type: 'User',
+                html_url: '#test-url'
+            }
+        };
     });
     afterEach(() => {
         logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
@@ -87,9 +95,9 @@ describe('PrepareRelease', () => {
             "Invoked updateRule(rule-id, true)",
             "Invoked findAllIssues(project = \"NET\" AND status = \"In Validation\")",
             "Found 4 issue(s) in 'In Validation'",
-            `Done: test-repo: The branch \`master\` was locked for release :ice_cube:\nTickets to validate:\n- <@U-Alice>\n  • ${link('ABC-1')}\n  • ${link('ABC-2')}\n- <@U-Bob>\n  • ${link('ABC-3')}\n- Unassigned\n  • ${link('ABC-4')}`,
+            `Done: ${lockedBy}\nTickets to validate:\n- <@U-Alice>\n  * ${link('ABC-1')}\n  * ${link('ABC-2')}\n- <@U-Bob>\n  * ${link('ABC-3')}\n- Unassigned\n  * ${link('ABC-4')}`,
             "Sending Slack message",
-            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"test-repo: The branch \`master\` was locked for release :ice_cube:\\nTickets to validate:\\n- <@U-Alice>\\n  • ${link('ABC-1')}\\n  • ${link('ABC-2')}\\n- <@U-Bob>\\n  • ${link('ABC-3')}\\n- Unassigned\\n  • ${link('ABC-4')}"})`,
+            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"${lockedBy}\\nTickets to validate:\\n- <@U-Alice>\\n  * ${link('ABC-1')}\\n  * ${link('ABC-2')}\\n- <@U-Bob>\\n  * ${link('ABC-3')}\\n- Unassigned\\n  * ${link('ABC-4')}"})`,
             "Done"
         ]);
     });
@@ -100,9 +108,9 @@ describe('PrepareRelease', () => {
             "Invoked updateRule(rule-id, true)",
             "Invoked findAllIssues(project = \"NET\" AND status = \"In Validation\")",
             "Found 1 issue(s) in 'In Validation'",
-            `Done: test-repo: The branch \`master\` was locked for release :ice_cube:\nTickets to validate:\n- Alice\n  • ${link('ABC-1')}`,
+            `Done: ${lockedBy}\nTickets to validate:\n- Alice\n  * ${link('ABC-1')}`,
             "Sending Slack message",
-            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"test-repo: The branch \`master\` was locked for release :ice_cube:\\nTickets to validate:\\n- Alice\\n  • ${link('ABC-1')}"})`,
+            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"${lockedBy}\\nTickets to validate:\\n- Alice\\n  * ${link('ABC-1')}"})`,
             "Done"
         ]);
     });
@@ -113,9 +121,9 @@ describe('PrepareRelease', () => {
             "Invoked updateRule(rule-id, true)",
             "Invoked findAllIssues(project = \"NET\" AND status = \"In Validation\")",
             "Found 1 issue(s) in 'In Validation'",
-            `Done: test-repo: The branch \`master\` was locked for release :ice_cube:\nTickets to validate:\n- Unassigned\n  • ${link('ABC-9')}`,
+            `Done: ${lockedBy}\nTickets to validate:\n- Unassigned\n  * ${link('ABC-9')}`,
             "Sending Slack message",
-            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"test-repo: The branch \`master\` was locked for release :ice_cube:\\nTickets to validate:\\n- Unassigned\\n  • ${link('ABC-9')}"})`,
+            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"${lockedBy}\\nTickets to validate:\\n- Unassigned\\n  * ${link('ABC-9')}"})`,
             "Done"
         ]);
     });
@@ -126,37 +134,23 @@ describe('PrepareRelease', () => {
             "Invoked updateRule(rule-id, true)",
             "Invoked findAllIssues(project = \"NET\" AND status = \"In Validation\")",
             "Found 0 issue(s) in 'In Validation'",
-            "Done: test-repo: The branch `master` was locked for release :ice_cube:\nNo tickets to validate.",
+            `Done: ${lockedBy}\nNo tickets to validate.`,
             "Sending Slack message",
-            "Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {\"channel\":\"test-channel\",\"text\":\"test-repo: The branch `master` was locked for release :ice_cube:\\nNo tickets to validate.\"})",
+            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"${lockedBy}\\nNo tickets to validate."})`,
             "Done"
         ]);
     });
-    it('Uses the configured status', async () => {
-        process.env['INPUT_STATUS'] = 'In Review';
+    it('Appends the additional-message before the ticket list', async () => {
+        process.env['INPUT_ADDITIONAL-MESSAGE'] = 'Planned for Friday';
         await runAction([issue('ABC-1', 'Alice')]);
         expect(logTester.logsParams).toStrictEqual([
             "Invoked findRule(master)",
             "Invoked updateRule(rule-id, true)",
-            "Invoked findAllIssues(project = \"NET\" AND status = \"In Review\")",
-            "Found 1 issue(s) in 'In Review'",
-            `Done: test-repo: The branch \`master\` was locked for release :ice_cube:\nTickets to validate:\n- <@U-Alice>\n  • ${link('ABC-1')}`,
+            "Invoked findAllIssues(project = \"NET\" AND status = \"In Validation\")",
+            "Found 1 issue(s) in 'In Validation'",
+            `Done: ${lockedBy}\n\nPlanned for Friday\nTickets to validate:\n- <@U-Alice>\n  * ${link('ABC-1')}`,
             "Sending Slack message",
-            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"test-repo: The branch \`master\` was locked for release :ice_cube:\\nTickets to validate:\\n- <@U-Alice>\\n  • ${link('ABC-1')}"})`,
-            "Done"
-        ]);
-    });
-    it('Escapes quotes in the status for JQL', async () => {
-        process.env['INPUT_STATUS'] = 'In "Validation"';
-        await runAction([issue('ABC-1', 'Alice')]);
-        expect(logTester.logsParams).toStrictEqual([
-            "Invoked findRule(master)",
-            "Invoked updateRule(rule-id, true)",
-            `Invoked findAllIssues(project = "NET" AND status = "In \\"Validation\\"")`,
-            `Found 1 issue(s) in 'In "Validation"'`,
-            `Done: test-repo: The branch \`master\` was locked for release :ice_cube:\nTickets to validate:\n- <@U-Alice>\n  • ${link('ABC-1')}`,
-            "Sending Slack message",
-            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"test-repo: The branch \`master\` was locked for release :ice_cube:\\nTickets to validate:\\n- <@U-Alice>\\n  • ${link('ABC-1')}"})`,
+            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"${lockedBy}\\n\\nPlanned for Friday\\nTickets to validate:\\n- <@U-Alice>\\n  * ${link('ABC-1')}"})`,
             "Done"
         ]);
     });
@@ -168,11 +162,5 @@ describe('PrepareRelease', () => {
             "Done"
         ]);
     });
-    it('Unknown project fails fast without locking or posting', async () => {
-        await runAction([issue('ABC-1', 'Alice')], false, undefined, false);
-        expect(logTester.logsParams).toStrictEqual([
-            "Done"
-        ]);
-    });
 });
-//# sourceMappingURL=PrepareRelease.test.js.map
+//# sourceMappingURL=AnnounceRelease.test.js.map

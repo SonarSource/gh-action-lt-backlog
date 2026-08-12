@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import { PrepareRelease } from "./PrepareRelease.js";
-const action = new PrepareRelease();
+import { AnnounceRelease } from "./AnnounceRelease.js";
+const action = new AnnounceRelease();
 action.run();
 //# sourceMappingURL=Index.js.map
