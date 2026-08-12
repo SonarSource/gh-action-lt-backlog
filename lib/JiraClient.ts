@@ -346,7 +346,7 @@ export class JiraClient {
 
   public async findAllIssues(jql: string): Promise<Issue[]> {
     console.log(`Searching for issues: ${jql}`);
-    const response = await this.sendRestGetApi(`search/jql?fields=key,assignee&maxResults=1000&jql=${encodeURIComponent(jql)}`);
+    const response = await this.sendRestGetApi(`search/jql?fields=key,assignee&maxResults=50&jql=${encodeURIComponent(jql)}`);
     if (response === null) {  // A release gate must see every ticket, so surface the error instead of under-counting
       throw new Error('Failed to fetch issues');
     }
