@@ -203,7 +203,7 @@ async function runAction(lockValue: boolean): Promise<void> {
   const action = new TestLockBranchAction(lockValue) as TestLockBranchAction & OctokitActionStub;
   action.sendGraphQL = sendGraphQLStub;
   action.rest = createOctokitRestStub("Irrelevant");
-  action.sendSlackPost = async function (url: string, jsonRequest: any): Promise<any> {
+  action.slack.sendPost = async function (url: string, jsonRequest: any): Promise<any> {
     console.log(`Invoked sendSlackPost('${url}', ${JSON.stringify(jsonRequest)}`)
     return {};
   }
