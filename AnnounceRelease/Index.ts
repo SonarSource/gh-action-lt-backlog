@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { PrepareRelease } from "./PrepareRelease.js";
+import { AnnounceRelease } from "./AnnounceRelease.js";
 
-const action = new PrepareRelease();
+const action = new AnnounceRelease();
 action.run();

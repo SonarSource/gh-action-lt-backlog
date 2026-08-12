@@ -1,5 +1,5 @@
-name: 'Prepare release'
-description: 'Lock the release branch and post a Slack message pinging assignees of tickets still in the Validate state.'
+name: 'Announce release'
+description: 'Lock the release branch and post a Slack message pinging assignees of tickets still in the In Validation state.'
 inputs:
   github-token:
     description: 'GitHub auth Token with administration:write permissions or public_repo permissions from admin account.'
@@ -11,14 +11,10 @@ inputs:
     description: 'Jira auth Token'
     required: true
   project:
-    description: 'Jira project key (e.g. NET) whose tickets in the given status gate the release.'
+    description: 'Jira project key (e.g. NET) whose tickets gate the release.'
     required: true
-  status:
-    description: 'Ticket state to look for.'
-    required: false
-    default: 'In Validation'
   slack-token:
-    description: 'Slack auth Token with chat-write and chat-write.public scope.'
+    description: 'Slack auth Token with chat:write, chat:write.public and users:read.email scope.'
     required: true
   slack-channel:
     description: 'Slack channel name or ID to send the notification to.'
@@ -27,7 +23,11 @@ inputs:
     description: 'Pattern of the branch protection rule to lock.'
     required: false
     default: 'master'
+  additional-message:
+    description: 'Additional Slack message text to be added to the default message.'
+    required: false
+    default: ''
 
 runs:
   using: 'node24'
-  main: '../dist/PrepareRelease/Index.js'
+  main: '../dist/AnnounceRelease/Index.js'
