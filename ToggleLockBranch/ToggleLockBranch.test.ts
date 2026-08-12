@@ -41,7 +41,7 @@ async function runAction(currentLockBranch: boolean): Promise<void> {
     console.log(`Invoked cancelAutoMerge(${pattern})`);
   };
   action.rest = createOctokitRestStub('Irrelevant');
-  action.sendSlackPost = async (url, req) => {
+  action.slack.sendPost = async (url: string, req: any) => {
     console.log(`Invoked sendSlackPost`);
     return {};
   };

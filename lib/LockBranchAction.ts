@@ -51,7 +51,7 @@ export abstract class LockBranchAction extends OctokitAction {
         if (updated.lockBranch === lockBranch) {
           const message = await this.buildSlackMessage(pattern, lockBranch);
           this.log(`Done: ${message}`);
-          this.sendSlackMessage(message);
+          this.slack.sendMessage(message);
         } else {
           this.log(`Failed: '${pattern}' was not updated successfully.`); // And we have no idea why
         }

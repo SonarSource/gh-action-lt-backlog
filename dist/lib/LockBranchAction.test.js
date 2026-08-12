@@ -201,7 +201,7 @@ async function runAction(lockValue) {
     const action = new TestLockBranchAction(lockValue);
     action.sendGraphQL = sendGraphQLStub;
     action.rest = createOctokitRestStub("Irrelevant");
-    action.sendSlackPost = async function (url, jsonRequest) {
+    action.slack.sendPost = async function (url, jsonRequest) {
         console.log(`Invoked sendSlackPost('${url}', ${JSON.stringify(jsonRequest)}`);
         return {};
     };
