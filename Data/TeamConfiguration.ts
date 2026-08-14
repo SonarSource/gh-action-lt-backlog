@@ -40,8 +40,8 @@ export const JiraTeams = {
 } satisfies Record<string, JiraTeam>;
 
 export const RootlyScheduleIds = {
-  PlatformCloudEngineeringTriager: 'a8f6f785-aea9-4647-8200-f249dfd5fa70',
-  PlatformCloudProductionEngineeringTriager: '70205800-ac28-48cd-a45e-b2e56f01edc9',
+  PlatformCloudEngineeringTriager: 'c461f921-6c62-4039-8c5e-59500682ccb0',
+  PlatformCloudProductionEngineeringTriager: 'c461f921-6c62-4039-8c5e-59500682ccb0',
   PlatformEngXpTriager: '340d3bc8-9b6c-43fc-856a-e44bec97ebc8',
   PlatformFrontEndEngineeringTriager: '2091132b-a81b-4c6c-80ea-8d4ea74227af',
 };

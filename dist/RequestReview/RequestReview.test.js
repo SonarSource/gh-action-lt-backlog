@@ -96,7 +96,7 @@ describe('RequestReview', () => {
             "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-eng-squad\",\"per_page\":100})",
             "Loading members of platform-cloud-prod-eng-squad",
             "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-prod-eng-squad\",\"per_page\":100})",
-            "Invoked findRootlyOnCallEmails(\"a8f6f785-aea9-4647-8200-f249dfd5fa70\")",
+            "Invoked findRootlyOnCallEmails(\"c461f921-6c62-4039-8c5e-59500682ccb0\")",
             "Invoked jira.moveIssue('GHA-42', 'Request Review', null)",
             "Invoked jira.assignIssueToEmail('GHA-42', ['user@sonarsource.com'])",
             "Found 1 Evergreen Epic(s), using SC-1000 Current SC Review Epic platform-cloud-eng-squad",
