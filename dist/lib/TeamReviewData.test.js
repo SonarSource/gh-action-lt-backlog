@@ -87,10 +87,8 @@ function createAction(senderLogin, senderAccountId) {
         },
         async findRootlyOnCallEmails(scheduleId) {
             switch (scheduleId) {
-                case 'a8f6f785-aea9-4647-8200-f249dfd5fa70':
+                case 'c461f921-6c62-4039-8c5e-59500682ccb0':
                     return ['cloud.engineering@sonarsource.com'];
-                case '70205800-ac28-48cd-a45e-b2e56f01edc9':
-                    return ['cloud.production.engineering@sonarsource.com'];
                 case '340d3bc8-9b6c-43fc-856a-e44bec97ebc8':
                     return ['eng.xp@sonarsource.com'];
                 case '2091132b-a81b-4c6c-80ea-8d4ea74227af':
@@ -131,7 +129,7 @@ describe('TeamReviewData', () => {
         it('platform-cloud-prod-eng-squad', async () => {
             const gitHubTeam = createSimpleTeam('platform-cloud-prod-eng-squad');
             expect(await TeamReviewData.create(createAction('some-login', '1234-account'), normalPR, 'SC-1234', gitHubTeam))
-                .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: 'cloud-production-engineering-triager', jiraTeam: JiraTeams.CloudProductionEngineering, gitHubTeam });
+                .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: 'cloud-engineering-triager', jiraTeam: JiraTeams.CloudProductionEngineering, gitHubTeam });
         });
         it('platform-front-end-eng-squad', async () => {
             const gitHubTeam = createSimpleTeam('platform-front-end-eng-squad');
