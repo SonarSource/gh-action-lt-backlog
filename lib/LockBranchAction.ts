@@ -52,7 +52,10 @@ export abstract class LockBranchAction extends OctokitAction {
         if (updated.lockBranch === lockBranch) {
           const action = lockBranch ? 'locked :ice_cube:' : 'unlocked and is now open for changes :sunny:';
           const suffix = additionalMessage ? `\n\n${additionalMessage}` : '';
-          const message = `*${this.repo.repo}*: The branch \`${pattern}\` was ${action} by <${this.payload.sender!.html_url}|${this.payload.sender!.login}>${suffix}`;
+          const sender = this.payload.sender
+            ? `<${this.payload.sender.html_url}|${this.payload.sender.login}>`
+            : 'a scheduled job';
+          const message = `*${this.repo.repo}*: The branch \`${pattern}\` was ${action} by ${sender}${suffix}`;
           this.log(`Done: ${message}`);
           this.sendSlackMessage(message);
         } else {
