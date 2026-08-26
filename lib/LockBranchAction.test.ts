@@ -270,6 +270,19 @@ describe('LockBranchAction', () => {
     ]);
   });
 
+  it('Lock without sender (scheduled job)', async () => {
+    process.env['INPUT_BRANCH-PATTERN'] = 'unlocked';
+    github.context.payload = {};  // No sender, as in a scheduled run
+    await runAction(true);
+    expect(logTester.logsParams).toStrictEqual([
+      "Invoked sendGraphQL list branch protection rules",
+      "Invoked sendGraphQL updateBranchProtectionRule to lock id-of-unlocked-3",
+      "Done: *test-repo*: The branch `unlocked` was locked :ice_cube: by a scheduled job",
+      "Skip sending slack message, channel was not set.",
+      "Done"
+    ]);
+  });
+
   it('Already in requested state', async () => {
     process.env['INPUT_BRANCH-PATTERN'] = 'unlocked';
     await runAction(false); // Branch is already unlocked
