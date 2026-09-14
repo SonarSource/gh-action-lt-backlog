@@ -33,8 +33,10 @@ const ignoredTeams = [
     "2.SCE_GTM",
     "3.Stripe_Project Mgmt.",
     "Accounts Payable",
+    "Administration & Integrations Squad", // GTM
     "Agentic Security",
     "AICoreTeam",
+    "Analysis Squad", // GTM
     "Analysis Trust", // Not using sprints
     "BizTech - FrontOffice",
     "BizTech - SolutionEnablement",
@@ -69,6 +71,7 @@ const ignoredTeams = [
     "FP&A GTM",
     "FP&A MC&Product",
     "Front-Office Squad (Stripe)",
+    "Gitar",
     "Growth",
     "Growth Marketing",
     "GTM - Web Development Squad",
@@ -89,6 +92,7 @@ const ignoredTeams = [
     "ITOPS-SYSENG",
     "Legal Team",
     "Operational Finance",
+    "Operations Squad", // GTM
     "Org Change JSM Process Owners",
     "PM Team",
     "ProdSec",
@@ -100,6 +104,7 @@ const ignoredTeams = [
     "Services",
     "Storefront EM",
     "Support Council",
+    "Support Team",
     "Taint Analysis", // Aggregation of STL Taint and DTL Taint
     "Travel Team",
     "UX Team",
@@ -107,6 +112,7 @@ const ignoredTeams = [
     "WE Alexandria",
     "WE Annecy",
     "WE Austin",
+    "WE Barcelona",
     "WE Bochum",
     "WE Geneva",
     "WE London",
