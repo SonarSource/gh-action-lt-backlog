@@ -18,6 +18,10 @@ Action assigns a Sprint field based on the determined user Team and boardId from
 
 This action does nothing if the PR title contains `DO NOT MERGE` phrase.
 
+Ticket creation can also be triggered on demand by commenting `/AddJiraTicket` on the PR (e.g. right after removing `DO NOT MERGE` from the title) — see the `issue_comment` trigger in the example usage below. If the PR already has a linked ticket, commenting `/AddJiraTicket` again is a no-op; it does not repost the linked-issue comment or remote link.
+
+Only SonarSource org members (`author_association == 'MEMBER'`) can use the `/AddJiraTicket` comment trigger — GitHub Apps are not org members, so a bot's comment normally has no effect. The example below explicitly allowlists the `hashicorp-vault-sonar-prod[bot]` identity (used by self-hosted Renovate / other Vault-token automation) so it can also use this trigger; add further bot logins to that check only as needed.
+
 ## Inputs
 
 ### `github-token`
@@ -116,6 +120,8 @@ name: Pull Request Created
 on:
   pull_request:
     types: ["opened"]
+  issue_comment:
+    types: ["created"]
 
 jobs:
   PullRequestCreated_job:
@@ -123,9 +129,15 @@ jobs:
     runs-on: sonar-xs
     permissions:
       id-token: write
-    # For external PR, ticket should be created manually
+    # For external PR, ticket should be created manually.
+    # On-demand: a maintainer can comment `/AddJiraTicket` on a PR (e.g. after removing DO NOT MERGE from the title) to (re)trigger ticket creation.
     if: |
-        github.event.pull_request.head.repo.full_name == github.repository
+        (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+        (github.event_name == 'issue_comment'
+          && github.event.issue.pull_request != null
+          && github.event.comment.body == '/AddJiraTicket'
+          && (github.event.comment.author_association == 'MEMBER'
+              || github.event.comment.user.login == 'hashicorp-vault-sonar-prod[bot]'))
     steps:
       - id: secrets
         uses: SonarSource/vault-action-wrapper@v3

@@ -23,7 +23,7 @@ import * as github from '@actions/github';
 import { PullRequestCreated } from './PullRequestCreated.js';
 import { LogTester } from '../tests/LogTester.js';
 import { jiraClientStub } from '../tests/JiraClientStub.js';
-import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
+import { createOctokitRestStub, StubReviewer, StubTeam } from '../tests/OctokitRestStub.js';
 import { OctokitActionStub } from '../tests/OctokitActionStub.js';
 import { PullRequest } from '../lib/OctokitTypes.js';
 
@@ -45,11 +45,11 @@ class TestPullRequestCreated extends PullRequestCreated {
   }
 }
 
-async function runAction(jiraProject: string, title: string, body?: string | null, user: string = 'test-user') {
+async function runAction(jiraProject: string, title: string, body?: string | null, user: string = 'test-user', requestedReviewers: StubReviewer[] = [], requestedTeams: StubTeam[] = [], headRepoFullName: string = 'test-owner/test-repo') {
   process.env['INPUT_JIRA-PROJECT'] = jiraProject;
   const action = new TestPullRequestCreated() as TestPullRequestCreated & OctokitActionStub;
   action.jira = jiraClientStub;
-  action.rest = createOctokitRestStub(title, body, user);
+  action.rest = createOctokitRestStub(title, body, user, requestedReviewers, requestedTeams, headRepoFullName);
   await action.run();
 }
 
@@ -133,6 +133,111 @@ describe('PullRequestCreated', () => {
     expect(action.log).toHaveBeenCalledTimes(1);
   });
 
+  function setIssueCommentPayload(title: string) {
+    github.context.payload = {
+      issue: {
+        number: 42,
+        title,
+        pull_request: {}
+      },
+      comment: {
+        id: 1,
+        body: '/AddJiraTicket'
+      },
+      repository: {
+        html_url: "https://github.com/test-owner/test-repo",
+        name: 'test-repo',
+        owner: { login: 'SonarSource' }
+      },
+      sender: {
+        login: 'test-user',
+        type: "User"
+      }
+    };
+  }
+
+  it('/AddJiraTicket comment triggers issue creation for a PR without a ticket', async () => {
+    setIssueCommentPayload('Standalone PR');
+    await runAction('KEY', 'Standalone PR');
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "findEmails called for test-user",
+      "No mentioned issues found",
+      "Looking for valid parent ticket",
+      "No parent issue found",
+      "No boardId is configured for team .NET Squad",
+      "Found 2 Evergreen Epic(s), using NET-1000 .NET KTLO Epic",
+      "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":null,\"parent\":{\"key\":\"NET-1000\"}})",
+      "Updating PR #42 title to: KEY-4242 Standalone PR",
+      "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"KEY-4242 Standalone PR\"})",
+      "Invoked jira.moveIssue('KEY-4242', 'Commit', null)",
+      "Invoked jira.moveIssue('KEY-4242', 'Start', null)",
+      "Invoked jira.assignIssueToAccount('KEY-4242', '1234-account')",
+      "Adding the following ticket as comment: KEY-4242",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
+      "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
+      "Done"
+    ]);
+  });
+
+  it('/AddJiraTicket comment does nothing while DO NOT MERGE is still in the title', async () => {
+    setIssueCommentPayload('Prefix [DO not MeRGe{: Test PR');
+    const action = new PullRequestCreated();
+    action.log = vi.fn();
+    await action.run();
+    expect(action.log).toHaveBeenCalledWith("Done");
+    expect(action.log).toHaveBeenCalledWith("'DO NOT MERGE' found in the PR title, skipping the action.");
+  });
+
+  it('/AddJiraTicket comment picks up reviewer requested on the loaded PR', async () => {
+    setIssueCommentPayload('Standalone PR');
+    await runAction('KEY', 'Standalone PR', null, 'test-user', [{ type: "User", login: "test-reviewer" }]);
+    expect(logTester.logsParams).toContain("Invoked jira.moveIssue('KEY-4242', 'Request Review', null)");
+    expect(logTester.logsParams).toContain("Invoked jira.assignIssueToEmail('KEY-4242', ['reviewer@sonarsource.com'])");
+  });
+
+  it('/AddJiraTicket comment on a PR with an existing ticket but no prior link backfills the linked-issue comment and remote link', async () => {
+    setIssueCommentPayload('KEY-4242 Standalone PR');
+    await runAction('KEY', 'KEY-4242 Standalone PR');
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Invoked rest.issues.listComments({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42})",
+      "Adding the following ticket as comment: KEY-4242",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
+      "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
+      "Done"
+    ]);
+  });
+
+  it('/AddJiraTicket comment on a PR that already has the linked-issue comment does not repost it', async () => {
+    setIssueCommentPayload('KEY-4242 Standalone PR');
+    process.env['INPUT_JIRA-PROJECT'] = 'KEY';
+    const action = new TestPullRequestCreated() as TestPullRequestCreated & OctokitActionStub;
+    action.jira = jiraClientStub;
+    action.rest = createOctokitRestStub('KEY-4242 Standalone PR', null, 'test-user');
+    action.rest.issues.listComments = ((params: any) => {
+      console.log(`Invoked rest.issues.listComments(${JSON.stringify(params)})`);
+      return Promise.resolve({ data: [{ body: '[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)' }] });
+    }) as any;
+    await action.run();
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Invoked rest.issues.listComments({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42})",
+      "Done"
+    ]);
+  });
+
+  it('/AddJiraTicket comment on an external PR does nothing', async () => {
+    setIssueCommentPayload('Standalone PR');
+    const action = new PullRequestCreated() as PullRequestCreated & OctokitActionStub;
+    action.jira = jiraClientStub;
+    action.rest = createOctokitRestStub('Standalone PR', null, 'test-user', [], [], 'fork-owner/test-repo');
+    action.log = vi.fn();
+    await action.run();
+    expect(action.log).toHaveBeenCalledWith('External PR, the ticket must be created manually.');
+    expect(action.log).toHaveBeenCalledWith('Done');
+  });
+
   it('Standalone PR user first email not linked to Jira', async () => {
     // Employee changed name and got a new email. GitHub preserves both emails, Jira only has the new one.
     await runAction('KEY', 'Title', null, 'renamed');
@@ -186,8 +291,8 @@ describe('PullRequestCreated', () => {
   });
 
   it('Standalone PR with description', async () => {
-    github.context.payload.pull_request!.requested_teams = [{ type: 'Team', name: 'test-team' }]; // Action does nothing additional when team is (auto)requested for review
-    await runAction('KEY', 'Standalone PR', 'Original description, this ignores USER-1234 tickets as those should not be parents');
+    // Action does nothing additional when team is (auto)requested for review, but the slug does not match a known team
+    await runAction('KEY', 'Standalone PR', 'Original description, this ignores USER-1234 tickets as those should not be parents', 'test-user', [], [{ name: 'test-team', slug: 'test-team' }]);
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
       "findEmails called for test-user",
@@ -229,8 +334,7 @@ describe('PullRequestCreated', () => {
   });
 
   it('Standalone PR with reviewer', async () => {
-    github.context.payload.pull_request!.requested_reviewers = [{ type: "User", login: "test-reviewer" }];
-    await runAction('KEY', 'Standalone PR');
+    await runAction('KEY', 'Standalone PR', null, 'test-user', [{ type: "User", login: "test-reviewer" }]);
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
       "findEmails called for test-user",
@@ -256,13 +360,12 @@ describe('PullRequestCreated', () => {
   });
 
   it('Standalone PR with team review', async () => {
-    github.context.payload.pull_request!.requested_teams = [
+    process.env['INPUT_TEAM-REVIEW-COMPONENT'] = 'Parameter Component';
+    await runAction('KEY', 'Standalone PR', null, 'test-user', [], [
       { name: "another-team", slug: "another-team" },                                       // NO OP
       { name: "platform-cloud-engineering-squad", slug: "platform-cloud-engineering-squad" },               // Requests review, queries accountId
       { name: "platform-cloud-production-engineering-squad", slug: "platform-cloud-production-engineering-squad" }      // Requests review, reuses accountId
-    ];
-    process.env['INPUT_TEAM-REVIEW-COMPONENT'] = 'Parameter Component';
-    await runAction('KEY', 'Standalone PR');
+    ]);
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
       "findEmails called for test-user",
@@ -345,8 +448,7 @@ describe('PullRequestCreated', () => {
   });
 
   it('Normal PR with reviewer', async () => {
-    github.context.payload.pull_request!.requested_reviewers = [{ type: "User", login: "test-user" }];
-    await runAction('KEY', 'KEY-4242 Normal PR');
+    await runAction('KEY', 'KEY-4242 Normal PR', null, 'test-user', [{ type: "User", login: "test-user" }]);
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
       "Adding the following ticket as comment: KEY-4242",
@@ -357,13 +459,12 @@ describe('PullRequestCreated', () => {
   });
 
   it('Normal PR with team review', async () => {
-    github.context.payload.pull_request!.requested_teams = [
+    process.env['INPUT_TEAM-REVIEW-COMPONENT'] = 'Parameter Component';
+    await runAction('KEY', 'KEY-4242 Normal PR', null, 'test-user', [], [
       { name: "another-team", slug: "another-team" },                                       // NO OP
       { name: "platform-cloud-engineering-squad", slug: "platform-cloud-engineering-squad" },               // Requests review, queries accountId
       { name: "platform-cloud-production-engineering-squad", slug: "platform-cloud-production-engineering-squad" }      // Requests review, reuses accountId
-    ];
-    process.env['INPUT_TEAM-REVIEW-COMPONENT'] = 'Parameter Component';
-    await runAction('KEY', 'KEY-4242 Normal PR');
+    ]);
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
       "Adding the following ticket as comment: KEY-4242",

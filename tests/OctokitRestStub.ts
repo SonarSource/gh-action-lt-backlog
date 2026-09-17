@@ -19,8 +19,12 @@
  */
 
 import type { Api } from '@octokit/plugin-rest-endpoint-methods';
+import type { SimpleUser, SimpleTeam } from '../lib/OctokitTypes.js';
 
-export function createOctokitRestStub(title: string, body?: string | null, login: string = 'test-user'): Api['rest'] {
+export type StubReviewer = Pick<SimpleUser, 'login' | 'type'>;
+export type StubTeam = Pick<SimpleTeam, 'name' | 'slug'>;
+
+export function createOctokitRestStub(title: string, body?: string | null, login: string = 'test-user', requestedReviewers: StubReviewer[] = [], requestedTeams: StubTeam[] = [], headRepoFullName: string = 'test-owner/test-repo'): Api['rest'] {
   return {
     issues: {
       createComment(params: any): void {
@@ -57,10 +61,17 @@ export function createOctokitRestStub(title: string, body?: string | null, login
                 name: 'test-repo'
               }
             },
+            head: {
+              repo: {
+                full_name: headRepoFullName
+              }
+            },
             user: {
               login,
               type: login.includes("[bot]") ? 'Bot' : 'User'
-            }
+            },
+            requested_reviewers: requestedReviewers,
+            requested_teams: requestedTeams
           }
         };
       },
