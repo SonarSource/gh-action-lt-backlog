@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-export function createOctokitRestStub(title, body, login = 'test-user') {
+export function createOctokitRestStub(title, body, login = 'test-user', requestedReviewers = [], requestedTeams = [], headRepoFullName = 'test-owner/test-repo') {
     return {
         issues: {
             createComment(params) {
@@ -54,10 +54,17 @@ export function createOctokitRestStub(title, body, login = 'test-user') {
                                 name: 'test-repo'
                             }
                         },
+                        head: {
+                            repo: {
+                                full_name: headRepoFullName
+                            }
+                        },
                         user: {
                             login,
                             type: login.includes("[bot]") ? 'Bot' : 'User'
-                        }
+                        },
+                        requested_reviewers: requestedReviewers,
+                        requested_teams: requestedTeams
                     }
                 };
             },
