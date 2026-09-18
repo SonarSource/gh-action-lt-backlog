@@ -189,6 +189,50 @@ describe('PullRequestCreated', () => {
     expect(action.log).toHaveBeenCalledWith("'DO NOT MERGE' found in the PR title, skipping the action.");
   });
 
+  it('/AddJiraTicket comment strips a bracketed DO NOT MERGE marker and creates the ticket', async () => {
+    setIssueCommentPayload('[DO NOT MERGE] Standalone PR');
+    await runAction('KEY', 'Standalone PR');
+    expect(logTester.logsParams).toStrictEqual([
+      "'DO NOT MERGE' marker removed, proceeding with ticket creation.",
+      "Updating PR #42 title to: Standalone PR",
+      "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"Standalone PR\"})",
+      "Loading PR #42",
+      "findEmails called for test-user",
+      "No mentioned issues found",
+      "Looking for valid parent ticket",
+      "No parent issue found",
+      "No boardId is configured for team .NET Squad",
+      "Found 2 Evergreen Epic(s), using NET-1000 .NET KTLO Epic",
+      "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":null,\"parent\":{\"key\":\"NET-1000\"}})",
+      "Updating PR #42 title to: KEY-4242 Standalone PR",
+      "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"KEY-4242 Standalone PR\"})",
+      "Invoked jira.moveIssue('KEY-4242', 'Commit', null)",
+      "Invoked jira.moveIssue('KEY-4242', 'Start', null)",
+      "Invoked jira.assignIssueToAccount('KEY-4242', '1234-account')",
+      "Adding the following ticket as comment: KEY-4242",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
+      "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
+      "Done"
+    ]);
+  });
+
+  it('/AddJiraTicket comment strips a colon-delimited DO NOT MERGE marker and creates the ticket', async () => {
+    setIssueCommentPayload('DO NOT MERGE: Standalone PR');
+    await runAction('KEY', 'Standalone PR');
+    expect(logTester.logsParams).toContain("'DO NOT MERGE' marker removed, proceeding with ticket creation.");
+    expect(logTester.logsParams).toContain("Updating PR #42 title to: Standalone PR");
+    expect(logTester.logsParams).toContain("Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":null,\"parent\":{\"key\":\"NET-1000\"}})");
+  });
+
+  it('DO NOT MERGE with brackets on PR opened still skips without stripping', async () => {
+    github.context.payload.pull_request!.title = "[DO NOT MERGE] Test PR";
+    const action = new PullRequestCreated();
+    action.log = vi.fn();
+    await action.run();
+    expect(action.log).toHaveBeenCalledWith("'DO NOT MERGE' found in the PR title, skipping the action.");
+    expect(action.log).not.toHaveBeenCalledWith("'DO NOT MERGE' marker removed, proceeding with ticket creation.");
+  });
+
   it('/AddJiraTicket comment picks up reviewer requested on the loaded PR', async () => {
     setIssueCommentPayload('Standalone PR');
     await runAction('KEY', 'Standalone PR', null, 'test-user', [{ type: "User", login: "test-reviewer" }]);

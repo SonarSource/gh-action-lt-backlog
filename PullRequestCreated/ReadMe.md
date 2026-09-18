@@ -18,7 +18,9 @@ Action assigns a Sprint field based on the determined user Team and boardId from
 
 This action does nothing if the PR title contains `DO NOT MERGE` phrase.
 
-Ticket creation can also be triggered on demand by commenting `/AddJiraTicket` on the PR (e.g. right after removing `DO NOT MERGE` from the title) — see the `issue_comment` trigger in the example usage below. If the PR already has a linked ticket, commenting `/AddJiraTicket` again is a no-op; it does not repost the linked-issue comment or remote link.
+Ticket creation can also be triggered on demand by commenting `/AddJiraTicket` on the PR — see the `issue_comment` trigger in the example usage below. If the PR already has a linked ticket, commenting `/AddJiraTicket` again is a no-op; it does not repost the linked-issue comment or remote link.
+
+On the `/AddJiraTicket` comment trigger only, a delimited `DO NOT MERGE` marker (`[DO NOT MERGE]`, `(DO NOT MERGE)`, or `DO NOT MERGE:`) is automatically removed from the title before proceeding, so removing the marker by hand first is not required. A looser, non-delimited mention of `DO NOT MERGE` (e.g. as part of a sentence) still blocks the action, same as on PR creation.
 
 Only SonarSource org members (`author_association == 'MEMBER'`) can use the `/AddJiraTicket` comment trigger — GitHub Apps are not org members, so a bot's comment normally has no effect. The example below explicitly allowlists the `hashicorp-vault-sonar-prod[bot]` identity (used by self-hosted Renovate / other Vault-token automation) so it can also use this trigger; add further bot logins to that check only as needed.
 

@@ -38,7 +38,7 @@ export class PullRequestCreated extends OctokitAction {
         return;
       }
     }
-    const pullRequestNumber = this.resolvePullRequestNumber();
+    const pullRequestNumber = await this.resolvePullRequestNumber();
     if (!pullRequestNumber) {
       return;
     }
@@ -92,17 +92,34 @@ export class PullRequestCreated extends OctokitAction {
     }
   }
 
-  private resolvePullRequestNumber(): number | null {
+  private async resolvePullRequestNumber(): Promise<number | null> {
     const pullRequestNumber = this.payload.pull_request?.number ?? this.payload.issue?.number;
     if (!pullRequestNumber) {
       this.log('No pull request found in the event, skipping the action.');
       return null;
     }
-    if (/DO NOT MERGE/i.test(this.payload.pull_request?.title ?? this.payload.issue?.title)) {
-      this.log("'DO NOT MERGE' found in the PR title, skipping the action.");
-      return null;
+    const title = this.payload.pull_request?.title ?? this.payload.issue?.title;
+    if (this.payload.pull_request) { // Native PR-opened event: DO NOT MERGE always blocks, title is never modified here
+      if (/DO NOT MERGE/i.test(title)) {
+        this.log("'DO NOT MERGE' found in the PR title, skipping the action.");
+        return null;
+      }
+    } else { // Comment trigger: an explicit /AddJiraTicket removes a delimited DO NOT MERGE marker and proceeds
+      const strippedTitle = this.stripDoNotMergeMarker(title);
+      if (strippedTitle !== title) {
+        this.log("'DO NOT MERGE' marker removed, proceeding with ticket creation.");
+        await this.updatePullRequestTitle(pullRequestNumber, strippedTitle);
+      } else if (/DO NOT MERGE/i.test(title)) {
+        this.log("'DO NOT MERGE' found in the PR title, skipping the action.");
+        return null;
+      }
     }
     return pullRequestNumber;
+  }
+
+  private stripDoNotMergeMarker(title: string): string {
+    const withoutMarker = title.replace(/\[\s*DO NOT MERGE\s*\]|\(\s*DO NOT MERGE\s*\)|DO NOT MERGE\s*:/i, '');
+    return withoutMarker === title ? title : this.cleanupWhitespace(withoutMarker);
   }
 
   private async processNewJiraIssue(pr: PullRequest, inputJiraProject: string, inputAdditionalFields: string): Promise<string | null> {
