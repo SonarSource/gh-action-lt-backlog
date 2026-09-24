@@ -13,12 +13,12 @@ jobs:
     permissions:
       id-token: write
     # For external PR, ticket should be created manually.
-    # On-demand: a maintainer can comment `/AddJiraTicket` on a PR (e.g. after removing DO NOT MERGE from the title) to (re)trigger ticket creation.
+    # On-demand: a maintainer can comment `/PullRequestCreated` on a PR to re-run this action.
     if: |
         (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
         (github.event_name == 'issue_comment'
           && github.event.issue.pull_request != null
-          && github.event.comment.body == '/AddJiraTicket'
+          && github.event.comment.body == '/PullRequestCreated'
           && (github.event.comment.author_association == 'MEMBER'
               || github.event.comment.user.login == 'hashicorp-vault-sonar-prod[bot]'))
     steps:
