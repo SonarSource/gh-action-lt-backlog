@@ -72,12 +72,12 @@ function createAction(senderLogin: string | null, senderAccountId: string | null
     },
     async listTeamMembers(teamSlug: string): Promise<SimpleUser[]> {
       switch (teamSlug) {
-        case 'platform-cloud-eng-squad':
+        case 'platform-cloud-engineering-squad':
           return [
             { login: 'cloud-user-1', type: 'User' } as SimpleUser,
             { login: 'cloud-user-2', type: 'User' } as SimpleUser
           ];
-        case 'platform-cloud-prod-eng-squad':
+        case 'platform-cloud-production-engineering-squad':
           return [
             { login: 'cloud-prod-user-1', type: 'User' } as SimpleUser,
             { login: 'cloud-prod-user-2', type: 'User' } as SimpleUser
@@ -123,22 +123,22 @@ describe('TeamReviewData', () => {
   });
 
   describe('create', () => {
-    it('platform-cloud-eng-squad, user found in Jira', async () => {
-      const gitHubTeam = createSimpleTeam('platform-cloud-eng-squad');
+    it('platform-cloud-engineering-squad, user found in Jira', async () => {
+      const gitHubTeam = createSimpleTeam('platform-cloud-engineering-squad');
       expect(await TeamReviewData.create(createAction('some-login', '1234-account'), normalPR, 'SC-1234', gitHubTeam))
         .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: 'cloud-engineering-triager', jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
     });
 
-    it('platform-cloud-eng-squad, user not found in Jira', async () => {
+    it('platform-cloud-engineering-squad, user not found in Jira', async () => {
       const action = createAction('some-login', null);
       action.jira.findAccountId = async () => null;
-      const gitHubTeam = createSimpleTeam('platform-cloud-eng-squad');
+      const gitHubTeam = createSimpleTeam('platform-cloud-engineering-squad');
       expect(await TeamReviewData.create(action, normalPR, 'SC-1234', gitHubTeam))
         .toEqual({ createReviewTicket: true, senderAccountId: null, assigneeAccountId: null, jiraTeam: JiraTeams.CloudEngineering, gitHubTeam });
     });
 
-    it('platform-cloud-prod-eng-squad', async () => {
-      const gitHubTeam = createSimpleTeam('platform-cloud-prod-eng-squad');
+    it('platform-cloud-production-engineering-squad', async () => {
+      const gitHubTeam = createSimpleTeam('platform-cloud-production-engineering-squad');
       expect(await TeamReviewData.create(createAction('some-login', '1234-account'), normalPR, 'SC-1234', gitHubTeam))
         .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: 'cloud-engineering-triager', jiraTeam: JiraTeams.CloudProductionEngineering, gitHubTeam });
     });
@@ -170,18 +170,18 @@ describe('TeamReviewData', () => {
     });
 
     it.each([
-      { team: 'platform-cloud-eng-squad', user: 'cloud-user-2' },
-      { team: 'platform-cloud-eng-squad', user: 'cloud-prod-user-2' },
-      { team: 'platform-cloud-prod-eng-squad', user: 'cloud-user-2' },
-      { team: 'platform-cloud-prod-eng-squad', user: 'cloud-prod-user-2' },
+      { team: 'platform-cloud-engineering-squad', user: 'cloud-user-2' },
+      { team: 'platform-cloud-engineering-squad', user: 'cloud-prod-user-2' },
+      { team: 'platform-cloud-production-engineering-squad', user: 'cloud-user-2' },
+      { team: 'platform-cloud-production-engineering-squad', user: 'cloud-prod-user-2' },
       { team: 'platform-front-end-eng-squad', user: 'front-end-user-2' },
     ])('null for $user from the same team $team', async ({ team, user }) => {
       expect(await TeamReviewData.create(createAction(user, undefined), normalPR, 'SC-1234', createSimpleTeam(team))).toBeNull();
     });
 
     it.each([
-      'platform-cloud-eng-squad',
-      'platform-cloud-prod-eng-squad',
+      'platform-cloud-engineering-squad',
+      'platform-cloud-production-engineering-squad',
       'platform-front-end-eng-squad',
     ])('bot PRs do not create review PRs', async (team) => {
       const result = await TeamReviewData.create(createAction('any-bot[bot]', null), createPullRequest('Bot PR'), 'SC-1234', createSimpleTeam(team));
