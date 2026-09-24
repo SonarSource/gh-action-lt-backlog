@@ -18,6 +18,8 @@ Action assigns a Sprint field based on the determined user Team and boardId from
 
 This action does nothing if the PR title contains `DO NOT MERGE` phrase.
 
+The action can also be re-run on demand by commenting `/PullRequestCreated` on the PR — see the `issue_comment` trigger in the example usage below. If the PR already has a linked ticket, the action only backfills what is missing (the linked-issue comment and the Jira remote link, when not already posted); it does not repost them once they exist.
+
 ## Inputs
 
 ### `github-token`
@@ -116,6 +118,8 @@ name: Pull Request Created
 on:
   pull_request:
     types: ["opened"]
+  issue_comment:
+    types: ["created"]
 
 jobs:
   PullRequestCreated_job:
@@ -123,9 +127,15 @@ jobs:
     runs-on: sonar-xs
     permissions:
       id-token: write
-    # For external PR, ticket should be created manually
+    # For external PR, ticket should be created manually.
+    # On-demand: a maintainer can comment `/PullRequestCreated` on a PR to re-run this action.
     if: |
-        github.event.pull_request.head.repo.full_name == github.repository
+        (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+        (github.event_name == 'issue_comment'
+          && github.event.issue.pull_request != null
+          && github.event.comment.body == '/PullRequestCreated'
+          && (github.event.comment.author_association == 'MEMBER'
+              || github.event.comment.user.login == 'hashicorp-vault-sonar-prod[bot]'))
     steps:
       - id: secrets
         uses: SonarSource/vault-action-wrapper@v3

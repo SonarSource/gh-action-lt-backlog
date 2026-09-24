@@ -35,25 +35,46 @@ export class PullRequestCreated extends OctokitAction {
                 return;
             }
         }
-        if (/DO NOT MERGE/i.test(this.payload.pull_request?.title)) {
-            this.log("'DO NOT MERGE' found in the PR title, skipping the action.");
+        const pullRequestNumber = this.resolvePullRequestNumber();
+        if (!pullRequestNumber) {
             return;
         }
-        const pr = await this.loadPullRequest(this.payload.pull_request.number);
+        const pr = await this.loadPullRequest(pullRequestNumber);
         if (pr == null) {
             return;
         }
+        if (!this.payload.pull_request && pr.head.repo?.full_name !== `${this.repo.owner}/${this.repo.repo}`) { // For external PR, ticket should be created manually
+            this.log('External PR, the ticket must be created manually.');
+            return;
+        }
         let fixedIssues = await this.findFixedIssues(pr);
+        let issueCreated = false;
         if (fixedIssues.length === 0) {
             const issue = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields);
             if (issue) {
                 fixedIssues = [issue];
+                issueCreated = true;
                 await this.processAllReviews(pr, issue); // Only for issues created by this action. Every other scenario is handled by RequestReview action.
             }
         }
         else if (pr.title !== this.cleanupWhitespace(pr.title)) { // New issues do this when persisting issue ID
             await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
         }
+        if (issueCreated || !await this.alreadyLinked(pr, fixedIssues)) { // On a re-triggered comment for a PR that already has a ticket, avoid re-posting the linked-issue comment and remote link.
+            await this.processFixedIssues(pr, fixedIssues);
+        }
+    }
+    async alreadyLinked(pr, fixedIssues) {
+        if (this.payload.pull_request) { // First run for this PR, links were never posted yet
+            return false;
+        }
+        if (pr.isRenovate()) { // The Renovate ID comment is bookkeeping, not the linked-issue comment
+            return false;
+        }
+        const comments = await this.listComments(pr.number);
+        return fixedIssues.some(issue => comments.some(x => x.body?.includes(this.issueLink(issue))));
+    }
+    async processFixedIssues(pr, fixedIssues) {
         if (fixedIssues) {
             if (!pr.isRenovate()) { // Renovate already has a comment with issue ID to persist the actual issue
                 await this.addLinkedIssuesAsComment(pr, fixedIssues);
@@ -68,6 +89,18 @@ export class PullRequestCreated extends OctokitAction {
                 }
             }
         }
+    }
+    resolvePullRequestNumber() {
+        const pullRequestNumber = this.payload.pull_request?.number ?? this.payload.issue?.number;
+        if (!pullRequestNumber) {
+            this.log('No pull request found in the event, skipping the action.');
+            return null;
+        }
+        if (/DO NOT MERGE/i.test(this.payload.pull_request?.title ?? this.payload.issue?.title)) {
+            this.log("'DO NOT MERGE' found in the PR title, skipping the action.");
+            return null;
+        }
+        return pullRequestNumber;
     }
     async processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields) {
         const accountId = await this.loadSenderAccountId();
@@ -98,15 +131,13 @@ export class PullRequestCreated extends OctokitAction {
     }
     async processAllReviews(pr, issueId) {
         // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
-        if (this.payload.pull_request) {
-            const component = this.inputString('team-review-component');
-            await this.processRequestReview(pr, issueId, component, this.payload.pull_request.requested_reviewers[0] || null, null);
-            for (const team of this.payload.pull_request.requested_teams) {
-                this.log(`Processing team review request: ${team.name}`);
-                const teamReview = await TeamReviewData.create(this, pr, issueId, team);
-                if (teamReview) {
-                    await this.processRequestReview(pr, issueId, component, null, teamReview);
-                }
+        const component = this.inputString('team-review-component');
+        await this.processRequestReview(pr, issueId, component, pr.requested_reviewers?.[0] || null, null);
+        for (const team of pr.requested_teams ?? []) {
+            this.log(`Processing team review request: ${team.name}`);
+            const teamReview = await TeamReviewData.create(this, pr, issueId, team);
+            if (teamReview) {
+                await this.processRequestReview(pr, issueId, component, null, teamReview);
             }
         }
     }
