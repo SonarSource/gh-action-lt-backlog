@@ -19,8 +19,8 @@
  */
 ;
 export const GitHubTeamSlugs = {
-    PlatformCloudEngineering: 'platform-cloud-eng-squad',
-    PlatformCloudProductionEngineering: 'platform-cloud-prod-eng-squad',
+    PlatformCloudEngineering: 'platform-cloud-engineering-squad',
+    PlatformCloudProductionEngineering: 'platform-cloud-production-engineering-squad',
     PlatformEngXp: 'platform-eng-xp-squad',
     PlatformFrontEndEngineering: 'platform-front-end-eng-squad',
 };

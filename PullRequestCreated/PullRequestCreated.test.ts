@@ -258,8 +258,8 @@ describe('PullRequestCreated', () => {
   it('Standalone PR with team review', async () => {
     github.context.payload.pull_request!.requested_teams = [
       { name: "another-team", slug: "another-team" },                                       // NO OP
-      { name: "platform-cloud-eng-squad", slug: "platform-cloud-eng-squad" },               // Requests review, queries accountId
-      { name: "platform-cloud-prod-eng-squad", slug: "platform-cloud-prod-eng-squad" }      // Requests review, reuses accountId
+      { name: "platform-cloud-engineering-squad", slug: "platform-cloud-engineering-squad" },               // Requests review, queries accountId
+      { name: "platform-cloud-production-engineering-squad", slug: "platform-cloud-production-engineering-squad" }      // Requests review, reuses accountId
     ];
     process.env['INPUT_TEAM-REVIEW-COMPONENT'] = 'Parameter Component';
     await runAction('KEY', 'Standalone PR');
@@ -278,32 +278,32 @@ describe('PullRequestCreated', () => {
       "Invoked jira.moveIssue('KEY-4242', 'Start', null)",
       "Invoked jira.assignIssueToAccount('KEY-4242', '1234-account')",
       "Processing team review request: another-team",
-      "Processing team review request: platform-cloud-eng-squad",
-      "Loading members of platform-cloud-eng-squad",
-      "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-eng-squad\",\"per_page\":100})",
-      "Loading members of platform-cloud-prod-eng-squad",
-      "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-prod-eng-squad\",\"per_page\":100})",
+      "Processing team review request: platform-cloud-engineering-squad",
+      "Loading members of platform-cloud-engineering-squad",
+      "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-engineering-squad\",\"per_page\":100})",
+      "Loading members of platform-cloud-production-engineering-squad",
+      "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-production-engineering-squad\",\"per_page\":100})",
       "Invoked findRootlyOnCallEmails(\"c461f921-6c62-4039-8c5e-59500682ccb0\")",
       "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
-      "Found 1 Evergreen Epic(s), using SC-1000 Current SC Review Epic platform-cloud-eng-squad",
+      "Found 1 Evergreen Epic(s), using SC-1000 Current SC Review Epic platform-cloud-engineering-squad",
       "Creating PREQ review issue",
       "Invoked jira.createIssue('PREQ', 'PR review for KEY-4242 Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"reporter\":{\"id\":\"1234-account\"},\"customfield_10001\":\"772ea1dc-3574-42bc-a378-7a898d910ebd\",\"labels\":[\"preq-review-code\"],\"parent\":{\"key\":\"SC-1000\"}})",
       "Invoked jira.assignIssueToAccount('PREQ-4242', '5000-teamreview-triager-account')",
       "Invoked jira.addIssueRemoteLink('PREQ-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
       "Invoked jira.linkIssues('PREQ-4242', 'KEY-4242', 'Relates')",
-      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-eng-squad\\n<!--slug: platform-cloud-eng-squad -->\"})",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-engineering-squad\\n<!--slug: platform-cloud-engineering-squad -->\"})",
       "Invoked jira.createComponent('PREQ', 'Parameter Component', 'null')",
       "Invoked jira.addIssueComponent('PREQ-4242', 'Parameter Component')",
-      "Processing team review request: platform-cloud-prod-eng-squad",
+      "Processing team review request: platform-cloud-production-engineering-squad",
       "Invoked findRootlyOnCallEmails(\"c461f921-6c62-4039-8c5e-59500682ccb0\")",
       "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
-      "Found 1 Evergreen Epic(s), using SC-2222 Current SC Review Epic platform-cloud-prod-eng-squad",
+      "Found 1 Evergreen Epic(s), using SC-2222 Current SC Review Epic platform-cloud-production-engineering-squad",
       "Creating PREQ review issue",
       "Invoked jira.createIssue('PREQ', 'PR review for KEY-4242 Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"reporter\":{\"id\":\"1234-account\"},\"customfield_10001\":\"6f2e744b-9f09-4c3a-852e-e2f138d1c14f\",\"labels\":[\"preq-review-code\"],\"parent\":{\"key\":\"SC-2222\"}})",
       "Invoked jira.assignIssueToAccount('PREQ-4242', '5000-teamreview-triager-account')",
       "Invoked jira.addIssueRemoteLink('PREQ-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
       "Invoked jira.linkIssues('PREQ-4242', 'KEY-4242', 'Relates')",
-      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-prod-eng-squad\\n<!--slug: platform-cloud-prod-eng-squad -->\"})",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-production-engineering-squad\\n<!--slug: platform-cloud-production-engineering-squad -->\"})",
       "Invoked jira.createComponent('PREQ', 'Parameter Component', 'null')",
       "Invoked jira.addIssueComponent('PREQ-4242', 'Parameter Component')",
       "Adding the following ticket as comment: KEY-4242",
@@ -359,8 +359,8 @@ describe('PullRequestCreated', () => {
   it('Normal PR with team review', async () => {
     github.context.payload.pull_request!.requested_teams = [
       { name: "another-team", slug: "another-team" },                                       // NO OP
-      { name: "platform-cloud-eng-squad", slug: "platform-cloud-eng-squad" },               // Requests review, queries accountId
-      { name: "platform-cloud-prod-eng-squad", slug: "platform-cloud-prod-eng-squad" }      // Requests review, reuses accountId
+      { name: "platform-cloud-engineering-squad", slug: "platform-cloud-engineering-squad" },               // Requests review, queries accountId
+      { name: "platform-cloud-production-engineering-squad", slug: "platform-cloud-production-engineering-squad" }      // Requests review, reuses accountId
     ];
     process.env['INPUT_TEAM-REVIEW-COMPONENT'] = 'Parameter Component';
     await runAction('KEY', 'KEY-4242 Normal PR');

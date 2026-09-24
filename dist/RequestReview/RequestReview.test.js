@@ -76,7 +76,7 @@ describe('RequestReview', () => {
         ]);
     });
     it('Create platform review issue', async () => {
-        github.context.payload.requested_team = { name: 'platform-cloud-eng-squad', slug: 'platform-cloud-eng-squad' };
+        github.context.payload.requested_team = { name: 'platform-cloud-engineering-squad', slug: 'platform-cloud-engineering-squad' };
         process.env['INPUT_TEAM-REVIEW-COMPONENT'] = 'Parameter Component';
         const sut = new RequestReview();
         sut.jira = jiraClientStub;
@@ -92,20 +92,20 @@ describe('RequestReview', () => {
         await sut.run();
         expect(logTester.logsParams).toStrictEqual([
             "Loading PR #42",
-            "Loading members of platform-cloud-eng-squad",
-            "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-eng-squad\",\"per_page\":100})",
-            "Loading members of platform-cloud-prod-eng-squad",
-            "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-prod-eng-squad\",\"per_page\":100})",
+            "Loading members of platform-cloud-engineering-squad",
+            "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-engineering-squad\",\"per_page\":100})",
+            "Loading members of platform-cloud-production-engineering-squad",
+            "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-production-engineering-squad\",\"per_page\":100})",
             "Invoked findRootlyOnCallEmails(\"c461f921-6c62-4039-8c5e-59500682ccb0\")",
             "Invoked jira.moveIssue('GHA-42', 'Request Review', null)",
             "Invoked jira.assignIssueToEmail('GHA-42', ['user@sonarsource.com'])",
-            "Found 1 Evergreen Epic(s), using SC-1000 Current SC Review Epic platform-cloud-eng-squad",
+            "Found 1 Evergreen Epic(s), using SC-1000 Current SC Review Epic platform-cloud-engineering-squad",
             "Creating PREQ review issue",
             "Invoked jira.createIssue('PREQ', 'PR review for GHA-42 Original Title', {\"issuetype\":{\"name\":\"Maintenance\"},\"reporter\":{\"id\":\"1234-account\"},\"customfield_10001\":\"772ea1dc-3574-42bc-a378-7a898d910ebd\",\"labels\":[\"preq-review-code\"],\"parent\":{\"key\":\"SC-1000\"}})",
             "Invoked jira.assignIssueToAccount('PREQ-4242', '5000-teamreview-triager-account')",
             "Invoked jira.addIssueRemoteLink('PREQ-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
             "Invoked jira.linkIssues('PREQ-4242', 'GHA-42', 'Relates')",
-            "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-eng-squad\\n<!--slug: platform-cloud-eng-squad -->\"})",
+            "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-engineering-squad\\n<!--slug: platform-cloud-engineering-squad -->\"})",
             "Invoked jira.createComponent('PREQ', 'Parameter Component', 'null')",
             "Invoked jira.addIssueComponent('PREQ-4242', 'Parameter Component')",
             "Done",

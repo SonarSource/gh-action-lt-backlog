@@ -180,7 +180,7 @@ describe('SubmitReview', () => {
       {},  // No body
       { body: '' },
       { body: 'Something else' },
-      { body: 'Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-eng-squad\\n<!--slug: platform-cloud-eng-squad -->' },
+      { body: 'Team Review Jira issue ID: [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) platform-cloud-engineering-squad\\n<!--slug: platform-cloud-engineering-squad -->' },
     ];
 
     it('Request changes by user from requested team', async () => {
@@ -202,8 +202,8 @@ describe('SubmitReview', () => {
         "Invoked jira.moveIssue('GHA-42', 'Approve', null)",
         "Invoked jira.moveIssue('GHA-43', 'Approve', null)",
         "Invoked rest.issues.listComments({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42})",
-        "Loading members of platform-cloud-eng-squad",
-        "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-eng-squad\",\"per_page\":100})",
+        "Loading members of platform-cloud-engineering-squad",
+        "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-engineering-squad\",\"per_page\":100})",
         "Invoked jira.moveIssue('PREQ-4242', 'Resolve issue', null)",
         "Invoked jira.moveIssue('PREQ-4242', 'Close Issue', null)",
         "Done",
@@ -217,8 +217,8 @@ describe('SubmitReview', () => {
         "Invoked jira.moveIssue('GHA-42', 'Approve', null)",
         "Invoked jira.moveIssue('GHA-43', 'Approve', null)",
         "Invoked rest.issues.listComments({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42})",
-        "Loading members of platform-cloud-eng-squad",
-        "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-eng-squad\",\"per_page\":100})",
+        "Loading members of platform-cloud-engineering-squad",
+        "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-engineering-squad\",\"per_page\":100})",
         "Done",
       ]);
     });
