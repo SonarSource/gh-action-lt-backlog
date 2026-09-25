@@ -96,12 +96,12 @@ describe('AnnounceRelease', () => {
 Locked for release.
 Tickets to validate:
 - <@U-Alice>
-  * ${link('ABC-1')} Alpha
-  * ${link('ABC-2')} Beta
+  • ${link('ABC-1')} Alpha
+  • ${link('ABC-2')} Beta
 - <@U-Bob>
-  * ${link('ABC-3')} Gamma
+  • ${link('ABC-3')} Gamma
 - Unassigned
-  * ${link('ABC-4')} Delta`));
+  • ${link('ABC-4')} Delta`));
     });
     it('Falls back to the display name when the assignee has no Slack account', async () => {
         await runAction([issue('ABC-1', 'Alice', 'Alpha')], false, () => null);
@@ -109,7 +109,7 @@ Tickets to validate:
 Locked for release.
 Tickets to validate:
 - Alice
-  * ${link('ABC-1')} Alpha`));
+  • ${link('ABC-1')} Alpha`));
     });
     it('Lists unassigned tickets', async () => {
         await runAction([issue('ABC-9', null, 'Orphan')]);
@@ -117,7 +117,7 @@ Tickets to validate:
 Locked for release.
 Tickets to validate:
 - Unassigned
-  * ${link('ABC-9')} Orphan`));
+  • ${link('ABC-9')} Orphan`));
     });
     it('Reports no tickets', async () => {
         await runAction([]);
@@ -134,7 +134,7 @@ Planned for Friday
 Locked for release.
 Tickets to validate:
 - <@U-Alice>
-  * ${link('ABC-1')} Alpha`));
+  • ${link('ABC-1')} Alpha`));
     });
     it('Does not post when the branch is already locked', async () => {
         await runAction([issue('ABC-1', 'Alice', 'Alpha')], true);

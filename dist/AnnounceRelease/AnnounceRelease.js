@@ -38,7 +38,7 @@ export class AnnounceRelease extends LockBranchAction {
         for (const group of groups.values()) {
             message += `\n- ${await this.mention(group[0].fields.assignee ?? null)}`;
             for (const issue of group) {
-                message += `\n  * ${this.ticketLink(issue.key)} ${issue.fields.summary}`;
+                message += `\n  • ${this.ticketLink(issue.key)} ${issue.fields.summary}`;
             }
         }
         return message;
