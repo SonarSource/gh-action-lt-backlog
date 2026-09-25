@@ -250,8 +250,11 @@ export class OctokitAction extends Action {
         }
         return this.senderAccountId;
     }
+    issueUrl(issue) {
+        return `${JIRA_DOMAIN}/browse/${issue}`;
+    }
     issueLink(issue) {
-        return `[${issue}](${JIRA_DOMAIN}/browse/${issue})`;
+        return `[${issue}](${this.issueUrl(issue)})`;
     }
 }
 //# sourceMappingURL=OctokitAction.js.map

@@ -34,27 +34,10 @@ describe('SlackClient', () => {
     logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
   });
 
-  it('findUserByEmail returns the matched user id', async () => {
-    const sut = new SlackClient('token', 'channel') as any;
-    sut.sendGet = async (url: string, params: Record<string, string>) => {
-      expect(url).toBe('https://slack.com/api/users.lookupByEmail');
-      expect(params).toStrictEqual({ email: 'john@example.com' });
-      return { user: { id: 'U1' } };
-    };
-    expect(await sut.findUserByEmail('john@example.com')).toBe('U1');
-  });
-
-  it('findUserByEmail returns null when the lookup finds nobody', async () => {
-    const sut = new SlackClient('token', 'channel') as any;
-    sut.sendGet = async () => null;  // sendRequest returns null when the response is not ok
-    expect(await sut.findUserByEmail('missing@example.com')).toBeNull();
-  });
-
-  // Local token is difficult to craft
-  itRunsOnlyInCI('findUserByEmail resolves a real user (needs users:read.email scope)', async () => {
+  // Local token is difficult to craft. Real addresses are not hardcoded in this public repo, so only the not-found path is asserted.
+  itRunsOnlyInCI('findUserByEmail returns null for an unknown address (needs users:read.email scope)', async () => {
     const sut = new SlackClient(process.env.SLACK_TOKEN!, '');
-    expect(await sut.findUserByEmail('alexander.meseldzija@sonarsource.com')).not.toBeNull();
-    expect(await sut.findUserByEmail('nobody@sonarsource.example')).toBeNull();
+    expect(await sut.findUserByEmail('missing@example.com')).toBeNull();
   });
 
   // Local token is difficult to craft

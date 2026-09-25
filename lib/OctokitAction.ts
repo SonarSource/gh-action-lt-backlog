@@ -291,7 +291,11 @@ export abstract class OctokitAction extends Action {
     return this.senderAccountId;
   }
 
+  protected issueUrl(issue: string): string {
+    return `${JIRA_DOMAIN}/browse/${issue}`;
+  }
+
   protected issueLink(issue: string): string {
-    return `[${issue}](${JIRA_DOMAIN}/browse/${issue})`;
+    return `[${issue}](${this.issueUrl(issue)})`;
   }
 }

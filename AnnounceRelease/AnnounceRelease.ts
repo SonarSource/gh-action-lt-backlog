@@ -20,9 +20,6 @@
 
 import { LockBranchAction } from '../lib/LockBranchAction.js';
 import type { Account } from '../lib/JiraClient.js';
-import { JIRA_DOMAIN } from '../lib/Constants.js';
-
-const VALIDATION_STATUS = 'In Validation';
 
 export class AnnounceRelease extends LockBranchAction {
   protected resolveLockBranch(): boolean {
@@ -31,23 +28,22 @@ export class AnnounceRelease extends LockBranchAction {
 
   protected async buildSlackMessage(pattern: string, lockBranch: boolean): Promise<string> {
     const message = await super.buildSlackMessage(pattern, lockBranch);
-    const tickets = await this.buildTicketList();
-    return tickets ? `${message}\n${tickets}` : message;
+    return `${message}\nLocked for release.\n${await this.buildTicketList()}`;
   }
 
   private async buildTicketList(): Promise<string> {
     const project = this.inputString('project');
-    const issues = await this.jira.findAllIssues(`project = ${JSON.stringify(project)} AND status = ${JSON.stringify(VALIDATION_STATUS)}`);
-    this.log(`Found ${issues.length} issue(s) in '${VALIDATION_STATUS}'`);
+    const issues = await this.jira.findIssues(`project = ${JSON.stringify(project)} AND status = "In Validation"`);
+    this.log(`Found ${issues.length} issue(s)`);
     if (issues.length === 0) {
       return 'No tickets to validate.';
     }
-    const groups = Map.groupBy(issues, issue => issue.fields.assignee?.displayName ?? 'Unassigned');
+    const groups = Map.groupBy(issues, x => x.fields.assignee?.displayName ?? 'Unassigned');
     let message = 'Tickets to validate:';
     for (const group of groups.values()) {
       message += `\n- ${await this.mention(group[0].fields.assignee ?? null)}`;
       for (const issue of group) {
-        message += `\n  * ${this.ticketLink(issue.key)}`;
+        message += `\n  * ${this.ticketLink(issue.key)} ${issue.fields.summary}`;
       }
     }
     return message;
@@ -62,6 +58,6 @@ export class AnnounceRelease extends LockBranchAction {
   }
 
   private ticketLink(key: string): string {
-    return `<${JIRA_DOMAIN}/browse/${key}|${key}>`;
+    return `<${this.issueUrl(key)}|${key}>`;
   }
 }

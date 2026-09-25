@@ -19,7 +19,6 @@
  */
 
 import { AtlassianDocument } from '../lib/AtlassianDocumentFormat.js';
-import { JIRA_DOMAIN } from '../lib/Constants.js';
 import { NewIssueParameters } from '../lib/NewIssueParameters.js';
 import { OctokitAction } from '../lib/OctokitAction.js';
 import { Issue } from '../lib/OctokitTypes.js';
@@ -30,7 +29,7 @@ export class ImportIssue extends OctokitAction {
     const issue = this.payload.issue as Issue;
     if (!issue.title.startsWith(`${jiraProject}-`)) {
       const id = await this.importIssue(jiraProject, issue);
-      await this.addComment(issue.number, `Internal ticket [${id}](${JIRA_DOMAIN}/browse/${id})`);
+      await this.addComment(issue.number, `Internal ticket ${this.issueLink(id)}`);
     }
   }
 

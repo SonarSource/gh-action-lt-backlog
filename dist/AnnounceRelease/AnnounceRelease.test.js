@@ -22,23 +22,25 @@ import { AnnounceRelease } from './AnnounceRelease.js';
 import { LogTester } from '../tests/LogTester.js';
 import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
 import * as github from '@actions/github';
-function issue(key, assignee) {
+function issue(key, assignee, summary) {
     const account = assignee ? { accountId: assignee, emailAddress: `${assignee}@x.com`, displayName: assignee } : null;
-    return { key, fields: { assignee: account } };
+    return { key, fields: { assignee: account, summary } };
 }
 const link = (key) => `<https://sonarsource.atlassian.net/browse/${key}|${key}>`;
 const lockedBy = '*test-repo*: The branch `master` was locked :ice_cube: by <#test-url|test-user>';
-function slackIdsFrom(issues) {
-    const ids = new Map();
-    for (const { fields } of issues) {
-        const assignee = fields.assignee;
-        if (assignee) {
-            ids.set(assignee.emailAddress, `U-${assignee.displayName}`);
-        }
-    }
-    return ids;
+function expectedLogs(issueCount, text) {
+    return [
+        "Invoked findRule(master)",
+        "Invoked updateRule(rule-id, true)",
+        "Invoked findIssues(project = \"NET\" AND status = \"In Validation\")",
+        `Found ${issueCount} issue(s)`,
+        `Done: ${text}`,
+        "Sending Slack message",
+        `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, ${JSON.stringify({ channel: 'test-channel', text })})`,
+        "Done",
+    ];
 }
-async function runAction(issues, currentlyLocked = false, slackIds = slackIdsFrom(issues)) {
+async function runAction(issues, currentlyLocked = false, resolveSlack = email => `U-${email.split('@')[0]}`) {
     const pattern = process.env['INPUT_BRANCH-PATTERN'];
     const action = new AnnounceRelease();
     action.findRule = async (pattern) => {
@@ -52,11 +54,11 @@ async function runAction(issues, currentlyLocked = false, slackIds = slackIdsFro
     action.cancelAutoMerge = async (pattern) => {
         console.log(`Invoked cancelAutoMerge(${pattern})`);
     };
-    action.jira.findAllIssues = async (jql) => {
-        console.log(`Invoked findAllIssues(${jql})`);
+    action.jira.findIssues = async (jql) => {
+        console.log(`Invoked findIssues(${jql})`);
         return issues;
     };
-    action.slack.findUserByEmail = async (email) => slackIds.get(email) ?? null;
+    action.slack.findUserByEmail = async (email) => resolveSlack(email);
     action.rest = createOctokitRestStub('Irrelevant');
     action.slack.sendPost = async (url, req) => {
         console.log(`Invoked sendSlackPost(${url}, ${JSON.stringify(req)})`);
@@ -89,73 +91,53 @@ describe('AnnounceRelease', () => {
         logTester?.afterEach(); // When beforeAll fails, beforeEach is not called, but afterEach is.
     });
     it('Groups tickets by assignee and mentions them by Slack ID', async () => {
-        await runAction([issue('ABC-1', 'Alice'), issue('ABC-2', 'Alice'), issue('ABC-3', 'Bob'), issue('ABC-4', null)]);
-        expect(logTester.logsParams).toStrictEqual([
-            "Invoked findRule(master)",
-            "Invoked updateRule(rule-id, true)",
-            "Invoked findAllIssues(project = \"NET\" AND status = \"In Validation\")",
-            "Found 4 issue(s) in 'In Validation'",
-            `Done: ${lockedBy}\nTickets to validate:\n- <@U-Alice>\n  * ${link('ABC-1')}\n  * ${link('ABC-2')}\n- <@U-Bob>\n  * ${link('ABC-3')}\n- Unassigned\n  * ${link('ABC-4')}`,
-            "Sending Slack message",
-            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"${lockedBy}\\nTickets to validate:\\n- <@U-Alice>\\n  * ${link('ABC-1')}\\n  * ${link('ABC-2')}\\n- <@U-Bob>\\n  * ${link('ABC-3')}\\n- Unassigned\\n  * ${link('ABC-4')}"})`,
-            "Done"
-        ]);
+        await runAction([issue('ABC-1', 'Alice', 'Alpha'), issue('ABC-2', 'Alice', 'Beta'), issue('ABC-3', 'Bob', 'Gamma'), issue('ABC-4', null, 'Delta')]);
+        expect(logTester.logsParams).toStrictEqual(expectedLogs(4, `${lockedBy}
+Locked for release.
+Tickets to validate:
+- <@U-Alice>
+  * ${link('ABC-1')} Alpha
+  * ${link('ABC-2')} Beta
+- <@U-Bob>
+  * ${link('ABC-3')} Gamma
+- Unassigned
+  * ${link('ABC-4')} Delta`));
     });
     it('Falls back to the display name when the assignee has no Slack account', async () => {
-        await runAction([issue('ABC-1', 'Alice')], false, new Map());
-        expect(logTester.logsParams).toStrictEqual([
-            "Invoked findRule(master)",
-            "Invoked updateRule(rule-id, true)",
-            "Invoked findAllIssues(project = \"NET\" AND status = \"In Validation\")",
-            "Found 1 issue(s) in 'In Validation'",
-            `Done: ${lockedBy}\nTickets to validate:\n- Alice\n  * ${link('ABC-1')}`,
-            "Sending Slack message",
-            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"${lockedBy}\\nTickets to validate:\\n- Alice\\n  * ${link('ABC-1')}"})`,
-            "Done"
-        ]);
+        await runAction([issue('ABC-1', 'Alice', 'Alpha')], false, () => null);
+        expect(logTester.logsParams).toStrictEqual(expectedLogs(1, `${lockedBy}
+Locked for release.
+Tickets to validate:
+- Alice
+  * ${link('ABC-1')} Alpha`));
     });
     it('Lists unassigned tickets', async () => {
-        await runAction([issue('ABC-9', null)]);
-        expect(logTester.logsParams).toStrictEqual([
-            "Invoked findRule(master)",
-            "Invoked updateRule(rule-id, true)",
-            "Invoked findAllIssues(project = \"NET\" AND status = \"In Validation\")",
-            "Found 1 issue(s) in 'In Validation'",
-            `Done: ${lockedBy}\nTickets to validate:\n- Unassigned\n  * ${link('ABC-9')}`,
-            "Sending Slack message",
-            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"${lockedBy}\\nTickets to validate:\\n- Unassigned\\n  * ${link('ABC-9')}"})`,
-            "Done"
-        ]);
+        await runAction([issue('ABC-9', null, 'Orphan')]);
+        expect(logTester.logsParams).toStrictEqual(expectedLogs(1, `${lockedBy}
+Locked for release.
+Tickets to validate:
+- Unassigned
+  * ${link('ABC-9')} Orphan`));
     });
     it('Reports no tickets', async () => {
         await runAction([]);
-        expect(logTester.logsParams).toStrictEqual([
-            "Invoked findRule(master)",
-            "Invoked updateRule(rule-id, true)",
-            "Invoked findAllIssues(project = \"NET\" AND status = \"In Validation\")",
-            "Found 0 issue(s) in 'In Validation'",
-            `Done: ${lockedBy}\nNo tickets to validate.`,
-            "Sending Slack message",
-            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"${lockedBy}\\nNo tickets to validate."})`,
-            "Done"
-        ]);
+        expect(logTester.logsParams).toStrictEqual(expectedLogs(0, `${lockedBy}
+Locked for release.
+No tickets to validate.`));
     });
     it('Appends the additional-message before the ticket list', async () => {
         process.env['INPUT_ADDITIONAL-MESSAGE'] = 'Planned for Friday';
-        await runAction([issue('ABC-1', 'Alice')]);
-        expect(logTester.logsParams).toStrictEqual([
-            "Invoked findRule(master)",
-            "Invoked updateRule(rule-id, true)",
-            "Invoked findAllIssues(project = \"NET\" AND status = \"In Validation\")",
-            "Found 1 issue(s) in 'In Validation'",
-            `Done: ${lockedBy}\n\nPlanned for Friday\nTickets to validate:\n- <@U-Alice>\n  * ${link('ABC-1')}`,
-            "Sending Slack message",
-            `Invoked sendSlackPost(https://slack.com/api/chat.postMessage, {"channel":"test-channel","text":"${lockedBy}\\n\\nPlanned for Friday\\nTickets to validate:\\n- <@U-Alice>\\n  * ${link('ABC-1')}"})`,
-            "Done"
-        ]);
+        await runAction([issue('ABC-1', 'Alice', 'Alpha')]);
+        expect(logTester.logsParams).toStrictEqual(expectedLogs(1, `${lockedBy}
+
+Planned for Friday
+Locked for release.
+Tickets to validate:
+- <@U-Alice>
+  * ${link('ABC-1')} Alpha`));
     });
     it('Does not post when the branch is already locked', async () => {
-        await runAction([issue('ABC-1', 'Alice')], true);
+        await runAction([issue('ABC-1', 'Alice', 'Alpha')], true);
         expect(logTester.logsParams).toStrictEqual([
             "Invoked findRule(master)",
             "The branch `master` is already locked.",

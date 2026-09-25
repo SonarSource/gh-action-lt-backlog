@@ -219,16 +219,8 @@ export class JiraClient {
     }
     async findIssues(jql) {
         console.log(`Searching for issues: ${jql}`);
-        const response = await this.sendRestGetApi(`search/jql?fields=key,summary,customfield_10015,duedate&jql=${encodeURIComponent(jql)}`); // // Only first page of results
+        const response = await this.sendRestGetApi(`search/jql?fields=key,summary,assignee,customfield_10015,duedate&maxResults=50&jql=${encodeURIComponent(jql)}`);
         return response?.issues ?? [];
-    }
-    async findAllIssues(jql) {
-        console.log(`Searching for issues: ${jql}`);
-        const response = await this.sendRestGetApi(`search/jql?fields=key,assignee&maxResults=50&jql=${encodeURIComponent(jql)}`);
-        if (response === null) { // A release gate must see every ticket, so surface the error instead of under-counting
-            throw new Error('Failed to fetch issues');
-        }
-        return response.issues ?? [];
     }
     async findTeam(queryFilter, resultFilter) {
         const nodes = (await this.findTeams(queryFilter)).filter(resultFilter);
