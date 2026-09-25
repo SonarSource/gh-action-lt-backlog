@@ -10,23 +10,23 @@ inputs:
   jira-token:
     description: 'Jira auth Token'
     required: true
-  project:
-    description: 'Jira project key (e.g. NET) whose tickets gate the release.'
-    required: true
   slack-token:
     description: 'Slack auth Token with chat:write, chat:write.public and users:read.email scope.'
     required: true
   slack-channel:
     description: 'Slack channel name or ID to send the notification to.'
     required: true
-  branch-pattern:
-    description: 'Pattern of the branch protection rule to lock.'
-    required: false
-    default: 'master'
+  project:
+    description: 'Jira project key (e.g. NET) whose tickets gate the release.'
+    required: true
   additional-message:
     description: 'Additional Slack message text to be added to the default message.'
     required: false
     default: ''
+  branch-pattern:
+    description: 'Pattern of the branch protection rule to lock.'
+    required: false
+    default: 'master'
 
 runs:
   using: 'node24'

@@ -48,32 +48,28 @@ export class SlackClient {
   }
 
   public async findUserByEmail(email: string): Promise<string | null> {
-    const response = await this.sendGet<SlackUserResponse>("https://slack.com/api/users.lookupByEmail", { email });
+    const response = await this.sendGet<SlackUserResponse>(`https://slack.com/api/users.lookupByEmail?email=${encodeURIComponent(email)}`);
     return response?.user?.id ?? null;
   }
 
-  private sendGet<T>(url: string, params: Record<string, string>): Promise<T | null> {
-    return this.sendRequest<T>(`${url}?${new URLSearchParams(params)}`, { method: "GET" });
+  private sendGet<T>(url: string): Promise<T | null> {
+    return this.sendRequest<T>("GET", url);
   }
 
-  private sendPost(url: string, jsonRequest: Record<string, unknown>): Promise<unknown> {
-    const body = JSON.stringify(jsonRequest);
-    console.log(`Sending slack POST: ${body}`);
-    return this.sendRequest(url, {
-      method: "POST",
-      body,
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-    });
+  private sendPost(url: string, body: Record<string, unknown>): Promise<unknown> {
+    console.log(`Sending slack POST: ${JSON.stringify(body)}`);
+    return this.sendRequest("POST", url, body);
   }
 
-  private async sendRequest<T>(url: string, options: RequestInit): Promise<T | null> {
+  private async sendRequest<T>(method: "GET" | "POST", url: string, body?: Record<string, unknown>): Promise<T | null> {
     if (!this.token) {
       throw new Error("slack-token was not set");
     }
     try {
       const response = await fetch(url, {
-        ...options,
-        headers: { authorization: `Bearer ${this.token}`, ...options.headers },
+        method,
+        headers: { authorization: `Bearer ${this.token}`, "Content-Type": "application/json; charset=utf-8" },
+        body: body ? JSON.stringify(body) : undefined,
       });
       if (!response.ok) {
         console.log(`Failed to send API request. Error ${response.status}: ${response.statusText}`);
