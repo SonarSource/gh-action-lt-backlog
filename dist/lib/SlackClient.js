@@ -34,29 +34,25 @@ export class SlackClient {
         }
     }
     async findUserByEmail(email) {
-        const response = await this.sendGet("https://slack.com/api/users.lookupByEmail", { email });
+        const response = await this.sendGet(`https://slack.com/api/users.lookupByEmail?email=${encodeURIComponent(email)}`);
         return response?.user?.id ?? null;
     }
-    sendGet(url, params) {
-        return this.sendRequest(`${url}?${new URLSearchParams(params)}`, { method: "GET" });
+    sendGet(url) {
+        return this.sendRequest("GET", url);
     }
-    sendPost(url, jsonRequest) {
-        const body = JSON.stringify(jsonRequest);
-        console.log(`Sending slack POST: ${body}`);
-        return this.sendRequest(url, {
-            method: "POST",
-            body,
-            headers: { "Content-Type": "application/json; charset=utf-8" },
-        });
+    sendPost(url, body) {
+        console.log(`Sending slack POST: ${JSON.stringify(body)}`);
+        return this.sendRequest("POST", url, body);
     }
-    async sendRequest(url, options) {
+    async sendRequest(method, url, body) {
         if (!this.token) {
             throw new Error("slack-token was not set");
         }
         try {
             const response = await fetch(url, {
-                ...options,
-                headers: { authorization: `Bearer ${this.token}`, ...options.headers },
+                method,
+                headers: { authorization: `Bearer ${this.token}`, "Content-Type": "application/json; charset=utf-8" },
+                body: body ? JSON.stringify(body) : undefined,
             });
             if (!response.ok) {
                 console.log(`Failed to send API request. Error ${response.status}: ${response.statusText}`);
