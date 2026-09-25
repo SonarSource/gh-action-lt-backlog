@@ -108,12 +108,12 @@ describe('AnnounceRelease', () => {
 Locked for release.
 Tickets to validate:
 - <@U-Alice>
-  * ${link('ABC-1')} Alpha
-  * ${link('ABC-2')} Beta
+  • ${link('ABC-1')} Alpha
+  • ${link('ABC-2')} Beta
 - <@U-Bob>
-  * ${link('ABC-3')} Gamma
+  • ${link('ABC-3')} Gamma
 - Unassigned
-  * ${link('ABC-4')} Delta`));
+  • ${link('ABC-4')} Delta`));
   });
 
   it('Falls back to the display name when the assignee has no Slack account', async () => {
@@ -123,7 +123,7 @@ Tickets to validate:
 Locked for release.
 Tickets to validate:
 - Alice
-  * ${link('ABC-1')} Alpha`));
+  • ${link('ABC-1')} Alpha`));
   });
 
   it('Lists unassigned tickets', async () => {
@@ -133,7 +133,7 @@ Tickets to validate:
 Locked for release.
 Tickets to validate:
 - Unassigned
-  * ${link('ABC-9')} Orphan`));
+  • ${link('ABC-9')} Orphan`));
   });
 
   it('Reports no tickets', async () => {
@@ -154,7 +154,7 @@ Planned for Friday
 Locked for release.
 Tickets to validate:
 - <@U-Alice>
-  * ${link('ABC-1')} Alpha`));
+  • ${link('ABC-1')} Alpha`));
   });
 
   it('Does not post when the branch is already locked', async () => {
