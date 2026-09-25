@@ -26,6 +26,8 @@ import { OctokitActionStub } from '../tests/OctokitActionStub.js';
 import { LockBranchActionStub } from '../tests/LockBranchActionStub.js';
 import * as github from '@actions/github';
 
+const itRunsOnlyInCI = process.env.GITHUB_ACTIONS === 'true' ? it : it.skip;
+
 function issue(key: string, assignee: string | null, summary: string): any {
   const account = assignee ? { accountId: assignee, emailAddress: `${assignee}@x.com`, displayName: assignee } : null;
   return { key, fields: { assignee: account, summary } };
@@ -164,5 +166,42 @@ Tickets to validate:
       "The branch `master` is already locked.",
       "Done"
     ]);
+  });
+
+  // Throwaway E2E — real Jira + real Slack, posts the real NET "In Validation" tickets to #notification_tester.
+  // Only the GitHub branch-lock calls are stubbed, so the real `master` branch is never touched.
+  // Runs only in CI (needs SLACK_TOKEN/JIRA_USER/JIRA_TOKEN from vault). DO NOT MERGE — it posts to Slack on every run.
+  itRunsOnlyInCI('E2E: posts the real In-Validation tickets to notification_tester', async () => {
+    process.env['GITHUB_REPOSITORY'] = 'SonarSource/gh-action-lt-backlog';
+    process.env['INPUT_GITHUB-TOKEN'] = process.env['GITHUB_TOKEN'];
+    process.env['INPUT_JIRA-USER'] = process.env['JIRA_USER'];
+    process.env['INPUT_JIRA-TOKEN'] = process.env['JIRA_TOKEN'];
+    process.env['INPUT_SLACK-TOKEN'] = process.env['SLACK_TOKEN'];
+    process.env['INPUT_SLACK-CHANNEL'] = 'notification_tester';
+    process.env['INPUT_PROJECT'] = 'NET';
+    process.env['INPUT_BRANCH-PATTERN'] = 'master';
+    process.env['INPUT_ADDITIONAL-MESSAGE'] = '';
+    github.context.payload = {
+      sender: { login: 'alex-meseldzija-sonarsource', type: 'User', html_url: 'https://github.com/alex-meseldzija-sonarsource' },
+    };
+
+    const action = new AnnounceRelease() as unknown as LockBranchActionStub & OctokitActionStub & { run(): Promise<void> };
+    // Stub ONLY the GitHub branch-lock side effects; Jira + Slack stay real.
+    action.findRule = async (pattern) => ({ id: 'rule-id', lockBranch: false, pattern });
+    action.updateRule = async (id, lockBranch) => ({ id, lockBranch, pattern: 'master' });
+    action.cancelAutoMerge = async () => { };
+    action.rest = createOctokitRestStub('Irrelevant');
+
+    // execute() fires sendMessage without awaiting it; capture the real POST so the test waits for delivery.
+    let delivered: Promise<unknown> = Promise.resolve();
+    const realSendPost = action.slack.sendPost.bind(action.slack);
+    action.slack.sendPost = (url: string, req: unknown) => (delivered = realSendPost(url, req));
+
+    await action.run();
+    await delivered;
+
+    const logs = logTester.logsParams as unknown[];
+    expect(logs.some(x => typeof x === 'string' && x === 'Sending Slack message')).toBe(true);
+    expect(logs.some(x => typeof x === 'string' && x.includes('NET-4664'))).toBe(true);
   });
 });
