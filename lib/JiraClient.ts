@@ -73,7 +73,7 @@ type RemoteLink = {
   }
 }
 
-type Account = {
+export type Account = {
   accountId: string;
   emailAddress: string;
   displayName: string;
@@ -339,8 +339,8 @@ export class JiraClient {
   }
 
   public async findIssues(jql: string): Promise<Issue[]> {
-    console.log(`Searching for issues: ${jql}`);  
-    const response = await this.sendRestGetApi(`search/jql?fields=key,summary,customfield_10015,duedate&jql=${encodeURIComponent(jql)}`);  // // Only first page of results
+    console.log(`Searching for issues: ${jql}`);
+    const response = await this.sendRestGetApi(`search/jql?fields=key,summary,assignee,customfield_10015,duedate&maxResults=50&jql=${encodeURIComponent(jql)}`);
     return response?.issues ?? [];
   }
 

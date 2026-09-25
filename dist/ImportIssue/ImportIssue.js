@@ -18,7 +18,6 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import { AtlassianDocument } from '../lib/AtlassianDocumentFormat.js';
-import { JIRA_DOMAIN } from '../lib/Constants.js';
 import { OctokitAction } from '../lib/OctokitAction.js';
 export class ImportIssue extends OctokitAction {
     async execute() {
@@ -26,7 +25,7 @@ export class ImportIssue extends OctokitAction {
         const issue = this.payload.issue;
         if (!issue.title.startsWith(`${jiraProject}-`)) {
             const id = await this.importIssue(jiraProject, issue);
-            await this.addComment(issue.number, `Internal ticket [${id}](${JIRA_DOMAIN}/browse/${id})`);
+            await this.addComment(issue.number, `Internal ticket ${this.issueLink(id)}`);
         }
     }
     async importIssue(jiraProject, issue) {

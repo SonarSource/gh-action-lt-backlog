@@ -262,5 +262,13 @@ describe('JiraClient', () => {
             { key: 'NET-5', fields: { summary: 'Hardening' } }
         ]);
     });
+    it('findIssues includes the assignee field', async () => {
+        const issues = await sut.findIssues('project = GHA AND assignee IS NOT EMPTY ORDER BY created');
+        expect(issues.length).toBeGreaterThan(0);
+        expect(issues.every(x => x.fields.assignee?.emailAddress != null)).toBe(true);
+    });
+    it('findIssues returns an empty array when nothing matches', async () => {
+        expect(await sut.findIssues('project = GHA AND created < "2000-01-01"')).toStrictEqual([]);
+    });
 });
 //# sourceMappingURL=JiraClient.test.js.map

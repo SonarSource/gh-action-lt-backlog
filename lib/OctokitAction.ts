@@ -28,6 +28,7 @@ import { JiraClient } from './JiraClient.js';
 import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN, TEAM_REVIEW_PREFIX } from './Constants.js';
 import { NewIssueData } from './NewIssueData.js';
 import type { TeamReviewData } from './TeamReviewData.js';
+import { SlackClient } from './SlackClient.js';
 
 type VerifiedEmailsUser = {
   organizationVerifiedDomainEmails: string[];
@@ -55,6 +56,7 @@ type RootlyScheduleShiftsResponse = {
 export abstract class OctokitAction extends Action {
   public readonly rest: Api['rest'];
   public readonly jira: JiraClient;
+  public readonly slack: SlackClient;
   protected readonly octokit: ReturnType<typeof github.getOctokit>;
   protected readonly isEngXpSquad: boolean;
   private graphqlWithAuth: typeof graphql | null = null;
@@ -64,6 +66,7 @@ export abstract class OctokitAction extends Action {
   constructor() {
     super();
     this.jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, this.inputString('jira-user'), this.inputString('jira-token'));
+    this.slack = new SlackClient(this.inputString('slack-token'), this.inputString('slack-channel'));
     this.octokit = github.getOctokit(this.inputString('github-token'));
     this.rest = this.octokit.rest;
     this.isEngXpSquad = this.inputBoolean('is-eng-xp-squad');
@@ -198,46 +201,6 @@ export abstract class OctokitAction extends Action {
     }
   }
 
-  protected async sendSlackMessage(text: string): Promise<void> {
-    const channel = this.inputString("slack-channel");
-    if (channel) {
-      this.log("Sending Slack message");
-      await this.sendSlackPost("https://slack.com/api/chat.postMessage", { channel, text });
-    } else {
-      this.log("Skip sending slack message, channel was not set.")
-    }
-  }
-
-  protected async sendSlackPost(url: string, jsonRequest: any): Promise<any> {
-    const token = this.inputString("slack-token");
-    if (!token) {
-      throw new Error("slack-token was not set");
-    }
-    try {
-      const body = JSON.stringify(jsonRequest);
-      this.log(`Sending slack POST: ${body}`);
-      const response = await fetch(url, {
-        method: "POST",
-        body,
-        headers: { "Content-Type": "application/json; charset=utf-8", authorization: `Bearer ${token}` }
-      });
-      if (!response.ok) {
-        this.log(`Failed to send API request. Error ${response.status}: ${response.statusText}`);
-        return null;
-      }
-      const data = await response.json();
-      if (!data.ok) {
-        this.log(`Failed to send API request. Error: ${data.error}`);
-        return null;
-      }
-      return data;
-    } catch (ex) {
-      this.log("Failed to send Slack request");
-      this.log((ex as Error).toString());
-      return null;
-    }
-  }
-
   public async findRootlyOnCallEmails(scheduleId: string | null): Promise<string[]> {
     if (!scheduleId) {
       return [];
@@ -328,7 +291,11 @@ export abstract class OctokitAction extends Action {
     return this.senderAccountId;
   }
 
+  protected issueUrl(issue: string): string {
+    return `${JIRA_DOMAIN}/browse/${issue}`;
+  }
+
   protected issueLink(issue: string): string {
-    return `[${issue}](${JIRA_DOMAIN}/browse/${issue})`;
+    return `[${issue}](${this.issueUrl(issue)})`;
   }
 }
