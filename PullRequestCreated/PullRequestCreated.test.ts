@@ -45,11 +45,11 @@ class TestPullRequestCreated extends PullRequestCreated {
   }
 }
 
-async function runAction(jiraProject: string, title: string, body?: string | null, user: string = 'test-user', requestedReviewers: StubReviewer[] = [], requestedTeams: StubTeam[] = [], headRepoFullName: string = 'test-owner/test-repo') {
+async function runAction(jiraProject: string, title: string, body?: string | null, user: string = 'test-user', requestedReviewers: StubReviewer[] = [], requestedTeams: StubTeam[] = []) {
   process.env['INPUT_JIRA-PROJECT'] = jiraProject;
   const action = new TestPullRequestCreated() as TestPullRequestCreated & OctokitActionStub;
   action.jira = jiraClientStub;
-  action.rest = createOctokitRestStub(title, body, user, requestedReviewers, requestedTeams, headRepoFullName);
+  action.rest = createOctokitRestStub(title, body, user, requestedReviewers, requestedTeams);
   await action.run();
 }
 
@@ -182,23 +182,43 @@ describe('PullRequestCreated', () => {
 
   it('/PullRequestCreated comment does nothing while DO NOT MERGE is still in the title', async () => {
     setIssueCommentPayload('Prefix [DO not MeRGe{: Test PR');
-    const action = new PullRequestCreated();
-    action.log = vi.fn();
-    await action.run();
-    expect(action.log).toHaveBeenCalledWith("Done");
-    expect(action.log).toHaveBeenCalledWith("'DO NOT MERGE' found in the PR title, skipping the action.");
+    await runAction('KEY', 'Prefix [DO not MeRGe{: Test PR');
+    expect(logTester.logsParams).toStrictEqual([
+      "'DO NOT MERGE' found in the PR title, skipping the action.",
+      "Done"
+    ]);
   });
 
   it('/PullRequestCreated comment picks up reviewer requested on the loaded PR', async () => {
     setIssueCommentPayload('Standalone PR');
     await runAction('KEY', 'Standalone PR', null, 'test-user', [{ type: "User", login: "test-reviewer" }]);
-    expect(logTester.logsParams).toContain("Invoked jira.moveIssue('KEY-4242', 'Request Review', null)");
-    expect(logTester.logsParams).toContain("Invoked jira.assignIssueToEmail('KEY-4242', ['reviewer@sonarsource.com'])");
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "findEmails called for test-user",
+      "No mentioned issues found",
+      "Looking for valid parent ticket",
+      "No parent issue found",
+      "No boardId is configured for team .NET Squad",
+      "Found 2 Evergreen Epic(s), using NET-1000 .NET KTLO Epic",
+      "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":null,\"parent\":{\"key\":\"NET-1000\"}})",
+      "Updating PR #42 title to: KEY-4242 Standalone PR",
+      "Invoked rest.pulls.update({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"pull_number\":42,\"title\":\"KEY-4242 Standalone PR\"})",
+      "Invoked jira.moveIssue('KEY-4242', 'Commit', null)",
+      "Invoked jira.moveIssue('KEY-4242', 'Start', null)",
+      "Invoked jira.assignIssueToAccount('KEY-4242', '1234-account')",
+      "Invoked jira.moveIssue('KEY-4242', 'Request Review', null)",
+      "findEmails called for test-reviewer",
+      "Invoked jira.assignIssueToEmail('KEY-4242', ['reviewer@sonarsource.com'])",
+      "Adding the following ticket as comment: KEY-4242",
+      "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
+      "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
+      "Done"
+    ]);
   });
 
   it('/PullRequestCreated comment on a PR with an existing ticket reposts the linked-issue comment and remote link', async () => {
-    setIssueCommentPayload('KEY-4242 Standalone PR');
-    await runAction('KEY', 'KEY-4242 Standalone PR');
+    setIssueCommentPayload('KEY-4242 Normal PR');
+    await runAction('KEY', 'KEY-4242 Normal PR');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
       "Adding the following ticket as comment: KEY-4242",

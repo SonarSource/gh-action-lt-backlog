@@ -58,12 +58,14 @@ export class PullRequestCreated extends OctokitAction {
             if (!pr.isRenovate()) { // Renovate already has a comment with issue ID to persist the actual issue
                 await this.addLinkedIssuesAsComment(pr, fixedIssues);
             }
-            await Promise.all(fixedIssues.map(issue => this.jira.addIssueRemoteLink(issue, pr.html_url)));
+            for (const issue of fixedIssues) {
+                await this.jira.addIssueRemoteLink(issue, pr.html_url);
+            }
             if (this.isEngXpSquad) {
-                await Promise.all(fixedIssues.filter(x => x.startsWith('BUILD-')).map(async (issue) => {
+                for (const issue of fixedIssues.filter(x => x.startsWith('BUILD-'))) { // BUILD-9328: No component for PREQ tickets
                     await this.addJiraComponent(issue, this.repo.repo, this.payload.repository?.html_url);
                     await this.addJiraComponent(issue, this.inputString('team-review-component')); // Mainly for PREQ, when set
-                }));
+                }
             }
         }
     }
@@ -96,16 +98,17 @@ export class PullRequestCreated extends OctokitAction {
     }
     async processAllReviews(pr, issueId) {
         // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
-        const component = this.inputString('team-review-component');
-        await this.processRequestReview(pr, issueId, component, pr.requested_reviewers?.[0] || null, null);
-        await (pr.requested_teams ?? []).reduce(async (previous, team) => {
-            await previous; // Team reviews are processed one at a time, in order; each posts its own PR comment and must not interleave with the others.
-            this.log(`Processing team review request: ${team.name}`);
-            const teamReview = await TeamReviewData.create(this, pr, issueId, team);
-            if (teamReview) {
-                await this.processRequestReview(pr, issueId, component, null, teamReview);
+        if (pr) {
+            const component = this.inputString('team-review-component');
+            await this.processRequestReview(pr, issueId, component, pr.requested_reviewers?.[0] || null, null);
+            for (const team of pr.requested_teams ?? []) {
+                this.log(`Processing team review request: ${team.name}`);
+                const teamReview = await TeamReviewData.create(this, pr, issueId, team);
+                if (teamReview) {
+                    await this.processRequestReview(pr, issueId, component, null, teamReview);
+                }
             }
-        }, Promise.resolve());
+        }
     }
     async persistIssueId(pr, issueId) {
         if (pr.isRenovate()) { // Renovate overrides the PR title back to the original https://github.com/renovatebot/renovate/issues/26833

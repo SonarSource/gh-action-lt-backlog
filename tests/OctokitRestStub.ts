@@ -24,7 +24,7 @@ import type { SimpleUser, SimpleTeam } from '../lib/OctokitTypes.js';
 export type StubReviewer = Pick<SimpleUser, 'login' | 'type'>;
 export type StubTeam = Pick<SimpleTeam, 'name' | 'slug'>;
 
-export function createOctokitRestStub(title: string, body?: string | null, login: string = 'test-user', requestedReviewers: StubReviewer[] = [], requestedTeams: StubTeam[] = [], headRepoFullName: string = 'test-owner/test-repo'): Api['rest'] {
+export function createOctokitRestStub(title: string, body?: string | null, login: string = 'test-user', requestedReviewers: StubReviewer[] = [], requestedTeams: StubTeam[] = []): Api['rest'] {
   return {
     issues: {
       createComment(params: any): void {
@@ -59,11 +59,6 @@ export function createOctokitRestStub(title: string, body?: string | null, login
             base: {
               repo: {
                 name: 'test-repo'
-              }
-            },
-            head: {
-              repo: {
-                full_name: headRepoFullName
               }
             },
             user: {
