@@ -18,7 +18,7 @@ Action assigns a Sprint field based on the determined user Team and boardId from
 
 This action does nothing if the PR title contains `DO NOT MERGE` phrase.
 
-The action can also be re-run on demand by commenting `/PullRequestCreated` on the PR — see the `issue_comment` trigger in the example usage below. If the PR already has a linked ticket, the action only backfills what is missing (the linked-issue comment and the Jira remote link, when not already posted); it does not repost them once they exist.
+The action can also be re-run on demand by commenting `/PullRequestCreated` on the PR — see the `issue_comment` trigger in the example usage below.
 
 ## Inputs
 

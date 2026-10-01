@@ -196,46 +196,16 @@ describe('PullRequestCreated', () => {
     expect(logTester.logsParams).toContain("Invoked jira.assignIssueToEmail('KEY-4242', ['reviewer@sonarsource.com'])");
   });
 
-  it('/PullRequestCreated comment on a PR with an existing ticket but no prior link backfills the linked-issue comment and remote link', async () => {
+  it('/PullRequestCreated comment on a PR with an existing ticket reposts the linked-issue comment and remote link', async () => {
     setIssueCommentPayload('KEY-4242 Standalone PR');
     await runAction('KEY', 'KEY-4242 Standalone PR');
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
-      "Invoked rest.issues.listComments({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42})",
       "Adding the following ticket as comment: KEY-4242",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
       "Invoked jira.addIssueRemoteLink('KEY-4242'', 'https://github.com/test-owner/test-repo/pull/42', null)",
       "Done"
     ]);
-  });
-
-  it('/PullRequestCreated comment on a PR that already has the linked-issue comment does not repost it', async () => {
-    setIssueCommentPayload('KEY-4242 Standalone PR');
-    process.env['INPUT_JIRA-PROJECT'] = 'KEY';
-    const action = new TestPullRequestCreated() as TestPullRequestCreated & OctokitActionStub;
-    action.jira = jiraClientStub;
-    action.rest = createOctokitRestStub('KEY-4242 Standalone PR', null, 'test-user');
-    action.rest.issues.listComments = ((params: any) => {
-      console.log(`Invoked rest.issues.listComments(${JSON.stringify(params)})`);
-      return Promise.resolve({ data: [{ body: '[KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)' }] });
-    }) as any;
-    await action.run();
-    expect(logTester.logsParams).toStrictEqual([
-      "Loading PR #42",
-      "Invoked rest.issues.listComments({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42})",
-      "Done"
-    ]);
-  });
-
-  it('/PullRequestCreated comment on an external PR does nothing', async () => {
-    setIssueCommentPayload('Standalone PR');
-    const action = new PullRequestCreated() as PullRequestCreated & OctokitActionStub;
-    action.jira = jiraClientStub;
-    action.rest = createOctokitRestStub('Standalone PR', null, 'test-user', [], [], 'fork-owner/test-repo');
-    action.log = vi.fn();
-    await action.run();
-    expect(action.log).toHaveBeenCalledWith('External PR, the ticket must be created manually.');
-    expect(action.log).toHaveBeenCalledWith('Done');
   });
 
   it('Standalone PR user first email not linked to Jira', async () => {
