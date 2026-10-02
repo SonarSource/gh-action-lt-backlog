@@ -21,4 +21,4 @@
 import { PullRequestCreated } from "./PullRequestCreated.js";
 
 const action = new PullRequestCreated();
-action.run();
+void action.run();

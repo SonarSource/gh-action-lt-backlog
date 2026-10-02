@@ -21,4 +21,4 @@
 import { RequestReview } from "./RequestReview.js";
 
 const action = new RequestReview();
-action.run();
+void action.run();

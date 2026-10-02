@@ -41,7 +41,7 @@ export class LockBranchAction extends OctokitAction {
                         : 'a scheduled job';
                     const message = `*${this.repo.repo}*: The branch \`${pattern}\` was ${action} by ${sender}${suffix}`;
                     this.log(`Done: ${message}`);
-                    this.sendSlackMessage(message);
+                    await this.sendSlackMessage(message);
                 }
                 else {
                     this.log(`Failed: '${pattern}' was not updated successfully.`); // And we have no idea why

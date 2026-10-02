@@ -19,5 +19,5 @@
  */
 import { ImportIssue } from "./ImportIssue.js";
 const action = new ImportIssue();
-action.run();
+void action.run();
 //# sourceMappingURL=Index.js.map

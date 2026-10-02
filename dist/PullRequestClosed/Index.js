@@ -19,5 +19,5 @@
  */
 import { PullRequestClosed } from "./PullRequestClosed.js";
 const action = new PullRequestClosed();
-action.run();
+void action.run();
 //# sourceMappingURL=Index.js.map
