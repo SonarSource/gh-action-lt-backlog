@@ -27,7 +27,7 @@ import { LockBranchActionStub } from '../tests/LockBranchActionStub.js';
 import * as github from '@actions/github';
 
 function issue(key: string, assignee: string | null, summary: string): any {
-  const account = assignee ? { accountId: assignee, emailAddress: `${assignee}@x.com`, displayName: assignee } : null;
+  const account = assignee ? { accountId: assignee, emailAddress: `${assignee}@example.com`, displayName: assignee } : null;
   return { key, fields: { assignee: account, summary } };
 }
 

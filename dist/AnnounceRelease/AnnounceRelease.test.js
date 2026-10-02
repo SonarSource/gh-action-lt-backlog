@@ -23,7 +23,7 @@ import { LogTester } from '../tests/LogTester.js';
 import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
 import * as github from '@actions/github';
 function issue(key, assignee, summary) {
-    const account = assignee ? { accountId: assignee, emailAddress: `${assignee}@x.com`, displayName: assignee } : null;
+    const account = assignee ? { accountId: assignee, emailAddress: `${assignee}@example.com`, displayName: assignee } : null;
     return { key, fields: { assignee: account, summary } };
 }
 const link = (key) => `<https://sonarsource.atlassian.net/browse/${key}|${key}>`;

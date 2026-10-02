@@ -257,15 +257,13 @@ describe('JiraClient', () => {
         expect(await productionSut.findTeamByName(JiraTeams.EngineeringExperience.name)).toMatchObject({ ...JiraTeams.EngineeringExperience }); // Eng Xp, because we maintain hardcoded value for it
     });
     it('findIssues', async () => {
-        expect(await sut.findIssues('key IN (GHA-1, NET-5) ORDER BY key')).toMatchObject([
+        const issues = await sut.findIssues('key IN (GHA-1, NET-5) ORDER BY key');
+        expect(issues).toMatchObject([
             { key: 'GHA-1', fields: { summary: 'Add Jira automation Dogfood' } },
             { key: 'NET-5', fields: { summary: 'Hardening' } }
         ]);
-    });
-    it('findIssues includes the assignee field', async () => {
-        const issues = await sut.findIssues('project = GHA AND assignee IS NOT EMPTY ORDER BY created');
-        expect(issues.length).toBeGreaterThan(0);
-        expect(issues.every(x => x.fields.assignee?.emailAddress != null)).toBe(true);
+        expect(issues[0].fields.assignee?.emailAddress != null).toBe(true); // GHA-1 is assigned
+        expect(issues[1].fields.assignee).toBeNull(); // NET-5 is unassigned
     });
     it('findIssues returns an empty array when nothing matches', async () => {
         expect(await sut.findIssues('project = GHA AND created < "2000-01-01"')).toStrictEqual([]);
