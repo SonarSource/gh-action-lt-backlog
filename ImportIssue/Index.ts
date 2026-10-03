@@ -21,4 +21,4 @@
 import { ImportIssue } from "./ImportIssue.js";
 
 const action = new ImportIssue();
-action.run();
+await action.run();
