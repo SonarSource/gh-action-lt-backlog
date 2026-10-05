@@ -36,15 +36,15 @@ export abstract class PullRequestAction extends OctokitAction {
     } else {
       const pr = await this.loadPullRequest(payloadPr.number);  
       if (pr) {
-        for (const issueId of issueIds) {
+        const issueIdsToProcess = issueIds.filter(issueId => {
           // BUILD/PREQ tickets are processed only when they are from Engineering Experience Squad repos. They should be ignored in any other repo, not to interfere with their process.
           if ((issueId.startsWith('BUILD-') || issueId.startsWith('PREQ-')) && !this.isEngXpSquad) {
             this.log(`Skipping ${issueId}`);
+            return false;
           }
-          else {
-            await this.processJiraIssue(pr, issueId);
-          }
-        }
+          return true;
+        });
+        await Promise.all(issueIdsToProcess.map(issueId => this.processJiraIssue(pr, issueId)));
         await this.afterExecute(pr);
       }
     }

@@ -42,13 +42,16 @@ export class SubmitReview extends PullRequestAction {
 
   protected override async afterExecute(pr: PullRequest): Promise<void> {
     if (this.payload.review.state === "approved") {
-      for (const comment of await this.listComments(pr.number)) {
-        const teamReviewIssueId = await this.approvedTeamReviewIssueId(comment.body);
-        if (teamReviewIssueId) {
-          await this.jira.moveIssue(teamReviewIssueId, 'Resolve issue');  // Move to RESOLVED
-          await this.jira.moveIssue(teamReviewIssueId, 'Close Issue');    // Move to DONE
-        }
-      }
+      const comments = await this.listComments(pr.number);
+      await Promise.all(
+        comments.map(async comment => {
+          const teamReviewIssueId = await this.approvedTeamReviewIssueId(comment.body);
+          if (teamReviewIssueId) {
+            await this.jira.moveIssue(teamReviewIssueId, 'Resolve issue'); // Move to RESOLVED
+            await this.jira.moveIssue(teamReviewIssueId, 'Close Issue'); // Move to DONE
+          }
+        }),
+      );
     }
   }
 
