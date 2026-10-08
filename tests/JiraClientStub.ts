@@ -37,6 +37,9 @@ export const jiraClientStub = {
       case 'SUBMIT-1': return { key: 'SUBMIT-1', fields: { project: { key: 'SUBMIT' }, issuetype: { name: 'Maintenance' }, assignee: null } };
       case 'SUBMIT-2': return { key: 'SUBMIT-2', fields: { project: { key: 'SUBMIT' }, issuetype: { name: 'Maintenance' }, assignee: { accountId: '4242-4242', emailAddress: 'user@sonarsource.com', displayName: 'User' } } };
       case 'SUBMIT-3': return { key: 'SUBMIT-3', fields: { project: { key: 'SUBMIT' }, issuetype: { name: 'Maintenance' }, assignee: { accountId: '712020:9c105dc5-0493-4d71-83a6-ed21c4ba03c0', emailAddress: 'nigel@sonarsource.com', displayName: 'Jira False Positive Bot' } } };
+      case 'SUBMIT-4': return { key: 'SUBMIT-4', fields: { project: { key: 'SUBMIT' }, issuetype: { name: 'Maintenance' }, assignee: { accountId: '62d146be6eba7198372287a4', emailAddress: 'helpdesk+jira-releaseengineerstech@sonarsource.com', displayName: 'JIRA Tech User Release Engineers' } } };
+      case 'SUBMIT-5': return { key: 'SUBMIT-5', fields: { project: { key: 'SUBMIT' }, issuetype: { name: 'Maintenance' }, assignee: { accountId: '712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4', emailAddress: 'helpdesk+jira-githubtech@sonarsource.com', displayName: 'Jira Tech User GitHub' } } };
+      case 'PREQ-42': return { key: 'PREQ-42', fields: { project: { key: 'PREQ' }, issuetype: { name: 'Maintenance' }, assignee: null } };
       case 'THEME-42': return { key: 'THEME-42', fields: { project: { key: 'THEME' }, issuetype: { name: 'Theme' } } };
       case 'FIXVER-1': return { key: 'FIXVER-1', fields: { project: { key: 'FIXVER' }, issuetype: { name: 'Feature' }, fixVersions: [] } };
       case 'FIXVER-2': return { key: 'FIXVER-2', fields: { project: { key: 'FIXVER' }, issuetype: { name: 'Feature' }, fixVersions: [{ name: '1.42' }, { name: '1.41.1' }] } };

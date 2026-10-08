@@ -23,7 +23,7 @@ import { Action } from './Action.js';
 import { addPullRequestExtensions } from './OctokitTypes.js';
 import { graphql, GraphqlResponseError } from '@octokit/graphql';
 import { JiraClient } from './JiraClient.js';
-import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN, TEAM_REVIEW_PREFIX } from './Constants.js';
+import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN, BOT_ASSIGNEE_ACCOUNT_IDS, TEAM_REVIEW_PREFIX } from './Constants.js';
 import { NewIssueData } from './NewIssueData.js';
 export class OctokitAction extends Action {
     rest;
@@ -261,11 +261,19 @@ export class OctokitAction extends Action {
                         await this.addJiraComponent(reviewIssueId, component);
                     }
                 }
-                else if (teamReview.assigneeAccountId) {
+                else if (teamReview.assigneeAccountId && await this.canReplaceAssignee(issueId)) {
                     await this.jira.assignIssueToAccount(issueId, teamReview.assigneeAccountId);
                 }
             }
         }
+    }
+    async canReplaceAssignee(issueId) {
+        const assignee = (await this.jira.loadIssue(issueId))?.fields.assignee;
+        if (assignee && !BOT_ASSIGNEE_ACCOUNT_IDS.includes(assignee.accountId)) {
+            this.log(`${issueId}: Keeping assignee ${assignee.displayName}`);
+            return false;
+        }
+        return true;
     }
     async addJiraComponent(issueId, name, description = null) {
         if (name) {
