@@ -25,9 +25,11 @@ import { graphql, GraphqlResponseError } from '@octokit/graphql';
 import { JiraClient } from './JiraClient.js';
 import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN, TEAM_REVIEW_PREFIX } from './Constants.js';
 import { NewIssueData } from './NewIssueData.js';
+import { SlackClient } from './SlackClient.js';
 export class OctokitAction extends Action {
     rest;
     jira;
+    slack;
     octokit;
     isEngXpSquad;
     graphqlWithAuth = null;
@@ -36,6 +38,7 @@ export class OctokitAction extends Action {
     constructor() {
         super();
         this.jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, this.inputString('jira-user'), this.inputString('jira-token'));
+        this.slack = new SlackClient(this.inputString('slack-token'), this.inputString('slack-channel'));
         this.octokit = github.getOctokit(this.inputString('github-token'));
         this.rest = this.octokit.rest;
         this.isEngXpSquad = this.inputBoolean('is-eng-xp-squad');
@@ -159,46 +162,6 @@ export class OctokitAction extends Action {
             throw error;
         }
     }
-    async sendSlackMessage(text) {
-        const channel = this.inputString("slack-channel");
-        if (channel) {
-            this.log("Sending Slack message");
-            await this.sendSlackPost("https://slack.com/api/chat.postMessage", { channel, text });
-        }
-        else {
-            this.log("Skip sending slack message, channel was not set.");
-        }
-    }
-    async sendSlackPost(url, jsonRequest) {
-        const token = this.inputString("slack-token");
-        if (!token) {
-            throw new Error("slack-token was not set");
-        }
-        try {
-            const body = JSON.stringify(jsonRequest);
-            this.log(`Sending slack POST: ${body}`);
-            const response = await fetch(url, {
-                method: "POST",
-                body,
-                headers: { "Content-Type": "application/json; charset=utf-8", authorization: `Bearer ${token}` }
-            });
-            if (!response.ok) {
-                this.log(`Failed to send API request. Error ${response.status}: ${response.statusText}`);
-                return null;
-            }
-            const data = await response.json();
-            if (!data.ok) {
-                this.log(`Failed to send API request. Error: ${data.error}`);
-                return null;
-            }
-            return data;
-        }
-        catch (ex) {
-            this.log("Failed to send Slack request");
-            this.log(ex.toString());
-            return null;
-        }
-    }
     async findRootlyOnCallEmails(scheduleId) {
         if (!scheduleId) {
             return [];
@@ -287,8 +250,11 @@ export class OctokitAction extends Action {
         }
         return this.senderAccountId;
     }
+    issueUrl(issue) {
+        return `${JIRA_DOMAIN}/browse/${issue}`;
+    }
     issueLink(issue) {
-        return `[${issue}](${JIRA_DOMAIN}/browse/${issue})`;
+        return `[${issue}](${this.issueUrl(issue)})`;
     }
 }
 //# sourceMappingURL=OctokitAction.js.map
