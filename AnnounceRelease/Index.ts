@@ -21,4 +21,4 @@
 import { AnnounceRelease } from "./AnnounceRelease.js";
 
 const action = new AnnounceRelease();
-action.run();
+void action.run();
