@@ -18,6 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import { JiraTeams, GitHubTeamSlugs, RootlyScheduleIds } from "../Data/TeamConfiguration.js";
+import { BOT_ASSIGNEE_ACCOUNT_IDS } from "./Constants.js";
 export class TeamReviewData {
     createReviewTicket;
     senderAccountId;
@@ -32,7 +33,7 @@ export class TeamReviewData {
         this.gitHubTeam = gitHubTeam;
     }
     static async create(action, pr, issueId, requested_team) {
-        const candidate = this.selectTeam(pr, issueId, requested_team);
+        const candidate = await this.selectTeam(action, pr, issueId, requested_team);
         if (candidate && await this.senderIsFromOutsideTeam(action, candidate)) {
             const assigneeAccountId = await action.jira.findAccountId(await action.findRootlyOnCallEmails(candidate.rootlyScheduleId));
             return new TeamReviewData(candidate.createReviewTicket, await action.loadSenderAccountId(), assigneeAccountId, candidate.jiraTeam, requested_team);
@@ -41,7 +42,7 @@ export class TeamReviewData {
             return null;
         }
     }
-    static selectTeam(pr, issueId, requested_team) {
+    static async selectTeam(action, pr, issueId, requested_team) {
         const createReviewTicket = !pr.isBot(); // Do not create 2nd Jira issue for bot PRs
         if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
             return {
@@ -68,10 +69,13 @@ export class TeamReviewData {
             };
         }
         else if (requested_team?.slug === GitHubTeamSlugs.PlatformEngXp) {
+            const rootlyScheduleId = issueId.startsWith('PREQ-') && await this.canReplaceAssignee(action, issueId)
+                ? RootlyScheduleIds.PlatformEngXpTriager // Assign only PREQ when previously owned by bots
+                : null; // Do not assing BUILD tickets
             return {
                 createReviewTicket: false,
                 jiraTeam: JiraTeams.EngineeringExperience,
-                rootlyScheduleId: issueId.startsWith('PREQ-') ? RootlyScheduleIds.PlatformEngXpTriager : null, // Do not assing BUILD tickets
+                rootlyScheduleId,
                 ignoredGitHubTeamSlugs: []
             };
         }
@@ -87,6 +91,10 @@ export class TeamReviewData {
             }
         }
         return true;
+    }
+    static async canReplaceAssignee(action, issueId) {
+        const assignee = (await action.jira.loadIssue(issueId))?.fields.assignee;
+        return !assignee || BOT_ASSIGNEE_ACCOUNT_IDS.includes(assignee.accountId);
     }
 }
 //# sourceMappingURL=TeamReviewData.js.map
