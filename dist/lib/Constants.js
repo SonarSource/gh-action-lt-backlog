@@ -21,7 +21,10 @@ export const RENOVATE_PREFIX = 'Renovate Jira issue ID: '; // Workaround for htt
 export const TEAM_REVIEW_PREFIX = 'Team Review Jira issue ID: ';
 export const JIRA_ISSUE_PATTERN = /\b(?!USER-)[A-Z][A-Z0-9]*-\d+/g;
 export const JIRA_DOMAIN = 'https://sonarsource.atlassian.net';
-export const NIGEL_ACCOUNT_ID = '712020:9c105dc5-0493-4d71-83a6-ed21c4ba03c0';
+export const JIRA_NIGEL_ACCOUNT_ID = '712020:9c105dc5-0493-4d71-83a6-ed21c4ba03c0';
+export const JIRA_TECH_USER_GITHUB_ACCOUNT_ID = '712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4';
+export const JIRA_TECH_USER_RELEASE_ENGINEERS_ACCOUNT_ID = '62d146be6eba7198372287a4';
+export const JIRA_BOT_ACCOUNT_IDS = [JIRA_NIGEL_ACCOUNT_ID, JIRA_TECH_USER_GITHUB_ACCOUNT_ID, JIRA_TECH_USER_RELEASE_ENGINEERS_ACCOUNT_ID];
 // To find values for these constants, you can use the following query, update Jira domain, and post it here: https://developer.atlassian.com/platform/teams/graphql/explorer/
 // To avoid consistency of having a single name for the same thing everywhere, wise developers of Patlassian* named the redundant `siteId` form teamSearchV2 a `cloudId` here.
 // * https://en.wikipedia.org/wiki/Pat_%26_Mat#Names

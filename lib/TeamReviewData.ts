@@ -22,6 +22,7 @@ import { JiraTeams, GitHubTeamSlugs, RootlyScheduleIds } from "../Data/TeamConfi
 import type { OctokitAction } from "./OctokitAction.js";
 import { PullRequest, SimpleTeam } from "./OctokitTypes.js";
 import { JiraTeam } from "./JiraTeam.js";
+import { JIRA_BOT_ACCOUNT_IDS } from "./Constants.js";
 
 type TeamCandidate = {
   createReviewTicket: boolean;
@@ -46,7 +47,7 @@ export class TeamReviewData {
   }
 
   public static async create(action: OctokitAction, pr: PullRequest, issueId: string, requested_team: SimpleTeam | null): Promise<TeamReviewData | null> {
-    const candidate = this.selectTeam(pr, issueId, requested_team);
+    const candidate = await this.selectTeam(action, pr, issueId, requested_team);
     if (candidate && await this.senderIsFromOutsideTeam(action, candidate)) {
       const assigneeAccountId = await action.jira.findAccountId(await action.findRootlyOnCallEmails(candidate.rootlyScheduleId));
       return new TeamReviewData(candidate.createReviewTicket, await action.loadSenderAccountId(), assigneeAccountId, candidate.jiraTeam, requested_team!);
@@ -55,7 +56,7 @@ export class TeamReviewData {
     }
   }
 
-  private static selectTeam(pr: PullRequest, issueId: string, requested_team: SimpleTeam | undefined | null): TeamCandidate | null {
+  private static async selectTeam(action: OctokitAction, pr: PullRequest, issueId: string, requested_team: SimpleTeam | undefined | null): Promise<TeamCandidate | null> {
     const createReviewTicket = !pr.isBot(); // Do not create 2nd Jira issue for bot PRs
     if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
       return {
@@ -79,10 +80,13 @@ export class TeamReviewData {
         ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformFrontEndEngineering]
       };
     } else if (requested_team?.slug === GitHubTeamSlugs.PlatformEngXp) {
+      const rootlyScheduleId = issueId.startsWith('PREQ-') && await this.canReplaceAssignee(action, issueId)
+        ? RootlyScheduleIds.PlatformEngXpTriager  // Assign only PREQ when previously owned by bots
+        : null;                                   // Do not assing BUILD tickets
       return {
         createReviewTicket: false,
         jiraTeam: JiraTeams.EngineeringExperience,
-        rootlyScheduleId: issueId.startsWith('PREQ-') ? RootlyScheduleIds.PlatformEngXpTriager : null,  // Do not assing BUILD tickets
+        rootlyScheduleId,
         ignoredGitHubTeamSlugs: []
       };
     } else {
@@ -98,5 +102,10 @@ export class TeamReviewData {
       }
     }
     return true;
+  }
+
+  private static async canReplaceAssignee(action: OctokitAction, issueId: string): Promise<boolean> {
+    const assignee = (await action.jira.loadIssue(issueId))?.fields.assignee;
+    return !assignee || JIRA_BOT_ACCOUNT_IDS.includes(assignee.accountId);
   }
 }

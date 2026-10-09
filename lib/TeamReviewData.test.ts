@@ -25,6 +25,7 @@ import { PullRequest, SimpleTeam, SimpleUser } from './OctokitTypes.js';
 import { LogTester } from '../tests/LogTester.js';
 import { OctokitAction } from './OctokitAction.js';
 import { context } from '@actions/github';
+import { Issue } from './JiraClient.js';
 
 function createPullRequest(title: string): PullRequest {
   return {
@@ -61,6 +62,16 @@ function createAction(senderLogin: string | null, senderAccountId: string | null
           }
         }
         return null;
+      },
+      async loadIssue(issueKey: string): Promise<Issue> {
+        switch (issueKey) {
+          case 'PREQ-4242':
+            return { fields: { assignee: { accountId: 'c343a59e-64b2-4ebe-a1a7-fcb4a0995196', displayName: 'FirstName LastName' } } } as Issue;
+          case 'PREQ-1000': 
+            return { fields: { assignee: { accountId: '712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4', displayName: 'Jira Tech User GitHub' } } } as Issue;
+          default:
+            throw new Error('Scaffolding did not expect issue: ' + issueKey);
+        }
       }
     },
     async loadSenderAccountId(): Promise<string | null> {
@@ -149,9 +160,15 @@ describe('TeamReviewData', () => {
         .toEqual({ createReviewTicket: true, senderAccountId: '1234-account', assigneeAccountId: 'front-end-engineering-triager', jiraTeam: JiraTeams.FrontEndEngineering, gitHubTeam });
     });
 
-    it('eng-xp-squad PREQ', async () => {
+    it('eng-xp-squad PREQ with human assignee', async () => {
       const gitHubTeam = createSimpleTeam('platform-eng-xp-squad');
-      expect(await TeamReviewData.create(createAction('some-login', '1234-account'), normalPR, 'PREQ-1234', gitHubTeam))
+      expect(await TeamReviewData.create(createAction('some-login', '1234-account'), normalPR, 'PREQ-4242', gitHubTeam))
+        .toEqual({ createReviewTicket: false, senderAccountId: '1234-account', assigneeAccountId: null, jiraTeam: JiraTeams.EngineeringExperience, gitHubTeam });
+    });
+
+    it('eng-xp-squad PREQ with Tech User assignee', async () => {
+      const gitHubTeam = createSimpleTeam('platform-eng-xp-squad');
+      expect(await TeamReviewData.create(createAction('some-login', '1234-account'), normalPR, 'PREQ-1000', gitHubTeam))
         .toEqual({ createReviewTicket: false, senderAccountId: '1234-account', assigneeAccountId: 'eng-xp-triager', jiraTeam: JiraTeams.EngineeringExperience, gitHubTeam });
     });
 
