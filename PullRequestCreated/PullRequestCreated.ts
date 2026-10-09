@@ -38,11 +38,11 @@ export class PullRequestCreated extends OctokitAction {
         return;
       }
     }
-    if (/DO NOT MERGE/i.test(this.payload.pull_request?.title)) {
+    if (/DO NOT MERGE/i.test(this.payload.pull_request?.title ?? this.payload.issue?.title)) {
       this.log("'DO NOT MERGE' found in the PR title, skipping the action.");
       return;
     }
-    const pr = await this.loadPullRequest(this.payload.pull_request!.number);
+    const pr = await this.loadPullRequest(this.payload.pull_request?.number ?? this.payload.issue!.number);
     if (pr == null) {
       return;
     }
@@ -100,10 +100,10 @@ export class PullRequestCreated extends OctokitAction {
 
   private async processAllReviews(pr: PullRequest, issueId: string): Promise<void> {
     // When PR is created directly with a reviewer, process it here. RequestReview action can be scheduled faster and PR title might not have an issue ID yet
-    if (this.payload.pull_request) {
+    if (pr) {
       const component = this.inputString('team-review-component');
-      await this.processRequestReview(pr, issueId, component, this.payload.pull_request.requested_reviewers[0] || null, null);
-      for (const team of this.payload.pull_request.requested_teams) {
+      await this.processRequestReview(pr, issueId, component, pr.requested_reviewers?.[0] || null, null);
+      for (const team of pr.requested_teams ?? []) {
         this.log(`Processing team review request: ${team.name}`);
         const teamReview = await TeamReviewData.create(this, pr, issueId, team);
         if (teamReview) {

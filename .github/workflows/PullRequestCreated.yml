@@ -3,6 +3,8 @@ name: Pull Request Created
 on:
   pull_request:
     types: ["opened"]
+  issue_comment:
+    types: ["created"]
 
 jobs:
   PullRequestCreated_job:
@@ -10,9 +12,15 @@ jobs:
     runs-on: sonar-xs
     permissions:
       id-token: write
-    # For external PR, ticket should be created manually
+    # For external PR, ticket should be created manually.
+    # On-demand: a maintainer can comment `/PullRequestCreated` on a PR to re-run this action.
     if: |
-        github.event.pull_request.head.repo.full_name == github.repository
+        (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+        (github.event_name == 'issue_comment'
+          && github.event.issue.pull_request != null
+          && github.event.comment.body == '/PullRequestCreated'
+          && (github.event.comment.author_association == 'MEMBER'
+              || github.event.comment.user.login == 'hashicorp-vault-sonar-prod[bot]'))
     steps:
       - id: secrets
         uses: SonarSource/vault-action-wrapper@v3
