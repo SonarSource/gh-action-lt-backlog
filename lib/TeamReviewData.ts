@@ -22,7 +22,7 @@ import { JiraTeams, GitHubTeamSlugs, RootlyScheduleIds } from "../Data/TeamConfi
 import type { OctokitAction } from "./OctokitAction.js";
 import { PullRequest, SimpleTeam } from "./OctokitTypes.js";
 import { JiraTeam } from "./JiraTeam.js";
-import { BOT_ASSIGNEE_ACCOUNT_IDS } from "./Constants.js";
+import { JIRA_BOT_ACCOUNT_IDS } from "./Constants.js";
 
 type TeamCandidate = {
   createReviewTicket: boolean;
@@ -106,6 +106,6 @@ export class TeamReviewData {
 
   private static async canReplaceAssignee(action: OctokitAction, issueId: string): Promise<boolean> {
     const assignee = (await action.jira.loadIssue(issueId))?.fields.assignee;
-    return !assignee || BOT_ASSIGNEE_ACCOUNT_IDS.includes(assignee.accountId);
+    return !assignee || JIRA_BOT_ACCOUNT_IDS.includes(assignee.accountId);
   }
 }

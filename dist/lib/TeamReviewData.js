@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import { JiraTeams, GitHubTeamSlugs, RootlyScheduleIds } from "../Data/TeamConfiguration.js";
-import { BOT_ASSIGNEE_ACCOUNT_IDS } from "./Constants.js";
+import { JIRA_BOT_ACCOUNT_IDS } from "./Constants.js";
 export class TeamReviewData {
     createReviewTicket;
     senderAccountId;
@@ -94,7 +94,7 @@ export class TeamReviewData {
     }
     static async canReplaceAssignee(action, issueId) {
         const assignee = (await action.jira.loadIssue(issueId))?.fields.assignee;
-        return !assignee || BOT_ASSIGNEE_ACCOUNT_IDS.includes(assignee.accountId);
+        return !assignee || JIRA_BOT_ACCOUNT_IDS.includes(assignee.accountId);
     }
 }
 //# sourceMappingURL=TeamReviewData.js.map

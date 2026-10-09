@@ -18,7 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { JIRA_ISSUE_PATTERN, NIGEL_ACCOUNT_ID, TEAM_REVIEW_PREFIX } from '../lib/Constants.js';
+import { JIRA_ISSUE_PATTERN, JIRA_NIGEL_ACCOUNT_ID, TEAM_REVIEW_PREFIX } from '../lib/Constants.js';
 import { PullRequest } from '../lib/OctokitTypes.js';
 import { PullRequestAction } from '../lib/PullRequestAction.js';
 
@@ -54,7 +54,7 @@ export class SubmitReview extends PullRequestAction {
 
   private async assignCurrentUser(issueId: string): Promise<void> {
     const issue = await this.jira.loadIssue(issueId);
-    if (!issue.fields.assignee || issue.fields.assignee.accountId === NIGEL_ACCOUNT_ID) {
+    if (!issue.fields.assignee || issue.fields.assignee.accountId === JIRA_NIGEL_ACCOUNT_ID) {
       const userEmails = await this.findEmails(this.payload.sender?.login);
       await this.jira.assignIssueToEmail(issueId, userEmails);
     }
