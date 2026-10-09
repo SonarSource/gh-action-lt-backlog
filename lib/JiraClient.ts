@@ -340,7 +340,7 @@ export class JiraClient {
 
   public async findIssues(jql: string): Promise<Issue[]> {
     console.log(`Searching for issues: ${jql}`);
-    const response = await this.sendRestGetApi(`search/jql?fields=key,summary,assignee,customfield_10015,duedate&jql=${encodeURIComponent(jql)}`);  // // Only first page of results
+    const response = await this.sendRestGetApi(`search/jql?fields=key,summary,assignee,customfield_10015,duedate&jql=${encodeURIComponent(jql)}`);  // Only first page of results
     return response?.issues ?? [];
   }
 
