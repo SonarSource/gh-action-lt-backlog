@@ -21,4 +21,4 @@
 import { ToggleLockBranch } from "./ToggleLockBranch.js";
 
 const action = new ToggleLockBranch();
-action.run();
+void action.run();

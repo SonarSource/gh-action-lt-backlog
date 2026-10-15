@@ -19,5 +19,5 @@
  */
 import { LogPayload } from "./LogPayload.js";
 const action = new LogPayload();
-action.run();
+void action.run();
 //# sourceMappingURL=Index.js.map
