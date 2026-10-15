@@ -21,4 +21,4 @@
 import { SubmitReview } from "./SubmitReview.js";
 
 const action = new SubmitReview();
-action.run();
+void action.run();

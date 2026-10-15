@@ -21,4 +21,4 @@
 import { LockBranch } from "./LockBranch.js";
 
 const action = new LockBranch();
-action.run();
+void action.run();
