@@ -12,4 +12,4 @@
 /dist/tsconfig.tsbuildinfo
 
 # See the ReadMe.md file for dependency management strategy
-#/node_modules/
+/node_modules/
