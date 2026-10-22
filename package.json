@@ -21,8 +21,5 @@
     "@actions/core": "^3.0.0",
     "@actions/github": "^9.1.0",
     "@octokit/graphql": "^9.0.3"
-  },
-  "overrides": {
-    "@octokit/types": "^18.0.0"
   }
 }
