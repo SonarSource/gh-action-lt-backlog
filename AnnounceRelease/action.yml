@@ -30,4 +30,4 @@ inputs:
 
 runs:
   using: 'node24'
-  main: '../dist/AnnounceRelease/Index.js'
+  main: '../dist/AnnounceRelease/Index.cjs'

@@ -51,21 +51,28 @@ All actions should be consumed from these branches.
 
     More info: https://docs.npmjs.com/cli/v9/configuring-npm/npmrc#auth-related-configuration
 
-### /node_modules/ dependencies
+### Dependencies and build
 
-The `/node_modules/` files that are part of the GIT repo:
-* Must contain production dependencies for the actions to run.
-* Must NOT contain development and testing dependencies, as those bring 10k+ small files that takes ages to check out on every action run.
+`node_modules/` is **not** committed — it is gitignored. Each action is bundled
+with [esbuild](https://esbuild.github.io/) into a single self-contained file at
+`dist/<Action>/Index.cjs` that inlines all of its dependencies, so the published
+action runs without `node_modules`. Only the compiled `dist/` bundles are
+committed.
 
-Dependency update:
+`npm run build` runs `tsc --noEmit` (type-check) and then `node build.mjs`
+(esbuild bundles every `<Action>/Index.ts`). `build.mjs` discovers actions
+automatically — any top-level folder that has both `action.yml` and `Index.ts` —
+so adding a new action needs no build-config change.
 
-1. Delete `/node_module/`.
-1. Comment out `/node_module/` exclusion in `.gitignore` file.
-1. Run `npm install --omit=dev` to restore only production dependencies into the `/node_module/`.
-1. Commit all changes.
-1. Uncomment `/node_module/` exclusion in `.gitignore` file.
-1. Run `npm install` to get all remaining files for local development.
-1. Commit changes to `.package-lock.json` file.
+Dependency / build update:
+
+1. Run `npm install` to restore the full dependency tree (add or update deps as needed).
+1. Run `npm run build` to regenerate the `dist/` bundles.
+1. Commit the changed files under `dist/` (plus `package.json` / `package-lock.json` if dependencies changed).
+
+CI (`.github/workflows/Build.yml`) runs `npm install` + `npm run build`, and
+`scripts/check-committed.sh` fails the build if the committed `dist/` is out of
+date with the sources.
 
 ### Run Octokit action from PowerShell
 
