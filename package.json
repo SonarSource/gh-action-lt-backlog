@@ -4,8 +4,8 @@
   "description": "BacklogAutomation",
   "type": "module",
   "scripts": {
-    "build": "tsc --build",
-    "clean": "tsc --build --clean",
+    "build": "tsc --noEmit && node build.mjs",
+    "clean": "node build.mjs --clean",
     "test": "vitest run",
     "test-uts": "vitest run --exclude 'Data/*'",
     "test-data": "vitest run Data/",
@@ -13,9 +13,10 @@
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
-    "vitest": "^5.0.5",
+    "esbuild": "^0.28.2",
     "prettier": "^3.8.3",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
   },
   "dependencies": {
     "@actions/core": "^3.0.0",
