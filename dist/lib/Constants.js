@@ -19,7 +19,7 @@
  */
 export const RENOVATE_PREFIX = 'Renovate Jira issue ID: '; // Workaround for https://github.com/renovatebot/renovate/issues/26833
 export const TEAM_REVIEW_PREFIX = 'Team Review Jira issue ID: ';
-export const JIRA_ISSUE_PATTERN = /\b(?!USER-)[A-Z][A-Z0-9]*-\d+/g;
+export const JIRA_ISSUE_PATTERN = /\b(?!(?:USER|CVE|CWE)-)[A-Z][A-Z0-9]*-\d+/g;
 export const JIRA_DOMAIN = 'https://sonarsource.atlassian.net';
 export const JIRA_NIGEL_ACCOUNT_ID = '712020:9c105dc5-0493-4d71-83a6-ed21c4ba03c0';
 export const JIRA_TECH_USER_GITHUB_ACCOUNT_ID = '712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4';
