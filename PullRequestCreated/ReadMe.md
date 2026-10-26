@@ -2,6 +2,8 @@
 
 Upon pull request creation, create a Jira ticket if no tickets are mentioned in the title.
 
+The PR description is copied to the Jira ticket. If its serialized Atlassian Document Format exceeds 32,767 characters, the action uses a short notice and a link to the full description on GitHub instead. This conservative budget includes links, formatting and escaping, so it can be exceeded even when the visible text is shorter. The PR body is preserved.
+
 This action will take the first non-`Sub-task` ticket and use it as a parent for the created ticket:
 - if the parent is an `Epic`, the created ticket will be a `Maintenance`
 - if the parent is not an `Epic`, the created ticket will be a `Sub-task`

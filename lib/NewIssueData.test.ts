@@ -31,6 +31,7 @@ function createPullRequest(title: string, body: string | null, repo: string = 'r
     number: 42,
     title,
     body,
+    html_url: 'https://github.com/test-owner/test-repo/pull/42',
     base: { repo: { name: repo } },
     isRenovate(): boolean { return title === 'Renovate PR' },
     isDependabot(): boolean { return title === 'Dependabot PR' },
@@ -125,6 +126,46 @@ describe('NewIssueData', () => {
     const body = 'Fix CVE-2026-78254 and CWE-79 as part of KEY-1234';
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', body), 'KEY', '', '1234-account', '')).toEqual(createExpectedParent('KEY', 'KEY-1234', 'Sub-task', body));
     expect(logTester.logsParams).toContain('Found mentioned issues: KEY-1234');
+  });
+
+  describe.each(['standard', 'engineering experience'])('description size for %s issues', mode => {
+    const createIssue = (pr: PullRequest) => mode === 'standard'
+      ? NewIssueData.create(jiraClientStub, pr, 'KEY', '', '1234-account', '')
+      : NewIssueData.createForEngExp(jiraClientStub, pr, '3333-eng-exp-account');
+    const documentOverhead = JSON.stringify(AtlassianDocument.fromMarkdown('x')).length - 1;
+
+    it.each([32766, 32767])('preserves a description of %i serialized characters', async size => {
+      const body = 'x'.repeat(size - documentOverhead);
+      const expected = AtlassianDocument.fromMarkdown(body);
+      expect(JSON.stringify(expected)).toHaveLength(size);
+
+      const issue = await createIssue(createPullRequest('Title', body));
+
+      expect(issue!.additionalFields.description).toEqual(expected);
+    });
+
+    it.each([
+      ['one character over the limit', 'x'.repeat(32768 - documentOverhead)],
+      ['many links', '[change](https://example.com/change)\n'.repeat(400)],
+      ['JSON escaping', '"\\'.repeat(9000)],
+    ])('links to the full PR description for %s', async (_, body) => {
+      // Formatting and escaping can exceed the budget even when the Markdown fits.
+      expect(body.length).toBeLessThan(32767);
+      expect(JSON.stringify(AtlassianDocument.fromMarkdown(body)).length).toBeGreaterThan(32767);
+      const pr = createPullRequest('Title', body);
+
+      const issue = await createIssue(pr);
+
+      const description = issue!.additionalFields.description;
+      expect(JSON.stringify(description).length).toBeLessThanOrEqual(32767);
+      expect(description.content[0].content).toContainEqual({
+        type: 'text',
+        text: 'View the full description on GitHub',
+        marks: [{ type: 'link', attrs: { href: pr.html_url } }],
+      });
+      expect(JSON.stringify(description)).toContain('The pull request description is too long for Jira.');
+      expect(pr.body).toBe(body);
+    });
   });
 
   it('create standalone PR with body as default template', async () => {

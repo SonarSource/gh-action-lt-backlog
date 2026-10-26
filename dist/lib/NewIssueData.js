@@ -22,6 +22,7 @@ import { Config } from "./Configuration.js";
 import { JIRA_ISSUE_PATTERN } from "./Constants.js";
 import { AtlassianDocument } from "./AtlassianDocumentFormat.js";
 export class NewIssueData {
+    static DESCRIPTION_MAX_LENGTH = 32767;
     projectKey;
     accountId;
     assigneeId;
@@ -40,7 +41,7 @@ export class NewIssueData {
         if (projectKey) {
             const additionalFields = this.parseAdditionalFields(inputAdditionalFields);
             const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? 'Maintenance'); // Transfer issuetype name manually, because parameters should have priority due to Sub-task.
-            parameters.description = this.parseDescription(pr.body);
+            parameters.description = this.parseDescription(pr);
             if (parameters.issuetype.name !== 'Sub-task') { // These fields cannot be set on Sub-task. Their values are inherited from the parent issue.
                 const team = await this.findTeam(jira, accountId, projectKey, fallbackTeam); // Can be null for bots when project lead is not member of any team, and fallbackTeam is not set. Jira request will fail if the field is mandatory for the project.
                 if (team != null) {
@@ -62,7 +63,7 @@ export class NewIssueData {
     static async createForEngExp(jira, pr, accountId) {
         const projectKey = await this.computeProjectKeyForEngExp(jira, pr, accountId);
         const parameters = this.newIssueParameters(projectKey, null, 'Maintenance');
-        parameters.description = this.parseDescription(pr.body);
+        parameters.description = this.parseDescription(pr);
         if (accountId) {
             parameters.reporter = { id: accountId };
         }
@@ -208,9 +209,17 @@ export class NewIssueData {
             return null;
         }
     }
-    static parseDescription(body) {
+    static parseDescription(pr) {
+        const body = pr.body;
         if (body && !/^Part of\s*<!--.*-->\s*$/s.test(body)) { // Don't spam Jira with default PR template
-            return AtlassianDocument.fromMarkdown(body);
+            const description = AtlassianDocument.fromMarkdown(body);
+            // Conservatively include links, formatting and escaping in the description budget.
+            const length = JSON.stringify(description).length;
+            if (length > this.DESCRIPTION_MAX_LENGTH) {
+                console.log(`PR description exceeds the Jira description budget (${length} serialized characters), using a link to the full description`);
+                return AtlassianDocument.fromMarkdown(`The pull request description is too long for Jira. [View the full description on GitHub](${pr.html_url}).`);
+            }
+            return description;
         }
         else {
             return undefined;
