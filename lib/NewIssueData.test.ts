@@ -121,6 +121,12 @@ describe('NewIssueData', () => {
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', null), 'KEY', '', '1234-account', '')).toEqual(createExpected(undefined));
   });
 
+  it('ignores vulnerability identifiers when finding a parent in the PR body', async () => {
+    const body = 'Fix CVE-2026-78254 and CWE-79 as part of KEY-1234';
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', body), 'KEY', '', '1234-account', '')).toEqual(createExpectedParent('KEY', 'KEY-1234', 'Sub-task', body));
+    expect(logTester.logsParams).toContain('Found mentioned issues: KEY-1234');
+  });
+
   it('create standalone PR with body as default template', async () => {
     const body = `Part of 
 <!-- 
