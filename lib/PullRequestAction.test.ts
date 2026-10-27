@@ -139,6 +139,16 @@ describe('PullRequestAction', () => {
 
   // PR is created with reviewer, both PullRequestCreated and RequestReview are triggered.
   describe('PR created with reviewer', () => {
+    it('ignores vulnerability identifiers in the creation-event title', async () => {
+      const sut = createSutFromPrCreationEvent('GHA-42 Fix CVE-2026-78254 and CWE-79');
+      await sut.run();
+      expect(logTester.logsParams).toStrictEqual([
+        "Loading PR #42",
+        "Invoked processJiraIssue(GHA-42)",
+        "Done",
+      ]);
+    });
+
     it('Normal PR', async () => {
       const sut = createSutFromPrCreationEvent("GHA-42 Normal PR");
       await sut.run();
