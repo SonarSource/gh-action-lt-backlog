@@ -22,7 +22,7 @@ import { Config } from "./Configuration.js";
 import { JIRA_ISSUE_PATTERN } from "./Constants.js";
 import { AtlassianDocument } from "./AtlassianDocumentFormat.js";
 export class NewIssueData {
-    static DESCRIPTION_MAX_LENGTH = 32767;
+    static DESCRIPTION_MAX_LENGTH = 30000;
     projectKey;
     accountId;
     assigneeId;

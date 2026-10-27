@@ -29,7 +29,7 @@ import { TeamReviewData } from "./TeamReviewData.js";
 import { AtlassianDocument } from "./AtlassianDocumentFormat.js";
 
 export class NewIssueData {
-  private static readonly DESCRIPTION_MAX_LENGTH = 32767;
+  private static readonly DESCRIPTION_MAX_LENGTH = 30000;
 
   public readonly projectKey: string;
   public readonly accountId: string | null;
