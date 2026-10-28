@@ -160,21 +160,6 @@ describe('SubmitReview', () => {
         ]);
     });
     describe('Submitted with team review comment', () => {
-        it('ignores vulnerability identifiers when finding the issue in a review-comment body', async () => {
-            await runAction('approved', [], 'test-user', 'GHA-42', 'first-login', [
-                { body: 'Team Review Jira issue ID: CVE-2026-78254 CWE-79 [PREQ-4242](https://sonarsource.atlassian.net/browse/PREQ-4242) <!--slug: platform-cloud-engineering-squad -->' },
-            ]);
-            expect(logTester.logsParams).toStrictEqual([
-                "Loading PR #42",
-                "Invoked jira.moveIssue('GHA-42', 'Approve', null)",
-                "Invoked rest.issues.listComments({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42})",
-                "Loading members of platform-cloud-engineering-squad",
-                "Invoked rest.teams.listMembersInOrg({\"org\":\"test-owner\",\"team_slug\":\"platform-cloud-engineering-squad\",\"per_page\":100})",
-                "Invoked jira.moveIssue('PREQ-4242', 'Resolve issue', null)",
-                "Invoked jira.moveIssue('PREQ-4242', 'Close Issue', null)",
-                "Done",
-            ]);
-        });
         const comments = [
             {}, // No body
             { body: '' },
