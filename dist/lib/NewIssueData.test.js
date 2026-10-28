@@ -22,11 +22,13 @@ import { NewIssueData } from '../lib/NewIssueData.js';
 import { jiraClientStub } from '../tests/JiraClientStub.js';
 import { LogTester } from '../tests/LogTester.js';
 import { TeamReviewDataStub } from '../tests/TeamReviewDataStub.js';
+import { AtlassianDocument } from './AtlassianDocumentFormat.js';
 function createPullRequest(title, body, repo = 'repo') {
     return {
         number: 42,
         title,
         body,
+        html_url: 'https://github.com/test-owner/test-repo/pull/42',
         base: { repo: { name: repo } },
         isRenovate() { return title === 'Renovate PR'; },
         isDependabot() { return title === 'Dependabot PR'; },
@@ -111,6 +113,22 @@ describe('NewIssueData', () => {
         const body = 'Fix CVE-2026-78254 and CWE-79 as part of KEY-1234';
         expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', body), 'KEY', '', '1234-account', '')).toEqual(createExpectedParent('KEY', 'KEY-1234', 'Sub-task', body));
         expect(logTester.logsParams).toContain('Found mentioned issues: KEY-1234');
+    });
+    it('create preserves short descriptions and links to oversized descriptions', async () => {
+        const body = 'x'.repeat(10000);
+        const shortIssue = await NewIssueData.create(jiraClientStub, createPullRequest('Title', body), 'KEY', '', '1234-account', '');
+        expect(shortIssue.additionalFields.description).toEqual(createDescription(body));
+        const pr = createPullRequest('Title', 'x'.repeat(30000));
+        const longIssue = await NewIssueData.create(jiraClientStub, pr, 'KEY', '', '1234-account', '');
+        expect(longIssue.additionalFields.description).toEqual(AtlassianDocument.fromMarkdown('The pull request description is too long for Jira. [View the full description on GitHub](https://github.com/test-owner/test-repo/pull/42).'));
+    });
+    it('createForEngExp preserves short descriptions and links to oversized descriptions', async () => {
+        const body = 'x'.repeat(10000);
+        const shortIssue = await NewIssueData.createForEngExp(jiraClientStub, createPullRequest('Title', body), '3333-eng-exp-account');
+        expect(shortIssue.additionalFields.description).toEqual(createDescription(body));
+        const pr = createPullRequest('Title', 'x'.repeat(30000));
+        const longIssue = await NewIssueData.createForEngExp(jiraClientStub, pr, '3333-eng-exp-account');
+        expect(longIssue.additionalFields.description).toEqual(AtlassianDocument.fromMarkdown('The pull request description is too long for Jira. [View the full description on GitHub](https://github.com/test-owner/test-repo/pull/42).'));
     });
     it('create standalone PR with body as default template', async () => {
         const body = `Part of 
