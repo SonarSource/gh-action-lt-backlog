@@ -135,7 +135,7 @@ describe('NewIssueData', () => {
 
     const pr = createPullRequest('Title', 'x'.repeat(30000));
     const longIssue = await NewIssueData.create(jiraClientStub, pr, 'KEY', '', '1234-account', '');
-    expect(longIssue!.additionalFields.description).toEqual(AtlassianDocument.fromMarkdown(`The pull request description is too long for Jira. [View the full description on GitHub](${pr.html_url}).`));
+    expect(longIssue!.additionalFields.description).toEqual(AtlassianDocument.fromMarkdown('The pull request description is too long for Jira. [View the full description on GitHub](https://github.com/test-owner/test-repo/pull/42).'));
   });
 
   it('createForEngExp preserves short descriptions and links to oversized descriptions', async () => {
@@ -145,7 +145,7 @@ describe('NewIssueData', () => {
 
     const pr = createPullRequest('Title', 'x'.repeat(30000));
     const longIssue = await NewIssueData.createForEngExp(jiraClientStub, pr, '3333-eng-exp-account');
-    expect(longIssue.additionalFields.description).toEqual(AtlassianDocument.fromMarkdown(`The pull request description is too long for Jira. [View the full description on GitHub](${pr.html_url}).`));
+    expect(longIssue.additionalFields.description).toEqual(AtlassianDocument.fromMarkdown('The pull request description is too long for Jira. [View the full description on GitHub](https://github.com/test-owner/test-repo/pull/42).'));
   });
 
   it('create standalone PR with body as default template', async () => {
