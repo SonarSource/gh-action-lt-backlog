@@ -32,6 +32,8 @@ All actions should be consumed from these branches.
 
 [AnnounceRelease](AnnounceRelease) - Lock the release branch and ping assignees of tickets still in Validate on Slack.
 
+[CleanupIssues](CleanupIssues) - Cancel stale issues created by automation that were closed without merging.
+
 ## Development notes
 
 ### Setup Repox authentication token

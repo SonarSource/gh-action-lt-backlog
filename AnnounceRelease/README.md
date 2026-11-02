@@ -54,7 +54,7 @@ None
 
 ## Prerequisites
 
-Ask DevInfra squad to add a
+Ask Engineering Experience Squad to add a
 * `github_lock` token to the Vault configuration of your repository.
 * `development/kv/data/jira` token.
 * `development/kv/data/slack` token.

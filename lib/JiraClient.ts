@@ -65,7 +65,7 @@ type Transition = {
   name: string;
 }
 
-type RemoteLink = {
+export type RemoteLink = {
   id: string,
   object: {
     url: string,
