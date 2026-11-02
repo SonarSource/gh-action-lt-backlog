@@ -29,6 +29,7 @@ let action;
 vi.setConfig({ testTimeout: 20000 }); // 20s
 // All teams that exist in Jira, but do not create PRs and do not need boardId configured:
 const ignoredTeams = [
+    ".NET Squad", // Not using sprints
     "1.SC_Project Mgmt.",
     "2.SCE_GTM",
     "3.Stripe_Project Mgmt.",
@@ -37,6 +38,7 @@ const ignoredTeams = [
     "Agentic Security",
     "AICoreTeam",
     "Analysis Squad", // GTM
+    "Analysis Platform", // Not using sprints
     "Analysis Trust", // Not using sprints
     "BizTech - FrontOffice",
     "BizTech - SolutionEnablement",
@@ -55,6 +57,7 @@ const ignoredTeams = [
     "Customer Marketing",
     "Data & Insights",
     "Documentation Squad",
+    "Dynamic Languages", // Not using sprints
     "ELT",
     "End-User Technology",
     "Engineering Project Management",
@@ -78,6 +81,7 @@ const ignoredTeams = [
     "Helix",
     "HR Business Partner",
     "HR Operations",
+    "HR Systems & Analytics",
     "Identity Triage",
     "Incident & Problem Management",
     "InfoSec",
@@ -90,6 +94,7 @@ const ignoredTeams = [
     "ITOPS-NETENG",
     "ITOPS-SOC",
     "ITOPS-SYSENG",
+    "JVM squad", // Not using sprints
     "Legal Team",
     "Operational Finance",
     "Operations Squad", // GTM
@@ -105,6 +110,7 @@ const ignoredTeams = [
     "Storefront EM",
     "Support Council",
     "Support Team",
+    "System Languages", // Not using sprints
     "Taint Analysis", // Aggregation of STL Taint and DTL Taint
     "Travel Team",
     "UX Team",
