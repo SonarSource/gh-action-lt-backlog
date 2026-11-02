@@ -25,7 +25,9 @@ import { PullRequestAction } from '../lib/PullRequestAction.js';
 export class SubmitReview extends PullRequestAction {
 
   protected async processJiraIssue(pr: PullRequest, issueId: string): Promise<void> {
-    if (this.payload.review.state === 'approved') {
+    if (this.isBotSender()) {
+      this.log(`Skipping review submitted by a bot: ${this.payload.sender!.login}`);
+    } else if (this.payload.review.state === 'approved') {
       if (pr.isBot()) { // Including Nigel
         await this.assignCurrentUser(issueId);  // When these start by approving PR instead of moving the card, they end up without a face
       }
@@ -41,7 +43,7 @@ export class SubmitReview extends PullRequestAction {
   }
 
   protected override async afterExecute(pr: PullRequest): Promise<void> {
-    if (this.payload.review.state === "approved") {
+    if (this.payload.review.state === "approved" && !this.isBotSender()) {
       for (const comment of await this.listComments(pr.number)) {
         const teamReviewIssueId = await this.approvedTeamReviewIssueId(comment.body);
         if (teamReviewIssueId) {
@@ -72,5 +74,9 @@ export class SubmitReview extends PullRequestAction {
       }
     }
     return null;
+  }
+
+  private isBotSender(): boolean {
+    return this.payload.sender?.type === "Bot";
   }
 }

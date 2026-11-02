@@ -41,7 +41,7 @@ async function runAction(state: string, findEmailsResult: string[] = [], prAutho
     },
     sender: {
       login: sender,
-      type: "User"
+      type: sender.endsWith('[bot]') ? "Bot" : "User"
     }
   };
   const action = new SubmitReview() as SubmitReview & OctokitActionStub;
@@ -95,6 +95,16 @@ describe('SubmitReview', () => {
     ]);
   });
 
+  it('Request Changes by a Bot is ignored', async () => {
+    await runAction('changes_requested', [], undefined, undefined, 'some[bot]');
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Skipping review submitted by a bot: some[bot]",
+      "Skipping review submitted by a bot: some[bot]",  // There are two Jira issues in the default PR title
+      "Done"
+    ]);
+  });
+
   it('Approved moves issue', async () => {
     await runAction('approved');
     expect(logTester.logsParams).toStrictEqual([
@@ -103,6 +113,16 @@ describe('SubmitReview', () => {
       "Invoked jira.moveIssue('GHA-43', 'Approve', null)",
       "Invoked rest.issues.listComments({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42})",
       "Done",
+    ]);
+  });
+
+  it('Approved by a Bot is ignored', async () => {
+    await runAction('approved', [], undefined, undefined, 'some[bot]');
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Skipping review submitted by a bot: some[bot]",
+      "Skipping review submitted by a bot: some[bot]",  // There are two Jira issues in the default PR title
+      "Done"
     ]);
   });
 
