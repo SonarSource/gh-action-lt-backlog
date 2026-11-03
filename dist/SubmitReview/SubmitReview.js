@@ -21,7 +21,10 @@ import { JIRA_ISSUE_PATTERN, JIRA_NIGEL_ACCOUNT_ID, TEAM_REVIEW_PREFIX } from '.
 import { PullRequestAction } from '../lib/PullRequestAction.js';
 export class SubmitReview extends PullRequestAction {
     async processJiraIssue(pr, issueId) {
-        if (this.payload.review.state === 'approved') {
+        if (this.isBotSender()) {
+            this.log(`Skipping review submitted by a bot: ${this.payload.sender.login}`);
+        }
+        else if (this.payload.review.state === 'approved') {
             if (pr.isBot()) { // Including Nigel
                 await this.assignCurrentUser(issueId); // When these start by approving PR instead of moving the card, they end up without a face
             }
@@ -38,7 +41,7 @@ export class SubmitReview extends PullRequestAction {
         }
     }
     async afterExecute(pr) {
-        if (this.payload.review.state === "approved") {
+        if (this.payload.review.state === "approved" && !this.isBotSender()) {
             for (const comment of await this.listComments(pr.number)) {
                 const teamReviewIssueId = await this.approvedTeamReviewIssueId(comment.body);
                 if (teamReviewIssueId) {
@@ -68,6 +71,9 @@ export class SubmitReview extends PullRequestAction {
             }
         }
         return null;
+    }
+    isBotSender() {
+        return this.payload.sender?.type === "Bot";
     }
 }
 //# sourceMappingURL=SubmitReview.js.map
