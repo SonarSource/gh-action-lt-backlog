@@ -40,6 +40,7 @@ export const RootlyScheduleIds = {
 // If a new team or default board is created, this file should be updated accordingly.
 export const TeamConfigurationData = [
     { name: "ABD Squad", boardId: 1638 },
+    { name: "Advanced Analysis Techniques", boardId: 10507 },
     { name: "Agentic Analysis Squad", boardId: 5313 },
     { name: "Analysis Processing Squad", boardId: 1443 },
     { name: "Architecture Squad", boardId: 1561 },
@@ -59,7 +60,7 @@ export const TeamConfigurationData = [
     { name: JiraTeams.EngineeringExperience.name, boardId: 1551 },
     { name: JiraTeams.FrontEndEngineering.name, boardId: 1444 },
     { name: "Identity Squad", boardId: 1448 },
-    { name: "Language Coverage Squad", boardId: 1770 },
+    { name: "Language Coverage", boardId: 1770 },
     { name: "Organization & Reporting Squad", boardId: 1555 },
     { name: "Remediation Experience", boardId: 1569 },
     { name: "Security SCA", boardId: 1803 },

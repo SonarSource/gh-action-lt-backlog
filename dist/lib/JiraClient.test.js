@@ -48,9 +48,14 @@ beforeAll(async () => {
 });
 async function findFirstActiveSprintId() {
     for (const team of TeamConfigurationData) {
-        const sprintId = await sut.findSprintId(team.boardId);
-        if (sprintId) {
-            return sprintId;
+        try {
+            const sprintId = await sut.findSprintId(team.boardId);
+            if (sprintId) {
+                return sprintId;
+            }
+        }
+        catch (error) {
+            console.log(`Scaffolding boardId ${team.boardId} Error: ${error}`); // Recent production boardIds throw 404 in sandbox
         }
     }
     fail('Scaffolding: Could not find any active sprint ID');
