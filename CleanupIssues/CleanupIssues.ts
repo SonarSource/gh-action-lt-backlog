@@ -20,6 +20,7 @@
 
 import { OctokitAction } from '../lib/OctokitAction.js';
 import { JIRA_TECH_USER_GITHUB_ACCOUNT_ID } from '../lib/Constants.js';
+import { Resolution } from '../lib/JiraClient.js';
 
 export class CleanupIssues extends OctokitAction {
   protected async execute(): Promise<void> {
@@ -29,7 +30,7 @@ export class CleanupIssues extends OctokitAction {
     let canceled = 0;
     for (const issue of issues) {
       if (await this.isAbandoned(issue.key)) {
-        await this.jira.moveIssue(issue.key, 'Cancel Issue', { resolution: { id: '10001' } });  // Won't do
+        await this.jira.moveIssue(issue.key, 'Cancel Issue', { resolution: { id: Resolution.WONT_DO } });
         canceled += 1;
       }
     }

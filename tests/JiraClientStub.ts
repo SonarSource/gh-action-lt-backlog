@@ -19,7 +19,7 @@
  */
 
 import { JiraTeams } from "../Data/TeamConfiguration.js";
-import { JiraClient, Issue, JiraVersion, RemoteLink } from '../lib/JiraClient.js';
+import { JiraClient, Issue, JiraVersion, RemoteLink, Resolution } from '../lib/JiraClient.js';
 import { JiraTeam } from '../lib/JiraTeam.js';
 
 function serializeStrings(values: string[]): string {
@@ -85,8 +85,8 @@ export const jiraClientStub = {
   },
   async findTransition(issueId: string, transitionName: string): Promise<{ id: string, name: string } | null> {
     switch (transitionName) {
-      case 'Merge into master': return issueId === "KEY-1111" ? null : { id: '10000', name: transitionName };
-      case 'Merge into branch': return issueId === "KEY-1111" ? null : { id: '10001', name: transitionName };
+      case 'Merge into master': return issueId === "KEY-1111" ? null : { id: Resolution.DONE, name: transitionName };
+      case 'Merge into branch': return issueId === "KEY-1111" ? null : { id: Resolution.WONT_DO, name: transitionName };
       case 'Merge': return { id: '10002', name: transitionName };
       default: return null; // No transition found
     }
