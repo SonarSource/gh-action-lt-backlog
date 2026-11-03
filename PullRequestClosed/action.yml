@@ -18,6 +18,10 @@ inputs:
     description: 'Jira fix version name assigned to issues without fix version set'
     required: false
     default: ''
+  jira-project:
+    description: 'Only assign fix versions to issues from this Jira project key; empty means all projects'
+    required: false
+    default: ''
 runs:
   using: 'node24'
   main: '../dist/PullRequestClosed/Index.js'

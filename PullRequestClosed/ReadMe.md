@@ -40,6 +40,14 @@ Special value `autodetect-lowest` will use the lowest unreleased fix version for
 
 This parameter is optional.
 
+### `jira-project`
+
+Jira project key allowed to receive fix versions. Example: `SCANENGINE`.
+
+When set, both explicit fix versions and `autodetect-lowest` apply only to issues whose project key exactly matches this value, regardless of their position in the pull request title. Leading and trailing whitespace is ignored.
+
+This parameter is optional. When omitted or empty, fix versions can be assigned to issues from all projects, preserving the existing behavior. Issue transitions are unaffected by this input.
+
 ## Outputs
 
 None
@@ -80,5 +88,6 @@ jobs:
           jira-user:    {{ fromJSON(steps.secrets.outputs.vault).JIRA_USER }}
           jira-token:   {{ fromJSON(steps.secrets.outputs.vault).JIRA_TOKEN }}
           fix-version:  autodetect-lowest   # Optional
+          jira-project: SCANENGINE          # Optional: restrict fix versions to this project
 
 ```

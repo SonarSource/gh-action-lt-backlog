@@ -51,6 +51,11 @@ export class PullRequestClosed extends PullRequestAction {
         if (fixVersion === '') {
             return;
         }
+        const jiraProject = this.inputString('jira-project').trim();
+        if (jiraProject !== '' && this.projectKeyFromIssueId(issueId) !== jiraProject) {
+            this.log(`${issueId}: Skipping fix version assignment for project other than ${jiraProject}`);
+            return;
+        }
         const issue = await this.jira.loadIssue(issueId);
         if (!issue) {
             this.log(`${issueId}: Could not load issue`);

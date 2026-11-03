@@ -26,7 +26,6 @@ import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
 import { OctokitActionStub } from '../tests/OctokitActionStub.js';
 
 async function runAction(title: string, merged: boolean, user: string = 'test-user', branchName: string = 'master') {
-  process.env['INPUT_JIRA-PROJECT'] = 'KEY';
   const action = new PullRequestClosed() as PullRequestClosed & OctokitActionStub;
   action.jira = jiraClientStub;
   action.rest = createOctokitRestStub(title, null, user);
@@ -192,6 +191,7 @@ describe('PullRequestClosed', () => {
 
     it('already set', async () => {
       process.env['INPUT_FIX-VERSION'] = '10.23';
+      process.env['INPUT_JIRA-PROJECT'] = 'FIXVER';
       await runAction('FIXVER-2 Title', true);
       expect(logTester.logsParams).toStrictEqual([
         "Loading PR #42",
@@ -231,6 +231,71 @@ describe('PullRequestClosed', () => {
         "Loading PR #42",
         "Invoked jira.transitionIssue('NOFIXV-1', {\"id\":\"10001\",\"name\":\"Merge into branch\"}, null)",
         "NOFIXV: No unreleased versions found",
+        "Done",
+      ]);
+    });
+  });
+
+  describe('jira-project', () => {
+    it.each(['10.23', 'autodetect-lowest'])('only assigns %s to matching issues in a mixed-project title', async (fixVersion) => {
+      process.env['INPUT_FIX-VERSION'] = fixVersion;
+      process.env['INPUT_JIRA-PROJECT'] = 'FIXVER';
+
+      for (const title of ['FIXVER-1 NOFIXV-1 Title', 'NOFIXV-1 FIXVER-1 Title']) {
+        await runAction(title, true);
+        const matchingIssueLogs = [
+          "Invoked jira.transitionIssue('FIXVER-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+          ...(fixVersion === 'autodetect-lowest' ? ["FIXVER: Found 1 unreleased versions 10.23, using 10.23"] : []),
+          "Invoked jira.addFixVersion('FIXVER-1', '10.23')",
+        ];
+        const otherIssueLogs = [
+          "Invoked jira.transitionIssue('NOFIXV-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+          "NOFIXV-1: Skipping fix version assignment for project other than FIXVER",
+        ];
+        expect(logTester.logsParams).toStrictEqual([
+          "Loading PR #42",
+          ...(title.startsWith('FIXVER-') ? [...matchingIssueLogs, ...otherIssueLogs] : [...otherIssueLogs, ...matchingIssueLogs]),
+          "Done",
+        ]);
+        logTester.logsParams = [];
+      }
+    });
+
+    it('requires an exact project key rather than a prefix', async () => {
+      process.env['INPUT_FIX-VERSION'] = 'autodetect-lowest';
+      process.env['INPUT_JIRA-PROJECT'] = 'FIX';
+      await runAction('FIXVER-1 Title', true);
+      expect(logTester.logsParams).toStrictEqual([
+        "Loading PR #42",
+        "Invoked jira.transitionIssue('FIXVER-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+        "FIXVER-1: Skipping fix version assignment for project other than FIX",
+        "Done",
+      ]);
+    });
+
+    it.each(['', '   '])('preserves assignments across projects for empty input %j', async (jiraProject) => {
+      process.env['INPUT_FIX-VERSION'] = '10.23';
+      process.env['INPUT_JIRA-PROJECT'] = jiraProject;
+      await runAction('FIXVER-1 NOFIXV-1 Title', true);
+      expect(logTester.logsParams).toStrictEqual([
+        "Loading PR #42",
+        "Invoked jira.transitionIssue('FIXVER-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+        "Invoked jira.addFixVersion('FIXVER-1', '10.23')",
+        "Invoked jira.transitionIssue('NOFIXV-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+        "Invoked jira.addFixVersion('NOFIXV-1', '10.23')",
+        "Done",
+      ]);
+    });
+
+    it('trims whitespace around the project key', async () => {
+      process.env['INPUT_FIX-VERSION'] = 'autodetect-lowest';
+      process.env['INPUT_JIRA-PROJECT'] = ' FIXVER ';
+      await runAction('FIXVER-1 Title', true);
+      expect(logTester.logsParams).toStrictEqual([
+        "Loading PR #42",
+        "Invoked jira.transitionIssue('FIXVER-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+        "FIXVER: Found 1 unreleased versions 10.23, using 10.23",
+        "Invoked jira.addFixVersion('FIXVER-1', '10.23')",
         "Done",
       ]);
     });
