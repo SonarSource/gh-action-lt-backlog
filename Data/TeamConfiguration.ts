@@ -69,7 +69,7 @@ export const TeamConfigurationData: TeamConfiguration[] = [
   { name: JiraTeams.EngineeringExperience.name, boardId: 1551 },
   { name: JiraTeams.FrontEndEngineering.name, boardId: 1444 },
   { name: "Identity Squad", boardId: 1448 },
-  { name: "Language Coverage", boardId: 1770 },
+  { name: "Language Expansion", boardId: 1770 },
   { name: "Organization & Reporting Squad", boardId: 1555 },
   { name: "Remediation Experience", boardId: 1569 },
   { name: "Security SCA", boardId: 1803 },
