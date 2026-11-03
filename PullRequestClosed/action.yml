@@ -15,7 +15,7 @@ inputs:
     required: false
     default: 'false'
   fix-version:
-    description: 'Jira fix version name assigned to issues without fix version set'
+    description: 'Jira fix version name assigned to issues without fix version set, only on merges into the repository default branch'
     required: false
     default: ''
 runs:

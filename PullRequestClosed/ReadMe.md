@@ -8,7 +8,7 @@ If `Merge into branch` or `Merge into master` transitions are not available, the
 
 If the PR is closed without being merged, then the action will try to use `Cancel issue` transition for issues created by `Jira Tech User GitHub` via `PullRequestCreated` automation. It will not close any other issues.
 
-When a pull request is merged, the action can optionally assign a Jira fix version to linked issues that do not have one yet.
+When a pull request is merged into the repository's configured default branch, the action can optionally assign a Jira fix version to linked issues that do not have one yet. Merges into other branches still transition issues, but do not assign fix versions. If the event does not identify the default branch, fix-version assignment is skipped.
 
 This action will attempt to move all tickets mentioned in the pull request title.
 
@@ -37,6 +37,8 @@ This parameter will resolve only issues created by automation, or bots.
 Jira fix version name assigned to issues without fix version set. Example: `10.23`
 
 Special value `autodetect-lowest` will use the lowest unreleased fix version for the given project.
+
+Both explicit versions and `autodetect-lowest` are applied only when the PR is merged into the repository's configured default branch. This is checked by the action; callers do not need a separate branch condition on this input.
 
 This parameter is optional.
 

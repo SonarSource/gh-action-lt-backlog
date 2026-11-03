@@ -51,6 +51,11 @@ export class PullRequestClosed extends PullRequestAction {
         if (fixVersion === '') {
             return;
         }
+        const defaultBranch = this.payload.repository?.default_branch;
+        if (!defaultBranch || this.payload.pull_request?.base.ref !== defaultBranch) {
+            this.log(`${issueId}: Skipping fix version assignment outside the repository default branch`);
+            return;
+        }
         const issue = await this.jira.loadIssue(issueId);
         if (!issue) {
             this.log(`${issueId}: Could not load issue`);

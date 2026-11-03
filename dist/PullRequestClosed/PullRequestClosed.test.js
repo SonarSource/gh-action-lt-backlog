@@ -22,11 +22,16 @@ import { PullRequestClosed } from './PullRequestClosed.js';
 import { LogTester } from '../tests/LogTester.js';
 import { jiraClientStub } from '../tests/JiraClientStub.js';
 import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
-async function runAction(title, merged, user = 'test-user', branchName = 'master') {
+async function runAction(title, merged, user = 'test-user', branchName = 'master', defaultBranch = 'master') {
     process.env['INPUT_JIRA-PROJECT'] = 'KEY';
     const action = new PullRequestClosed();
     action.jira = jiraClientStub;
     action.rest = createOctokitRestStub(title, null, user);
+    action.payload.repository = defaultBranch === null ? undefined : {
+        name: 'test-repo',
+        owner: { login: 'test-owner' },
+        default_branch: defaultBranch,
+    };
     action.payload.pull_request = {
         ...(await action.rest.pulls.get({})).data,
         created_at: '2024-12-24T11:00:00Z',
@@ -203,11 +208,52 @@ describe('PullRequestClosed', () => {
         });
         it('autodetect-lowest project without fix version', async () => {
             process.env['INPUT_FIX-VERSION'] = 'autodetect-lowest';
-            await runAction('NOFIXV-1 Title', true, 'test-user', 'user/branch');
+            await runAction('NOFIXV-1 Title', true);
             expect(logTester.logsParams).toStrictEqual([
                 "Loading PR #42",
-                "Invoked jira.transitionIssue('NOFIXV-1', {\"id\":\"10001\",\"name\":\"Merge into branch\"}, null)",
+                "Invoked jira.transitionIssue('NOFIXV-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
                 "NOFIXV: No unreleased versions found",
+                "Done",
+            ]);
+        });
+    });
+    describe.each(['10.23', 'autodetect-lowest'])('default branch with fix-version %s', (fixVersion) => {
+        beforeEach(() => {
+            process.env['INPUT_FIX-VERSION'] = fixVersion;
+        });
+        it.each(['main', 'trunk'])('assigns a fix version when the configured default is %s', async (defaultBranch) => {
+            await runAction('FIXVER-1 Title', true, 'test-user', defaultBranch, defaultBranch);
+            expect(logTester.logsParams).toContain("Invoked jira.addFixVersion('FIXVER-1', '10.23')");
+            if (fixVersion === 'autodetect-lowest') {
+                expect(logTester.logsParams).toContain("FIXVER: Found 1 unreleased versions 10.23, using 10.23");
+            }
+        });
+        it.each(['master', 'main', 'branch-10.23', 'feature/work'])('skips fix versions on non-default branch %s while transitioning the issue', async (branchName) => {
+            await runAction('FIXVER-1 Title', true, 'test-user', branchName, 'trunk');
+            const transition = branchName === 'feature/work'
+                ? { id: '10001', name: 'Merge into branch' }
+                : { id: '10000', name: 'Merge into master' };
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                `Invoked jira.transitionIssue('FIXVER-1', ${JSON.stringify(transition)}, null)`,
+                "FIXVER-1: Skipping fix version assignment outside the repository default branch",
+                "Done",
+            ]);
+        });
+        it('skips fix versions when repository default-branch metadata is missing', async () => {
+            await runAction('FIXVER-1 Title', true, 'test-user', 'master', null);
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                "Invoked jira.transitionIssue('FIXVER-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+                "FIXVER-1: Skipping fix version assignment outside the repository default branch",
+                "Done",
+            ]);
+        });
+        it('does not assign a fix version when closed without merging', async () => {
+            await runAction('KEY-5678 Title', false);
+            expect(logTester.logsParams).toStrictEqual([
+                "Loading PR #42",
+                "Invoked jira.moveIssue('KEY-5678', 'Cancel Issue', {\"resolution\":{\"id\":\"10001\"}})",
                 "Done",
             ]);
         });
