@@ -60,7 +60,7 @@ export class NewIssueData {
           parameters.customfield_10020 = sprintId;
         }
         if (!parent) {
-          parameters.parent = await this.findEvergreenEpic(jira, team);
+          parameters.parent = await this.findEvergreenEpic(jira, pr, team);
         }
       }
       return new NewIssueData(projectKey, accountId, accountId, { ...additionalFields, ...parameters });
@@ -86,19 +86,19 @@ export class NewIssueData {
       ? ['dvi-created-by-automation', 'dvi-renovate']
       : ['dvi-created-by-automation'];
     if (projectKey === 'BUILD') { // PREQ is handled by in-Jira automation, with hardcoded value
-      parameters.parent = await this.findEvergreenEpic(jira, JiraTeams.EngineeringExperience);
+      parameters.parent = await this.findEvergreenEpic(jira, pr, JiraTeams.EngineeringExperience);
     }
     return new NewIssueData(projectKey, accountId, projectKey === 'PREQ' ? null : accountId, parameters); // GHA-86 Leave PREQ unassigned
   }
 
-  public static async createForTeamReview(jira: JiraClient, teamReview: TeamReviewData): Promise<NewIssueData> {
+  public static async createForTeamReview(jira: JiraClient, pr: PullRequest, teamReview: TeamReviewData): Promise<NewIssueData> {
     const parameters = this.newIssueParameters('PREQ', null, 'Maintenance');
     if (teamReview.senderAccountId) {
       parameters.reporter = { id: teamReview.senderAccountId };
     }
     parameters.customfield_10001 = teamReview.jiraTeam.id;
     parameters.labels = ['preq-review-code'];
-    parameters.parent = await this.findEvergreenEpic(jira, teamReview.jiraTeam, 'summary ~ "PREQ"');
+    parameters.parent = await this.findEvergreenEpic(jira, pr, teamReview.jiraTeam, 'summary ~ "PREQ"');
     return new NewIssueData('PREQ', teamReview.senderAccountId, teamReview.assigneeAccountId, parameters);
   }
 
@@ -206,7 +206,7 @@ export class NewIssueData {
     }
   }
 
-  private static async findEvergreenEpic(jira: JiraClient, team: JiraTeam | null, summary: string = 'summary ~ "KTLO" OR summary ~ "Evergreen"'): Promise<{ key: string } | null> {
+  private static async findEvergreenEpic(jira: JiraClient, pr:PullRequest, team: JiraTeam | null, summary: string = 'summary ~ "KTLO" OR summary ~ "Evergreen"'): Promise<{ key: string } | null> {
     if (team) {
       const epics = await jira.findIssues(`issuetype = Epic AND statusCategory != Done AND (${summary}) and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=${team.id} ORDER BY key`);
       if (epics.length === 0) {
@@ -214,8 +214,10 @@ export class NewIssueData {
         return null;
       }
       else {
-        console.log(`Found ${epics.length} Evergreen Epic(s), using ${epics[0].key} ${epics[0].fields.summary}`);
-        return { key: epics[0].key };
+        const isRenovatePR = pr.isRenovate();
+        const epic = epics.find(x => /renovate/i.test(x.fields.summary) == isRenovatePR) ?? epics[0];
+        console.log(`Found ${epics.length} Evergreen Epic(s), using ${epic.key} ${epic.fields.summary}`);
+        return { key: epic.key };
       }
     } else {
       console.log('Team was not found, can not search for parent Evergreen Epic');

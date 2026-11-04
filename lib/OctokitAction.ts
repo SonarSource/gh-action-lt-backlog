@@ -249,7 +249,7 @@ export abstract class OctokitAction extends Action {
       }
       if (teamReview) {
         if (teamReview.createReviewTicket) {
-          const data = await NewIssueData.createForTeamReview(this.jira, teamReview);
+          const data = await NewIssueData.createForTeamReview(this.jira, pr, teamReview);
           this.log(`Creating ${data.projectKey} review issue`);
           const reviewIssueId = await this.jira.createIssue(data.projectKey, `PR review for ${pr.title}`, data.additionalFields);
           if (reviewIssueId) {
