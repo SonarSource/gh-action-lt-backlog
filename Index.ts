@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
  * mailto: info AT sonarsource DOT com
@@ -18,7 +18,18 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { LogPayload } from "./LogPayload.js";
+import * as core from '@actions/core';
+import { LogPayload } from './LogPayload/LogPayload.js';
 
-const action = new LogPayload();
-action.run();
+const actions = [
+  LogPayload
+];
+
+export async function run(actionName: string): Promise<void> {
+  const actionType = actions.find(x => x.name === actionName);
+  if (actionType) {
+    await new actionType().run();
+  } else {
+    core.setFailed(`Unknown action '${actionName}'.`);
+  }
+}

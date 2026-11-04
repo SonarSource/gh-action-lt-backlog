@@ -3,7 +3,11 @@
 ###############################################################################
 * text=auto
 *.js text eol=lf
+*.cjs text eol=lf
 *.ts text eol=lf
 *.md text eol=lf
 *.json text eol=lf
 *.njsproj text eol=lf
+
+# Generated bundle: collapse it in PR diffs and exclude it from language statistics
+/dist/Index.cjs linguist-generated=true
