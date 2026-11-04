@@ -127,7 +127,9 @@ export class PullRequestCreated extends OctokitAction {
   }
 
   private async addLinkedIssuesAsComment(pr: PullRequest, linkedIssues: string[]): Promise<void> {
-    console.log(`Adding the following ticket as comment: ${linkedIssues}`);
-    await this.addComment(pr.number, linkedIssues.map(x => this.issueLink(x)).join('\n'));
+    if (linkedIssues.length !== 0) {
+      console.log(`Adding the following ticket as comment: ${linkedIssues}`);
+      await this.addComment(pr.number, linkedIssues.map(x => this.issueLink(x)).join('\n'));
+    }
   }
 }

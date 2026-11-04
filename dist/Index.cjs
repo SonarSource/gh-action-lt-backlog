@@ -26133,8 +26133,10 @@ var PullRequestCreated = class extends OctokitAction {
     return value.replaceAll(/\s\s+/g, " ").trim();
   }
   async addLinkedIssuesAsComment(pr, linkedIssues) {
-    console.log(`Adding the following ticket as comment: ${linkedIssues}`);
-    await this.addComment(pr.number, linkedIssues.map((x) => this.issueLink(x)).join("\n"));
+    if (linkedIssues.length !== 0) {
+      console.log(`Adding the following ticket as comment: ${linkedIssues}`);
+      await this.addComment(pr.number, linkedIssues.map((x) => this.issueLink(x)).join("\n"));
+    }
   }
 };
 
