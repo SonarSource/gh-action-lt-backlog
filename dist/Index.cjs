@@ -13605,7 +13605,7 @@ var require_fetch = __commonJS({
     function handleFetchDone(response) {
       finalizeAndReportTiming(response, "fetch");
     }
-    function fetch2(input, init = void 0) {
+    function fetch3(input, init = void 0) {
       webidl.argumentLengthCheck(arguments, 1, "globalThis.fetch");
       let p = createDeferredPromise();
       let requestObject;
@@ -14560,7 +14560,7 @@ var require_fetch = __commonJS({
       }
     }
     module2.exports = {
-      fetch: fetch2,
+      fetch: fetch3,
       Fetch,
       fetching,
       finalizeAndReportTiming
@@ -19098,7 +19098,7 @@ var require_undici = __commonJS({
     module2.exports.setGlobalDispatcher = setGlobalDispatcher;
     module2.exports.getGlobalDispatcher = getGlobalDispatcher;
     var fetchImpl = require_fetch().fetch;
-    module2.exports.fetch = async function fetch2(init, options = void 0) {
+    module2.exports.fetch = async function fetch3(init, options = void 0) {
       try {
         return await fetchImpl(init, options);
       } catch (err) {
@@ -20358,6 +20358,16 @@ var ExitCode;
   ExitCode2[ExitCode2["Success"] = 0] = "Success";
   ExitCode2[ExitCode2["Failure"] = 1] = "Failure";
 })(ExitCode || (ExitCode = {}));
+function getInput(name, options) {
+  const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
+  if (options && options.required && !val) {
+    throw new Error(`Input required and not supplied: ${name}`);
+  }
+  if (options && options.trimWhitespace === false) {
+    return val;
+  }
+  return val.trim();
+}
 function setFailed(message) {
   process.exitCode = ExitCode.Failure;
   error(message);
@@ -20447,6 +20457,14 @@ var __awaiter2 = function(thisArg, _arguments, P, generator) {
     step((generator = generator.apply(thisArg, _arguments || [])).next());
   });
 };
+function getAuthString(token, options) {
+  if (!token && !options.auth) {
+    throw new Error("Parameter token or opts.auth is required");
+  } else if (token && options.auth) {
+    throw new Error("Parameters token and opts.auth may not both be specified");
+  }
+  return typeof options.auth === "string" ? options.auth : `token ${token}`;
+}
 function getProxyAgent(destinationUrl) {
   const hc = new httpClient.HttpClient();
   return hc.getAgent(destinationUrl);
@@ -20464,6 +20482,19 @@ function getProxyFetch(destinationUrl) {
 }
 function getApiBaseUrl() {
   return process.env["GITHUB_API_URL"] || "https://api.github.com";
+}
+function getUserAgentWithOrchestrationId(baseUserAgent) {
+  var _a;
+  const orchId = (_a = process.env["ACTIONS_ORCHESTRATION_ID"]) === null || _a === void 0 ? void 0 : _a.trim();
+  if (orchId) {
+    const sanitizedId = orchId.replace(/[^a-z0-9_.-]/gi, "_");
+    const tag = `actions_orchestration_id/${sanitizedId}`;
+    if (baseUserAgent === null || baseUserAgent === void 0 ? void 0 : baseUserAgent.includes(tag))
+      return baseUserAgent;
+    const ua = baseUserAgent ? `${baseUserAgent} ` : "";
+    return `${ua}${tag}`;
+  }
+  return baseUserAgent;
 }
 
 // node_modules/universal-user-agent/index.js
@@ -21391,8 +21422,8 @@ function isPlainObject2(value) {
 }
 var noop = () => "";
 async function fetchWrapper(requestOptions) {
-  const fetch2 = requestOptions.request?.fetch || globalThis.fetch;
-  if (!fetch2) {
+  const fetch3 = requestOptions.request?.fetch || globalThis.fetch;
+  if (!fetch3) {
     throw new Error(
       "fetch is not set. Please pass a fetch implementation as new Octokit({ request: { fetch }}). Learn more at https://github.com/octokit/octokit.js/#fetch-missing"
     );
@@ -21408,7 +21439,7 @@ async function fetchWrapper(requestOptions) {
   );
   let fetchResponse;
   try {
-    fetchResponse = await fetch2(requestOptions.url, {
+    fetchResponse = await fetch3(requestOptions.url, {
       method: requestOptions.method,
       body,
       redirect: requestOptions.request?.redirect,
@@ -24410,9 +24441,25 @@ var defaults = {
   }
 };
 var GitHub = Octokit.plugin(restEndpointMethods, paginateRest).defaults(defaults);
+function getOctokitOptions(token, options) {
+  const opts = Object.assign({}, options || {});
+  const auth2 = getAuthString(token, opts);
+  if (auth2) {
+    opts.auth = auth2;
+  }
+  const userAgent2 = getUserAgentWithOrchestrationId(opts.userAgent);
+  if (userAgent2) {
+    opts.userAgent = userAgent2;
+  }
+  return opts;
+}
 
 // node_modules/@actions/github/lib/github.js
 var context2 = new Context();
+function getOctokit(token, options, ...additionalPlugins) {
+  const GitHubWithPlugins = GitHub.plugin(...additionalPlugins);
+  return new GitHubWithPlugins(getOctokitOptions(token, options));
+}
 
 // lib/Action.ts
 var Action = class {
@@ -24455,6 +24502,1346 @@ var Action = class {
   }
 };
 
+// lib/OctokitTypes.ts
+function addPullRequestExtensions(pr) {
+  return {
+    ...pr,
+    isRenovate() {
+      return this.user?.login === "renovate[bot]" || this.user?.login === "hashicorp-vault-sonar-prod[bot]" && this.body?.includes("This PR has been generated by [Mend Renovate]") || false;
+    },
+    isDependabot() {
+      return this.user?.login === "dependabot[bot]";
+    },
+    isBot() {
+      return this.user?.type === "Bot";
+    }
+  };
+}
+
+// Data/TeamConfiguration.ts
+var GitHubTeamSlugs = {
+  PlatformCloudEngineering: "platform-cloud-engineering-squad",
+  PlatformCloudProductionEngineering: "platform-cloud-production-engineering-squad",
+  PlatformEngXp: "platform-eng-xp-squad",
+  PlatformFrontEndEngineering: "platform-front-end-eng-squad"
+};
+var JiraTeams = {
+  EngineeringExperience: { id: "eb40f25e-3596-4541-b661-cf83e7bc4fa6", name: "Engineering Experience Squad" },
+  CloudEngineering: { id: "772ea1dc-3574-42bc-a378-7a898d910ebd", name: "Cloud Engineering" },
+  CloudProductionEngineering: { id: "6f2e744b-9f09-4c3a-852e-e2f138d1c14f", name: "Cloud Production Engineering" },
+  FrontEndEngineering: { id: "53da4327-9401-498d-ae38-28dcb1e347a1", name: "Front-End Engineering" }
+};
+var RootlyScheduleIds = {
+  PlatformCloudEngineeringTriager: "c461f921-6c62-4039-8c5e-59500682ccb0",
+  PlatformCloudProductionEngineeringTriager: "c461f921-6c62-4039-8c5e-59500682ccb0",
+  PlatformEngXpTriager: "340d3bc8-9b6c-43fc-856a-e44bec97ebc8",
+  PlatformFrontEndEngineeringTriager: "2091132b-a81b-4c6c-80ea-8d4ea74227af"
+};
+var TeamConfigurationData = [
+  { name: "ABD Squad", boardId: 1638 },
+  { name: "Advanced Analysis Techniques", boardId: 10507 },
+  { name: "Agentic Analysis Squad", boardId: 5313 },
+  { name: "Analysis Processing Squad", boardId: 1443 },
+  { name: "Architecture Squad", boardId: 1561 },
+  { name: "Autoscan", boardId: 9544 },
+  { name: "Billing-Squad", boardId: 1536 },
+  { name: "BizTech - Back Office", boardId: 1464 },
+  { name: "CI Experience", boardId: 9378 },
+  { name: JiraTeams.CloudEngineering.name, boardId: 8147 },
+  { name: JiraTeams.CloudProductionEngineering.name, boardId: 8148 },
+  { name: "Cloud Security", boardId: 1462 },
+  { name: "Code Data Storage", boardId: 9013 },
+  { name: "Context Augmentation Squad", boardId: 8314 },
+  { name: "Data & ML Platform", boardId: 7875 },
+  { name: "Development Experience Squad", boardId: 1527 },
+  { name: "DevOps Platform Experience Squad", boardId: 1438 },
+  { name: "DTL Taint", boardId: 4146 },
+  { name: JiraTeams.EngineeringExperience.name, boardId: 1551 },
+  { name: JiraTeams.FrontEndEngineering.name, boardId: 1444 },
+  { name: "Identity Squad", boardId: 1448 },
+  { name: "Language Expansion", boardId: 1770 },
+  { name: "Organization & Reporting Squad", boardId: 1555 },
+  { name: "Remediation Experience", boardId: 1569 },
+  { name: "Security SCA", boardId: 1803 },
+  { name: "Server Platform squad", boardId: 1548 },
+  { name: "STL Taint", boardId: 4179 },
+  { name: "Workflow & Standards Squad", boardId: 1550 }
+];
+
+// lib/Configuration.ts
+var Configuration = class {
+  teams = {};
+  constructor() {
+    for (const team of TeamConfigurationData) {
+      this.teams[team.name] = team;
+    }
+  }
+  findTeam(name) {
+    return this.teams[name] || null;
+  }
+};
+var Config = new Configuration();
+
+// lib/JiraClient.ts
+var JiraClient = class {
+  domain;
+  siteId;
+  organizationId;
+  token;
+  constructor(domain, siteId, organizationId, user, token) {
+    this.domain = domain;
+    this.siteId = siteId;
+    this.organizationId = organizationId;
+    this.token = Buffer.from(`${user}:${token}`).toString("base64");
+  }
+  async createIssue(projectKey, summary2, additionalFields) {
+    const request2 = {
+      fields: {
+        project: { key: projectKey },
+        summary: summary2,
+        ...additionalFields
+      }
+    };
+    console.log(`Creating issue in project '${projectKey}'`);
+    const response = await this.sendRestPostApi("issue", request2);
+    const issueId = response?.key || null;
+    if (issueId) {
+      console.log(`Created issue: ${issueId}`);
+    }
+    return issueId;
+  }
+  loadIssue(issueKey) {
+    console.log(`Load issue '${issueKey}'`);
+    return this.sendRestGetApi(`issue/${issueKey}`);
+  }
+  loadProject(projectKey) {
+    console.log(`Load project '${projectKey}'`);
+    return this.sendRestGetApi(`project/${projectKey}`);
+  }
+  async moveIssue(issueId, transitionName, fields = null) {
+    const transition = await this.findTransition(issueId, transitionName);
+    if (transition == null) {
+      console.log(`${issueId}: Could not find the transition '${transitionName}'`);
+    } else {
+      await this.transitionIssue(issueId, transition, fields);
+    }
+  }
+  async findTransition(issueId, transitionName) {
+    const transitions = (await this.sendRestGetApi(`issue/${issueId}/transitions`))?.transitions ?? [];
+    return transitions.find((x) => x.name === transitionName) || null;
+  }
+  async transitionIssue(issueId, transition, fields = null) {
+    console.log(`${issueId}: Executing '${transition.name}' (${transition.id}) transition`);
+    await this.sendRestPostApi(`issue/${issueId}/transitions`, { transition: { id: transition.id }, fields });
+  }
+  async assignIssueToEmail(issueId, userEmails) {
+    const accountId = await this.findAccountId(userEmails);
+    if (accountId != null) {
+      await this.assignIssueToAccount(issueId, accountId);
+    }
+  }
+  async assignIssueToAccount(issueId, accountId) {
+    console.log(`${issueId}: Assigning to ${accountId}`);
+    await this.sendRestPutApi(`issue/${issueId}/assignee`, { accountId });
+  }
+  async addReviewer(issueId, userEmails) {
+    const accountId = await this.findAccountId(userEmails);
+    if (accountId != null) {
+      console.log(`${issueId}: Adding Reviewer ${accountId}`);
+      const request2 = {
+        update: {
+          customfield_11227: [{
+            add: { accountId }
+            // Nothing will happen if it already exists
+          }]
+        }
+      };
+      await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request2);
+    }
+  }
+  async addReviewedBy(issueId, userEmails) {
+    const accountId = await this.findAccountId(userEmails);
+    if (accountId != null) {
+      console.log(`${issueId}: Adding Reviewed by ${accountId}`);
+      const request2 = {
+        update: {
+          customfield_11228: [{
+            add: { accountId }
+            // Nothing will happen if it already exists
+          }]
+        }
+      };
+      await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request2);
+    }
+  }
+  async createComponent(projectKey, name, description) {
+    console.log(`Searching for component '${name}' in project ${projectKey}`);
+    const { total, values } = await this.sendRestGetApi(`project/${encodeURIComponent(projectKey)}/component?query=${encodeURIComponent(name)}`);
+    if (values.some((x) => x.name === name)) {
+      console.log(`Component found in ${total} result(s)`);
+      return true;
+    } else {
+      console.log(`Component not found in ${total} result(s). Creating a new one.`);
+      return await this.sendRestPostApi("component", { project: projectKey, name, description }) != null;
+    }
+  }
+  async addIssueComponent(issueId, name) {
+    console.log(`${issueId}: Adding component ${name}`);
+    const request2 = {
+      update: {
+        components: [{
+          add: { name }
+          // Nothing will happen if it already exists
+        }]
+      }
+    };
+    return await this.sendRestPutApi(`issue/${issueId}?notifyUsers=false`, request2) != null;
+  }
+  async findProjectVersions(projectKey) {
+    console.log(`${projectKey}: Loading versions`);
+    return await this.sendRestGetApi(`project/${projectKey}/versions`) ?? [];
+  }
+  async addFixVersion(issueKey, versionName) {
+    console.log(`${issueKey}: Adding fix version ${versionName}`);
+    const request2 = {
+      update: {
+        fixVersions: [{
+          add: { name: versionName }
+        }]
+      }
+    };
+    await this.sendRestPutApi(`issue/${issueKey}`, request2);
+  }
+  async addIssueRemoteLink(issueId, url, title = null) {
+    console.log(`${issueId}: Adding remote link ${url}`);
+    await this.sendRestPostApi(`issue/${issueId}/remotelink`, { object: { url, title: title ?? url } });
+  }
+  async linkIssues(issueId, linkedIssueId, linkType) {
+    console.log(`Linking ${issueId} and ${linkedIssueId} as '${linkType}'`);
+    await this.sendRestPostApi("issueLink", {
+      type: { name: linkType },
+      inwardIssue: { key: issueId },
+      outwardIssue: { key: linkedIssueId }
+    });
+  }
+  loadIssueRemoteLinks(issueId) {
+    console.log(`${issueId}: Load remote links for ${issueId}`);
+    return this.sendRestGetApi(`issue/${issueId}/remotelink`);
+  }
+  async findAccountId(emails) {
+    for (const email of emails) {
+      const accountId = await this.findAccountIdFromEmail(email);
+      if (accountId) {
+        return accountId;
+      }
+    }
+    return null;
+  }
+  async findAccountIdFromEmail(email) {
+    if (email == null) {
+      console.log("Could not find accountId, email is null");
+      return null;
+    }
+    const logUser = email.substring(0, email.indexOf("@")).replace(".", " ");
+    console.log(`Searching for user: ${logUser}`);
+    let accounts = await this.sendRestGetApi(`user/search?query=${encodeURIComponent(email)}`) ?? [];
+    accounts = accounts.filter((x) => x.emailAddress === email);
+    if (accounts.length === 0) {
+      console.log(`Could not find user ${logUser} in Jira`);
+      return null;
+    } else {
+      console.log(`Found ${accounts.length} account(s), using ${accounts[0].accountId} ${accounts[0].displayName}`);
+      return accounts[0].accountId;
+    }
+  }
+  findBoard(boardId) {
+    console.log(`Searching for boardId ${boardId}`);
+    return this.sendRestGetAgile(`board/${boardId}`);
+  }
+  async findSprintId(boardId) {
+    console.log(`Searching for active sprint in board ${boardId}`);
+    let { values } = await this.sendRestGetAgile(`board/${boardId}/sprint?state=active`);
+    values = values.filter((x) => x.originBoardId === boardId);
+    if (values.length === 0) {
+      console.log(`Could not find active sprint in board ${boardId}`);
+      return null;
+    } else {
+      const originalLength = values.length;
+      const sprint = values.sort((a, b) => a.endDate.localeCompare(b.endDate)).pop();
+      console.log(`Found ${originalLength} active sprint(s), using ${sprint.id} ${sprint.name}`);
+      return sprint.id;
+    }
+  }
+  async findTeamByUser(accountId) {
+    console.log(`Searching for teams of account ${accountId}`);
+    return this.findTeam(`membership: { memberIds: "${accountId}" }`, (x) => true);
+  }
+  async findTeamByName(teamName) {
+    console.log(`Searching for team ${teamName}`);
+    return this.findTeam(`query: "${teamName}"`, (x) => x.name === teamName);
+  }
+  async findIssues(jql) {
+    console.log(`Searching for issues: ${jql}`);
+    const response = await this.sendRestGetApi(`search/jql?fields=key,summary,assignee,customfield_10015,duedate&jql=${encodeURIComponent(jql)}`);
+    return response?.issues ?? [];
+  }
+  async findTeam(queryFilter, resultFilter) {
+    const nodes = (await this.findTeams(queryFilter)).filter(resultFilter);
+    if (nodes.length === 0) {
+      console.log(`Could not find team in Jira`);
+      return null;
+    } else {
+      const match = nodes.find((x) => Config.findTeam(x.name) != null) ?? nodes[0];
+      console.log(`Found ${nodes.length} team(s), using ${match.id} ${match.name}`);
+      return match;
+    }
+  }
+  async findTeams(queryFilter) {
+    const allTeams = [];
+    let after = null;
+    let hasNextPage = true;
+    while (hasNextPage) {
+      const response = await this.sendGraphQL(`
+        query MandatoryButUselessQueryName {
+          team {
+            teamSearchV2 (
+              siteId: "${this.siteId}",
+              organizationId: "ari:cloud:platform::org/${this.organizationId}",
+              filter: { ${queryFilter} }
+              after: "${after}"
+            )
+            {
+              nodes {
+                team { id displayName }
+              }
+              pageInfo {
+                hasNextPage # This is lying and returning false only on the last page :facepalm:
+                endCursor
+              }
+            }
+          }
+        }`);
+      if (!response) {
+        console.log(`ERROR: Failed to search for teams.`);
+        return [];
+      } else if (response.errors) {
+        console.log(`ERROR: Failed to search for teams. ${JSON.stringify(response.errors, null, 2)}`);
+        return [];
+      } else if (response.data.team) {
+        const teamData = response.data.team.teamSearchV2;
+        for (const team of teamData.nodes) {
+          const id = team.team.id.split("/").pop();
+          allTeams.push({ id, name: team.team.displayName });
+        }
+        hasNextPage = teamData.pageInfo.hasNextPage;
+        after = teamData.pageInfo.endCursor;
+      } else {
+        hasNextPage = false;
+      }
+    }
+    return allTeams;
+  }
+  async sendGraphQL(query) {
+    console.log(query);
+    return this.sendRequest("POST", "gateway/api/graphql", { query });
+  }
+  async sendRestGetApi(endpoint2) {
+    return this.sendRequest("GET", `rest/api/3/${endpoint2}`);
+  }
+  async sendRestGetAgile(endpoint2) {
+    return this.sendRequest("GET", `rest/agile/1.0/${endpoint2}`);
+  }
+  async sendRestPostApi(endpoint2, body) {
+    console.log(JSON.stringify(body, null, 2));
+    return this.sendRequest("POST", `rest/api/3/${endpoint2}`, body);
+  }
+  async sendRestPutApi(endpoint2, body) {
+    console.log(JSON.stringify(body, null, 2));
+    return this.sendRequest("PUT", `rest/api/3/${endpoint2}`, body);
+  }
+  async sendRequest(method, path, body) {
+    const url = `${this.domain}/${path}`;
+    const response = await fetch(url, {
+      method,
+      headers: {
+        "Authorization": `Basic ${this.token}`,
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Accept-Language": "en"
+        // Otherwise Patlassian* returns errors in Chineese :facepalm:
+      },
+      body: body ? JSON.stringify(body) : void 0
+    });
+    const responseContent = await response.text();
+    const data = responseContent.length > 0 ? JSON.parse(responseContent) : {};
+    if (response.ok) {
+      return data;
+    } else {
+      console.log(`${response.status} (${response.statusText}): ${data?.errorMessages?.join(". ") ?? "Unknown error"}`);
+      if (data != null) {
+        console.log(JSON.stringify(data, null, 2));
+      }
+      return null;
+    }
+  }
+};
+
+// lib/Constants.ts
+var RENOVATE_PREFIX = "Renovate Jira issue ID: ";
+var TEAM_REVIEW_PREFIX = "Team Review Jira issue ID: ";
+var JIRA_ISSUE_PATTERN = /\b(?!USER-)[A-Z][A-Z0-9]*-\d+/g;
+var JIRA_DOMAIN = "https://sonarsource.atlassian.net";
+var JIRA_NIGEL_ACCOUNT_ID = "712020:9c105dc5-0493-4d71-83a6-ed21c4ba03c0";
+var JIRA_TECH_USER_GITHUB_ACCOUNT_ID = "712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4";
+var JIRA_TECH_USER_RELEASE_ENGINEERS_ACCOUNT_ID = "62d146be6eba7198372287a4";
+var JIRA_BOT_ACCOUNT_IDS = [JIRA_NIGEL_ACCOUNT_ID, JIRA_TECH_USER_GITHUB_ACCOUNT_ID, JIRA_TECH_USER_RELEASE_ENGINEERS_ACCOUNT_ID];
+var JIRA_SITE_ID = "d2e970e4-8820-420f-8908-e27ca87a64b8";
+var JIRA_ORGANIZATION_ID = "78eed3e4-84ad-4374-b777-a3b4ba5d9516";
+
+// lib/MarkdownParser.ts
+var MarkdownParser = class {
+  lines;
+  nextIndex = 0;
+  constructor(markdown) {
+    this.lines = markdown.split("\n").map((line) => line.trimEnd());
+  }
+  readBlock() {
+    if (!this.canRead()) {
+      return null;
+    }
+    let line = this.readLine();
+    while (line.trim() === "" && this.canRead()) {
+      line = this.readLine();
+    }
+    if (this.isHeading(line)) {
+      return { type: "heading", text: line };
+    } else if (this.isCodeBlock(line)) {
+      return { type: "codeBlock", text: this.readCodeBlock() };
+    } else if (this.isBlockQuote(line)) {
+      return { type: "blockquote", text: this.readBlockquote(line) };
+    } else {
+      return { type: "paragraph", text: this.readParagraph(line) };
+    }
+  }
+  canRead() {
+    return this.nextIndex < this.lines.length;
+  }
+  readLine() {
+    return this.lines[this.nextIndex++];
+  }
+  readCodeBlock() {
+    let text = "";
+    while (this.nextIndex < this.lines.length && !this.isCodeBlock(this.lines[this.nextIndex])) {
+      text += (text ? "\n" : "") + this.readLine();
+    }
+    this.nextIndex++;
+    return text;
+  }
+  readBlockquote(line) {
+    let text = line.substring(1).trimStart();
+    while (this.nextIndex < this.lines.length && this.isBlockQuote(this.lines[this.nextIndex])) {
+      text += "\n" + this.readLine().substring(1).trimStart();
+    }
+    return text;
+  }
+  readParagraph(line) {
+    let text = line;
+    while (this.nextIndex < this.lines.length && this.isParagraph(this.lines[this.nextIndex])) {
+      text += "\n" + this.readLine();
+    }
+    return text;
+  }
+  isParagraph(line) {
+    return !this.isHeading(line) && !this.isCodeBlock(line) && !this.isBlockQuote(line);
+  }
+  isHeading(line) {
+    return /^#{1,6} /.test(line);
+  }
+  isCodeBlock(line) {
+    return /^```\w*#?$/.test(line);
+  }
+  isBlockQuote(line) {
+    return line.startsWith(">");
+  }
+};
+
+// lib/MarkdownTextParser.ts
+var MarkdownTextParser = class {
+  text;
+  nextIndex = 0;
+  constructor(text) {
+    this.text = text;
+  }
+  readBlock() {
+    if (this.nextIndex >= this.text.length) {
+      return null;
+    } else if (this.text[this.nextIndex] === "`") {
+      return { type: "code", text: this.readCode() };
+    } else if (this.text.startsWith("http://", this.nextIndex) || this.text.startsWith("https://", this.nextIndex)) {
+      const href = this.readHref();
+      return { type: "link", text: href, href };
+    } else {
+      const match = this.matchLink(this.nextIndex);
+      if (match == null) {
+        return { type: "text", text: this.readText() };
+      } else {
+        this.nextIndex += match[0].length;
+        return { type: "link", text: match.groups.title, href: match.groups.href };
+      }
+    }
+  }
+  readText() {
+    const end = this.nextTokenIndex();
+    const result = this.text.substring(this.nextIndex, end);
+    this.nextIndex = end;
+    return result;
+  }
+  nextTokenIndex() {
+    let index = this.nextIndex;
+    let next = new NextIndex(this.text, index);
+    while (next.token > 0 || next.link > 0) {
+      if (next.token > 0 && (next.link < 0 || next.token < next.link)) {
+        return next.token;
+      } else if (next.link >= 0) {
+        if (this.matchLink(next.link)) {
+          return next.link;
+        } else {
+          index = next.link + 1;
+          next = new NextIndex(this.text, index);
+        }
+      }
+    }
+    return this.text.length;
+  }
+  readCode() {
+    let end = this.text.indexOf("`", this.nextIndex + 1);
+    if (end < 0) {
+      end = this.text.length;
+    }
+    const result = this.text.substring(this.nextIndex + 1, end);
+    this.nextIndex = end + 1;
+    return result;
+  }
+  matchLink(index) {
+    return this.text[index] === "[" ? this.text.substring(index).match(/^\[(?<title>[^\]]+)\]\((?<href>[^) ]+)\)/) : null;
+  }
+  readHref() {
+    const match = this.text.substring(this.nextIndex).match(/^https?:\/\/[^\s,;)]*/);
+    let text = match[0];
+    while (text.endsWith("?") || text.endsWith(".")) {
+      text = text.substring(0, text.length - 1);
+    }
+    this.nextIndex += text.length;
+    return text;
+  }
+};
+var NextIndex = class {
+  token = -1;
+  link;
+  constructor(text, index) {
+    this.token = this.minToken(text.indexOf("`", index));
+    this.token = this.minToken(text.indexOf("http://", index));
+    this.token = this.minToken(text.indexOf("https://", index));
+    this.link = text.indexOf("[", index);
+    if (this.token === index) {
+      throw new Error("This should be called only when current token starts with text.");
+    }
+  }
+  minToken(candidate) {
+    return this.token < 0 || candidate >= 0 && candidate < this.token ? candidate : this.token;
+  }
+};
+
+// lib/AtlassianDocumentFormat.ts
+var AtlassianDocument = class _AtlassianDocument {
+  type = "doc";
+  version = 1;
+  content;
+  constructor(content) {
+    this.content = content;
+  }
+  static fromMarkdown(markdown) {
+    const contents = [];
+    const parser = new MarkdownParser(markdown);
+    let block;
+    while (block = parser.readBlock()) {
+      contents.push(new AdfNode(block));
+    }
+    this.normalizeHeadings(contents);
+    return new _AtlassianDocument(contents);
+  }
+  static normalizeHeadings(nodes) {
+    const headings = nodes.filter((x) => x.type === "heading");
+    if (headings.length > 0) {
+      const min = headings.reduce((min2, x) => Math.min(min2, x.attrs.level), 6);
+      for (const node of headings) {
+        node.attrs.level -= min - 1;
+      }
+    }
+  }
+};
+var AdfNode = class _AdfNode {
+  type;
+  content;
+  attrs;
+  marks;
+  text;
+  constructor(block) {
+    this.type = block.type;
+    switch (block.type) {
+      case "heading": {
+        const level = block.text.indexOf(" ");
+        this.attrs = { level };
+        this.content = _AdfNode.parseText(block.text.substring(level + 1));
+        break;
+      }
+      case "blockquote": {
+        this.content = [
+          {
+            type: "paragraph",
+            content: _AdfNode.parseText(block.text)
+          }
+        ];
+        break;
+      }
+      case "codeBlock": {
+        this.content = [{ type: "text", text: block.text }];
+        break;
+      }
+      case "paragraph": {
+        this.content = _AdfNode.parseText(block.text);
+        break;
+      }
+      default:
+        throw new Error(`Unsupported block type: ${block.type}`);
+    }
+  }
+  static parseText(text) {
+    const nodes = [];
+    const parser = new MarkdownTextParser(text);
+    let block;
+    while (block = parser.readBlock()) {
+      switch (block.type) {
+        case "code": {
+          nodes.push({
+            type: "text",
+            text: block.text,
+            marks: [{ type: "code" }]
+          });
+          break;
+        }
+        case "link": {
+          nodes.push({
+            type: "text",
+            text: block.text,
+            marks: [{ type: "link", attrs: { href: block.href } }]
+          });
+          break;
+        }
+        case "text": {
+          nodes.push({
+            type: "text",
+            text: block.text
+          });
+          break;
+        }
+        default:
+          throw new Error(`Unsupported text block type: ${block.type}`);
+      }
+    }
+    return nodes;
+  }
+};
+
+// lib/NewIssueData.ts
+var NewIssueData = class _NewIssueData {
+  static DESCRIPTION_MAX_LENGTH = 3e4;
+  projectKey;
+  accountId;
+  assigneeId;
+  additionalFields;
+  constructor(projectKey, accountId, assigneeId, additionalFields) {
+    this.projectKey = projectKey;
+    this.accountId = accountId;
+    this.assigneeId = assigneeId;
+    this.additionalFields = additionalFields;
+  }
+  static async create(jira, pr, inputJiraProject, inputAdditionalFields, accountId, fallbackTeam) {
+    const parent = pr.isRenovate() || pr.isDependabot() ? null : await this.findValidParent(jira, this.findMentionedIssues(pr));
+    const projectKey = this.computeProjectKey(inputJiraProject, parent);
+    if (projectKey) {
+      const additionalFields = this.parseAdditionalFields(inputAdditionalFields);
+      const parameters = this.newIssueParameters(projectKey, parent, additionalFields.issuetype?.name ?? "Maintenance");
+      parameters.description = this.parseDescription(pr);
+      if (parameters.issuetype.name !== "Sub-task") {
+        const team = await this.findTeam(jira, accountId, projectKey, fallbackTeam);
+        if (team != null) {
+          const sprintId = await this.findSprintId(jira, team.name);
+          parameters.customfield_10001 = team.id;
+          parameters.customfield_10020 = sprintId;
+        }
+        if (!parent) {
+          parameters.parent = await this.findEvergreenEpic(jira, team);
+        }
+      }
+      return new _NewIssueData(projectKey, accountId, accountId, { ...additionalFields, ...parameters });
+    } else {
+      console.log("No suitable project key found, issue will not be created");
+      return null;
+    }
+  }
+  static async createForEngExp(jira, pr, accountId) {
+    const projectKey = await this.computeProjectKeyForEngExp(jira, pr, accountId);
+    const parameters = this.newIssueParameters(projectKey, null, "Maintenance");
+    parameters.description = this.parseDescription(pr);
+    if (accountId) {
+      parameters.reporter = { id: accountId };
+    }
+    parameters.customfield_10001 = JiraTeams.EngineeringExperience.id;
+    if (!pr.isRenovate() && projectKey !== "PREQ") {
+      const sprintId = await this.findSprintId(jira, JiraTeams.EngineeringExperience.name);
+      parameters.customfield_10020 = sprintId;
+    }
+    parameters.labels = pr.isRenovate() ? ["dvi-created-by-automation", "dvi-renovate"] : ["dvi-created-by-automation"];
+    if (projectKey === "BUILD") {
+      parameters.parent = await this.findEvergreenEpic(jira, JiraTeams.EngineeringExperience);
+    }
+    return new _NewIssueData(projectKey, accountId, projectKey === "PREQ" ? null : accountId, parameters);
+  }
+  static async createForTeamReview(jira, teamReview) {
+    const parameters = this.newIssueParameters("PREQ", null, "Maintenance");
+    if (teamReview.senderAccountId) {
+      parameters.reporter = { id: teamReview.senderAccountId };
+    }
+    parameters.customfield_10001 = teamReview.jiraTeam.id;
+    parameters.labels = ["preq-review-code"];
+    parameters.parent = await this.findEvergreenEpic(jira, teamReview.jiraTeam, 'summary ~ "PREQ"');
+    return new _NewIssueData("PREQ", teamReview.senderAccountId, teamReview.assigneeAccountId, parameters);
+  }
+  static computeProjectKey(inputJiraProject, parent) {
+    if (!parent) {
+      return inputJiraProject;
+    } else if (parent.fields.issuetype.name === "Epic") {
+      return inputJiraProject || parent.fields.project.key;
+    } else {
+      return parent.fields.project.key;
+    }
+  }
+  static async computeProjectKeyForEngExp(jira, pr, accountId) {
+    if (pr.base.repo.name === "parent-oss") {
+      return "PARENTOSS";
+    } else if (accountId) {
+      const team = await jira.findTeamByUser(accountId);
+      return team?.name === JiraTeams.EngineeringExperience.name ? "BUILD" : "PREQ";
+    } else {
+      return "BUILD";
+    }
+  }
+  static parseAdditionalFields(inputAdditionFields) {
+    if (inputAdditionFields) {
+      try {
+        return JSON.parse(inputAdditionFields);
+      } catch (error2) {
+        console.log(`Unable to parse additional-fields: ${inputAdditionFields}`, error2);
+      }
+    }
+    return {};
+  }
+  static newIssueParameters(projectKey, parent, issueType) {
+    switch (parent?.fields.issuetype.name) {
+      case "Epic":
+        return { issuetype: { name: issueType }, parent: { key: parent.key } };
+      case "Sub-task":
+      case void 0:
+      case null:
+        return { issuetype: { name: issueType } };
+      default:
+        return parent.fields.project.key === projectKey ? { issuetype: { name: "Sub-task" }, parent: { key: parent.key } } : { issuetype: { name: issueType } };
+    }
+  }
+  static async findValidParent(jira, issues) {
+    console.log("Looking for valid parent ticket");
+    for (const issueKey of issues) {
+      if (issueKey.startsWith("BUILD-") || issueKey.startsWith("PREQ-")) {
+        console.log(`Ignoring Eng. Xp Squad project: ${issueKey}`);
+      } else {
+        const issue2 = await jira.loadIssue(issueKey);
+        if (issue2 && !["Theme", "Initiative", "Sub-task"].includes(issue2.fields.issuetype.name)) {
+          console.log(`Parent issue: ${issue2.key} ${issue2.fields.issuetype.name}`);
+          return issue2;
+        }
+      }
+    }
+    console.log("No parent issue found");
+    return null;
+  }
+  static findMentionedIssues(pr) {
+    const mentionedIssues = pr.body?.match(JIRA_ISSUE_PATTERN) ?? [];
+    console.log(mentionedIssues.length > 0 ? `Found mentioned issues: ${mentionedIssues}` : "No mentioned issues found");
+    return new Set(mentionedIssues);
+  }
+  static async findTeam(jira, userAccountId, projectKey, fallbackTeam) {
+    if (userAccountId) {
+      const team = await jira.findTeamByUser(userAccountId);
+      if (team) {
+        return team;
+      }
+    }
+    if (fallbackTeam) {
+      const team = await jira.findTeamByName(fallbackTeam);
+      if (team) {
+        return team;
+      }
+    }
+    if (projectKey === "SC") {
+      return JiraTeams.CloudEngineering;
+    }
+    const project = await jira.loadProject(projectKey);
+    console.log(`No team found for current user, using ${projectKey} lead ${project.lead.displayName}`);
+    return jira.findTeamByUser(project.lead.accountId);
+  }
+  static async findSprintId(jira, teamName) {
+    const team = Config.findTeam(teamName);
+    if (team?.boardId) {
+      return jira.findSprintId(team.boardId);
+    } else {
+      console.log(`No boardId is configured for team ${teamName}`);
+      return null;
+    }
+  }
+  static async findEvergreenEpic(jira, team, summary2 = 'summary ~ "KTLO" OR summary ~ "Evergreen"') {
+    if (team) {
+      const epics = await jira.findIssues(`issuetype = Epic AND statusCategory != Done AND (${summary2}) and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=${team.id} ORDER BY key`);
+      if (epics.length === 0) {
+        console.log(`Could not find Evergreen Epic parent for team ${team.name} with ID ${team.id} and Start/Due date in Jira`);
+        return null;
+      } else {
+        console.log(`Found ${epics.length} Evergreen Epic(s), using ${epics[0].key} ${epics[0].fields.summary}`);
+        return { key: epics[0].key };
+      }
+    } else {
+      console.log("Team was not found, can not search for parent Evergreen Epic");
+      return null;
+    }
+  }
+  static parseDescription(pr) {
+    const body = pr.body;
+    if (body && !/^Part of\s*<!--.*-->\s*$/s.test(body)) {
+      const description = AtlassianDocument.fromMarkdown(body);
+      const length = JSON.stringify(description).length;
+      if (length > this.DESCRIPTION_MAX_LENGTH) {
+        console.log(`PR description exceeds the Jira description budget (${length} serialized characters), using a link to the full description`);
+        return AtlassianDocument.fromMarkdown(`The pull request description is too long for Jira. [View the full description on GitHub](${pr.html_url}).`);
+      }
+      return description;
+    } else {
+      return void 0;
+    }
+  }
+};
+
+// lib/SlackClient.ts
+var SlackClient = class {
+  token;
+  channel;
+  constructor(token, channel) {
+    this.token = token;
+    this.channel = channel;
+  }
+  async sendMessage(text) {
+    if (this.channel) {
+      console.log("Sending Slack message");
+      await this.sendPost("https://slack.com/api/chat.postMessage", { channel: this.channel, text });
+    } else {
+      console.log("Skip sending slack message, channel was not set.");
+    }
+  }
+  async findUserByEmail(email) {
+    const response = await this.sendGet(`https://slack.com/api/users.lookupByEmail?email=${encodeURIComponent(email)}`);
+    return response?.user?.id ?? null;
+  }
+  sendGet(url) {
+    return this.sendRequest("GET", url);
+  }
+  sendPost(url, body) {
+    console.log(`Sending slack POST: ${JSON.stringify(body)}`);
+    return this.sendRequest("POST", url, body);
+  }
+  async sendRequest(method, url, body) {
+    if (!this.token) {
+      throw new Error("slack-token was not set");
+    }
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { authorization: `Bearer ${this.token}`, "Content-Type": "application/json; charset=utf-8" },
+        body: body ? JSON.stringify(body) : void 0
+      });
+      if (!response.ok) {
+        console.log(`Failed to send API request. Error ${response.status}: ${response.statusText}`);
+        return null;
+      }
+      const data = await response.json();
+      if (!data.ok) {
+        console.log(`Failed to send API request. Error: ${data.error}`);
+        return null;
+      }
+      return data;
+    } catch (ex) {
+      console.log("Failed to send Slack request");
+      console.log(ex.toString());
+      return null;
+    }
+  }
+};
+
+// lib/OctokitAction.ts
+var OctokitAction = class extends Action {
+  rest;
+  jira;
+  slack;
+  octokit;
+  isEngXpSquad;
+  graphqlWithAuth = null;
+  senderAccountId = void 0;
+  // Cache
+  teamMembersCache = /* @__PURE__ */ new Map();
+  constructor() {
+    super();
+    this.jira = new JiraClient(JIRA_DOMAIN, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, this.inputString("jira-user"), this.inputString("jira-token"));
+    this.slack = new SlackClient(this.inputString("slack-token"), this.inputString("slack-channel"));
+    this.octokit = getOctokit(this.inputString("github-token"));
+    this.rest = this.octokit.rest;
+    this.isEngXpSquad = this.inputBoolean("is-eng-xp-squad");
+  }
+  sendGraphQL(query) {
+    this.graphqlWithAuth ??= graphql2.defaults({
+      headers: {
+        authorization: `token ${this.inputString("github-token")}`
+      }
+    });
+    return this.graphqlWithAuth(query);
+  }
+  inputString(name) {
+    return getInput(name);
+  }
+  inputNumber(name) {
+    const input = this.inputString(name);
+    const value = Number.parseInt(input);
+    if (Number.isNaN(value)) {
+      throw new TypeError(`Value of input '${name}' is not a number: ${input}`);
+    } else {
+      return value;
+    }
+  }
+  inputBoolean(name) {
+    return this.inputString(name).toLowerCase() === "true";
+  }
+  async loadPullRequest(pull_number) {
+    try {
+      this.log(`Loading PR #${pull_number}`);
+      return addPullRequestExtensions((await this.rest.pulls.get(this.addRepo({ pull_number }))).data);
+    } catch (error2) {
+      this.log(`Pull Request #${pull_number} not found: ${error2}`);
+      return null;
+    }
+  }
+  async loadIssue(issue_number) {
+    try {
+      this.log(`Loading issue #${issue_number}`);
+      return (await this.rest.issues.get(this.addRepo({ issue_number }))).data;
+    } catch (error2) {
+      this.log(`Issue #${issue_number} not found: ${error2}`);
+      return null;
+    }
+  }
+  async findFixedIssues(pr) {
+    const text = pr.isRenovate() ? (await this.listComments(pr.number)).findLast((x) => x.body?.startsWith(RENOVATE_PREFIX))?.body : pr.title;
+    return [...new Set(text?.match(JIRA_ISSUE_PATTERN) ?? [])];
+  }
+  async addComment(issue_number, body) {
+    await this.rest.issues.createComment(this.addRepo({ issue_number, body }));
+  }
+  async listComments(issue_number) {
+    return (await this.rest.issues.listComments(this.addRepo({ issue_number }))).data;
+  }
+  async listTeamMembers(teamSlug) {
+    let members = this.teamMembersCache.get(teamSlug);
+    if (!members) {
+      this.log(`Loading members of ${teamSlug}`);
+      members = (await this.rest.teams.listMembersInOrg({ org: this.repo.owner, team_slug: teamSlug, per_page: 100 })).data;
+      this.teamMembersCache.set(teamSlug, members);
+    }
+    return members;
+  }
+  updateIssueTitle(issue_number, title) {
+    this.log(`Updating issue #${issue_number} title to: ${title}`);
+    return this.updateIssue(issue_number, { title });
+  }
+  updatePullRequestTitle(prNumber, title) {
+    this.log(`Updating PR #${prNumber} title to: ${title}`);
+    return this.updatePullRequest(prNumber, { title });
+  }
+  updatePullRequestDescription(prNumber, body) {
+    this.log(`Updating PR #${prNumber} description`);
+    return this.updatePullRequest(prNumber, { body });
+  }
+  async updateIssue(issue_number, update) {
+    try {
+      await this.rest.issues.update(this.addRepo({ issue_number, ...update }));
+    } catch (error2) {
+      this.log(`Failed to update issue #${issue_number}: ${error2}`);
+    }
+  }
+  async updatePullRequest(prNumber, update) {
+    try {
+      await this.rest.pulls.update(this.addRepo({ pull_number: prNumber, ...update }));
+    } catch (error2) {
+      this.log(`Failed to update PR #${prNumber}: ${error2}`);
+    }
+  }
+  async findEmails(login) {
+    if (login.endsWith("[bot]")) {
+      this.log(`Skipping email search for bot: ${login}`);
+      return [];
+    }
+    this.log(`Searching for email of ${login}`);
+    try {
+      const { user: { organizationVerifiedDomainEmails: emails } } = await this.sendGraphQL(`
+        query {
+          user(login: "${login}") {
+            organizationVerifiedDomainEmails(login: "${this.repo.owner}")
+          }
+        }`);
+      this.log(`Found ${emails.length} email(s) for ${login}`);
+      const sonar = emails.filter((x) => x.toLowerCase().includes("@sonar"));
+      const other = emails.filter((x) => !x.toLowerCase().includes("@sonar"));
+      return [...sonar, ...other];
+    } catch (error2) {
+      if (error2 instanceof GraphqlResponseError && error2.errors?.length === 1 && error2.errors[0].type === "NOT_FOUND") {
+        this.log(`No email found for ${login}: ${error2.errors[0].message}`);
+        return [];
+      }
+      throw error2;
+    }
+  }
+  async findRootlyOnCallEmails(scheduleId) {
+    if (!scheduleId) {
+      return [];
+    }
+    this.log(`Finding Rootly On-Call email for schedule: ${scheduleId}`);
+    const response = await this.sendRootlyGet(`schedules/${scheduleId}/shifts?include=user`);
+    const emails = response?.included.filter((x) => x.type === "users").map((x) => x.attributes.email) || [];
+    this.log(`Found ${emails.length} Rootly On-Call users`);
+    return emails;
+  }
+  async sendRootlyGet(path) {
+    const token = this.inputString("rootly-token");
+    if (!token) {
+      this.log("rootly-token was not set, request can not be send");
+      return null;
+    }
+    try {
+      const response = await fetch(`https://api.rootly.com/v1/${path}`, {
+        headers: { authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        this.log(`Rootly request failed. Error ${response.status}: ${response.statusText}`);
+        return null;
+      }
+      return await response.json();
+    } catch (ex) {
+      this.log("Failed to send Rootly request");
+      this.log(ex.toString());
+      return null;
+    }
+  }
+  async processRequestReview(pr, issueId, component, requested_reviewer, teamReview) {
+    if (requested_reviewer?.type === "Bot") {
+      this.log(`Skipping request review from bot: ${requested_reviewer.login}`);
+    } else if (requested_reviewer || teamReview) {
+      await this.jira.moveIssue(issueId, "Request Review");
+      if (requested_reviewer) {
+        const userEmails = await this.findEmails(requested_reviewer.login);
+        if (this.isEngXpSquad) {
+          await this.jira.addReviewer(issueId, userEmails);
+        } else {
+          await this.jira.assignIssueToEmail(issueId, userEmails);
+        }
+      }
+      if (teamReview) {
+        if (teamReview.createReviewTicket) {
+          const data = await NewIssueData.createForTeamReview(this.jira, teamReview);
+          this.log(`Creating ${data.projectKey} review issue`);
+          const reviewIssueId = await this.jira.createIssue(data.projectKey, `PR review for ${pr.title}`, data.additionalFields);
+          if (reviewIssueId) {
+            if (data.assigneeId) {
+              await this.jira.assignIssueToAccount(reviewIssueId, data.assigneeId);
+            }
+            await this.jira.addIssueRemoteLink(reviewIssueId, pr.html_url);
+            await this.jira.linkIssues(reviewIssueId, issueId, "Relates");
+            await this.addComment(pr.number, `${TEAM_REVIEW_PREFIX}${this.issueLink(reviewIssueId)} ${teamReview.gitHubTeam.name}
+<!--slug: ${teamReview.gitHubTeam.slug} -->`);
+            await this.addJiraComponent(reviewIssueId, component);
+          }
+        } else if (teamReview.assigneeAccountId) {
+          await this.jira.assignIssueToAccount(issueId, teamReview.assigneeAccountId);
+        }
+      }
+    }
+  }
+  async addJiraComponent(issueId, name, description = null) {
+    if (name) {
+      if (!await this.jira.createComponent(this.projectKeyFromIssueId(issueId), name, description)) {
+        this.setFailed("Failed to create component");
+        return;
+      }
+      if (!await this.jira.addIssueComponent(issueId, name)) {
+        this.setFailed("Failed to add component");
+      }
+    }
+  }
+  projectKeyFromIssueId(issueId) {
+    return issueId.split("-")[0];
+  }
+  async loadSenderAccountId() {
+    if (this.senderAccountId === void 0) {
+      this.senderAccountId = await this.jira.findAccountId(await this.findEmails(this.payload.sender?.login));
+    }
+    return this.senderAccountId;
+  }
+  issueUrl(issue2) {
+    return `${JIRA_DOMAIN}/browse/${issue2}`;
+  }
+  issueLink(issue2) {
+    return `[${issue2}](${this.issueUrl(issue2)})`;
+  }
+};
+
+// lib/LockBranchAction.ts
+var LockBranchAction = class extends OctokitAction {
+  async execute() {
+    const pattern = this.inputString("branch-pattern");
+    const rule = await this.findRule(pattern);
+    if (rule) {
+      const lockBranch = this.resolveLockBranch(rule);
+      if (rule.lockBranch === lockBranch) {
+        this.log(`The branch \`${pattern}\` is already ${lockBranch ? "locked" : "unlocked"}.`);
+      } else {
+        if (!lockBranch) {
+          await this.cancelAutoMerge(pattern);
+        }
+        const updated = await this.updateRule(rule.id, lockBranch);
+        if (updated.lockBranch === lockBranch) {
+          const message = await this.buildSlackMessage(pattern, lockBranch);
+          this.log(`Done: ${message}`);
+          await this.slack.sendMessage(message);
+        } else {
+          this.log(`Failed: '${pattern}' was not updated successfully.`);
+        }
+      }
+    }
+  }
+  async buildSlackMessage(pattern, lockBranch) {
+    const action = lockBranch ? "locked :ice_cube:" : "unlocked and is now open for changes :sunny:";
+    const additionalMessage = this.inputString("additional-message");
+    const suffix = additionalMessage ? `
+
+${additionalMessage}` : "";
+    const sender = this.payload.sender ? `<${this.payload.sender.html_url}|${this.payload.sender.login}>` : "a scheduled job";
+    return `*${this.repo.repo}*: The branch \`${pattern}\` was ${action} by ${sender}${suffix}`;
+  }
+  async findRule(pattern) {
+    const rules = (await this.loadRules()).filter((x) => x.pattern === pattern);
+    if (rules.length === 0) {
+      this.log(`Branch protection rule with pattern '${pattern}' does not exist.`);
+      return null;
+    } else {
+      return rules[0];
+    }
+  }
+  async loadRules() {
+    const {
+      repository: {
+        branchProtectionRules: { nodes }
+      }
+    } = await this.sendGraphQL(`
+      query {
+        repository(owner: "${this.repo.owner}", name: "${this.repo.repo}") {
+          branchProtectionRules(first: 100) {
+            nodes {
+              id
+              lockBranch
+              pattern
+            }
+          }
+        }
+      }`);
+    return nodes;
+  }
+  async updateRule(id, lockBranch) {
+    const {
+      updateBranchProtectionRule: { branchProtectionRule }
+    } = await this.sendGraphQL(`
+      mutation {
+        updateBranchProtectionRule(input:{
+          branchProtectionRuleId: "${id}",
+          lockBranch: ${lockBranch}
+        })
+        {
+          branchProtectionRule {
+            id
+            lockBranch
+            pattern
+          }
+        }
+      }`);
+    return branchProtectionRule;
+  }
+  async cancelAutoMerge(branch) {
+    this.log(`Canceling auto-merge for branch '${branch}'`);
+    const targetPRs = await this.loadPullRequests(branch);
+    const autoClosePRs = targetPRs.filter((x) => x.autoMergeRequest);
+    this.log(`Found ${targetPRs.length} PRs targeting ${branch}, and ${autoClosePRs.length} with auto-merge.`);
+    for (const pr of autoClosePRs) {
+      await this.cancelPullRequestAutoMerge(pr);
+      await this.addComment(pr.number, `The target branch was unlocked and auto-merge was canceled to prevent unexpected actions.`);
+    }
+  }
+  async loadPullRequests(targetBranch) {
+    const allNodes = [];
+    let after = "";
+    while (after !== null) {
+      const {
+        repository: {
+          pullRequests: { nodes, pageInfo: { endCursor, hasNextPage } }
+        }
+      } = await this.sendGraphQL(`
+        query {
+          repository(owner: "${this.repo.owner}", name: "${this.repo.repo}") {
+            pullRequests(first: 100, after: "${after}", states: OPEN, baseRefName:"${targetBranch}"){
+              nodes {
+                id
+                number
+                autoMergeRequest { commitHeadline } # We don't need commitHeadline, but GraphQL syntax requires to query something there
+              }
+              pageInfo {
+                endCursor
+                hasNextPage
+              }
+            }
+          }
+        }`);
+      allNodes.push(...nodes);
+      after = hasNextPage ? endCursor : null;
+    }
+    return allNodes;
+  }
+  async cancelPullRequestAutoMerge(pr) {
+    this.log(`Canceling auto-merge for PR #${pr.number}`);
+    await this.sendGraphQL(`
+      mutation {
+        disablePullRequestAutoMerge(input: { pullRequestId: "${pr.id}" } )
+        {
+          pullRequest { id }
+        }
+      }`);
+  }
+};
+
+// AnnounceRelease/AnnounceRelease.ts
+var AnnounceRelease = class extends LockBranchAction {
+  resolveLockBranch() {
+    return true;
+  }
+  async buildSlackMessage(pattern, lockBranch) {
+    const message = await super.buildSlackMessage(pattern, lockBranch);
+    return `${message}
+Locked for release.
+${await this.buildTicketList()}`;
+  }
+  async buildTicketList() {
+    const project = this.inputString("project");
+    const issues = await this.jira.findIssues(`project = ${JSON.stringify(project)} AND status = "In Validation"`);
+    this.log(`Found ${issues.length} issue(s)`);
+    if (issues.length === 0) {
+      return "No tickets to validate.";
+    }
+    const groups = Map.groupBy(issues, (x) => x.fields.assignee?.displayName ?? "Unassigned");
+    let message = "Tickets to validate:";
+    for (const group of groups.values()) {
+      message += `
+- ${await this.mention(group[0].fields.assignee ?? null)}`;
+      for (const issue2 of group) {
+        message += `
+  \u2022 ${this.ticketLink(issue2.key)} ${issue2.fields.summary}`;
+      }
+    }
+    return message;
+  }
+  async mention(assignee) {
+    if (assignee == null) {
+      return "Unassigned";
+    }
+    const slackId = await this.slack.findUserByEmail(assignee.emailAddress);
+    return slackId ? `<@${slackId}>` : assignee.displayName;
+  }
+  ticketLink(key) {
+    return `<${this.issueUrl(key)}|${key}>`;
+  }
+};
+
+// ImportIssue/ImportIssue.ts
+var ImportIssue = class extends OctokitAction {
+  async execute() {
+    const jiraProject = this.inputString("jira-project");
+    const issue2 = this.payload.issue;
+    if (!issue2.title.startsWith(`${jiraProject}-`)) {
+      const id = await this.importIssue(jiraProject, issue2);
+      await this.addComment(issue2.number, `Internal ticket ${this.issueLink(id)}`);
+    }
+  }
+  async importIssue(jiraProject, issue2) {
+    console.log(`Importing #${issue2.number}`);
+    const parameters = {
+      issuetype: { name: this.issueType(issue2) },
+      description: AtlassianDocument.fromMarkdown(issue2.body ?? "")
+    };
+    const id = await this.jira.createIssue(jiraProject, issue2.title, parameters);
+    console.log(`Created ${id}`);
+    const promises3 = [];
+    promises3.push(
+      this.jira.addIssueRemoteLink(id, issue2.html_url),
+      this.updateIssueTitle(issue2.number, `${id} ${issue2.title}`)
+    );
+    for (const component of issue2.labels.map((x) => typeof x === "string" ? x : x.name)) {
+      promises3.push(this.addJiraComponent(id, component));
+    }
+    await Promise.all(promises3);
+    return id;
+  }
+  issueType(issue2) {
+    const data = [
+      { name: "Bug", type: "Bug" },
+      { name: "CFG/SE FPs", type: "False Positive" },
+      { name: "False Negative", type: "False Negative" },
+      { name: "False Positive", type: "False Positive" },
+      { name: "Rule Idea", type: "Feature" }
+    ];
+    return data.find((x) => this.hasLabel(issue2, x.name))?.type ?? "Feature";
+  }
+  hasLabel(issue2, label) {
+    return issue2.labels.some((x) => typeof x === "object" && x.name === label);
+  }
+};
+
+// LockBranch/LockBranch.ts
+var LockBranch = class extends LockBranchAction {
+  resolveLockBranch() {
+    return this.inputBoolean("lock-branch");
+  }
+};
+
 // LogPayload/LogPayload.ts
 var LogPayload = class extends Action {
   async execute() {
@@ -24464,9 +25851,376 @@ var LogPayload = class extends Action {
   }
 };
 
+// lib/PullRequestAction.ts
+var PullRequestAction = class extends OctokitAction {
+  async execute() {
+    const payloadPr = addPullRequestExtensions(this.payload.pull_request);
+    const issueIds = payloadPr.created_at === payloadPr.updated_at ? payloadPr.title?.match(JIRA_ISSUE_PATTERN) ?? [] : await this.findFixedIssues(payloadPr);
+    if (issueIds.length === 0) {
+      console.log("No Jira issue found in the PR title.");
+    } else {
+      const pr = await this.loadPullRequest(payloadPr.number);
+      if (pr) {
+        for (const issueId of issueIds) {
+          if ((issueId.startsWith("BUILD-") || issueId.startsWith("PREQ-")) && !this.isEngXpSquad) {
+            this.log(`Skipping ${issueId}`);
+          } else {
+            await this.processJiraIssue(pr, issueId);
+          }
+        }
+        await this.afterExecute(pr);
+      }
+    }
+  }
+  async afterExecute(pr) {
+  }
+};
+
+// lib/FixVersionResolver.ts
+async function findLowestUnreleasedFixVersion(jira, projectKey) {
+  const allVersions = await jira.findProjectVersions(projectKey);
+  const unreleased = allVersions.filter((x) => !x.released && !x.archived).toSorted((left, right) => compareVersionNames(left.name, right.name));
+  if (unreleased.length === 0) {
+    console.log(`${projectKey}: No unreleased versions found`);
+    return null;
+  } else {
+    console.log(`${projectKey}: Found ${unreleased.length} unreleased versions ${unreleased.map((x) => x.name).join(", ")}, using ${unreleased[0].name}`);
+    return unreleased[0].name;
+  }
+}
+function compareVersionNames(leftName, rightName) {
+  const left = parseVersion(leftName);
+  const right = parseVersion(rightName);
+  for (let i = 0; i < Math.max(left.numbers.length, right.numbers.length); i++) {
+    const sign = Math.sign((left.numbers[i] ?? 0) - (right.numbers[i] ?? 0));
+    if (sign !== 0) {
+      return sign;
+    }
+  }
+  return left.suffix.localeCompare(right.suffix, "en", { numeric: true });
+}
+function parseVersion(name) {
+  const index = name.indexOf("-");
+  const numbers = index < 0 ? name : name.substring(0, index);
+  const suffix = index < 0 ? "ZZZ" : name.substring(index + 1);
+  return { numbers: numbers.split(".").map((x) => Number.parseInt(x, 10) || 0), suffix };
+}
+
+// PullRequestClosed/PullRequestClosed.ts
+var PullRequestClosed = class extends PullRequestAction {
+  async processJiraIssue(pr, issueId) {
+    if (this.isEngXpSquad) {
+      if (pr.isBot()) {
+        await this.jira.moveIssue(issueId, "Resolve issue", { resolution: { id: this.resolutionId() } });
+      } else {
+        this.log(`Skipping issue resolution for non-Bot PR`);
+      }
+    } else if (this.payload.pull_request?.merged) {
+      await this.processMerge(issueId);
+    } else {
+      await this.processClose(issueId);
+    }
+  }
+  async processMerge(issueId) {
+    const transition = await this.jira.findTransition(issueId, this.isReleaseBranch(this.payload.pull_request?.base.ref) ? "Merge into master" : "Merge into branch");
+    if (transition == null) {
+      await this.jira.moveIssue(issueId, "Merge");
+    } else {
+      await this.jira.transitionIssue(issueId, transition);
+    }
+    await this.addFixVersion(issueId);
+  }
+  async addFixVersion(issueId) {
+    const fixVersion = this.inputString("fix-version").trim();
+    if (fixVersion === "") {
+      return;
+    }
+    const issue2 = await this.jira.loadIssue(issueId);
+    if (!issue2) {
+      this.log(`${issueId}: Could not load issue`);
+    } else if (issue2.fields.fixVersions.length > 0) {
+      this.log(`${issueId}: Fix version is already set ${issue2.fields.fixVersions.map((x) => x.name).join(", ")}, skipping`);
+    } else {
+      const newFixVersion = fixVersion === "autodetect-lowest" ? await findLowestUnreleasedFixVersion(this.jira, this.projectKeyFromIssueId(issueId)) : fixVersion;
+      if (newFixVersion) {
+        await this.jira.addFixVersion(issueId, newFixVersion);
+      }
+    }
+  }
+  async processClose(issueId) {
+    const issue2 = await this.jira.loadIssue(issueId);
+    const creator = issue2?.fields.creator.displayName || null;
+    if (creator === "Jira Tech User GitHub") {
+      await this.jira.moveIssue(issueId, "Cancel Issue", { resolution: { id: this.resolutionId() } });
+    } else {
+      this.log(`Skipping issue cancellation for creator ${creator}`);
+    }
+  }
+  isReleaseBranch(ref) {
+    return ref === "master" || ref === "main" || ref.startsWith("branch-");
+  }
+  resolutionId() {
+    return this.payload.pull_request.merged ? "10000" : "10001";
+  }
+};
+
+// lib/TeamReviewData.ts
+var TeamReviewData = class _TeamReviewData {
+  createReviewTicket;
+  senderAccountId;
+  assigneeAccountId;
+  jiraTeam;
+  gitHubTeam;
+  constructor(createReviewTicket, senderAccountId, assigneeAccountId, team, gitHubTeam) {
+    this.createReviewTicket = createReviewTicket;
+    this.senderAccountId = senderAccountId;
+    this.assigneeAccountId = assigneeAccountId;
+    this.jiraTeam = team;
+    this.gitHubTeam = gitHubTeam;
+  }
+  static async create(action, pr, issueId, requested_team) {
+    const candidate = await this.selectTeam(action, pr, issueId, requested_team);
+    if (candidate && await this.senderIsFromOutsideTeam(action, candidate)) {
+      const assigneeAccountId = await action.jira.findAccountId(await action.findRootlyOnCallEmails(candidate.rootlyScheduleId));
+      return new _TeamReviewData(candidate.createReviewTicket, await action.loadSenderAccountId(), assigneeAccountId, candidate.jiraTeam, requested_team);
+    } else {
+      return null;
+    }
+  }
+  static async selectTeam(action, pr, issueId, requested_team) {
+    const createReviewTicket = !pr.isBot();
+    if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudEngineering) {
+      return {
+        createReviewTicket,
+        jiraTeam: JiraTeams.CloudEngineering,
+        rootlyScheduleId: RootlyScheduleIds.PlatformCloudEngineeringTriager,
+        ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
+      };
+    } else if (requested_team?.slug === GitHubTeamSlugs.PlatformCloudProductionEngineering) {
+      return {
+        createReviewTicket,
+        jiraTeam: JiraTeams.CloudProductionEngineering,
+        rootlyScheduleId: RootlyScheduleIds.PlatformCloudProductionEngineeringTriager,
+        ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformCloudEngineering, GitHubTeamSlugs.PlatformCloudProductionEngineering]
+      };
+    } else if (requested_team?.slug === GitHubTeamSlugs.PlatformFrontEndEngineering) {
+      return {
+        createReviewTicket,
+        jiraTeam: JiraTeams.FrontEndEngineering,
+        rootlyScheduleId: RootlyScheduleIds.PlatformFrontEndEngineeringTriager,
+        ignoredGitHubTeamSlugs: [GitHubTeamSlugs.PlatformFrontEndEngineering]
+      };
+    } else if (requested_team?.slug === GitHubTeamSlugs.PlatformEngXp) {
+      const rootlyScheduleId = issueId.startsWith("PREQ-") && await this.canReplaceAssignee(action, issueId) ? RootlyScheduleIds.PlatformEngXpTriager : null;
+      return {
+        createReviewTicket: false,
+        jiraTeam: JiraTeams.EngineeringExperience,
+        rootlyScheduleId,
+        ignoredGitHubTeamSlugs: []
+      };
+    } else {
+      return null;
+    }
+  }
+  static async senderIsFromOutsideTeam(action, candidate) {
+    for (const slug of candidate.ignoredGitHubTeamSlugs) {
+      const members = await action.listTeamMembers(slug);
+      if (members.some((x) => x.login === action.payload.sender?.login)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  static async canReplaceAssignee(action, issueId) {
+    const assignee = (await action.jira.loadIssue(issueId))?.fields.assignee;
+    return !assignee || JIRA_BOT_ACCOUNT_IDS.includes(assignee.accountId);
+  }
+};
+
+// PullRequestCreated/PullRequestCreated.ts
+var PullRequestCreated = class extends OctokitAction {
+  async execute() {
+    const inputJiraProject = this.inputString("jira-project");
+    const inputAdditionalFields = this.inputString("additional-fields");
+    if (this.isEngXpSquad) {
+      if (inputJiraProject) {
+        this.setFailed("jira-project input is not supported when is-eng-xp-squad is set.");
+        return;
+      }
+      if (inputAdditionalFields) {
+        this.setFailed("additional-fields input is not supported when is-eng-xp-squad is set.");
+        return;
+      }
+    }
+    if (/DO NOT MERGE/i.test(this.payload.pull_request?.title ?? this.payload.issue?.title)) {
+      this.log("'DO NOT MERGE' found in the PR title, skipping the action.");
+      return;
+    }
+    const pr = await this.loadPullRequest(this.payload.pull_request?.number ?? this.payload.issue.number);
+    if (pr == null) {
+      return;
+    }
+    let fixedIssues = await this.findFixedIssues(pr);
+    if (fixedIssues.length === 0) {
+      const issue2 = await this.processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields);
+      if (issue2) {
+        fixedIssues = [issue2];
+        await this.processAllReviews(pr, issue2);
+      }
+    } else if (pr.title !== this.cleanupWhitespace(pr.title)) {
+      await this.updatePullRequestTitle(pr.number, this.cleanupWhitespace(pr.title));
+    }
+    if (fixedIssues) {
+      if (!pr.isRenovate()) {
+        await this.addLinkedIssuesAsComment(pr, fixedIssues);
+      }
+      for (const issue2 of fixedIssues) {
+        await this.jira.addIssueRemoteLink(issue2, pr.html_url);
+      }
+      if (this.isEngXpSquad) {
+        for (const issue2 of fixedIssues.filter((x) => x.startsWith("BUILD-"))) {
+          await this.addJiraComponent(issue2, this.repo.repo, this.payload.repository?.html_url);
+          await this.addJiraComponent(issue2, this.inputString("team-review-component"));
+        }
+      }
+    }
+  }
+  async processNewJiraIssue(pr, inputJiraProject, inputAdditionalFields) {
+    const accountId = await this.loadSenderAccountId();
+    const data = this.isEngXpSquad ? await NewIssueData.createForEngExp(this.jira, pr, accountId) : await NewIssueData.create(this.jira, pr, inputJiraProject, inputAdditionalFields, accountId, this.inputString("fallback-team"));
+    if (data) {
+      const issueId = await this.jira.createIssue(data.projectKey, pr.title, data.additionalFields);
+      if (issueId) {
+        await this.persistIssueId(pr, issueId);
+        await this.jira.moveIssue(issueId, "Commit");
+        if (data.accountId) {
+          await this.jira.moveIssue(issueId, "Start");
+        }
+        if (data.assigneeId) {
+          await this.jira.assignIssueToAccount(issueId, data.assigneeId);
+        }
+        return issueId;
+      } else {
+        this.setFailed("Failed to create a new issue in Jira");
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+  async processAllReviews(pr, issueId) {
+    if (pr) {
+      const component = this.inputString("team-review-component");
+      await this.processRequestReview(pr, issueId, component, pr.requested_reviewers?.[0] || null, null);
+      for (const team of pr.requested_teams ?? []) {
+        this.log(`Processing team review request: ${team.name}`);
+        const teamReview = await TeamReviewData.create(this, pr, issueId, team);
+        if (teamReview) {
+          await this.processRequestReview(pr, issueId, component, null, teamReview);
+        }
+      }
+    }
+  }
+  async persistIssueId(pr, issueId) {
+    if (pr.isRenovate()) {
+      await this.addComment(pr.number, RENOVATE_PREFIX + this.issueLink(issueId));
+    } else {
+      pr.title = this.cleanupWhitespace(`${issueId} ${pr.title}`);
+      await this.updatePullRequestTitle(pr.number, pr.title);
+    }
+  }
+  cleanupWhitespace(value) {
+    return value.replaceAll(/\s\s+/g, " ").trim();
+  }
+  async addLinkedIssuesAsComment(pr, linkedIssues) {
+    console.log(`Adding the following ticket as comment: ${linkedIssues}`);
+    await this.addComment(pr.number, linkedIssues.map((x) => this.issueLink(x)).join("\n"));
+  }
+};
+
+// RequestReview/RequestReview.ts
+var RequestReview = class extends PullRequestAction {
+  async processJiraIssue(pr, issueId) {
+    const component = this.inputString("team-review-component");
+    const teamReview = await TeamReviewData.create(this, pr, issueId, this.payload.requested_team ?? null);
+    await this.processRequestReview(pr, issueId, component, this.payload.requested_reviewer ?? null, teamReview);
+  }
+};
+
+// SubmitReview/SubmitReview.ts
+var SubmitReview = class extends PullRequestAction {
+  async processJiraIssue(pr, issueId) {
+    if (this.isBotSender()) {
+      this.log(`Skipping review submitted by a bot: ${this.payload.sender.login}`);
+    } else if (this.payload.review.state === "approved") {
+      if (pr.isBot()) {
+        await this.assignCurrentUser(issueId);
+      }
+      if (this.isEngXpSquad) {
+        const userEmails = await this.findEmails(this.payload.sender?.login);
+        await this.jira.addReviewedBy(issueId, userEmails);
+      } else {
+        await this.jira.moveIssue(issueId, "Approve");
+      }
+    } else if (this.payload.review.state === "changes_requested") {
+      await this.jira.moveIssue(issueId, "Request Changes");
+    }
+  }
+  async afterExecute(pr) {
+    if (this.payload.review.state === "approved" && !this.isBotSender()) {
+      for (const comment of await this.listComments(pr.number)) {
+        const teamReviewIssueId = await this.approvedTeamReviewIssueId(comment.body);
+        if (teamReviewIssueId) {
+          await this.jira.moveIssue(teamReviewIssueId, "Resolve issue");
+          await this.jira.moveIssue(teamReviewIssueId, "Close Issue");
+        }
+      }
+    }
+  }
+  async assignCurrentUser(issueId) {
+    const issue2 = await this.jira.loadIssue(issueId);
+    if (!issue2.fields.assignee || issue2.fields.assignee.accountId === JIRA_NIGEL_ACCOUNT_ID) {
+      const userEmails = await this.findEmails(this.payload.sender?.login);
+      await this.jira.assignIssueToEmail(issueId, userEmails);
+    }
+  }
+  async approvedTeamReviewIssueId(body) {
+    if (body?.startsWith(TEAM_REVIEW_PREFIX)) {
+      const issueId = body.match(JIRA_ISSUE_PATTERN) ?? null;
+      const teamSlug = body.match(/<!--slug: ([^ ]+) -->/) ?? null;
+      if (issueId && teamSlug) {
+        const members = await this.listTeamMembers(teamSlug[1]);
+        if (members.some((x) => x.login === this.payload.sender?.login)) {
+          return issueId[0];
+        }
+        ;
+      }
+    }
+    return null;
+  }
+  isBotSender() {
+    return this.payload.sender?.type === "Bot";
+  }
+};
+
+// ToggleLockBranch/ToggleLockBranch.ts
+var ToggleLockBranch = class extends LockBranchAction {
+  resolveLockBranch(rule) {
+    return !rule.lockBranch;
+  }
+};
+
 // Index.ts
 var actions = [
-  LogPayload
+  AnnounceRelease,
+  ImportIssue,
+  LockBranch,
+  LogPayload,
+  PullRequestClosed,
+  PullRequestCreated,
+  RequestReview,
+  SubmitReview,
+  ToggleLockBranch
 ];
 async function run(actionName) {
   const actionType = actions.find((x) => x.name === actionName);

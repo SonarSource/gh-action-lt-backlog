@@ -18,7 +18,6 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { RequestReview } from "./RequestReview.js";
+import { run } from '../dist/Index.cjs';
 
-const action = new RequestReview();
-action.run();
+await run('ToggleLockBranch');
