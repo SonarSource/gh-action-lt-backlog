@@ -18,7 +18,6 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { JIRA_ISSUE_PATTERN } from './Constants.js';
 import { OctokitAction } from './OctokitAction.js';
 import { addPullRequestExtensions, PullRequest } from './OctokitTypes.js';
 
@@ -29,7 +28,7 @@ export abstract class PullRequestAction extends OctokitAction {
     const payloadPr = addPullRequestExtensions(this.payload.pull_request as PullRequest);
     // GHA-321 Avoid race condition: PullRequestCreated handles review for newly created issues. This handles everything else.
     const issueIds = payloadPr.created_at === payloadPr.updated_at  // This action was scheduled directly from PR creation (RequestReview), the race is on.
-      ? payloadPr.title?.match(JIRA_ISSUE_PATTERN) ?? []  // Use payload! PR with ticket number will work just fine. Standalone PR doesn't have tickets here and is handled by PullRequestCreated.
+      ? this.findTitleIssues(payloadPr.title)             // Use payload! PR with ticket number will work just fine. Standalone PR doesn't have tickets here and is handled by PullRequestCreated.
       : await this.findFixedIssues(payloadPr);            // Action triggered later => normal processing, including renovate PRs with issue ID in comment
     if (issueIds.length === 0) {
       console.log('No Jira issue found in the PR title.');
