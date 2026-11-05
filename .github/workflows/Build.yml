@@ -26,12 +26,11 @@ jobs:
           secrets: |
             development/artifactory/token/{REPO_OWNER_NAME_DASH}-public-reader access_token | REPOX_TOKEN;
 
-        # Restore DEV dependencies that are not present in the repo due to .gitignore of /node_modules/ to reduce the checkout size in production.
-      - name: Restore dev dependencies
+      - name: Restore dependencies
         env:
             NPM_CONFIG_registry: https://repox.jfrog.io/artifactory/api/npm/npm
             NPM_CONFIG_//repox.jfrog.io/artifactory/api/npm/:_authToken: ${{ fromJSON(steps.secrets.outputs.vault).REPOX_TOKEN }}
-        run: npm install
+        run: npm ci
 
       - name: Build
         run: npm run build
@@ -61,12 +60,11 @@ jobs:
             development/kv/data/jira token  | JIRA_TOKEN;
             development/kv/data/rootly ro-api-key | ROOTLY_TOKEN;
 
-        # Restore DEV dependencies that are not present in the repo due to .gitignore of /node_modules/ to reduce the checkout size in production.
-      - name: Restore dev dependencies
+      - name: Restore dependencies
         env:
             NPM_CONFIG_registry: https://repox.jfrog.io/artifactory/api/npm/npm
             NPM_CONFIG_//repox.jfrog.io/artifactory/api/npm/:_authToken: ${{ fromJSON(steps.secrets.outputs.vault).REPOX_TOKEN }}
-        run: npm install
+        run: npm ci
 
       - name: Run tests
         env:
@@ -100,12 +98,11 @@ jobs:
             development/kv/data/rootly ro-api-key | ROOTLY_TOKEN;
 
 
-        # Restore DEV dependencies that are not present in the repo due to .gitignore of /node_modules/ to reduce the checkout size in production.
-      - name: Restore dev dependencies
+      - name: Restore dependencies
         env:
             NPM_CONFIG_registry: https://repox.jfrog.io/artifactory/api/npm/npm
             NPM_CONFIG_//repox.jfrog.io/artifactory/api/npm/:_authToken: ${{ fromJSON(steps.secrets.outputs.vault).REPOX_TOKEN }}
-        run: npm install
+        run: npm ci
 
       - name: Run Data Consistency Check
         env:
