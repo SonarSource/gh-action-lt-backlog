@@ -1,0 +1,19 @@
+name: 'Cleanup issues'
+description: 'Cancel stale Jira issues created by automation that were closed without merging.'
+inputs:
+  github-token:
+    description: 'GitHub auth Token'
+    required: true
+  jira-user:
+    description: 'Jira auth User'
+    required: true
+  jira-token:
+    description: 'Jira auth Token'
+    required: true
+  jira-project:
+    description: 'Jira project key'
+    required: true
+
+runs:
+  using: 'node24'
+  main: 'Index.mjs'

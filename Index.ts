@@ -28,9 +28,11 @@ import { PullRequestCreated } from './PullRequestCreated/PullRequestCreated.js';
 import { RequestReview } from './RequestReview/RequestReview.js';
 import { SubmitReview } from './SubmitReview/SubmitReview.js';
 import { ToggleLockBranch } from './ToggleLockBranch/ToggleLockBranch.js';
+import { CleanupIssues } from './CleanupIssues/CleanupIssues.js';
 
 const actions = [
   AnnounceRelease,
+  CleanupIssues,
   ImportIssue,
   LockBranch,
   LogPayload,

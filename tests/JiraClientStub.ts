@@ -19,7 +19,7 @@
  */
 
 import { JiraTeams } from "../Data/TeamConfiguration.js";
-import { JiraClient, Issue, JiraVersion } from '../lib/JiraClient.js';
+import { JiraClient, Issue, JiraVersion, RemoteLink, Resolution } from '../lib/JiraClient.js';
 import { JiraTeam } from '../lib/JiraTeam.js';
 
 function serializeStrings(values: string[]): string {
@@ -85,8 +85,8 @@ export const jiraClientStub = {
   },
   async findTransition(issueId: string, transitionName: string): Promise<{ id: string, name: string } | null> {
     switch (transitionName) {
-      case 'Merge into master': return issueId === "KEY-1111" ? null : { id: '10000', name: transitionName };
-      case 'Merge into branch': return issueId === "KEY-1111" ? null : { id: '10001', name: transitionName };
+      case 'Merge into master': return issueId === "KEY-1111" ? null : { id: Resolution.DONE, name: transitionName };
+      case 'Merge into branch': return issueId === "KEY-1111" ? null : { id: Resolution.WONT_DO, name: transitionName };
       case 'Merge': return { id: '10002', name: transitionName };
       default: return null; // No transition found
     }
@@ -141,6 +141,28 @@ export const jiraClientStub = {
   async addIssueRemoteLink(issueId: string, url: string, title: string | null = null): Promise<void> {
     title = title ? `'${title}'` : 'null';
     console.log(`Invoked jira.addIssueRemoteLink('${issueId}'', '${url}', ${title})`);
+  },
+  async loadIssueRemoteLinks(issueId: string): Promise<RemoteLink[]> {
+    function create(url: string): RemoteLink {
+      return { id: '42', object: { url, title: url } };
+    }
+
+    switch (issueId) {
+      case 'CLOSED-1': return [create('https://github.com/test-owner/test-repo/pull/100'), create('https://github.com/test-owner/test-repo/pull/101')];
+      case 'OPENED-1': return [create('https://github.com/test-owner/test-repo/pull/100'), create('https://github.com/test-owner/test-repo/pull/201')];
+      case 'MERGED-1': return [create('https://github.com/test-owner/test-repo/pull/100'), create('https://github.com/test-owner/test-repo/pull/301')];
+      case 'MISSED-1': return [create('https://github.com/test-owner/test-repo/pull/100'), create('https://github.com/test-owner/test-repo/pull/0')];
+      case 'EMPTY-1': return [];
+      case 'IRRELEVANT-1':
+        return [
+          create('https://github.com/another-owner/test-repo/pull/100'),
+          create('https://github.com/test-owner/another-repo/pull/100'),
+          create('https://another-domain.com/test-owner/test-repo/pull/100'),
+          create('https://sonarsource.com'),
+        ];
+      default:
+        throw new Error(`Scaffolding did not expect issueId: ${issueId}`);
+    }
   },
   async moveIssue(issueId: string, transitionName: string, fields: any = null): Promise<void> {
     fields = fields ? JSON.stringify(fields) : 'null';

@@ -24782,7 +24782,7 @@ var JiraClient = class {
   }
   async findIssues(jql) {
     console.log(`Searching for issues: ${jql}`);
-    const response = await this.sendRestGetApi(`search/jql?fields=key,summary,assignee,customfield_10015,duedate&jql=${encodeURIComponent(jql)}`);
+    const response = await this.sendRestGetApi(`search/jql?fields=key,summary,assignee,customfield_10015,duedate&maxResults=200&jql=${encodeURIComponent(jql)}`);
     return response?.issues ?? [];
   }
   async findTeam(queryFilter, resultFilter) {
@@ -25968,7 +25968,7 @@ var PullRequestClosed = class extends PullRequestAction {
     return ref === "master" || ref === "main" || ref.startsWith("branch-");
   }
   resolutionId() {
-    return this.payload.pull_request.merged ? "10000" : "10001";
+    return this.payload.pull_request.merged ? "10000" /* DONE */ : "10001" /* WONT_DO */;
   }
 };
 
@@ -26220,9 +26220,50 @@ var ToggleLockBranch = class extends LockBranchAction {
   }
 };
 
+// CleanupIssues/CleanupIssues.ts
+var CleanupIssues = class extends OctokitAction {
+  async execute() {
+    const project = this.inputString("jira-project");
+    const issues = await this.jira.findIssues(`project=${JSON.stringify(project)} AND status IN ("Open", "To Do") AND creator="${JIRA_TECH_USER_GITHUB_ACCOUNT_ID}" ORDER BY created ASC`);
+    this.log(`Found ${issues.length} issue(s) to check`);
+    let canceled = 0;
+    for (const issue2 of issues) {
+      if (await this.isAbandoned(issue2.key)) {
+        await this.jira.moveIssue(issue2.key, "Cancel Issue", { resolution: { id: "10001" /* WONT_DO */ } });
+        canceled += 1;
+      }
+    }
+    this.log(`Cancelled ${canceled} of ${issues.length} issue(s)`);
+  }
+  async isAbandoned(issueId) {
+    const prNumbers = await this.findPRs(issueId);
+    if (prNumbers.length === 0) {
+      this.log(`${issueId}: No pull request from this repository is linked, skipping`);
+      return false;
+    }
+    for (const prNumber of prNumbers) {
+      const pr = await this.loadPullRequest(prNumber);
+      if (!pr) {
+        this.log(`${issueId}: PR #${prNumber} not found, skipping`);
+        return false;
+      } else if (pr.state !== "closed" || pr.merged) {
+        this.log(`${issueId}: PR #${prNumber} is ${pr.merged ? "merged" : pr.state}, skipping`);
+        return false;
+      }
+    }
+    return true;
+  }
+  async findPRs(issueId) {
+    const prefix = `https://github.com/${this.repo.owner}/${this.repo.repo}/pull/`.toLowerCase();
+    const links = await this.jira.loadIssueRemoteLinks(issueId) ?? [];
+    return links.map((x) => x.object.url.toLowerCase()).filter((x) => x.startsWith(prefix)).map((x) => Number.parseInt(x.substring(prefix.length), 10));
+  }
+};
+
 // Index.ts
 var actions = [
   AnnounceRelease,
+  CleanupIssues,
   ImportIssue,
   LockBranch,
   LogPayload,

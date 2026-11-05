@@ -21,6 +21,7 @@
 import { PullRequestAction } from '../lib/PullRequestAction.js';
 import { PullRequest } from '../lib/OctokitTypes.js';
 import { findLowestUnreleasedFixVersion } from '../lib/FixVersionResolver.js';
+import { Resolution } from '../lib/JiraClient.js';
 
 export class PullRequestClosed extends PullRequestAction {
   protected async processJiraIssue(pr: PullRequest, issueId: string): Promise<void> {
@@ -86,7 +87,7 @@ export class PullRequestClosed extends PullRequestAction {
 
   private resolutionId(): string {
     return this.payload.pull_request!.merged
-      ? '10000'   // "Done"
-      : '10001';  // "Won't do"
+      ? Resolution.DONE
+      : Resolution.WONT_DO;
   }
 }
