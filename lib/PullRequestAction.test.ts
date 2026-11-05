@@ -85,7 +85,7 @@ describe('PullRequestAction', () => {
   });
 
   it('Process all title issue IDs', async () => {
-    const sut = new TestPullRequestAction("GHA-42, [GHA-43] And also SCAN4NET-44 with number in project key, but no lowercase-22");
+    const sut = new TestPullRequestAction("GHA-42, [GHA-43] And SCAN4NET-44 with number in project key, but no lowercase-22");
     await sut.run();
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
@@ -114,7 +114,7 @@ describe('PullRequestAction', () => {
   });
 
   it('Ignore BUILD and PREQ', async () => {
-    const sut = new TestPullRequestAction("GHA-42 is processed but BUILD-42 and PREQ-43 are ignored");
+    const sut = new TestPullRequestAction("GHA-42, BUILD-42 and PREQ-43 ignores BUILD and PREQ");
     await sut.run();
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
@@ -145,6 +145,25 @@ describe('PullRequestAction', () => {
       expect(logTester.logsParams).toStrictEqual([
         "Loading PR #42",
         "Invoked processJiraIssue(GHA-42)",
+        "Done"
+      ]);
+    });
+
+    it('PR with issue-like text after the leading issue', async () => {
+      const sut = createSutFromPrCreationEvent("GHA-42 Fix UTF-8 in CVE-2026-69152");
+      await sut.run();
+      expect(logTester.logsParams).toStrictEqual([
+        "Loading PR #42",
+        "Invoked processJiraIssue(GHA-42)",
+        "Done"
+      ]);
+    });
+
+    it('Standalone PR with issue-like text, PullRequestCreated did not run yet', async () => {
+      const sut = createSutFromPrCreationEvent("Fix UTF-8 encoding");
+      await sut.run();
+      expect(logTester.logsParams).toStrictEqual([
+        "No Jira issue found in the PR title.",
         "Done"
       ]);
     });

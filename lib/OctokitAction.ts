@@ -25,7 +25,7 @@ import { Action } from './Action.js';
 import { PullRequest, IssueComment, addPullRequestExtensions, Issue, SimpleUser } from './OctokitTypes.js';
 import { graphql, GraphQlQueryResponseData, GraphqlResponseError } from '@octokit/graphql';
 import { JiraClient } from './JiraClient.js';
-import { JIRA_ISSUE_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN, TEAM_REVIEW_PREFIX } from './Constants.js';
+import { JIRA_ISSUE_PATTERN, JIRA_TITLE_ISSUES_PATTERN, RENOVATE_PREFIX, JIRA_SITE_ID, JIRA_ORGANIZATION_ID, JIRA_DOMAIN, TEAM_REVIEW_PREFIX } from './Constants.js';
 import { NewIssueData } from './NewIssueData.js';
 import type { TeamReviewData } from './TeamReviewData.js';
 import { SlackClient } from './SlackClient.js';
@@ -120,10 +120,15 @@ export abstract class OctokitAction extends Action {
   }
 
   protected async findFixedIssues(pr: PullRequest): Promise<string[]> {
-    const text = pr.isRenovate() // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
-      ? (await this.listComments(pr.number)).findLast(x => x.body?.startsWith(RENOVATE_PREFIX))?.body
-      : pr.title;
-    return [...new Set(text?.match(JIRA_ISSUE_PATTERN) ?? [])];
+    const issues = pr.isRenovate() // We're storing the ID in a comment as a workaround for https://github.com/renovatebot/renovate/issues/26833
+      ? (await this.listComments(pr.number)).findLast(x => x.body?.startsWith(RENOVATE_PREFIX))?.body?.match(JIRA_ISSUE_PATTERN) ?? []
+      : this.findTitleIssues(pr.title);
+    return [...new Set(issues)];
+  }
+
+  protected findTitleIssues(title: string | undefined): string[] {
+    const leadingIssues = JIRA_TITLE_ISSUES_PATTERN.exec(title ?? '')?.[0] ?? '';
+    return leadingIssues.match(JIRA_ISSUE_PATTERN) ?? [];
   }
 
   protected async addComment(issue_number: number, body: string): Promise<void> {
