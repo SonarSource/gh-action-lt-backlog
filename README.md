@@ -51,22 +51,6 @@ All actions should be consumed from these branches.
 
     More info: https://docs.npmjs.com/cli/v9/configuring-npm/npmrc#auth-related-configuration
 
-### /node_modules/ dependencies
-
-The `/node_modules/` files that are part of the GIT repo:
-* Must contain production dependencies for the actions to run.
-* Must NOT contain development and testing dependencies, as those bring 10k+ small files that takes ages to check out on every action run.
-
-Dependency update:
-
-1. Delete `/node_module/`.
-1. Comment out `/node_module/` exclusion in `.gitignore` file.
-1. Run `npm install --omit=dev` to restore only production dependencies into the `/node_module/`.
-1. Commit all changes.
-1. Uncomment `/node_module/` exclusion in `.gitignore` file.
-1. Run `npm install` to get all remaining files for local development.
-1. Commit changes to `.package-lock.json` file.
-
 ### Run Octokit action from PowerShell
 
 This syntax allows setting environment variables with hyphens in the name:
@@ -76,7 +60,7 @@ ${env:GITHUB_REPOSITORY}="SonarSource/<YourRepoName>"
 ${env:INPUT_GITHUB-TOKEN}="ghp_...."
 ${env:INPUT_PARAM}="True"
 ${env:INPUT_PARAM-NAME-WITH-HYPHEN}="Value"
-clear; node .\dist\ActionName\ActionName.js
+clear; npm run build; node .\ActionName\Index.mjs
 ```
 
 ### Development commands
@@ -112,12 +96,11 @@ Create `.vscode/launch.json` file, update `program` path to `FIXME` startup file
   "version": "0.2.0",
   "configurations": [
     {
-      "program": "${workspaceFolder}/dist/FIXME/FIXME.js",
+      "program": "${workspaceFolder}/FIXME/Index.mjs",
       "type": "node",
       "request": "launch",
       "name": "Launch",
-      "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": [ "${workspaceFolder}/dist/**/*.js" ]
+      "outFiles": [ "${workspaceFolder}/dist/Index.cjs" ]
     }
   ]
 }
