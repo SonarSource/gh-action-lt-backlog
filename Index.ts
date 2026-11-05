@@ -19,10 +19,26 @@
  */
 
 import * as core from '@actions/core';
+import { AnnounceRelease } from './AnnounceRelease/AnnounceRelease.js';
+import { ImportIssue } from './ImportIssue/ImportIssue.js';
+import { LockBranch } from './LockBranch/LockBranch.js';
 import { LogPayload } from './LogPayload/LogPayload.js';
+import { PullRequestClosed } from './PullRequestClosed/PullRequestClosed.js';
+import { PullRequestCreated } from './PullRequestCreated/PullRequestCreated.js';
+import { RequestReview } from './RequestReview/RequestReview.js';
+import { SubmitReview } from './SubmitReview/SubmitReview.js';
+import { ToggleLockBranch } from './ToggleLockBranch/ToggleLockBranch.js';
 
 const actions = [
-  LogPayload
+  AnnounceRelease,
+  ImportIssue,
+  LockBranch,
+  LogPayload,
+  PullRequestClosed,
+  PullRequestCreated,
+  RequestReview,
+  SubmitReview,
+  ToggleLockBranch
 ];
 
 export async function run(actionName: string): Promise<void> {

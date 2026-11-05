@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Backlog Automation
  * Copyright (C) SonarSource Sàrl
  * mailto: info AT sonarsource DOT com
@@ -18,7 +18,6 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { LockBranch } from "./LockBranch.js";
+import { run } from '../dist/Index.cjs';
 
-const action = new LockBranch();
-action.run();
+await run('ImportIssue');

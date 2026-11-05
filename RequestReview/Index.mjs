@@ -18,7 +18,6 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import { SubmitReview } from "./SubmitReview.js";
+import { run } from '../dist/Index.cjs';
 
-const action = new SubmitReview();
-action.run();
+await run('RequestReview');
