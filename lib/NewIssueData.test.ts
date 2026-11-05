@@ -191,6 +191,23 @@ describe('NewIssueData', () => {
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Body'), '', '', '1234-account', '')).toBeNull();
   });
 
+  it('create parent Evergreen avoid Renovate Evergreen for non-Renovate PR', async () => {
+    const expected = createExpectedParent('KEY', 'NET-1000', 'Maintenance', 'Body', '5001-renovate-and-normal-evergreen-epics-account');
+    expected.additionalFields.customfield_10001 = 'renovate-and-normal-evergreen-epics-team';
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Normal PR', 'Body'), 'KEY', '', '5001-renovate-and-normal-evergreen-epics-account', '')).toEqual(expected);  // NET-1000 is Evergreen, should avod firt Renovate epic NET-2000
+  });
+
+  it('create parent Evergreen prefer Renovate Evergreen for Renovate PR', async () => {
+    const expected = createExpectedParent('KEY', 'NET-2000', 'Maintenance', 'Body', '5002-normal-and-renovate-evergreen-epics-account');
+    expected.additionalFields.customfield_10001 = 'normal-and-renovate-evergreen-epics-team';
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', '5002-normal-and-renovate-evergreen-epics-account', '')).toEqual(expected);  // NET-2000 is Evergreen for Renovate
+  });
+
+  it('create parent Evergreen use fallback for Renovate PR', async () => {
+    const expected = createExpectedParent('KEY', 'NET-1000', 'Maintenance', 'Body')
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', '1234-account', '')).toEqual(expected);  // NET-1000 is Evergreen fallback
+  });
+
   it('create parent Evergreen Epic is null without team', async () => {
     const expected: NewIssueData = {
       accountId: null,
@@ -301,7 +318,8 @@ describe('NewIssueData', () => {
   });
 
   it('createForTeamReview', async () => {
-    expect(await NewIssueData.createForTeamReview(jiraClientStub, TeamReviewDataStub.createCloudEngineering('1234-account', '5000-assignee'))).toEqual({
+    const pr = createPullRequest('GHA-42 Normal PR', null);
+    expect(await NewIssueData.createForTeamReview(jiraClientStub, pr, TeamReviewDataStub.createCloudEngineering('1234-account', '5000-assignee'))).toEqual({
       accountId: '1234-account',
       assigneeId: '5000-assignee',
       additionalFields: {
@@ -316,7 +334,8 @@ describe('NewIssueData', () => {
   });
 
   it('createForTeamReview with null accountId', async () => {
-    expect(await NewIssueData.createForTeamReview(jiraClientStub, TeamReviewDataStub.createCloudEngineering(null, null))).toEqual({
+    const pr = createPullRequest('GHA-42 Normal PR', null);
+    expect(await NewIssueData.createForTeamReview(jiraClientStub, pr, TeamReviewDataStub.createCloudEngineering(null, null))).toEqual({
       accountId: null,
       assigneeId: null,
       additionalFields: {

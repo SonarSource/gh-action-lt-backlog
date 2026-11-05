@@ -25181,7 +25181,7 @@ var NewIssueData = class _NewIssueData {
           parameters.customfield_10020 = sprintId;
         }
         if (!parent) {
-          parameters.parent = await this.findEvergreenEpic(jira, team);
+          parameters.parent = await this.findEvergreenEpic(jira, pr, team);
         }
       }
       return new _NewIssueData(projectKey, accountId, accountId, { ...additionalFields, ...parameters });
@@ -25204,18 +25204,18 @@ var NewIssueData = class _NewIssueData {
     }
     parameters.labels = pr.isRenovate() ? ["dvi-created-by-automation", "dvi-renovate"] : ["dvi-created-by-automation"];
     if (projectKey === "BUILD") {
-      parameters.parent = await this.findEvergreenEpic(jira, JiraTeams.EngineeringExperience);
+      parameters.parent = await this.findEvergreenEpic(jira, pr, JiraTeams.EngineeringExperience);
     }
     return new _NewIssueData(projectKey, accountId, projectKey === "PREQ" ? null : accountId, parameters);
   }
-  static async createForTeamReview(jira, teamReview) {
+  static async createForTeamReview(jira, pr, teamReview) {
     const parameters = this.newIssueParameters("PREQ", null, "Maintenance");
     if (teamReview.senderAccountId) {
       parameters.reporter = { id: teamReview.senderAccountId };
     }
     parameters.customfield_10001 = teamReview.jiraTeam.id;
     parameters.labels = ["preq-review-code"];
-    parameters.parent = await this.findEvergreenEpic(jira, teamReview.jiraTeam, 'summary ~ "PREQ"');
+    parameters.parent = await this.findEvergreenEpic(jira, pr, teamReview.jiraTeam, 'summary ~ "PREQ"');
     return new _NewIssueData("PREQ", teamReview.senderAccountId, teamReview.assigneeAccountId, parameters);
   }
   static computeProjectKey(inputJiraProject, parent) {
@@ -25309,15 +25309,17 @@ var NewIssueData = class _NewIssueData {
       return null;
     }
   }
-  static async findEvergreenEpic(jira, team, summary2 = 'summary ~ "KTLO" OR summary ~ "Evergreen"') {
+  static async findEvergreenEpic(jira, pr, team, summary2 = 'summary ~ "KTLO" OR summary ~ "Evergreen"') {
     if (team) {
       const epics = await jira.findIssues(`issuetype = Epic AND statusCategory != Done AND (${summary2}) and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=${team.id} ORDER BY key`);
       if (epics.length === 0) {
         console.log(`Could not find Evergreen Epic parent for team ${team.name} with ID ${team.id} and Start/Due date in Jira`);
         return null;
       } else {
-        console.log(`Found ${epics.length} Evergreen Epic(s), using ${epics[0].key} ${epics[0].fields.summary}`);
-        return { key: epics[0].key };
+        const isRenovatePR = pr.isRenovate();
+        const epic = epics.find((x) => /renovate/i.test(x.fields.summary) == isRenovatePR) ?? epics[0];
+        console.log(`Found ${epics.length} Evergreen Epic(s), using ${epic.key} ${epic.fields.summary}`);
+        return { key: epic.key };
       }
     } else {
       console.log("Team was not found, can not search for parent Evergreen Epic");
@@ -25571,7 +25573,7 @@ var OctokitAction = class extends Action {
       }
       if (teamReview) {
         if (teamReview.createReviewTicket) {
-          const data = await NewIssueData.createForTeamReview(this.jira, teamReview);
+          const data = await NewIssueData.createForTeamReview(this.jira, pr, teamReview);
           this.log(`Creating ${data.projectKey} review issue`);
           const reviewIssueId = await this.jira.createIssue(data.projectKey, `PR review for ${pr.title}`, data.additionalFields);
           if (reviewIssueId) {

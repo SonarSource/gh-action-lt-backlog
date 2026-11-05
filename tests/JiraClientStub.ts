@@ -71,6 +71,8 @@ export const jiraClientStub = {
       case '2222-no-team': return null;
       case '3333-eng-exp-account': return JiraTeams.EngineeringExperience;
       case '4444-no-epics-account': return { name: 'No Epics Squad', id: 'no-epics-team' };
+      case '5001-renovate-and-normal-evergreen-epics-account': return { name: 'More Evergreen Epics, first one is Normal', id: 'renovate-and-normal-evergreen-epics-team' };
+      case '5002-normal-and-renovate-evergreen-epics-account': return { name: 'More Evergreen Epics, first one is Renovate', id: 'normal-and-renovate-evergreen-epics-team' };
       default: throw new Error(`Scaffolding did not expect accountId ${accountId}`);
     };
   },
@@ -102,6 +104,14 @@ export const jiraClientStub = {
         return [];
       case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=no-epics-team ORDER BY key':
         return [];
+      case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=normal-and-renovate-evergreen-epics-team ORDER BY key':
+        return [
+          { key: 'NET-1000', fields: { summary: 'KTLO Epic' } } as Issue,
+          { key: 'NET-2000', fields: { summary: 'KTLO Epic for Renovate' } } as Issue];
+      case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=renovate-and-normal-evergreen-epics-team ORDER BY key':
+        return [
+          { key: 'NET-2000', fields: { summary: 'KTLO Epic for Renovate' } } as Issue,
+          { key: 'NET-1000', fields: { summary: 'KTLO Epic' } } as Issue];
       case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=eb40f25e-3596-4541-b661-cf83e7bc4fa6 ORDER BY key':
         return [{ key: 'BUILD-1000', fields: { summary: 'Eng Exp KTLO Epic' } } as Issue];
       case 'issuetype = Epic AND statusCategory != Done AND (summary ~ "KTLO" OR summary ~ "Evergreen") and "Start date[Date]"<=startOfDay() and duedate>=startOfDay() and "Team[Team]"=772ea1dc-3574-42bc-a378-7a898d910ebd ORDER BY key':
