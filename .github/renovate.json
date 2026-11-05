@@ -2,5 +2,15 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "github>SonarSource/renovate-config:quality-corelang-squad"
-  ]
+  ],
+  "postUpgradeTasks": {
+    "commands": [
+      "npm ci --ignore-scripts",
+      "npm run build"
+    ],
+    "fileFilters": [
+      "dist/Index.cjs"
+    ],
+    "executionMode": "branch"
+  }
 }
