@@ -323,6 +323,19 @@ describe('PullRequestCreated', () => {
     ]);
   });
 
+  it('Standalone PR no Jira project', async () => {
+    await runAction('', 'Standalone PR');
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "findEmails called for test-user",
+      "No mentioned issues found",
+      "Looking for valid parent ticket",
+      "No parent issue found",
+      "No suitable project key found, issue will not be created",
+      "Done"
+    ]);
+  });
+
   it('/PullRequestCreated comment on a Renovate PR backfills the remote link despite the bookkeeping comment', async () => {
     setIssueCommentPayload('Standalone PR');
     process.env['INPUT_JIRA-PROJECT'] = 'KEY';
