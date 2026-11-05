@@ -100,7 +100,6 @@ Create `.vscode/launch.json` file, update `program` path to `FIXME` startup file
       "type": "node",
       "request": "launch",
       "name": "Launch",
-      "preLaunchTask": "npm: bundle:debug",
       "outFiles": [ "${workspaceFolder}/dist/Index.cjs" ]
     }
   ]

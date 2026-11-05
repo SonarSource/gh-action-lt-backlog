@@ -6,8 +6,7 @@
   "scripts": {
     "build": "npm run typecheck && npm run bundle",
     "typecheck": "tsc",
-    "bundle": "esbuild Index.ts --bundle --platform=node --target=node24 --format=cjs --log-level=warning --outfile=dist/Index.cjs",
-    "bundle:debug": "npm run bundle -- --sourcemap",
+    "bundle": "esbuild Index.ts --bundle --platform=node --target=node24 --format=cjs --log-level=warning --sourcemap --outfile=dist/Index.cjs",
     "test": "vitest run",
     "test-uts": "vitest run --exclude 'Data/*'",
     "test-data": "vitest run Data/",
