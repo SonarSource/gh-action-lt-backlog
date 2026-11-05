@@ -24889,7 +24889,9 @@ var JiraClient = class {
 // lib/Constants.ts
 var RENOVATE_PREFIX = "Renovate Jira issue ID: ";
 var TEAM_REVIEW_PREFIX = "Team Review Jira issue ID: ";
-var JIRA_ISSUE_PATTERN = /\b(?!USER-)[A-Z][A-Z0-9]*-\d+/g;
+var JIRA_ISSUE_KEY = String.raw`\b(?!USER-)[A-Z][A-Z0-9]*-\d+`;
+var JIRA_ISSUE_PATTERN = new RegExp(JIRA_ISSUE_KEY, "g");
+var JIRA_TITLE_ISSUES_PATTERN = new RegExp(String.raw`^(?:${JIRA_ISSUE_KEY}\b|[^A-Za-z]|\b[Aa]nd\b)*`);
 var JIRA_DOMAIN = "https://sonarsource.atlassian.net";
 var JIRA_NIGEL_ACCOUNT_ID = "712020:9c105dc5-0493-4d71-83a6-ed21c4ba03c0";
 var JIRA_TECH_USER_GITHUB_ACCOUNT_ID = "712020:9dcffe4d-55ee-4d69-b5d1-535c6dbd9cc4";
@@ -25458,8 +25460,12 @@ var OctokitAction = class extends Action {
     }
   }
   async findFixedIssues(pr) {
-    const text = pr.isRenovate() ? (await this.listComments(pr.number)).findLast((x) => x.body?.startsWith(RENOVATE_PREFIX))?.body : pr.title;
-    return [...new Set(text?.match(JIRA_ISSUE_PATTERN) ?? [])];
+    const issues = pr.isRenovate() ? (await this.listComments(pr.number)).findLast((x) => x.body?.startsWith(RENOVATE_PREFIX))?.body?.match(JIRA_ISSUE_PATTERN) ?? [] : this.findTitleIssues(pr.title);
+    return [...new Set(issues)];
+  }
+  findTitleIssues(title) {
+    const leadingIssues = JIRA_TITLE_ISSUES_PATTERN.exec(title ?? "")?.[0] ?? "";
+    return leadingIssues.match(JIRA_ISSUE_PATTERN) ?? [];
   }
   async addComment(issue_number, body) {
     await this.rest.issues.createComment(this.addRepo({ issue_number, body }));
@@ -25857,7 +25863,7 @@ var LogPayload = class extends Action {
 var PullRequestAction = class extends OctokitAction {
   async execute() {
     const payloadPr = addPullRequestExtensions(this.payload.pull_request);
-    const issueIds = payloadPr.created_at === payloadPr.updated_at ? payloadPr.title?.match(JIRA_ISSUE_PATTERN) ?? [] : await this.findFixedIssues(payloadPr);
+    const issueIds = payloadPr.created_at === payloadPr.updated_at ? this.findTitleIssues(payloadPr.title) : await this.findFixedIssues(payloadPr);
     if (issueIds.length === 0) {
       console.log("No Jira issue found in the PR title.");
     } else {
