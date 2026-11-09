@@ -59,6 +59,9 @@ Ask Engineering Experience Squad to add a
 * `development/kv/data/jira` token.
 * `development/kv/data/slack` token.
 
+The `github_lock` token is only issued to workflows running on a protected ref: the default branch, a `branch-*` branch or a tag.
+Jobs triggered by pull requests or running on any other branch are denied by Vault, so the workflow that calls this action has to be dispatched from one of these refs.
+
 A branch protection rule for the configured `branch-pattern` has to exist before running this action.
 
 ### IaC branch protection in re-service-config
