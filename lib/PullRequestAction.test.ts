@@ -79,7 +79,19 @@ describe('PullRequestAction', () => {
     const sut = new TestPullRequestAction("Standalone PR");
     await sut.run();
     expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
       "No Jira issue found in the PR title.",
+      "Done",
+    ]);
+  });
+
+  it('No PR', async () => {
+    const sut = new TestPullRequestAction("Not found");
+    sut.payload.pull_request!.number = 404;
+    await sut.run();
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #404",
+      "Pull Request #404 not found: TypeError: Cannot read properties of null (reading 'data')",
       "Done",
     ]);
   });
@@ -163,6 +175,7 @@ describe('PullRequestAction', () => {
       const sut = createSutFromPrCreationEvent("Fix UTF-8 encoding");
       await sut.run();
       expect(logTester.logsParams).toStrictEqual([
+        "Loading PR #42",
         "No Jira issue found in the PR title.",
         "Done"
       ]);
@@ -172,6 +185,7 @@ describe('PullRequestAction', () => {
       const sut = createSutFromPrCreationEvent("Standalone PR");
       await sut.run();
       expect(logTester.logsParams).toStrictEqual([
+        "Loading PR #42",
         "No Jira issue found in the PR title.",
         "Done"
       ]);
@@ -182,6 +196,7 @@ describe('PullRequestAction', () => {
       sut.payload.pull_request!.title = "Standalone PR"; // While REST api will already return the updated title, the payload contains the original one
       await sut.run();
       expect(logTester.logsParams).toStrictEqual([
+        "Loading PR #42",
         "No Jira issue found in the PR title.",
         "Done"
       ]);
@@ -191,6 +206,7 @@ describe('PullRequestAction', () => {
       const sut = createSutFromPrCreationEvent("Renovate PR", "renovate[bot]");
       await sut.run();
       expect(logTester.logsParams).toStrictEqual([
+        "Loading PR #42",
         "No Jira issue found in the PR title.",
         "Done"
       ]);
@@ -207,9 +223,22 @@ describe('PullRequestAction', () => {
       };
       await sut.run();
       expect(logTester.logsParams).toStrictEqual([
+        "Loading PR #42",
         "No Jira issue found in the PR title.",
         "Done"
       ]);
     });
   });
+
+  it('Standalone PR, event trigged before PullRequestCreated updated PR title and re-run later', async () => {
+    const sut = new TestPullRequestAction("GHA-42 Standalone PR title seen by REST") as TestPullRequestAction & OctokitActionStub;  
+    sut.payload.pull_request!.title = "Standalone PR title seen by payload"; // While REST api will already return the updated title, the payload contains the original one on a later action re-run
+    await sut.run();
+    expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
+      "Invoked processJiraIssue(GHA-42)",
+      "Done"
+    ]);
+  });
+
 });

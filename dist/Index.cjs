@@ -25863,12 +25863,12 @@ var LogPayload = class extends Action {
 var PullRequestAction = class extends OctokitAction {
   async execute() {
     const payloadPr = addPullRequestExtensions(this.payload.pull_request);
-    const issueIds = payloadPr.created_at === payloadPr.updated_at ? this.findTitleIssues(payloadPr.title) : await this.findFixedIssues(payloadPr);
-    if (issueIds.length === 0) {
-      console.log("No Jira issue found in the PR title.");
-    } else {
-      const pr = await this.loadPullRequest(payloadPr.number);
-      if (pr) {
+    const pr = await this.loadPullRequest(payloadPr.number);
+    if (pr) {
+      const issueIds = payloadPr.created_at === payloadPr.updated_at ? this.findTitleIssues(payloadPr.title) : await this.findFixedIssues(pr);
+      if (issueIds.length === 0) {
+        console.log("No Jira issue found in the PR title.");
+      } else {
         for (const issueId of issueIds) {
           if ((issueId.startsWith("BUILD-") || issueId.startsWith("PREQ-")) && !this.isEngXpSquad) {
             this.log(`Skipping ${issueId}`);
