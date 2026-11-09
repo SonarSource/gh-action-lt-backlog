@@ -31,7 +31,7 @@ async function runAction(title: string, merged: boolean, user: string = 'test-us
   action.jira = jiraClientStub;
   action.rest = createOctokitRestStub(title, null, user);
   action.payload.pull_request = {
-    ...(await action.rest.pulls.get({} as any)).data,
+    ...(await action.rest.pulls.get({ pull_number: 42 } as any)).data,
     created_at: '2024-12-24T11:00:00Z',
     updated_at: '2024-12-24T22:33:44Z',  // Closing action can not be triggered at the same time as PR creation
     merged,

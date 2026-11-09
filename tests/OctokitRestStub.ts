@@ -50,25 +50,32 @@ export function createOctokitRestStub(title: string, body?: string | null, login
     },
     pulls: {
       get(params: any): any {
-        return {
-          data: {
-            number: 42,
-            title,
-            body,
-            html_url: 'https://github.com/test-owner/test-repo/pull/42',
-            base: {
-              repo: {
-                name: 'test-repo'
+        switch (params.pull_number) {
+          case 42:
+            return {
+              data: {
+                number: 42,
+                title,
+                body,
+                html_url: 'https://github.com/test-owner/test-repo/pull/42',
+                base: {
+                  repo: {
+                    name: 'test-repo'
+                  }
+                },
+                user: {
+                  login,
+                  type: login.includes("[bot]") ? 'Bot' : 'User'
+                },
+                requested_reviewers: requestedReviewers,
+                requested_teams: requestedTeams
               }
-            },
-            user: {
-              login,
-              type: login.includes("[bot]") ? 'Bot' : 'User'
-            },
-            requested_reviewers: requestedReviewers,
-            requested_teams: requestedTeams
-          }
-        };
+            };
+          case 404:
+            return null;
+          default:
+            throw new Error(`Scaffolding did not expect PR #${params.pull_number}`);
+        }
       },
       update(params: any): void {
         console.log(`Invoked rest.pulls.update(${JSON.stringify(params)})`);

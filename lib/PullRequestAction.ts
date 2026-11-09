@@ -26,15 +26,15 @@ export abstract class PullRequestAction extends OctokitAction {
 
   protected async execute(): Promise<void> {
     const payloadPr = addPullRequestExtensions(this.payload.pull_request as PullRequest);
-    // GHA-321 Avoid race condition: PullRequestCreated handles review for newly created issues. This handles everything else.
-    const issueIds = payloadPr.created_at === payloadPr.updated_at  // This action was scheduled directly from PR creation (RequestReview), the race is on.
-      ? this.findTitleIssues(payloadPr.title)             // Use payload! PR with ticket number will work just fine. Standalone PR doesn't have tickets here and is handled by PullRequestCreated.
-      : await this.findFixedIssues(payloadPr);            // Action triggered later => normal processing, including renovate PRs with issue ID in comment
-    if (issueIds.length === 0) {
-      console.log('No Jira issue found in the PR title.');
-    } else {
-      const pr = await this.loadPullRequest(payloadPr.number);  
-      if (pr) {
+    const pr = await this.loadPullRequest(payloadPr.number);
+    if (pr) {
+      // GHA-321 Avoid race condition: PullRequestCreated handles review for newly created issues. This handles everything else.
+      const issueIds = payloadPr.created_at === payloadPr.updated_at  // This action was scheduled directly from PR creation (RequestReview), the race is on.
+        ? this.findTitleIssues(payloadPr.title)             // Use payload! PR with ticket number will work just fine. Standalone PR doesn't have tickets here and is handled by PullRequestCreated.
+        : await this.findFixedIssues(pr);                   // Action triggered later => normal processing, including renovate PRs with issue ID in comment. 
+      if (issueIds.length === 0) {
+        console.log('No Jira issue found in the PR title.');
+      } else {
         for (const issueId of issueIds) {
           // BUILD/PREQ tickets are processed only when they are from Engineering Experience Squad repos. They should be ignored in any other repo, not to interfere with their process.
           if ((issueId.startsWith('BUILD-') || issueId.startsWith('PREQ-')) && !this.isEngXpSquad) {

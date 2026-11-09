@@ -131,6 +131,7 @@ describe('RequestReview', () => {
     }
     await sut.run();
     expect(logTester.logsParams).toStrictEqual([
+      "Loading PR #42",
       "No Jira issue found in the PR title.",
       "Done",
     ]);
