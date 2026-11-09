@@ -52,6 +52,9 @@ Ask Engineering Experience Squad to add a
 * `github_lock` token to the Vault configuration of your repository. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/8372a71d1dbb5d408f777eaaea1ead6d85c75299/orders/analysis-dotnet-squad.yaml#L185-L186)
 * `development/kv/data/slack` token. [Example](https://github.com/SonarSource/re-terraform-aws-vault/blob/8372a71d1dbb5d408f777eaaea1ead6d85c75299/orders/analysis-dotnet-squad.yaml#L200)
 
+The `github_lock` token is only issued to workflows running on a protected ref: the default branch, a `branch-*` branch or a tag.
+Jobs triggered by pull requests or running on any other branch are denied by Vault, so the workflow that calls this action has to be dispatched from one of these refs.
+
 A branch protection rule for the configured `branch-pattern` has to exist before running this action.
 
 ### IaC branch protection in re-service-config
