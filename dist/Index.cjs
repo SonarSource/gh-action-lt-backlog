@@ -25186,6 +25186,9 @@ var NewIssueData = class _NewIssueData {
           parameters.parent = await this.findEvergreenEpic(jira, pr, team);
         }
       }
+      if (pr.isRenovate()) {
+        parameters.labels = [...additionalFields.labels ?? [], "renovate"];
+      }
       return new _NewIssueData(projectKey, accountId, accountId, { ...additionalFields, ...parameters });
     } else {
       console.log("No suitable project key found, issue will not be created");

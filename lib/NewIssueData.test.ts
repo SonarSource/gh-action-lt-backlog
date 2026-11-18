@@ -88,7 +88,7 @@ function createExpectedParent(projectKey: string, parent: string | null, issueTy
   };
 }
 
-function createExpectedWithoutAccount(description: string): NewIssueData {
+function createExpectedWithoutAccount(description: string, labels: string[] | undefined): NewIssueData {
   return {
     accountId: null,
     assigneeId: null,
@@ -96,6 +96,7 @@ function createExpectedWithoutAccount(description: string): NewIssueData {
       customfield_10001: 'dot-neeet-team',
       customfield_10020: null,
       issuetype: { name: 'Maintenance' },
+      labels,
       parent: { key: 'NET-1000' },
       description: createDescription(description),
     },
@@ -200,11 +201,13 @@ describe('NewIssueData', () => {
   it('create parent Evergreen prefer Renovate Evergreen for Renovate PR', async () => {
     const expected = createExpectedParent('KEY', 'NET-2000', 'Maintenance', 'Body', '5002-normal-and-renovate-evergreen-epics-account');
     expected.additionalFields.customfield_10001 = 'normal-and-renovate-evergreen-epics-team';
+    expected.additionalFields.labels = ['renovate'];
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', '5002-normal-and-renovate-evergreen-epics-account', '')).toEqual(expected);  // NET-2000 is Evergreen for Renovate
   });
 
   it('create parent Evergreen use fallback for Renovate PR', async () => {
-    const expected = createExpectedParent('KEY', 'NET-1000', 'Maintenance', 'Body')
+    const expected = createExpectedParent('KEY', 'NET-1000', 'Maintenance', 'Body');
+    expected.additionalFields.labels = ['renovate'];
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', '1234-account', '')).toEqual(expected);  // NET-1000 is Evergreen fallback
   });
 
@@ -264,12 +267,17 @@ describe('NewIssueData', () => {
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Title', 'Body'), 'KEY', '{ "issuetype": { "name": "Custom Issue Type" } }', '1234-account', '')).toEqual(expected);
   });
 
+  it('create with additional fields Renovate preserves labels', async () => {
+    const expected = createExpectedWithoutAccount('Body', ['SomeLabel', 'renovate']);
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '{ "labels": ["SomeLabel"] }', null, '')).toEqual(expected);
+  });
+
   it('create renovate ignores parent', async () => {
-    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'FOREIGN-1234 and NET-1111'), 'KEY', '', null, '')).toEqual(createExpectedWithoutAccount('FOREIGN-1234 and NET-1111'));
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'FOREIGN-1234 and NET-1111'), 'KEY', '', null, '')).toEqual(createExpectedWithoutAccount('FOREIGN-1234 and NET-1111', ['renovate']));
   });
 
   it('create dependabot ignores parent', async () => {
-    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Dependabot PR', 'FOREIGN-1234 and NET-1111'), 'KEY', '', null, '')).toEqual(createExpectedWithoutAccount('FOREIGN-1234 and NET-1111'));
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Dependabot PR', 'FOREIGN-1234 and NET-1111'), 'KEY', '', null, '')).toEqual(createExpectedWithoutAccount('FOREIGN-1234 and NET-1111', undefined));
   });
 
   it('create non-Renovate non-Dependabot bot resolves parent', async () => {
@@ -285,6 +293,7 @@ describe('NewIssueData', () => {
         customfield_10001: 'fallback-team',
         customfield_10020: 42,
         issuetype: { name: 'Maintenance' },
+        labels: ['renovate'],
         parent: null,    // No Evergreen Epic
         description: createDescription('Body'),
       },
@@ -294,11 +303,11 @@ describe('NewIssueData', () => {
   });
 
   it('create with fallbackTeam nonexistent', async () => {
-    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', null, 'nonexistent-fallback-team')).toEqual(createExpectedWithoutAccount('Body'));
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', null, 'nonexistent-fallback-team')).toEqual(createExpectedWithoutAccount('Body', ['renovate']));
   });
 
   it('create with project lead team', async () => {
-    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', null, '')).toEqual(createExpectedWithoutAccount('Body'));
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', null, '')).toEqual(createExpectedWithoutAccount('Body', ['renovate']));
   });
 
   it('create with SC without fallback', async () => {
@@ -309,6 +318,7 @@ describe('NewIssueData', () => {
         customfield_10001: '772ea1dc-3574-42bc-a378-7a898d910ebd',
         customfield_10020: 42,
         issuetype: { name: 'Maintenance' },
+        labels: ['renovate'],
         parent: { key: 'SC-3333' },
         description: createDescription('Body'),
       },
@@ -355,6 +365,7 @@ describe('NewIssueData', () => {
       additionalFields: {
         // No team, no sprint
         issuetype: { name: 'Maintenance' },
+        labels: ['renovate'],
         parent: null,    // No Evergreen Epic
         description: createDescription('Body'),
       },
