@@ -142,7 +142,7 @@ export const jiraClientStub = {
     title = title ? `'${title}'` : 'null';
     console.log(`Invoked jira.addIssueRemoteLink('${issueId}'', '${url}', ${title})`);
   },
-  async loadIssueRemoteLinks(issueId: string): Promise<RemoteLink[]> {
+  async loadIssueRemoteLinks(issueId: string): Promise<RemoteLink[] | null> {
     function create(url: string): RemoteLink {
       return { id: '42', object: { url, title: url } };
     }
@@ -153,6 +153,7 @@ export const jiraClientStub = {
       case 'MERGED-1': return [create('https://github.com/test-owner/test-repo/pull/100'), create('https://github.com/test-owner/test-repo/pull/301')];
       case 'MISSED-1': return [create('https://github.com/test-owner/test-repo/pull/100'), create('https://github.com/test-owner/test-repo/pull/0')];
       case 'EMPTY-1': return [];
+      case 'FAILED-1': return null; // Jira request failed
       case 'IRRELEVANT-1':
         return [
           create('https://github.com/another-owner/test-repo/pull/100'),
