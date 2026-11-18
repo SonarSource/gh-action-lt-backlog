@@ -37,6 +37,8 @@ Ask Engineering Experience Squad to "Add Jira GitHub tokens" to the Vault config
 
 ## Example usage
 
+File name: `.github/workflows/SubmitReview.yml`
+
 ```yaml
 name: Submit Review
 
