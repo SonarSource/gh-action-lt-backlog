@@ -22,6 +22,14 @@ import { OctokitAction } from '../lib/OctokitAction.js';
 import { JIRA_TECH_USER_GITHUB_ACCOUNT_ID } from '../lib/Constants.js';
 import { Resolution } from '../lib/JiraClient.js';
 
+enum PullRequestState {
+  Unknown = 'Unknown',
+  Open = 'Open',
+  Merged = 'Merged',
+  Closed = 'Closed', // Not merged
+  FromDifferentRepo = 'From another repo',
+}
+
 export class CleanupIssues extends OctokitAction {
   protected async execute(): Promise<void> {
     const project = this.inputString('jira-project');
@@ -29,7 +37,8 @@ export class CleanupIssues extends OctokitAction {
     this.log(`Found ${issues.length} issue(s) to check`);
     let canceled = 0;
     for (const issue of issues) {
-      if (await this.isAbandoned(issue.key)) {
+      const prs = await this.loadPRs(issue.key);
+      if (this.isAbandoned(issue.key, prs)) {
         await this.jira.moveIssue(issue.key, 'Cancel Issue', { resolution: { id: Resolution.WONT_DO } });
         canceled += 1;
       }
@@ -37,40 +46,46 @@ export class CleanupIssues extends OctokitAction {
     this.log(`Cancelled ${canceled} of ${issues.length} issue(s)`);
   }
 
-  private async isAbandoned(issueId: string): Promise<boolean> {
-    const prs = await this.findPRs(issueId);
+  private isAbandoned(issueId: string, prs: PullRequestState[] | null): boolean {
     if (prs === null) {
       this.log(`${issueId}: Remote links could not be loaded, skipping`);
       return false;
-    } else if (prs.allUrls.length === 0) {
+    }
+    if (prs.length === 0) {
       this.log(`${issueId}: No pull request is linked, closing`);
       return true;
-    } else if (prs.currentRepoPRNumbers.length === 0) {
-      this.log(`${issueId}: No pull request from this repository is linked, skipping`);
-      return false;
     }
-    else {
-      for (const prNumber of prs.currentRepoPRNumbers) { // Issue can be linked to multiple PRs. All of them must be closed without merge.
-        const pr = await this.loadPullRequest(prNumber);
-        if (!pr) {
-          this.log(`${issueId}: PR #${prNumber} not found, skipping`);
-          return false;
-        } else if (pr.state !== 'closed' || pr.merged) {
-          this.log(`${issueId}: PR #${prNumber} is ${pr.merged ? 'merged' : pr.state}, skipping`);
-          return false;
-        }
-      }
-      return true;
-    }
+    return prs.every(x => x === PullRequestState.Closed);
   }
 
-  private async findPRs(issueId: string): Promise<{ allUrls: string[], currentRepoPRNumbers: number[] } | null> { // null when remote links could not be loaded
+  private async loadPRs(issueId: string): Promise<PullRequestState[] | null> { // null when remote links could not be loaded
     const links = await this.jira.loadIssueRemoteLinks(issueId);
     if (links === null) {
       return null;
     }
     const prefix = `https://github.com/${this.repo.owner}/${this.repo.repo}/pull/`.toLowerCase();
-    const allUrls = links.map(x => x.object.url.toLowerCase());
-    return { allUrls, currentRepoPRNumbers: allUrls.filter(x => x.startsWith(prefix)).map(x => Number.parseInt(x.substring(prefix.length), 10)) };
+    const result: PullRequestState[] = [];
+    for (const link of links) {
+      const url = link.object.url.toLowerCase();
+      const state = url.startsWith(prefix)
+        ? await this.loadPRState(Number.parseInt(url.substring(prefix.length), 10))
+        : PullRequestState.FromDifferentRepo;
+      this.log(`${url}: ${state}`);
+      result.push(state);
+    }
+    return result;
+  }
+
+  private async loadPRState(prNumber: number): Promise<PullRequestState> {
+    const pr = await this.loadPullRequest(prNumber);
+    if (!pr) {
+      return PullRequestState.Unknown;
+    } else if (pr.merged) {
+      return PullRequestState.Merged;
+    } else if (pr.state === 'closed'){
+      return PullRequestState.Closed;
+    } else {
+      return PullRequestState.Open;
+    }
   }
 }

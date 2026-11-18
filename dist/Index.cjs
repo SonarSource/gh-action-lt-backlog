@@ -26231,46 +26231,51 @@ var CleanupIssues = class extends OctokitAction {
     this.log(`Found ${issues.length} issue(s) to check`);
     let canceled = 0;
     for (const issue2 of issues) {
-      if (await this.isAbandoned(issue2.key)) {
+      const prs = await this.loadPRs(issue2.key);
+      if (this.isAbandoned(issue2.key, prs)) {
         await this.jira.moveIssue(issue2.key, "Cancel Issue", { resolution: { id: "10001" /* WONT_DO */ } });
         canceled += 1;
       }
     }
     this.log(`Cancelled ${canceled} of ${issues.length} issue(s)`);
   }
-  async isAbandoned(issueId) {
-    const prs = await this.findPRs(issueId);
+  isAbandoned(issueId, prs) {
     if (prs === null) {
       this.log(`${issueId}: Remote links could not be loaded, skipping`);
       return false;
-    } else if (prs.allUrls.length === 0) {
+    }
+    if (prs.length === 0) {
       this.log(`${issueId}: No pull request is linked, closing`);
       return true;
-    } else if (prs.currentRepoPRNumbers.length === 0) {
-      this.log(`${issueId}: No pull request from this repository is linked, skipping`);
-      return false;
-    } else {
-      for (const prNumber of prs.currentRepoPRNumbers) {
-        const pr = await this.loadPullRequest(prNumber);
-        if (!pr) {
-          this.log(`${issueId}: PR #${prNumber} not found, skipping`);
-          return false;
-        } else if (pr.state !== "closed" || pr.merged) {
-          this.log(`${issueId}: PR #${prNumber} is ${pr.merged ? "merged" : pr.state}, skipping`);
-          return false;
-        }
-      }
-      return true;
     }
+    return prs.every((x) => x === "Closed" /* Closed */);
   }
-  async findPRs(issueId) {
+  async loadPRs(issueId) {
     const links = await this.jira.loadIssueRemoteLinks(issueId);
     if (links === null) {
       return null;
     }
     const prefix = `https://github.com/${this.repo.owner}/${this.repo.repo}/pull/`.toLowerCase();
-    const allUrls = links.map((x) => x.object.url.toLowerCase());
-    return { allUrls, currentRepoPRNumbers: allUrls.filter((x) => x.startsWith(prefix)).map((x) => Number.parseInt(x.substring(prefix.length), 10)) };
+    const result = [];
+    for (const link of links) {
+      const url = link.object.url.toLowerCase();
+      const state = url.startsWith(prefix) ? await this.loadPRState(Number.parseInt(url.substring(prefix.length), 10)) : "From another repo" /* FromDifferentRepo */;
+      this.log(`${url}: ${state}`);
+      result.push(state);
+    }
+    return result;
+  }
+  async loadPRState(prNumber) {
+    const pr = await this.loadPullRequest(prNumber);
+    if (!pr) {
+      return "Unknown" /* Unknown */;
+    } else if (pr.merged) {
+      return "Merged" /* Merged */;
+    } else if (pr.state === "closed") {
+      return "Closed" /* Closed */;
+    } else {
+      return "Open" /* Open */;
+    }
   }
 };
 
