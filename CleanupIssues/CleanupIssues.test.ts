@@ -46,6 +46,7 @@ async function runAction(issueId: string): Promise<void> {
           case 101: return create('closed', false);
           case 201: return create('open', false);
           case 301: return create('closed', true);  // Merged
+          case 302: return create('closed', true);  // Merged
           default:
             throw new Error(`Scaffolding did not expect pull_number: ${pull_number}`);
         }
@@ -82,7 +83,7 @@ describe('CleanupIssues', () => {
       "Loading PR #101",
       "https://github.com/test-owner/test-repo/pull/101: Closed",
       "Invoked jira.moveIssue('CLOSEDCLOSED-1', 'Cancel Issue', {\"resolution\":{\"id\":\"10001\"}})",
-      "Cancelled 1 of 1 issue(s)",
+      "Checked 1 issue(s): 1 Canceled, 0 marked as Done",
       "Done",
     ]);
   });
@@ -96,7 +97,7 @@ describe('CleanupIssues', () => {
       "https://github.com/test-owner/test-repo/pull/100: Closed",
       "Loading PR #201",
       "https://github.com/test-owner/test-repo/pull/201: Open",
-      "Cancelled 0 of 1 issue(s)",
+      "Checked 1 issue(s): 0 Canceled, 0 marked as Done",
       "Done",
     ]);
   });
@@ -110,7 +111,8 @@ describe('CleanupIssues', () => {
       "https://github.com/test-owner/test-repo/pull/100: Closed",
       "Loading PR #301",
       "https://github.com/test-owner/test-repo/pull/301: Merged",
-      "Cancelled 0 of 1 issue(s)",
+      "Invoked jira.moveIssue('CLOSEDMERGED-1', 'Merge', null)",
+      "Checked 1 issue(s): 0 Canceled, 1 marked as Done",
       "Done",
     ]);
   });
@@ -125,7 +127,36 @@ describe('CleanupIssues', () => {
       "Loading PR #0",
       "Pull Request #0 not found: Error: PR #0 does not exist",
       "https://github.com/test-owner/test-repo/pull/0: Unknown",
-      "Cancelled 0 of 1 issue(s)",
+      "Checked 1 issue(s): 0 Canceled, 0 marked as Done",
+      "Done",
+    ]);
+  });
+
+  it('Only merged PRs', async () => {
+    await runAction('MERGEDMERGED-1');
+    expect(logTester.logsParams).toStrictEqual([
+      "Invoked jira.findIssues(...), returning MERGEDMERGED-1",
+      "Found 1 issue(s) to check",
+      "Loading PR #301",
+      "https://github.com/test-owner/test-repo/pull/301: Merged",
+      "Loading PR #302",
+      "https://github.com/test-owner/test-repo/pull/302: Merged",
+      "Invoked jira.moveIssue('MERGEDMERGED-1', 'Merge', null)",
+      "Checked 1 issue(s): 0 Canceled, 1 marked as Done",
+      "Done",
+    ]);
+  });
+
+  it('Open and Merged PR', async () => {
+    await runAction('MERGEDOPENED-1');
+    expect(logTester.logsParams).toStrictEqual([
+      "Invoked jira.findIssues(...), returning MERGEDOPENED-1",
+      "Found 1 issue(s) to check",
+      "Loading PR #301",
+      "https://github.com/test-owner/test-repo/pull/301: Merged",
+      "Loading PR #201",
+      "https://github.com/test-owner/test-repo/pull/201: Open",
+      "Checked 1 issue(s): 0 Canceled, 0 marked as Done",
       "Done",
     ]);
   });
@@ -139,7 +170,7 @@ describe('CleanupIssues', () => {
       "https://github.com/test-owner/another-repo/pull/100: From another repo",
       "https://another-domain.com/test-owner/test-repo/pull/100: From another repo",
       "https://sonarsource.com: From another repo",
-      "Cancelled 0 of 1 issue(s)",
+      "Checked 1 issue(s): 0 Canceled, 0 marked as Done",
       "Done",
     ]);
   });
@@ -151,7 +182,7 @@ describe('CleanupIssues', () => {
       "Found 1 issue(s) to check",
       "EMPTY-1: No pull request is linked, closing",
       "Invoked jira.moveIssue('EMPTY-1', 'Cancel Issue', {\"resolution\":{\"id\":\"10001\"}})",
-      "Cancelled 1 of 1 issue(s)",
+      "Checked 1 issue(s): 1 Canceled, 0 marked as Done",
       "Done",
     ]);
   });
@@ -162,7 +193,7 @@ describe('CleanupIssues', () => {
       "Invoked jira.findIssues(...), returning FAILED-1",
       "Found 1 issue(s) to check",
       "FAILED-1: Remote links could not be loaded, skipping",
-      "Cancelled 0 of 1 issue(s)",
+      "Checked 1 issue(s): 0 Canceled, 0 marked as Done",
       "Done",
     ]);
   });

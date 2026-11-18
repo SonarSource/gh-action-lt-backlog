@@ -152,6 +152,8 @@ export const jiraClientStub = {
       case 'CLOSEDOPENED-1': return [create('https://github.com/test-owner/test-repo/pull/100'), create('https://github.com/test-owner/test-repo/pull/201')];
       case 'CLOSEDMERGED-1': return [create('https://github.com/test-owner/test-repo/pull/100'), create('https://github.com/test-owner/test-repo/pull/301')];
       case 'CLOSEDMISSED-1': return [create('https://github.com/test-owner/test-repo/pull/100'), create('https://github.com/test-owner/test-repo/pull/0')];
+      case 'MERGEDMERGED-1': return [create('https://github.com/test-owner/test-repo/pull/301'), create('https://github.com/test-owner/test-repo/pull/302')];
+      case 'MERGEDOPENED-1': return [create('https://github.com/test-owner/test-repo/pull/301'), create('https://github.com/test-owner/test-repo/pull/201')];
       case 'EMPTY-1': return [];
       case 'FAILED-1': return null; // Jira request failed
       case 'IRRELEVANT-1':
