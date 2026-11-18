@@ -313,7 +313,7 @@ describe('PullRequestCreated', () => {
       "findEmails called for test-user",
       "No boardId is configured for team .NET Squad",
       "Found 2 Evergreen Epic(s), using NET-1000 .NET KTLO Epic",
-      "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":null,\"parent\":{\"key\":\"NET-1000\"}})",
+      "Invoked jira.createIssue('KEY', 'Standalone PR', {\"issuetype\":{\"name\":\"Maintenance\"},\"customfield_10001\":\"dot-neeet-team\",\"customfield_10020\":null,\"parent\":{\"key\":\"NET-1000\"},\"labels\":[\"renovate\"]})",
       "Invoked rest.issues.createComment({\"owner\":\"test-owner\",\"repo\":\"test-repo\",\"issue_number\":42,\"body\":\"Renovate Jira issue ID: [KEY-4242](https://sonarsource.atlassian.net/browse/KEY-4242)\"})",
       "Invoked jira.moveIssue('KEY-4242', 'Commit', null)",
       "Invoked jira.moveIssue('KEY-4242', 'Start', null)",
