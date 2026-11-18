@@ -24776,6 +24776,10 @@ var JiraClient = class {
     console.log(`Searching for teams of account ${accountId}`);
     return this.findTeam(`membership: { memberIds: "${accountId}" }`, (x) => true);
   }
+  async findTeamsByUser(accountId) {
+    console.log(`Searching for all teams of account ${accountId}`);
+    return this.findTeams(`membership: { memberIds: "${accountId}" }`);
+  }
   async findTeamByName(teamName) {
     console.log(`Searching for team ${teamName}`);
     return this.findTeam(`query: "${teamName}"`, (x) => x.name === teamName);
@@ -25295,12 +25299,14 @@ var NewIssueData = class _NewIssueData {
         return team;
       }
     }
-    if (projectKey === "SC") {
-      return JiraTeams.CloudEngineering;
-    }
     const project = await jira.loadProject(projectKey);
     console.log(`No team found for current user, using ${projectKey} lead ${project.lead.displayName}`);
-    return jira.findTeamByUser(project.lead.accountId);
+    const leadTeams = await jira.findTeamsByUser(project.lead.accountId);
+    if (leadTeams.length > 1) {
+      console.log(`${projectKey} lead ${project.lead.displayName} is member of ${leadTeams.length} teams, Team field will not be set`);
+      return null;
+    }
+    return leadTeams[0] ?? null;
   }
   static async findSprintId(jira, teamName) {
     const team = Config.findTeam(teamName);

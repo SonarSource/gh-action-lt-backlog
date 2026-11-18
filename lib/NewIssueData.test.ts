@@ -301,20 +301,25 @@ describe('NewIssueData', () => {
     expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'KEY', '', null, '')).toEqual(createExpectedWithoutAccount('Body'));
   });
 
-  it('create with SC without fallback', async () => {
+  it('create with project lead in multiple teams leaves team empty', async () => {
     const expected: NewIssueData = {
       accountId: null,
       assigneeId: null,
       additionalFields: {
-        customfield_10001: '772ea1dc-3574-42bc-a378-7a898d910ebd',
-        customfield_10020: 42,
+        // No team, no sprint
         issuetype: { name: 'Maintenance' },
-        parent: { key: 'SC-3333' },
+        parent: null,    // No Evergreen Epic without team
         description: createDescription('Body'),
       },
-      projectKey: 'SC'
+      projectKey: 'MULTI'
     };
-    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'SC', '', null, '')).toEqual(expected);
+    expect(await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'MULTI', '', null, '')).toEqual(expected);
+    expect(logTester.logsParams).toContain('MULTI lead Project Lead In Many Teams is member of 2 teams, Team field will not be set');
+  });
+
+  it('create with project lead in multiple teams uses fallbackTeam', async () => {
+    const result = await NewIssueData.create(jiraClientStub, createPullRequest('Renovate PR', 'Body'), 'MULTI', '', null, 'fallback-team');
+    expect(result?.additionalFields.customfield_10001).toBe('fallback-team');
   });
 
   it('createForTeamReview', async () => {

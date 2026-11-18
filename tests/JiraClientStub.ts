@@ -46,9 +46,18 @@ export const jiraClientStub = {
     }
   },
   async loadProject(projectKey: string): Promise<any> {
-    return projectKey === 'KEY'
-      ? { lead: { accountId: '1234-account', displayName: 'Project Lead' } }
-      : { lead: { accountId: '2222-no-team', displayName: 'Project Lead Without team' } };
+    switch (projectKey) {
+      case 'KEY': return { lead: { accountId: '1234-account', displayName: 'Project Lead' } };
+      case 'MULTI': return { lead: { accountId: '6000-multi-team-lead', displayName: 'Project Lead In Many Teams' } };
+      default: return { lead: { accountId: '2222-no-team', displayName: 'Project Lead Without team' } };
+    }
+  },
+  async findTeamsByUser(accountId: string): Promise<JiraTeam[]> {
+    if (accountId === '6000-multi-team-lead') {
+      return [{ name: 'First Squad', id: 'first-team' }, { name: 'Second Squad', id: 'second-team' }];
+    }
+    const team = await jiraClientStub.findTeamByUser(accountId);
+    return team ? [team] : [];
   },
   async findAccountId(emails: string[]): Promise<string | null> {
     return JiraClient.prototype.findAccountId.call(jiraClientStub, emails);

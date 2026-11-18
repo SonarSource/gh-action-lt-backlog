@@ -12,7 +12,7 @@ The action will add a comment with links to all mentioned Jira tickets for easy 
 
 Action uses `Commit` and `Start` transitions to update the issue and assigns it to the author. It also uses `Request Review` transition in case there's a reviewer already selected during the PR creation.
 
-Action assigns a Team field based on the PR author's Team, or Project Lead for authors without Jira account (bots).
+Action assigns a Team field based on the PR author's Team, or Project Lead for authors without Jira account (bots). When the Project Lead is a member of more than one team, the Team field is left empty. Use `fallback-team` to set it.
 
 Action assigns a Sprint field based on the determined user Team and boardId from the [configuration](../Data/TeamConfiguration.ts).
 
