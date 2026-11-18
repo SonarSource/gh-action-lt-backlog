@@ -26227,28 +26227,31 @@ var ToggleLockBranch = class extends LockBranchAction {
 var CleanupIssues = class extends OctokitAction {
   async execute() {
     const project = this.inputString("jira-project");
-    const issues = await this.jira.findIssues(`project=${JSON.stringify(project)} AND status IN ("Open", "To Do") AND creator="${JIRA_TECH_USER_GITHUB_ACCOUNT_ID}" ORDER BY created ASC`);
+    const issues = await this.jira.findIssues(`project=${JSON.stringify(project)} AND statusCategory!=Done AND creator="${JIRA_TECH_USER_GITHUB_ACCOUNT_ID}" ORDER BY created ASC`);
     this.log(`Found ${issues.length} issue(s) to check`);
     let canceled = 0;
+    let done = 0;
     for (const issue2 of issues) {
       const prs = await this.loadPRs(issue2.key);
-      if (this.isAbandoned(issue2.key, prs)) {
+      if (!prs) {
+        this.log(`${issue2.key}: Remote links could not be loaded, skipping`);
+      } else if (this.isEmpty(issue2.key, prs) || prs.every((x) => x === "Closed" /* Closed */)) {
         await this.jira.moveIssue(issue2.key, "Cancel Issue", { resolution: { id: "10001" /* WONT_DO */ } });
         canceled += 1;
+      } else if (prs.every((x) => x === "Closed" /* Closed */ || x === "Merged" /* Merged */)) {
+        await this.jira.moveIssue(issue2.key, "Merge");
+        done += 1;
       }
     }
-    this.log(`Cancelled ${canceled} of ${issues.length} issue(s)`);
+    this.log(`Checked ${issues.length} issue(s): ${canceled} Canceled, ${done} marked as Done`);
   }
-  isAbandoned(issueId, prs) {
-    if (prs === null) {
-      this.log(`${issueId}: Remote links could not be loaded, skipping`);
-      return false;
-    }
+  isEmpty(issueId, prs) {
     if (prs.length === 0) {
       this.log(`${issueId}: No pull request is linked, closing`);
       return true;
+    } else {
+      return false;
     }
-    return prs.every((x) => x === "Closed" /* Closed */);
   }
   async loadPRs(issueId) {
     const links = await this.jira.loadIssueRemoteLinks(issueId);
