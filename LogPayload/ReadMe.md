@@ -12,6 +12,8 @@ None
 
 ## Example usage
 
+File name: `.github/workflows/LogPayload.yml`, or preferably add this job to another existing action that you're trying to debug.
+
 ```yaml
 name: Log Payload
 

@@ -72,6 +72,8 @@ Update your IaC branch protection to ignore changes of `lock_branch`.
 
 ## Example usage
 
+File name: `.github/workflows/AnnounceRelease.yml`
+
 ```yaml
 name: Announce release
 

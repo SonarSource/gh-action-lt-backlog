@@ -63,6 +63,8 @@ Update your IaC branch protection to ignore changes of `lock_branch`. [Example](
 
 ## Example usage
 
+File name: `.github/workflows/ToggleLockBranch.yml`
+
 ```yaml
 name: Toggle lock branch
 

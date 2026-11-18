@@ -50,6 +50,8 @@ Ask Engineering Experience Squad to "Add Jira GitHub tokens" to the Vault config
 
 ## Example usage
 
+File name: `.github/workflows/PullRequestClosed.yml`
+
 ```yaml
 name: Pull Request Closed
 

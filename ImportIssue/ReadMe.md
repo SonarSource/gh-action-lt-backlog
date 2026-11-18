@@ -30,6 +30,8 @@ Ask Engineering Experience Squad to "Add Jira GitHub tokens" to the Vault config
 
 ## Example usage
 
+File name: `.github/workflows/LabelIssue.yml`
+
 ```yaml
 name: Issue labeled
 
