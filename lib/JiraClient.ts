@@ -278,7 +278,7 @@ export class JiraClient {
     });
   }
 
-  public loadIssueRemoteLinks(issueId: string): Promise<RemoteLink[]> {
+  public loadIssueRemoteLinks(issueId: string): Promise<RemoteLink[] | null> {
     console.log(`${issueId}: Load remote links for ${issueId}`);
     return this.sendRestGetApi(`issue/${issueId}/remotelink`);
   }
