@@ -187,12 +187,14 @@ export class NewIssueData {
         return team;
       }
     }
-    if (projectKey === 'SC') {  // GHA-293: Lead of SC is in too many squads => issues lands in random board. Bot PRs should fallback to Cloud Engineering, anything else is configurable via 'fallback-team' parameter.
-      return JiraTeams.CloudEngineering;
-    }
     const project = await jira.loadProject(projectKey);
     console.log(`No team found for current user, using ${projectKey} lead ${project.lead.displayName}`);
-    return jira.findTeamByUser(project.lead.accountId);
+    const leadTeams = await jira.findTeamsByUser(project.lead.accountId);
+    if (leadTeams.length > 1) {  // SC-63213: Lead in several squads (like SC) would put the issue on a random board. Better to leave the team empty, or set 'fallback-team'.
+      console.log(`${projectKey} lead ${project.lead.displayName} is member of ${leadTeams.length} teams, Team field will not be set`);
+      return null;
+    }
+    return leadTeams[0] ?? null;
   }
 
   private static async findSprintId(jira: JiraClient, teamName: string): Promise<number | null> {

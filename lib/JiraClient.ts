@@ -338,6 +338,11 @@ export class JiraClient {
     return this.findTeam(`membership: { memberIds: "${accountId}" }`, x => true); // No post-filtering
   }
 
+  public async findTeamsByUser(accountId: string): Promise<JiraTeam[]> {
+    console.log(`Searching for all teams of account ${accountId}`);
+    return this.findTeams(`membership: { memberIds: "${accountId}" }`);
+  }
+
   public async findTeamByName(teamName: string): Promise<JiraTeam | null> {
     console.log(`Searching for team ${teamName}`);
     return this.findTeam(`query: "${teamName}"`, x => x.name === teamName); // Query returns also partial matches. We need to post-filter them
