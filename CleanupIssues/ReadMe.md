@@ -1,10 +1,10 @@
 # CleanupIssues
 
-Cancel stale Jira issues created by automation that were closed without merging.
+Cleanup stale Jira issues created by automation for PRs that were closed or merged on GitHub, but not in Jira.
 
-The action searches the given Jira project for issues in the `Open` or `To Do` state created by `Jira Tech User GitHub`. If the issue has all PRs closed without merging, it cancels the issue as `Won't do`.
+The action searches the given Jira project for unresolved issues created by `Jira Tech User GitHub`. If the issue has all PRs closed or merged, it moves the Jira issue.
 
-Issues without a link to a pull request from the current repository are ignored. 
+Issues with weblinks to another repositories are ignored. Issues without any weblinks are canceled.
 
 ## Inputs
 

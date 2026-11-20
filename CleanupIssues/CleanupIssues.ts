@@ -33,29 +33,32 @@ enum PullRequestState {
 export class CleanupIssues extends OctokitAction {
   protected async execute(): Promise<void> {
     const project = this.inputString('jira-project');
-    const issues = await this.jira.findIssues(`project=${JSON.stringify(project)} AND status IN ("Open", "To Do") AND creator="${JIRA_TECH_USER_GITHUB_ACCOUNT_ID}" ORDER BY created ASC`); // Only first page of results
+    const issues = await this.jira.findIssues(`project=${JSON.stringify(project)} AND statusCategory!=Done AND creator="${JIRA_TECH_USER_GITHUB_ACCOUNT_ID}" ORDER BY created ASC`); // Only first page of results
     this.log(`Found ${issues.length} issue(s) to check`);
     let canceled = 0;
+    let done = 0;
     for (const issue of issues) {
       const prs = await this.loadPRs(issue.key);
-      if (this.isAbandoned(issue.key, prs)) {
+      if(!prs){
+        this.log(`${issue.key}: Remote links could not be loaded, skipping`);
+      } else if (this.isEmpty(issue.key, prs) || prs.every(x => x === PullRequestState.Closed)) {
         await this.jira.moveIssue(issue.key, 'Cancel Issue', { resolution: { id: Resolution.WONT_DO } });
         canceled += 1;
+      } else if (prs.every(x => x === PullRequestState.Closed || x === PullRequestState.Merged)) {
+        await this.jira.moveIssue(issue.key, 'Merge');
+        done += 1;
       }
     }
-    this.log(`Cancelled ${canceled} of ${issues.length} issue(s)`);
+    this.log(`Checked ${issues.length} issue(s): ${canceled} Canceled, ${done} marked as Done`);
   }
 
-  private isAbandoned(issueId: string, prs: PullRequestState[] | null): boolean {
-    if (prs === null) {
-      this.log(`${issueId}: Remote links could not be loaded, skipping`);
-      return false;
-    }
+  private isEmpty(issueId: string, prs: PullRequestState[]): boolean {
     if (prs.length === 0) {
       this.log(`${issueId}: No pull request is linked, closing`);
       return true;
+    } else {
+      return false;
     }
-    return prs.every(x => x === PullRequestState.Closed);
   }
 
   private async loadPRs(issueId: string): Promise<PullRequestState[] | null> { // null when remote links could not be loaded
