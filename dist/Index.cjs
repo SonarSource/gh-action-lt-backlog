@@ -26236,27 +26236,38 @@ var CleanupIssues = class extends OctokitAction {
     this.log(`Cancelled ${canceled} of ${issues.length} issue(s)`);
   }
   async isAbandoned(issueId) {
-    const prNumbers = await this.findPRs(issueId);
-    if (prNumbers.length === 0) {
+    const prs = await this.findPRs(issueId);
+    if (prs === null) {
+      this.log(`${issueId}: Remote links could not be loaded, skipping`);
+      return false;
+    } else if (prs.allUrls.length === 0) {
+      this.log(`${issueId}: No pull request is linked, closing`);
+      return true;
+    } else if (prs.currentRepoPRNumbers.length === 0) {
       this.log(`${issueId}: No pull request from this repository is linked, skipping`);
       return false;
-    }
-    for (const prNumber of prNumbers) {
-      const pr = await this.loadPullRequest(prNumber);
-      if (!pr) {
-        this.log(`${issueId}: PR #${prNumber} not found, skipping`);
-        return false;
-      } else if (pr.state !== "closed" || pr.merged) {
-        this.log(`${issueId}: PR #${prNumber} is ${pr.merged ? "merged" : pr.state}, skipping`);
-        return false;
+    } else {
+      for (const prNumber of prs.currentRepoPRNumbers) {
+        const pr = await this.loadPullRequest(prNumber);
+        if (!pr) {
+          this.log(`${issueId}: PR #${prNumber} not found, skipping`);
+          return false;
+        } else if (pr.state !== "closed" || pr.merged) {
+          this.log(`${issueId}: PR #${prNumber} is ${pr.merged ? "merged" : pr.state}, skipping`);
+          return false;
+        }
       }
+      return true;
     }
-    return true;
   }
   async findPRs(issueId) {
+    const links = await this.jira.loadIssueRemoteLinks(issueId);
+    if (links === null) {
+      return null;
+    }
     const prefix = `https://github.com/${this.repo.owner}/${this.repo.repo}/pull/`.toLowerCase();
-    const links = await this.jira.loadIssueRemoteLinks(issueId) ?? [];
-    return links.map((x) => x.object.url.toLowerCase()).filter((x) => x.startsWith(prefix)).map((x) => Number.parseInt(x.substring(prefix.length), 10));
+    const allUrls = links.map((x) => x.object.url.toLowerCase());
+    return { allUrls, currentRepoPRNumbers: allUrls.filter((x) => x.startsWith(prefix)).map((x) => Number.parseInt(x.substring(prefix.length), 10)) };
   }
 };
 

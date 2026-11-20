@@ -136,12 +136,24 @@ describe('CleanupIssues', () => {
     ]);
   });
 
-  it('No issues', async () => {
+  it('No PRs', async () => {
     await runAction('EMPTY-1');
     expect(logTester.logsParams).toStrictEqual([
       "Invoked jira.findIssues(...), returning EMPTY-1",
       "Found 1 issue(s) to check",
-      "EMPTY-1: No pull request from this repository is linked, skipping",
+      "EMPTY-1: No pull request is linked, closing",
+      "Invoked jira.moveIssue('EMPTY-1', 'Cancel Issue', {\"resolution\":{\"id\":\"10001\"}})",
+      "Cancelled 1 of 1 issue(s)",
+      "Done",
+    ]);
+  });
+
+  it('Remote links failed to load', async () => {
+    await runAction('FAILED-1');
+    expect(logTester.logsParams).toStrictEqual([
+      "Invoked jira.findIssues(...), returning FAILED-1",
+      "Found 1 issue(s) to check",
+      "FAILED-1: Remote links could not be loaded, skipping",
       "Cancelled 0 of 1 issue(s)",
       "Done",
     ]);
