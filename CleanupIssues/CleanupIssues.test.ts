@@ -73,53 +73,58 @@ describe('CleanupIssues', () => {
   });
 
   it('Only closed PRs', async () => {
-    await runAction('CLOSED-1');
+    await runAction('CLOSEDCLOSED-1');
     expect(logTester.logsParams).toStrictEqual([
-      "Invoked jira.findIssues(...), returning CLOSED-1",
+      "Invoked jira.findIssues(...), returning CLOSEDCLOSED-1",
       "Found 1 issue(s) to check",
       "Loading PR #100",
+      "https://github.com/test-owner/test-repo/pull/100: Closed",
       "Loading PR #101",
-      "Invoked jira.moveIssue('CLOSED-1', 'Cancel Issue', {\"resolution\":{\"id\":\"10001\"}})",
+      "https://github.com/test-owner/test-repo/pull/101: Closed",
+      "Invoked jira.moveIssue('CLOSEDCLOSED-1', 'Cancel Issue', {\"resolution\":{\"id\":\"10001\"}})",
       "Cancelled 1 of 1 issue(s)",
       "Done",
     ]);
   });
 
-  it('With open PR', async () => {
-    await runAction('OPENED-1');
+  it('Open and Closed PR', async () => {
+    await runAction('CLOSEDOPENED-1');
     expect(logTester.logsParams).toStrictEqual([
-      "Invoked jira.findIssues(...), returning OPENED-1",
+      "Invoked jira.findIssues(...), returning CLOSEDOPENED-1",
       "Found 1 issue(s) to check",
       "Loading PR #100",
+      "https://github.com/test-owner/test-repo/pull/100: Closed",
       "Loading PR #201",
-      "OPENED-1: PR #201 is open, skipping",
+      "https://github.com/test-owner/test-repo/pull/201: Open",
       "Cancelled 0 of 1 issue(s)",
       "Done",
     ]);
   });
 
-  it('With merged PR', async () => {
-    await runAction('MERGED-1');
+  it('Closed and Merged PR', async () => {
+    await runAction('CLOSEDMERGED-1');
     expect(logTester.logsParams).toStrictEqual([
-      "Invoked jira.findIssues(...), returning MERGED-1",
+      "Invoked jira.findIssues(...), returning CLOSEDMERGED-1",
       "Found 1 issue(s) to check",
       "Loading PR #100",
+      "https://github.com/test-owner/test-repo/pull/100: Closed",
       "Loading PR #301",
-      "MERGED-1: PR #301 is merged, skipping",
+      "https://github.com/test-owner/test-repo/pull/301: Merged",
       "Cancelled 0 of 1 issue(s)",
       "Done",
     ]);
   });
 
   it('Nonexistent PR', async () => {
-    await runAction('MISSED-1');
+    await runAction('CLOSEDMISSED-1');
     expect(logTester.logsParams).toStrictEqual([
-      "Invoked jira.findIssues(...), returning MISSED-1",
+      "Invoked jira.findIssues(...), returning CLOSEDMISSED-1",
       "Found 1 issue(s) to check",
       "Loading PR #100",
+      "https://github.com/test-owner/test-repo/pull/100: Closed",
       "Loading PR #0",
       "Pull Request #0 not found: Error: PR #0 does not exist",
-      "MISSED-1: PR #0 not found, skipping",
+      "https://github.com/test-owner/test-repo/pull/0: Unknown",
       "Cancelled 0 of 1 issue(s)",
       "Done",
     ]);
@@ -130,7 +135,10 @@ describe('CleanupIssues', () => {
     expect(logTester.logsParams).toStrictEqual([
       "Invoked jira.findIssues(...), returning IRRELEVANT-1",
       "Found 1 issue(s) to check",
-      "IRRELEVANT-1: No pull request from this repository is linked, skipping",
+      "https://github.com/another-owner/test-repo/pull/100: From another repo",
+      "https://github.com/test-owner/another-repo/pull/100: From another repo",
+      "https://another-domain.com/test-owner/test-repo/pull/100: From another repo",
+      "https://sonarsource.com: From another repo",
       "Cancelled 0 of 1 issue(s)",
       "Done",
     ]);
