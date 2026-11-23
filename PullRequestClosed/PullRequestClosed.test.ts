@@ -25,7 +25,7 @@ import { jiraClientStub } from '../tests/JiraClientStub.js';
 import { createOctokitRestStub } from '../tests/OctokitRestStub.js';
 import { OctokitActionStub } from '../tests/OctokitActionStub.js';
 
-async function runAction(title: string, merged: boolean, user: string = 'test-user', branchName: string = 'master') {
+async function runAction(title: string, merged: boolean, user: string = 'test-user') {
   process.env['INPUT_JIRA-PROJECT'] = 'KEY';
   const action = new PullRequestClosed() as PullRequestClosed & OctokitActionStub;
   action.jira = jiraClientStub;
@@ -34,8 +34,7 @@ async function runAction(title: string, merged: boolean, user: string = 'test-us
     ...(await action.rest.pulls.get({ pull_number: 42 } as any)).data,
     created_at: '2024-12-24T11:00:00Z',
     updated_at: '2024-12-24T22:33:44Z',  // Closing action can not be triggered at the same time as PR creation
-    merged,
-    base: { ref: branchName },
+    merged
   } as typeof action.payload.pull_request;  // Reuse scaffolding
   if (user === "renovate[bot]") {
     (action as any).rest.issues.listComments = function () {
@@ -137,29 +136,7 @@ describe('PullRequestClosed', () => {
     ]);
   });
 
-  it('PR merged into release branch', async () => {
-    const releaseBranches = ['master', 'main', 'branch-0.0.0'];
-    for (const branchName of releaseBranches) {
-      await runAction('KEY-1234 Title', true, 'test-user', branchName);
-      expect(logTester.logsParams).toStrictEqual([
-        "Loading PR #42",
-        "Invoked jira.transitionIssue('KEY-1234', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
-        "Done",
-      ]);
-      logTester.logsParams = [];
-    }
-  });
-
-  it('PR merged into non-release branch', async () => {
-    await runAction('KEY-5678 Title', true, 'test-user', 'user/branch');
-    expect(logTester.logsParams).toStrictEqual([
-      "Loading PR #42",
-      "Invoked jira.transitionIssue('KEY-5678', {\"id\":\"10001\",\"name\":\"Merge into branch\"}, null)",
-      "Done",
-    ]);
-  });
-
-  it('Merge PR for workflow without feature branches', async () => {
+  it('Merge PR', async () => {
     await runAction('KEY-1111 Title', true);
     expect(logTester.logsParams).toStrictEqual([
       "Loading PR #42",
@@ -174,7 +151,7 @@ describe('PullRequestClosed', () => {
       await runAction('FIXVER-1 Title', true);
       expect(logTester.logsParams).toStrictEqual([
         "Loading PR #42",
-        "Invoked jira.transitionIssue('FIXVER-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+        "Invoked jira.moveIssue('FIXVER-1', 'Merge', null)",
         "Done",
       ]);
     });
@@ -184,7 +161,7 @@ describe('PullRequestClosed', () => {
       await runAction('FIXVER-1 Title', true);
       expect(logTester.logsParams).toStrictEqual([
         "Loading PR #42",
-        "Invoked jira.transitionIssue('FIXVER-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+        "Invoked jira.moveIssue('FIXVER-1', 'Merge', null)",
         "Invoked jira.addFixVersion('FIXVER-1', '10.23')",
         "Done",
       ]);
@@ -195,7 +172,7 @@ describe('PullRequestClosed', () => {
       await runAction('FIXVER-2 Title', true);
       expect(logTester.logsParams).toStrictEqual([
         "Loading PR #42",
-        "Invoked jira.transitionIssue('FIXVER-2', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+        "Invoked jira.moveIssue('FIXVER-2', 'Merge', null)",
         "FIXVER-2: Fix version is already set 1.42, 1.41.1, skipping",
         "Done",
       ]);
@@ -206,7 +183,7 @@ describe('PullRequestClosed', () => {
       await runAction('FAKE-1234 Title', true);
       expect(logTester.logsParams).toStrictEqual([
         "Loading PR #42",
-        "Invoked jira.transitionIssue('FAKE-1234', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+        "Invoked jira.moveIssue('FAKE-1234', 'Merge', null)",
         "FAKE-1234: Could not load issue",
         "Done",
       ]);
@@ -217,7 +194,7 @@ describe('PullRequestClosed', () => {
       await runAction('FIXVER-1 Title', true);
       expect(logTester.logsParams).toStrictEqual([
         "Loading PR #42",
-        "Invoked jira.transitionIssue('FIXVER-1', {\"id\":\"10000\",\"name\":\"Merge into master\"}, null)",
+        "Invoked jira.moveIssue('FIXVER-1', 'Merge', null)",
         "FIXVER: Found 1 unreleased versions 10.23, using 10.23",
         "Invoked jira.addFixVersion('FIXVER-1', '10.23')",
         "Done",
@@ -226,10 +203,10 @@ describe('PullRequestClosed', () => {
 
     it('autodetect-lowest project without fix version', async () => {
       process.env['INPUT_FIX-VERSION'] = 'autodetect-lowest';
-      await runAction('NOFIXV-1 Title', true, 'test-user', 'user/branch');
+      await runAction('NOFIXV-1 Title', true, 'test-user');
       expect(logTester.logsParams).toStrictEqual([
         "Loading PR #42",
-        "Invoked jira.transitionIssue('NOFIXV-1', {\"id\":\"10001\",\"name\":\"Merge into branch\"}, null)",
+        "Invoked jira.moveIssue('NOFIXV-1', 'Merge', null)",
         "NOFIXV: No unreleased versions found",
         "Done",
       ]);

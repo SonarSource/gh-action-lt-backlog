@@ -25933,12 +25933,7 @@ var PullRequestClosed = class extends PullRequestAction {
     }
   }
   async processMerge(issueId) {
-    const transition = await this.jira.findTransition(issueId, this.isReleaseBranch(this.payload.pull_request?.base.ref) ? "Merge into master" : "Merge into branch");
-    if (transition == null) {
-      await this.jira.moveIssue(issueId, "Merge");
-    } else {
-      await this.jira.transitionIssue(issueId, transition);
-    }
+    await this.jira.moveIssue(issueId, "Merge");
     await this.addFixVersion(issueId);
   }
   async addFixVersion(issueId) {
@@ -25966,9 +25961,6 @@ var PullRequestClosed = class extends PullRequestAction {
     } else {
       this.log(`Skipping issue cancellation for creator ${creator}`);
     }
-  }
-  isReleaseBranch(ref) {
-    return ref === "master" || ref === "main" || ref.startsWith("branch-");
   }
   resolutionId() {
     return this.payload.pull_request.merged ? "10000" /* DONE */ : "10001" /* WONT_DO */;

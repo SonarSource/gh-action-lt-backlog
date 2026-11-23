@@ -40,13 +40,7 @@ export class PullRequestClosed extends PullRequestAction {
   }
 
   private async processMerge(issueId: string): Promise<void> {
-    const transition = await this.jira.findTransition(issueId, this.isReleaseBranch(this.payload.pull_request?.base.ref) ? 'Merge into master' : 'Merge into branch');
-    if (transition == null) {
-      await this.jira.moveIssue(issueId, 'Merge');
-    } else {
-      await this.jira.transitionIssue(issueId, transition);
-    }
-
+    await this.jira.moveIssue(issueId, 'Merge');
     await this.addFixVersion(issueId);
   }
 
@@ -79,10 +73,6 @@ export class PullRequestClosed extends PullRequestAction {
     } else {
       this.log(`Skipping issue cancellation for creator ${creator}`);
     }
-  }
-
-  private isReleaseBranch(ref: string): boolean {
-    return ref === 'master' || ref === 'main' || ref.startsWith('branch-');
   }
 
   private resolutionId(): string {

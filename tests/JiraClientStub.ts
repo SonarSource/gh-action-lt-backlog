@@ -84,11 +84,10 @@ export const jiraClientStub = {
     }
   },
   async findTransition(issueId: string, transitionName: string): Promise<{ id: string, name: string } | null> {
-    switch (transitionName) {
-      case 'Merge into master': return issueId === "KEY-1111" ? null : { id: Resolution.DONE, name: transitionName };
-      case 'Merge into branch': return issueId === "KEY-1111" ? null : { id: Resolution.WONT_DO, name: transitionName };
-      case 'Merge': return { id: '10002', name: transitionName };
-      default: return null; // No transition found
+    if(transitionName==='Merge') {
+      return { id: '10002', name: transitionName };
+    } else {
+      throw new Error(`Scaffolding did not expect transition name ${transitionName}`);
     }
   },
   async findSprintId(boardId: number): Promise<number | null> {
@@ -189,13 +188,14 @@ export const jiraClientStub = {
     return true;
   },
   async findIssueFixVersions(issueKey: string): Promise<{ id: string; name: string }[] | null> {
-    if (issueKey === 'KEY-9001') {
-      return [{ id: '99', name: '9.8' }];
+    switch (issueKey){
+      case 'KEY-9001':
+        return [{ id: '99', name: '9.8' }];
+      case 'KEY-9002':
+        return null;
+      default:
+        return [];
     }
-    if (issueKey === 'KEY-9002') {
-      return null;
-    }
-    return [];
   },
   async addReviewer(issueId: string, userEmails: string[]): Promise<void> {
     console.log(`Invoked jira.addReviewer('${issueId}', ${serializeStrings(userEmails)})`);
