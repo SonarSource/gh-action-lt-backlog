@@ -1,5 +1,5 @@
 name: 'Cleanup issues'
-description: 'Cancel stale Jira issues created by automation that were closed without merging.'
+description: 'Cleanup stale Jira issues created by automation for PRs that were closed or merged on GitHub, but not in Jira.'
 inputs:
   github-token:
     description: 'GitHub auth Token'
