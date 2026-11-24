@@ -1,5 +1,5 @@
 name: 'Move card after merging a pull request'
-description: 'Move fixed Jira tickets using the "Merge into branch" or "Merge into master" transition after merging the pull request.'
+description: 'Move fixed Jira tickets using the "Merge" transition after merging the pull request.'
 inputs:
   github-token:
     description: 'GitHub auth Token'
