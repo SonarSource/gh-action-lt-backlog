@@ -19,7 +19,7 @@
  */
 
 import { JiraTeams } from "../Data/TeamConfiguration.js";
-import { JiraClient, Issue, JiraVersion, RemoteLink, Resolution } from '../lib/JiraClient.js';
+import { JiraClient, Issue, JiraVersion, RemoteLink } from '../lib/JiraClient.js';
 import { JiraTeam } from '../lib/JiraTeam.js';
 
 function serializeStrings(values: string[]): string {
