@@ -33,7 +33,8 @@ enum PullRequestState {
 export class CleanupIssues extends OctokitAction {
   protected async execute(): Promise<void> {
     const project = this.inputString('jira-project');
-    const issues = await this.jira.findIssues(`project=${JSON.stringify(project)} AND statusCategory!=Done AND creator="${JIRA_TECH_USER_GITHUB_ACCOUNT_ID}" ORDER BY created ASC`); // Only first page of results
+    // GHA-484: Ignore issues that were previously merged (and possibly reverted), and moved back to backlog or progress for second attempts.
+    const issues = await this.jira.findIssues(`project=${JSON.stringify(project)} AND statusCategory!=Done AND status WAS NOT IN ("In Validation", Done, Canceled) AND creator="${JIRA_TECH_USER_GITHUB_ACCOUNT_ID}" ORDER BY created ASC`); // Only first page of results
     this.log(`Found ${issues.length} issue(s) to check`);
     let canceled = 0;
     let done = 0;
