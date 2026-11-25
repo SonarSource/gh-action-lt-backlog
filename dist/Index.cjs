@@ -26219,7 +26219,7 @@ var ToggleLockBranch = class extends LockBranchAction {
 var CleanupIssues = class extends OctokitAction {
   async execute() {
     const project = this.inputString("jira-project");
-    const issues = await this.jira.findIssues(`project=${JSON.stringify(project)} AND statusCategory!=Done AND creator="${JIRA_TECH_USER_GITHUB_ACCOUNT_ID}" ORDER BY created ASC`);
+    const issues = await this.jira.findIssues(`project=${JSON.stringify(project)} AND statusCategory!=Done AND status WAS NOT IN ("In Validation", Done, Canceled) AND creator="${JIRA_TECH_USER_GITHUB_ACCOUNT_ID}" ORDER BY created ASC`);
     this.log(`Found ${issues.length} issue(s) to check`);
     let canceled = 0;
     let done = 0;
